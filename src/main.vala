@@ -104,16 +104,16 @@ namespace SwayNotificatonCenter {
                 hints,
                 expire_timeout);
 
-            if (!dbusInit.ccDaemon.get_visibility ()) {
-                if (id == replaces_id) {
-                    notiWin.replace_notification (param);
-                    foreach (NotifyParams n in dbusInit.notifications) {
-                        if (n.applied_id == replaces_id) {
-                            dbusInit.notifications.remove (n);
-                            break;
-                        }
+            if (id == replaces_id) {
+                notiWin.replace_notification (param);
+                foreach (NotifyParams n in dbusInit.notifications) {
+                    if (n.applied_id == replaces_id) {
+                        dbusInit.notifications.remove (n);
+                        break;
                     }
                 }
+            }
+            if (!dbusInit.ccDaemon.get_visibility ()) {
                 notiWin.add_notification (param);
             }
             dbusInit.notifications.append (param);

@@ -130,8 +130,8 @@ namespace SwayNotificatonCenter {
                                           out string version,
                                           out string spec_version)
         throws DBusError, IOError {
-            name = "sway-notification-center";
-            vendor = "yeert";
+            name = "SwayNotificationCenter";
+            vendor = "ErikReider";
             version = "0.1";
             spec_version = "1.0";
         }

@@ -48,7 +48,9 @@ namespace SwayNotificatonCenter {
             foreach (var child in box.get_children ()) {
                 box.remove (child);
             }
-            foreach (var param in notifications) {
+            var notis = notifications.copy ();
+            notis.reverse ();
+            foreach (var param in notis) {
                 var noti = new Notification (param, true);
                 box.add (noti);
             }

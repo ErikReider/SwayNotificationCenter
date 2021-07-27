@@ -9,6 +9,20 @@ namespace SwayNotificatonCenter {
             cc = new ControlCenterWidget ();
         }
 
+        public void close_notification (uint32 id) throws DBusError, IOError {
+            try {
+                foreach (NotifyParams n in dbusInit.notifications) {
+                    if (n.applied_id == id) {
+                        dbusInit.notifications.remove (n);
+                        update ();
+                        break;
+                    }
+                }
+            } catch (Error e) {
+                print ("Error: %s\n", e.message);
+            }
+        }
+
         public bool get_visibility () throws DBusError, IOError {
             return cc.visible;
         }
@@ -20,7 +34,7 @@ namespace SwayNotificatonCenter {
         }
 
         public void update () throws DBusError, IOError {
-            cc.update (this.dbusInit.notifications);
+            cc.update (this.dbusInit.notifications, dbusInit.notiDaemon);
         }
     }
 
@@ -44,14 +58,14 @@ namespace SwayNotificatonCenter {
             return vis;
         }
 
-        public void update (List<NotifyParams ? > notifications) {
+        public void update (List<NotifyParams ? > notifications, NotiDaemon notiDaemon) {
             foreach (var child in box.get_children ()) {
                 box.remove (child);
             }
             var notis = notifications.copy ();
             notis.reverse ();
             foreach (var param in notis) {
-                var noti = new Notification (param, true);
+                var noti = new Notification (param, notiDaemon, true);
                 box.add (noti);
             }
         }

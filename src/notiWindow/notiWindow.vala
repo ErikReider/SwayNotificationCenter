@@ -27,8 +27,9 @@ namespace SwayNotificatonCenter {
             }
         }
 
-        public void add_notification (NotifyParams param) {
-            var noti = new Notification (param);
+        // public delegate void Close_click (NotifyParams param);
+        public void add_notification (NotifyParams param, NotiDaemon notiDaemon) {
+            var noti = new Notification (param, notiDaemon);
             // param.printParams ();
             box.pack_end (noti, false, false, 0);
             noti.show_notification ((v_noti) => {

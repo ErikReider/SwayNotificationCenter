@@ -20,8 +20,9 @@ namespace SwayNotificatonCenter {
 
         public NotifyParams param;
 
-
-        public Notification (NotifyParams param, bool show = false) {
+        public Notification (NotifyParams param,
+                             NotiDaemon notiDaemon,
+                             bool show = false) {
             this.param = param;
 
             this.summary.set_text (param.summary);
@@ -33,7 +34,11 @@ namespace SwayNotificatonCenter {
             });
 
             close_button.button_press_event.connect ((widget, event_button) => {
-                print (widget.get_name ());
+                try {
+                    notiDaemon.click_close_notification (param.applied_id);
+                } catch (Error e) {
+                    print ("Error: %s\n", e.message);
+                }
                 return false;
             });
 
@@ -43,9 +48,7 @@ namespace SwayNotificatonCenter {
         }
 
         private void set_icon () {
-            if (param.app_icon != "") {
-                img.set_from_icon_name (param.app_icon, Gtk.IconSize.DIALOG);
-            } else {
+            if (param.app_icon == "") {
                 // Get the app icon
                 GLib.Icon ? icon = null;
                 foreach (var app in AppInfo.get_all ()) {
@@ -57,6 +60,8 @@ namespace SwayNotificatonCenter {
                 if (icon != null) {
                     img.set_from_gicon (icon, Gtk.IconSize.DIALOG);
                 }
+            } else {
+                img.set_from_icon_name (param.app_icon, Gtk.IconSize.DIALOG);
             }
         }
 

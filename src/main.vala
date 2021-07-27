@@ -69,7 +69,7 @@ namespace SwayNotificatonCenter {
 
         private uint32 noti_id = 1;
 
-        private NotiWindow notiWin;
+        public NotiWindow notiWin;
         private DBusInit dbusInit;
 
         public NotiDaemon (DBusInit dbusInit) {
@@ -114,11 +114,16 @@ namespace SwayNotificatonCenter {
                 }
             }
             if (!dbusInit.ccDaemon.get_visibility ()) {
-                notiWin.add_notification (param);
+                notiWin.add_notification (param, this);
             }
             dbusInit.notifications.append (param);
             dbusInit.ccDaemon.update ();
             return id;
+        }
+
+        public void click_close_notification (uint32 id) throws DBusError, IOError {
+            notiWin.close_notification (id);
+            dbusInit.ccDaemon.close_notification (id);
         }
 
         public void CloseNotification (uint32 id) throws DBusError, IOError {

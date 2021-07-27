@@ -1,6 +1,6 @@
 sway_notificaton_center_sources = [
   'main.vala',
-  'window/window.vala',
+  'notiWindow/notiWindow.vala',
   'notification/notification.vala',
   'controlCenter/controlCenter.vala',
   'constants.vala',

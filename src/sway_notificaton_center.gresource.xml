@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/org/erikreider/sway-notification-center">
-    <file>window/window.ui</file>
+    <file>notiWindow/notiWindow.ui</file>
     <file>notification/notification.ui</file>
     <file>controlCenter/controlCenter.ui</file>
   </gresource>

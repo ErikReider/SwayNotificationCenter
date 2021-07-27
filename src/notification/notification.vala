@@ -46,17 +46,23 @@ namespace SwayNotificatonCenter {
             if (param.app_icon != "") {
                 img.set_from_icon_name (param.app_icon, Gtk.IconSize.DIALOG);
             } else {
+                // Get the app icon
+                GLib.Icon ? icon = null;
                 foreach (var app in AppInfo.get_all ()) {
                     if (app.get_name ().down () == param.app_name.down ()) {
-                        img.set_from_gicon (app.get_icon (), Gtk.IconSize.DIALOG);
+                        icon = app.get_icon ();
                         break;
                     }
+                }
+                if (icon != null) {
+                    img.set_from_gicon (icon, Gtk.IconSize.DIALOG);
                 }
             }
         }
 
         public delegate void On_hide_cb (Notification noti);
 
+        // Called to show a temp notification
         public void show_notification (On_hide_cb callback) {
             this.show ();
             int ms = param.expire_timeout > 0 ? param.expire_timeout : millis;

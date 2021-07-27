@@ -29,7 +29,7 @@ namespace SwayNotificatonCenter {
 
         public void add_notification (NotifyParams param) {
             var noti = new Notification (param);
-            param.printParams ();
+            // param.printParams ();
             box.pack_end (noti, false, false, 0);
             noti.show_notification ((v_noti) => {
                 box.remove (v_noti);

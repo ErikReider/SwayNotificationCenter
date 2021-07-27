@@ -44,6 +44,7 @@
                       <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="margin-end">14</property>
                         <property name="orientation">vertical</property>
                         <child>
                           <object class="GtkLabel" id="summary">

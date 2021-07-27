@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=sway-notificaton-center
+Exec=sway-notificaton-center
+Icon=org.erikreider.sway-notification-center
+Terminal=false
+Type=Application
+Categories=GTK;
+StartupNotify=true

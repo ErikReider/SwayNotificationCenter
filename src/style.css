@@ -1,0 +1,34 @@
+.notification-parent:first-child {
+  margin-top: 6px;
+}
+.notification-parent:last-child {
+  margin-bottom: 12px;
+}
+
+.notification {
+  background: rgb(58, 58, 58);
+  padding: 6px;
+  border-radius: 10px;
+}
+
+.notification-box {
+  border-radius: 10px;
+  margin: 6px 12px;
+  box-shadow: 0px 2px 4px 2px rgba(0, 0, 0, 0.5);
+}
+
+.notification-close-button {
+  background-color: black;
+  box-shadow: 0px 2px 4px 2px rgba(0, 0, 0, 0.3);
+  margin: 0 4px;
+  padding: 6px;
+  border-radius: 100%;
+}
+
+.cc {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.noti-base {
+  background-color: transparent;
+}

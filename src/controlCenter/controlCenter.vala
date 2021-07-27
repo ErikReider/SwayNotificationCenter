@@ -9,20 +9,6 @@ namespace SwayNotificatonCenter {
             cc = new ControlCenterWidget ();
         }
 
-        public void close_notification (uint32 id) throws DBusError, IOError {
-            try {
-                foreach (NotifyParams n in dbusInit.notifications) {
-                    if (n.applied_id == id) {
-                        dbusInit.notifications.remove (n);
-                        update ();
-                        break;
-                    }
-                }
-            } catch (Error e) {
-                print ("Error: %s\n", e.message);
-            }
-        }
-
         public bool get_visibility () throws DBusError, IOError {
             return cc.visible;
         }
@@ -33,8 +19,12 @@ namespace SwayNotificatonCenter {
             }
         }
 
-        public void update () throws DBusError, IOError {
-            cc.update (this.dbusInit.notifications, dbusInit.notiDaemon);
+        public void add_notification (NotifyParams param) throws DBusError, IOError {
+            cc.add_notification (param, dbusInit.notiDaemon);
+        }
+
+        public void close_notification (uint32 id) throws DBusError, IOError {
+            cc.close_notification (id);
         }
     }
 
@@ -52,22 +42,32 @@ namespace SwayNotificatonCenter {
             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
         }
 
+        private void removeWidget (Gtk.Widget widget) {
+            uint len = box.get_children ().length () - 1;
+            box.remove (widget);
+            if (len <= 0) {
+                // Do something in the future!
+            }
+        }
+
         public bool toggle_visibility () {
             var vis = !this.visible;
             this.set_visible (vis);
             return vis;
         }
 
-        public void update (List<NotifyParams ? > notifications, NotiDaemon notiDaemon) {
-            foreach (var child in box.get_children ()) {
-                box.remove (child);
+        public void close_notification (uint32 id) {
+            foreach (var w in box.get_children ()) {
+                if (((Notification) w).param.applied_id == id) {
+                    removeWidget (w);
+                    break;
+                }
             }
-            var notis = notifications.copy ();
-            notis.reverse ();
-            foreach (var param in notis) {
-                var noti = new Notification (param, notiDaemon, true);
-                box.add (noti);
-            }
+        }
+
+        public void add_notification (NotifyParams param, NotiDaemon notiDaemon) {
+            var noti = new Notification (param, notiDaemon, true);
+            box.pack_end (noti, false, true, 0);
         }
     }
 }

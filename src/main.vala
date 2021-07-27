@@ -1,6 +1,6 @@
 namespace SwayNotificatonCenter {
 
-    public class NotifyParams {
+    public struct NotifyParams {
         public uint32 applied_id { get; set; }
         public string app_name { get; set; }
         public uint32 replaces_id { get; set; }
@@ -29,38 +29,30 @@ namespace SwayNotificatonCenter {
             this.actions = actions;
             this.hints = hints;
             this.expire_timeout = expire_timeout;
-
-            get_icon ();
-        }
-
-        private void get_icon () {
         }
 
         public void printParams () {
-            print ("----START---- \n");
             // print (applied_id.to_string () + "\n");
-            print (app_name + "\n");
+            // print (app_name + "\n");
             // print (replaces_id.to_string () + "\n");
             // print (app_icon + "\n");
             // print (summary + "\n");
             // print (body + "\n");
-            print ("-----------\n");
+            print ("----Actions----\n");
             foreach (var action in actions) {
                 print (action + "\n");
             }
-            print ("-----------\n");
-            // print(hints.get ("icon_data").print (false) + "\n");
-            // hints.get ("icon_data")
+            print ("----END----\n");
 
             // foreach (var hint in hints.get_values ()) {
             // hint.print (false);
             // }
-            print ("-----------\n");
+            print ("----Hints----\n");
             foreach (var key in hints.get_keys ()) {
                 print (key + "\n");
             }
-            print ("-----------\n");
-            print (expire_timeout.to_string () + "\n");
+            print ("----END----\n");
+            // print (expire_timeout.to_string () + "\n");
         }
     }
 
@@ -93,7 +85,7 @@ namespace SwayNotificatonCenter {
         throws DBusError, IOError {
             uint32 id = replaces_id == 0 ? ++noti_id : replaces_id;
 
-            var param = new NotifyParams (
+            var param = NotifyParams (
                 id,
                 app_name,
                 replaces_id,
@@ -105,19 +97,13 @@ namespace SwayNotificatonCenter {
                 expire_timeout);
 
             if (id == replaces_id) {
-                notiWin.replace_notification (param);
-                foreach (NotifyParams n in dbusInit.notifications) {
-                    if (n.applied_id == replaces_id) {
-                        dbusInit.notifications.remove (n);
-                        break;
-                    }
-                }
+                notiWin.close_notification (id);
+                dbusInit.ccDaemon.close_notification (id);
             }
             if (!dbusInit.ccDaemon.get_visibility ()) {
                 notiWin.add_notification (param, this);
             }
-            dbusInit.notifications.append (param);
-            dbusInit.ccDaemon.update ();
+            dbusInit.ccDaemon.add_notification (param);
             return id;
         }
 
@@ -126,6 +112,7 @@ namespace SwayNotificatonCenter {
             dbusInit.ccDaemon.close_notification (id);
         }
 
+        // Only remove the popup without removing the it from the panel
         public void CloseNotification (uint32 id) throws DBusError, IOError {
             notiWin.close_notification (id);
         }
@@ -148,7 +135,6 @@ namespace SwayNotificatonCenter {
 
     public class DBusInit {
 
-        public List<NotifyParams ? > notifications = new List<NotifyParams ? > ();
         public NotiDaemon notiDaemon;
         public CcDaemon ccDaemon;
 

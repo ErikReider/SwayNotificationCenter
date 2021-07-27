@@ -18,19 +18,8 @@ namespace SwayNotificatonCenter {
             if (len <= 0) box.set_visible (false);
         }
 
-        public void replace_notification (NotifyParams param) {
-            foreach (var w in box.get_children ()) {
-                if (((Notification) w).param.applied_id == param.replaces_id) {
-                    removeWidget (w);
-                    break;
-                }
-            }
-        }
-
-        // public delegate void Close_click (NotifyParams param);
         public void add_notification (NotifyParams param, NotiDaemon notiDaemon) {
             var noti = new Notification (param, notiDaemon);
-            // param.printParams ();
             box.pack_end (noti, false, false, 0);
             noti.show_notification ((v_noti) => {
                 box.remove (v_noti);

@@ -27,6 +27,7 @@
               <object class="GtkBox" id="box">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="valign">start</property>
                 <property name="orientation">vertical</property>
                 <child>
                   <placeholder/>

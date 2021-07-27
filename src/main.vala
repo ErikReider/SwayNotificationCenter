@@ -122,7 +122,7 @@ namespace SwayNotificatonCenter {
         }
 
         public void CloseNotification (uint32 id) throws DBusError, IOError {
-            print ("yeet");
+            notiWin.close_notification (id);
         }
 
         public void GetServerInformation (out string name,

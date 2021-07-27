@@ -16,7 +16,7 @@ namespace SwayNotificatonCenter {
         unowned Gtk.Image img;
 
         private int open_timeout = 0;
-        private int seconds = 5;
+        private const int millis = 5000;
 
         public NotifyParams param;
 
@@ -57,14 +57,17 @@ namespace SwayNotificatonCenter {
 
         public delegate void On_hide_cb (Notification noti);
 
-        public void show_notification (On_hide_cb on_hide_cb) {
+        public void show_notification (On_hide_cb callback) {
             this.show ();
-            open_timeout = 1;
-            Timeout.add ((int) (seconds * 1000), () => {
-                open_timeout--;
-                if (open_timeout == 0) on_hide_cb (this);
-                return false;
-            });
+            int ms = param.expire_timeout > 0 ? param.expire_timeout : millis;
+            if (param.expire_timeout != 0) {
+                open_timeout = 1;
+                Timeout.add ((int) (ms), () => {
+                    open_timeout--;
+                    if (open_timeout == 0) callback (this);
+                    return false;
+                });
+            }
         }
     }
 }

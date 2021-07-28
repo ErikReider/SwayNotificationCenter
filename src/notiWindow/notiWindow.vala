@@ -7,7 +7,7 @@ namespace SwayNotificatonCenter {
 
         public NotiWindow () {
             GtkLayerShell.init_for_window (this);
-            GtkLayerShell.set_layer (this, GtkLayerShell.Layer.OVERLAY);
+            GtkLayerShell.set_layer (this, GtkLayerShell.Layer.TOP);
             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
         }

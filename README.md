@@ -28,3 +28,8 @@ To toggle the panel
 ./build/src/sway-nc-client
 ```
 
+## Screenshots
+
+![Screenshot of desktop notification](./assets/desktop.png)
+
+![Screenshot of panel](./assets/panel.png)

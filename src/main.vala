@@ -186,7 +186,7 @@ namespace SwayNotificatonCenter {
              add_provider_for_screen (
                 Gdk.Screen.get_default (),
                 css_provider,
-                Gtk.STYLE_PROVIDER_PRIORITY_USER);
+                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
         } catch (Error e) {
             print ("Error: %s\n", e.message);
         }

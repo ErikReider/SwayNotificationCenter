@@ -7,19 +7,20 @@
     <property name="can-focus">False</property>
     <property name="orientation">vertical</property>
     <child>
-      <object class="GtkOverlay">
-        <property name="width-request">400</property>
+      <object class="GtkEventBox" id="event_box">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
+        <property name="visible-window">False</property>
         <child>
-          <object class="GtkBox">
+          <object class="GtkOverlay" id="overlay">
+            <property name="width-request">400</property>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="orientation">vertical</property>
             <child>
-              <object class="GtkEventBox" id="eventBox">
+              <object class="GtkButton" id="noti_button">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
@@ -28,6 +29,8 @@
                       <object class="GtkImage" id="img">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="margin-left">6</property>
+                        <property name="margin-right">12</property>
                         <property name="margin-start">6</property>
                         <property name="margin-end">12</property>
                         <property name="margin-top">6</property>
@@ -55,8 +58,10 @@
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="ellipsize">end</property>
+                                <property name="max-width-chars">0</property>
                                 <property name="xalign">0</property>
                                 <attributes>
+                                  <attribute name="weight" value="bold"/>
                                   <attribute name="size" value="12288"/>
                                 </attributes>
                               </object>
@@ -70,6 +75,7 @@
                               <object class="GtkLabel" id="time">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
+                                <property name="margin-start">6</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -90,13 +96,13 @@
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="wrap">True</property>
+                            <property name="max-width-chars">0</property>
                             <property name="xalign">0</property>
                             <property name="yalign">0</property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
-                            <property name="pack-type">end</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
@@ -112,51 +118,46 @@
                     </style>
                   </object>
                 </child>
+                <style>
+                  <class name="notification-button-box"/>
+                </style>
               </object>
               <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
+                <property name="index">-1</property>
               </packing>
             </child>
-            <style>
-              <class name="notification-box"/>
-            </style>
-          </object>
-          <packing>
-            <property name="index">-1</property>
-          </packing>
-        </child>
-        <child type="overlay">
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="halign">end</property>
-            <property name="valign">start</property>
-            <property name="orientation">vertical</property>
-            <child>
-              <object class="GtkEventBox" id="close_button">
+            <child type="overlay">
+              <object class="GtkBox" id="close_button_parent">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="halign">end</property>
+                <property name="valign">start</property>
+                <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkImage" id="close_button_img">
+                  <object class="GtkEventBox" id="close_button">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="pixel-size">12</property>
-                    <property name="icon-name">close-symbolic</property>
-                    <property name="icon_size">0</property>
+                    <child>
+                      <object class="GtkImage" id="close_button_img">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="pixel-size">12</property>
+                        <property name="icon-name">close-symbolic</property>
+                        <property name="icon_size">0</property>
+                      </object>
+                    </child>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
                 </child>
+                <style>
+                  <class name="notification-close-button"/>
+                </style>
               </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
             </child>
-            <style>
-              <class name="notification-close-button"/>
-            </style>
           </object>
         </child>
       </object>

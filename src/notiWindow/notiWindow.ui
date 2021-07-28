@@ -3,20 +3,47 @@
 <interface>
   <requires lib="gtk+" version="3.24"/>
   <template class="SwayNotificatonCenterNotiWindow" parent="GtkApplicationWindow">
+    <property name="width-request">500</property>
     <property name="can-focus">False</property>
+    <property name="vexpand">True</property>
     <property name="resizable">False</property>
+    <property name="default-width">500</property>
+    <property name="type-hint">notification</property>
+    <property name="skip-taskbar-hint">True</property>
+    <property name="skip-pager-hint">True</property>
+    <property name="urgency-hint">True</property>
     <property name="decorated">False</property>
     <property name="deletable">False</property>
+    <property name="gravity">north-east</property>
+    <property name="show-menubar">False</property>
     <child>
-      <object class="GtkBox" id="box">
+      <object class="GtkScrolledWindow">
+        <property name="width-request">500</property>
         <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="orientation">vertical</property>
+        <property name="can-focus">True</property>
+        <property name="propagate-natural-height">True</property>
         <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
+          <object class="GtkViewport">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="shadow-type">none</property>
+            <child>
+              <object class="GtkBox" id="box">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+            </child>
+          </object>
         </child>
       </object>
     </child>

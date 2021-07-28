@@ -12,10 +12,12 @@
     <property name="skip-pager-hint">True</property>
     <property name="urgency-hint">True</property>
     <property name="decorated">False</property>
+    <property name="deletable">False</property>
     <property name="gravity">north-east</property>
     <property name="show-menubar">False</property>
     <child>
       <object class="GtkScrolledWindow">
+        <property name="width-request">500</property>
         <property name="visible">True</property>
         <property name="can-focus">True</property>
         <child>

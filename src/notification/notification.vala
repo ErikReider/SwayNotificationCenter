@@ -1,9 +1,8 @@
 namespace SwayNotificatonCenter {
     [GtkTemplate (ui = "/org/erikreider/sway-notification-center/notification/notification.ui")]
     private class Notification : Gtk.Box {
-
         [GtkChild]
-        unowned Gtk.EventBox eventBox;
+        unowned Gtk.Button noti_button;
 
         [GtkChild]
         unowned Gtk.EventBox close_button;
@@ -30,9 +29,8 @@ namespace SwayNotificatonCenter {
             this.summary.set_text (param.summary);
             this.body.set_text (param.body);
 
-            eventBox.button_press_event.connect ((widget, event_button) => {
-                print (widget.get_name ());
-                return false;
+            noti_button.clicked.connect(() => {
+                print ("CLICK\n");
             });
 
             close_button.button_press_event.connect ((widget, event_button) => {
@@ -41,12 +39,12 @@ namespace SwayNotificatonCenter {
                 } catch (Error e) {
                     print ("Error: %s\n", e.message);
                 }
-                return false;
+                return true;
             });
 
             set_icon ();
 
-            if (show) this.show_all ();
+            if (show) this.show ();
         }
 
         public void set_time () {

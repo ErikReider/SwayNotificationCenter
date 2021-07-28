@@ -54,13 +54,15 @@ namespace SwayNotificatonCenter {
         }
 
         private string get_readable_time () {
-            string value = "Now";
+            string value = "";
 
             double diff = (GLib.get_real_time () * 0.000001) - param.time;
             double secs = diff / 60;
             double hours = secs / 60;
             double days = hours / 24;
-            if (secs >= 1 && hours < 1) {
+            if (secs < 1) {
+                value = "Now";
+            } else if (secs >= 1 && hours < 1) {
                 // 1m - 1h
                 var val = Math.floor (secs);
                 value = val.to_string () + " min";

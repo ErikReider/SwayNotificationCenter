@@ -27,17 +27,18 @@ public class Client : Application {
     }
 
     private void print_help (string[] args) {
-        print(@"Usage:\n");
-        print(@"\t $(args[0]) <OPTION>\n");
-        print(@"Help:\n");
-        print(@"\t -h, --help \t\t Show help options\n");
-        print(@"Options:\n");
-        print(@"\t -t, --toggle \t\t Toggle the notificaion panel\n");
-        print(@"\t -c, --count \t\t Print the current notificaion count\n");
-        print(@"\t -s, --subscribe \t Subscribe to notificaion add and close events\n");
+        print (@"Usage:\n");
+        print (@"\t $(args[0]) <OPTION>\n");
+        print (@"Help:\n");
+        print (@"\t -h, --help \t\t Show help options\n");
+        print (@"Options:\n");
+        print (@"\t -t, --toggle \t\t Toggle the notificaion panel\n");
+        print (@"\t -c, --count \t\t Print the current notificaion count\n");
+        print (@"\t -s, --subscribe \t Subscribe to notificaion add and close events\n");
     }
 
     public override int command_line (ApplicationCommandLine cmd_line) {
+        if (cc_daemon == null) return 1;
         try {
             string[] args = cmd_line.get_arguments ();
             if (args.length < 2) {

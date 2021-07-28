@@ -73,7 +73,7 @@ namespace SwayNotificatonCenter {
 
         public void set_noti_window_visibility (bool value)
         throws DBusError, IOError {
-            notiWin.set_visible (value);
+            notiWin.change_visibility (value);
         }
 
         public uint32 Notify (string app_name,

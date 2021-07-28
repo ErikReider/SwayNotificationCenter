@@ -12,10 +12,21 @@ namespace SwayNotificatonCenter {
             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
         }
 
+        public void change_visibility (bool value) {
+            this.set_visible (value);
+            if (!value) close_all_notifications ();
+        }
+
+        public void close_all_notifications () {
+            foreach (var w in box.get_children ()) {
+                box.remove (w);
+            }
+        }
+
         private void removeWidget (Gtk.Widget widget) {
             uint len = box.get_children ().length () - 1;
             box.remove (widget);
-            if (len <= 0) box.set_visible (false);
+            if (len <= 0) this.hide ();
         }
 
         public void add_notification (NotifyParams param, NotiDaemon notiDaemon) {
@@ -25,7 +36,7 @@ namespace SwayNotificatonCenter {
                 box.remove (v_noti);
                 if (box.get_children ().length () == 0) this.hide ();
             });
-            this.show_all ();
+            this.show ();
         }
 
         public void close_notification (uint32 id) {

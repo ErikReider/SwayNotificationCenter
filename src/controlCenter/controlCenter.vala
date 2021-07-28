@@ -13,6 +13,10 @@ namespace SwayNotificatonCenter {
             return cc.visible;
         }
 
+        public void close_all_notifications () throws DBusError, IOError {
+            cc.close_all_notifications ();
+        }
+
         public void toggle () throws DBusError, IOError {
             if (cc.toggle_visibility ()) {
                 dbusInit.notiDaemon.set_noti_window_visibility (false);
@@ -42,6 +46,12 @@ namespace SwayNotificatonCenter {
             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
         }
 
+        public void close_all_notifications () {
+            foreach (var w in box.get_children ()) {
+                box.remove (w);
+            }
+        }
+
         private void removeWidget (Gtk.Widget widget) {
             uint len = box.get_children ().length () - 1;
             box.remove (widget);
@@ -53,7 +63,7 @@ namespace SwayNotificatonCenter {
         public bool toggle_visibility () {
             var cc_visibility = !this.visible;
             this.set_visible (cc_visibility);
-            if(cc_visibility) {
+            if (cc_visibility) {
                 foreach (var w in box.get_children ()) {
                     var noti = (Notification) w;
                     noti.set_time ();

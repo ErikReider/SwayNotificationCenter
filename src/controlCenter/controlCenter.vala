@@ -9,12 +9,18 @@ namespace SwayNotificatonCenter {
             cc = new ControlCenterWidget ();
         }
 
+        public signal void on_notificaion (uint count);
+
         public bool get_visibility () throws DBusError, IOError {
             return cc.visible;
         }
 
         public void close_all_notifications () throws DBusError, IOError {
             cc.close_all_notifications ();
+        }
+
+        public uint notification_count () throws DBusError, IOError {
+            return cc.notification_count ();
         }
 
         public void toggle () throws DBusError, IOError {
@@ -25,10 +31,12 @@ namespace SwayNotificatonCenter {
 
         public void add_notification (NotifyParams param) throws DBusError, IOError {
             cc.add_notification (param, dbusInit.notiDaemon);
+            on_notificaion (notification_count ());
         }
 
         public void close_notification (uint32 id) throws DBusError, IOError {
             cc.close_notification (id);
+            on_notificaion (notification_count ());
         }
     }
 
@@ -44,6 +52,10 @@ namespace SwayNotificatonCenter {
             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
+        }
+
+        public uint notification_count () {
+            return box.get_children ().length ();
         }
 
         public void close_all_notifications () {

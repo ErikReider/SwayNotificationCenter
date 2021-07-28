@@ -17,9 +17,10 @@
     <property name="show-menubar">False</property>
     <child>
       <object class="GtkScrolledWindow">
-        <property name="width-request">500</property>
         <property name="visible">True</property>
         <property name="can-focus">True</property>
+        <property name="hscrollbar-policy">never</property>
+        <property name="propagate-natural-height">True</property>
         <child>
           <object class="GtkViewport">
             <property name="visible">True</property>

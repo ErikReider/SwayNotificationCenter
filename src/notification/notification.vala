@@ -11,12 +11,14 @@ namespace SwayNotificatonCenter {
         [GtkChild]
         unowned Gtk.Label summary;
         [GtkChild]
+        unowned Gtk.Label time;
+        [GtkChild]
         unowned Gtk.Label body;
         [GtkChild]
         unowned Gtk.Image img;
 
         private int open_timeout = 0;
-        private const int millis = 5000;
+        private const int millis = 10000;
 
         public NotifyParams param;
 
@@ -47,6 +49,39 @@ namespace SwayNotificatonCenter {
             if (show) this.show_all ();
         }
 
+        public void set_time () {
+            this.time.set_text (get_readable_time ());
+        }
+
+        private string get_readable_time () {
+            string value = "Now";
+
+            double diff = (GLib.get_real_time () * 0.000001) - param.time;
+            double secs = diff / 60;
+            double hours = secs / 60;
+            double days = hours / 24;
+            if (secs >= 1 && hours < 1) {
+                // 1m - 1h
+                var val = Math.floor (secs);
+                value = val.to_string () + " min";
+                if (val > 1) value += "s";
+                value += " ago";
+            } else if (hours >= 1 && hours < 24) {
+                // 1h - 24h
+                var val = Math.floor (hours);
+                value = val.to_string () + " hour";
+                if (val > 1) value += "s";
+                value += " ago";
+            } else {
+                // Days
+                var val = Math.floor (days);
+                value = val.to_string () + " day";
+                if (val > 1) value += "s";
+                value += " ago";
+            }
+            return value;
+        }
+
         private void set_icon () {
             if (param.app_icon == "") {
                 // Get the app icon
@@ -73,7 +108,7 @@ namespace SwayNotificatonCenter {
             int ms = param.expire_timeout > 0 ? param.expire_timeout : millis;
             if (param.expire_timeout != 0) {
                 open_timeout = 1;
-                Timeout.add ((int) (ms), () => {
+                Timeout.add (ms, () => {
                     open_timeout--;
                     if (open_timeout == 0) callback (this);
                     return false;

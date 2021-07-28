@@ -10,6 +10,7 @@ namespace SwayNotificatonCenter {
         public string[] actions { get; set; }
         public HashTable<string, Variant> hints { get; set; }
         public int expire_timeout { get; set; }
+        public int64 time { get; set; } // Epoch in seconds
 
         public NotifyParams (uint32 applied_id,
                              string app_name,
@@ -29,6 +30,7 @@ namespace SwayNotificatonCenter {
             this.actions = actions;
             this.hints = hints;
             this.expire_timeout = expire_timeout;
+            this.time = (int64) (GLib.get_real_time () * 0.000001);
         }
 
         public void printParams () {
@@ -59,7 +61,7 @@ namespace SwayNotificatonCenter {
     [DBus (name = "org.freedesktop.Notifications")]
     public class NotiDaemon : Object {
 
-        private uint32 noti_id = 1;
+        private uint32 noti_id = 0;
 
         public NotiWindow notiWin;
         private DBusInit dbusInit;

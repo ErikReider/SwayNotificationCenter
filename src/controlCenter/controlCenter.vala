@@ -51,9 +51,15 @@ namespace SwayNotificatonCenter {
         }
 
         public bool toggle_visibility () {
-            var vis = !this.visible;
-            this.set_visible (vis);
-            return vis;
+            var cc_visibility = !this.visible;
+            this.set_visible (cc_visibility);
+            if(cc_visibility) {
+                foreach (var w in box.get_children ()) {
+                    var noti = (Notification) w;
+                    noti.set_time ();
+                }
+            }
+            return cc_visibility;
         }
 
         public void close_notification (uint32 id) {
@@ -67,6 +73,7 @@ namespace SwayNotificatonCenter {
 
         public void add_notification (NotifyParams param, NotiDaemon notiDaemon) {
             var noti = new Notification (param, notiDaemon, true);
+            noti.set_time ();
             box.pack_end (noti, false, true, 0);
         }
     }

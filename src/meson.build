@@ -10,7 +10,13 @@ sway_notificaton_center_deps = [
   dependency('gio-2.0', version: '>= 2.50'),
   dependency('gtk+-3.0', version: '>= 3.22'),
   dependency('libhandy-1', version: '>= 1.0.0'),
-  meson.get_compiler('c').find_library('gtk-layer-shell')
+  meson.get_compiler('c').find_library('gtk-layer-shell'),
+  meson.get_compiler('c').find_library('m', required : false),
+]
+
+args = [
+  '--target-glib=2.50',
+  '--pkg=GtkLayerShell-0.1',
 ]
 
 gnome = import('gnome')
@@ -22,14 +28,14 @@ sway_notificaton_center_sources += gnome.compile_resources('sway_notificaton_cen
 
 executable('sway-nc',
   sway_notificaton_center_sources,
-  vala_args: [ '--target-glib=2.50', '--pkg=GtkLayerShell-0.1' ],
+  vala_args: args,
   dependencies: sway_notificaton_center_deps,
   install: true,
 )
 
 executable('sway-nc-client',
   ['client.vala', 'constants.vala'],
-  vala_args: [ '--target-glib=2.50', '--pkg=GtkLayerShell-0.1' ],
+  vala_args: args,
   dependencies: sway_notificaton_center_deps,
   install: true,
 )

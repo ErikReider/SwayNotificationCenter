@@ -7,6 +7,14 @@ A simple notification daemon with a gui built for Sway (potentially any wm with 
 - A panel to view previous notifications
 - The same features as any other basic notification daemon
 
+## Planned Features
+
+- PLKGBUILD file for arch (and any others if requested 😃)
+- Customization through a CSS file
+- Click notification to execute default action
+- Show alternative notification actions
+- Slick animations 😎
+
 ## Install
 
 ```zsh

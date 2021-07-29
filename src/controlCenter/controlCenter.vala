@@ -46,6 +46,9 @@ namespace SwayNotificatonCenter {
         [GtkChild]
         unowned Gtk.Box box;
 
+        [GtkChild]
+        unowned Gtk.Label empty_label;
+
         public ControlCenterWidget () {
             GtkLayerShell.init_for_window (this);
             GtkLayerShell.set_layer (this, GtkLayerShell.Layer.TOP);
@@ -68,7 +71,7 @@ namespace SwayNotificatonCenter {
             uint len = box.get_children ().length () - 1;
             box.remove (widget);
             if (len <= 0) {
-                // Do something in the future!
+                empty_label.set_visible (true);
             }
         }
 
@@ -94,6 +97,7 @@ namespace SwayNotificatonCenter {
         }
 
         public void add_notification (NotifyParams param, NotiDaemon notiDaemon) {
+            empty_label.set_visible (false);
             var noti = new Notification (param, notiDaemon, true);
             noti.set_time ();
             box.pack_end (noti, false, true, 0);

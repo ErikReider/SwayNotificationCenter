@@ -12,9 +12,11 @@ namespace SwayNotificatonCenter {
         [GtkChild]
         unowned Gtk.Label time;
         [GtkChild]
-        unowned Gtk.Label body;
+        unowned Gtk.TextView body;
         [GtkChild]
         unowned Gtk.Image img;
+
+        private Gtk.TextBuffer buffer;
 
         private int open_timeout = 0;
         private const int millis = 10000;
@@ -27,9 +29,12 @@ namespace SwayNotificatonCenter {
             this.param = param;
 
             this.summary.set_text (param.summary);
-            this.body.set_text (param.body);
 
-            noti_button.clicked.connect(() => {
+            buffer = new Gtk.TextBuffer (new Gtk.TextTagTable ());
+            buffer.set_text (param.body);
+            this.body.set_buffer (buffer);
+
+            noti_button.clicked.connect (() => {
                 print ("CLICK\n");
             });
 

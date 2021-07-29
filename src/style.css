@@ -38,6 +38,11 @@
   border-radius: 100%;
 }
 
+.body, .body text {
+  background-color: transparent;
+  color: white;
+}
+
 .cc {
   background-color: rgba(0, 0, 0, 0.7);
 }

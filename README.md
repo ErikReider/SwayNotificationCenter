@@ -24,7 +24,7 @@ ninja -C build
 
 ## Run
 
-To start the daemon
+To start the daemon (remember to kill any other notification daemon before running)
 
 ```zsh
 ./build/src/sway-nc

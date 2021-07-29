@@ -1,24 +1,11 @@
-.notification-parent:first-child {
+.notification-background:first-child {
   margin-top: 6px;
 }
-.notification-parent:last-child {
+.notification-background:last-child {
   margin-bottom: 12px;
 }
 
 .notification {
-  background-color: transparent;
-  padding: 6px;
-  border-radius: 10px;
-}
-
-.noti-top-button {
-  background-color: transparent;
-}
-.noti-top-button:hover {
-  background-color: transparent;
-}
-
-.notification-button-box {
   background: rgb(58, 58, 58);
   border-radius: 10px;
   margin: 6px 12px;
@@ -26,27 +13,40 @@
   padding: 0;
 }
 
-.notification-button-box:hover {
-  background-color: rgb(68, 68, 68);
+.notification:hover {
+  background: rgb(68, 68, 68);
 }
 
-.notification-close-button {
-  background-color: black;
+.notification-content {
+  background: transparent;
+  padding: 6px;
+  border-radius: 10px;
+}
+
+.close-button {
+  background: black;
   box-shadow: 0px 2px 4px 2px rgba(0, 0, 0, 0.3);
   margin: 0 4px;
-  padding: 6px;
+  padding: 0px;
   border-radius: 100%;
 }
 
-.body, .body text {
-  background-color: transparent;
+.close-button:hover {
+  background: rgb(40, 40, 40);
+  transition: all 0.15s ease-in-out;
+  opacity: 0.9;
+}
+
+.body,
+.body text {
+  background: transparent;
   color: white;
 }
 
-.cc {
-  background-color: rgba(0, 0, 0, 0.7);
+.control-center {
+  background: rgba(0, 0, 0, 0.7);
 }
 
-.noti-base {
-  background-color: transparent;
+.floating-notifications {
+  background: transparent;
 }

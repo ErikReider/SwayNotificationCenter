@@ -42,7 +42,7 @@
       </object>
     </child>
     <style>
-      <class name="cc"/>
+      <class name="control-center"/>
     </style>
   </template>
 </interface>

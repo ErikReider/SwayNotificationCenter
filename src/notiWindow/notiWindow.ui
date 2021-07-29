@@ -44,7 +44,7 @@
       </object>
     </child>
     <style>
-      <class name="noti-base"/>
+      <class name="floating-notifications"/>
     </style>
   </template>
 </interface>

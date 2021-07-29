@@ -5,7 +5,7 @@ namespace SwayNotificatonCenter {
         unowned Gtk.Button noti_button;
 
         [GtkChild]
-        unowned Gtk.EventBox close_button;
+        unowned Gtk.Button close_button;
 
         [GtkChild]
         unowned Gtk.Label summary;
@@ -38,13 +38,12 @@ namespace SwayNotificatonCenter {
                 print ("CLICK\n");
             });
 
-            close_button.button_press_event.connect ((widget, event_button) => {
+            close_button.clicked.connect ((widget) => {
                 try {
                     notiDaemon.click_close_notification (param.applied_id);
                 } catch (Error e) {
                     print ("Error: %s\n", e.message);
                 }
-                return true;
             });
 
             set_icon ();

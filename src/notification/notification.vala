@@ -87,7 +87,9 @@ namespace SwayNotificatonCenter {
         }
 
         private void set_icon () {
-            if (param.app_icon == "") {
+            if(param.app_icon != "") {
+                img.set_from_icon_name (param.app_icon, Gtk.IconSize.DIALOG);
+            } else {
                 // Get the app icon
                 GLib.Icon ? icon = null;
                 foreach (var app in AppInfo.get_all ()) {
@@ -98,9 +100,10 @@ namespace SwayNotificatonCenter {
                 }
                 if (icon != null) {
                     img.set_from_gicon (icon, Gtk.IconSize.DIALOG);
+                } else {
+                    // Default icon
+                    img.set_from_icon_name ("image-missing", Gtk.IconSize.DIALOG);
                 }
-            } else {
-                img.set_from_icon_name (param.app_icon, Gtk.IconSize.DIALOG);
             }
         }
 

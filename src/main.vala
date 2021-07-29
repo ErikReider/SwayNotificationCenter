@@ -144,6 +144,7 @@ namespace SwayNotificatonCenter {
     public class NotiDaemon : Object {
 
         private uint32 noti_id = 0;
+        private bool dnd = false;
 
         public NotiWindow notiWin;
         private DBusInit dbusInit;
@@ -184,11 +185,15 @@ namespace SwayNotificatonCenter {
                 notiWin.close_notification (id);
                 dbusInit.ccDaemon.close_notification (id);
             }
-            if (!dbusInit.ccDaemon.get_visibility ()) {
+            if (!dbusInit.ccDaemon.get_visibility () && !dnd) {
                 notiWin.add_notification (param, this);
             }
             dbusInit.ccDaemon.add_notification (param);
             return id;
+        }
+
+        public bool toggle_dnd () throws DBusError, IOError {
+            return (dnd = !dnd);
         }
 
         public void click_close_notification (uint32 id) throws DBusError, IOError {

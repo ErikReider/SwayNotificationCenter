@@ -29,6 +29,10 @@ namespace SwayNotificatonCenter {
             }
         }
 
+        public uint toggle_dnd () throws DBusError, IOError {
+            return dbusInit.notiDaemon.toggle_dnd () == true ? 1 : 0;
+        }
+
         public void add_notification (NotifyParams param) throws DBusError, IOError {
             cc.add_notification (param, dbusInit.notiDaemon);
             on_notificaion (notification_count ());

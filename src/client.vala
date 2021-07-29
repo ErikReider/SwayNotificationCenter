@@ -5,6 +5,8 @@ interface CcDaemon : GLib.Object {
 
     public abstract void toggle () throws DBusError, IOError;
 
+    public abstract uint toggle_dnd () throws DBusError, IOError;
+
     public signal void on_notificaion (uint count);
 }
 
@@ -32,8 +34,9 @@ public class Client : Application {
         print (@"Help:\n");
         print (@"\t -h, --help \t\t Show help options\n");
         print (@"Options:\n");
-        print (@"\t -t, --toggle \t\t Toggle the notificaion panel\n");
+        print (@"\t -t, --toggle-panel \t\t Toggle the notificaion panel\n");
         print (@"\t -c, --count \t\t Print the current notificaion count\n");
+        print (@"\t -d, --toggle-dnd \t\t Toggle and print the current dnd state\n");
         print (@"\t -s, --subscribe \t Subscribe to notificaion add and close events\n");
     }
 
@@ -54,9 +57,13 @@ public class Client : Application {
                 case "-c":
                     print (cc_daemon.notification_count ().to_string ());
                     break;
-                case "--toggle":
+                case "--toggle-panel":
                 case "-t":
                     cc_daemon.toggle ();
+                    break;
+                case "--toggle-dnd":
+                case "-d":
+                    print (cc_daemon.toggle_dnd ().to_string ());
                     break;
                 case "--subscribe":
                 case "-s":

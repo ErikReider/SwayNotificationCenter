@@ -42,7 +42,7 @@ namespace SwayNotificatonCenter {
 
             close_button.clicked.connect (close_notification);
 
-            set_icon.begin();
+            set_icon ();
 
             if (show) this.show ();
         }
@@ -90,25 +90,27 @@ namespace SwayNotificatonCenter {
             }
         }
 
-        private async void set_icon () {
+        private void set_icon () {
+            img.set_pixel_size (48);
             if (param.image_data.is_initialized) {
-                var data = param.image_data;
-                // Rebuild and scale the image
-                var pixbuf = new Gdk.Pixbuf.with_unowned_data (data.data, Gdk.Colorspace.RGB,
-                                                               data.has_alpha, data.bits_per_sample,
-                                                               data.width, data.height, data.rowstride, null);
-                var scaled_pixbuf = pixbuf.scale_simple (64, 64, Gdk.InterpType.BILINEAR);
-                img.set_from_pixbuf (scaled_pixbuf);
-            } else if (param.app_icon != "") {
-                img.set_from_icon_name (param.app_icon, Gtk.IconSize.DIALOG);
+                Functions.set_image_data (param.image_data, img);
+            } else if (param.image_path != null) {
+                Functions.set_image_path (param.image_path, img);
+            } else if (param.app_icon != null) {
+                Functions.set_image_path (param.app_icon, img);
+            } else if (param.icon_data.is_initialized) {
+                Functions.set_image_data (param.icon_data, img);
             } else {
                 // Get the app icon
                 GLib.Icon ? icon = null;
-                foreach (var app in AppInfo.get_all ()) {
-                    if (app.get_name ().down () == param.app_name.down ()) {
-                        icon = app.get_icon ();
-                        break;
+                if (param.desktop_entry == "") {
+                    foreach (var app in AppInfo.get_all ()) {
+                        if (app.get_name ().down () == param.app_name.down ()) {
+                            icon = app.get_icon ();
+                            break;
+                        }
                     }
+                } else {
                 }
                 if (icon != null) {
                     img.set_from_gicon (icon, Gtk.IconSize.DIALOG);

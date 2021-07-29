@@ -4,6 +4,7 @@ sway_notificaton_center_sources = [
   'notification/notification.vala',
   'controlCenter/controlCenter.vala',
   'constants.vala',
+  'functions.vala',
 ]
 
 sway_notificaton_center_deps = [

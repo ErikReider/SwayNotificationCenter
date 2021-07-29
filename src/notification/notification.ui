@@ -59,6 +59,9 @@
                               <attribute name="weight" value="bold"/>
                               <attribute name="size" value="12288"/>
                             </attributes>
+                            <style>
+                              <class name="summary"/>
+                            </style>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -72,6 +75,9 @@
                             <property name="can-focus">False</property>
                             <property name="margin-start">6</property>
                             <property name="track-visited-links">False</property>
+                            <style>
+                              <class name="time"/>
+                            </style>
                           </object>
                           <packing>
                             <property name="expand">False</property>

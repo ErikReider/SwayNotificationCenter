@@ -27,6 +27,7 @@ namespace SwayNotificatonCenter {
         // Hints
         public bool action_icons { get; set; }
         public Image_Data image_data { get; set; }
+        public Image_Data icon_data { get; set; }
         public string image_path { get; set; }
         public string desktop_entry { get; set; }
         public string category { get; set; }
@@ -59,8 +60,7 @@ namespace SwayNotificatonCenter {
 
         private void s_hints () {
             foreach (var hint in hints.get_keys ()) {
-                var hint_value = hints[hint];
-                print (hint + "\n");
+                Variant hint_value = hints[hint];
                 switch (hint) {
                     case "action-icons":
                         if (hint_value.is_of_type (GLib.VariantType.BOOLEAN)) {
@@ -84,11 +84,17 @@ namespace SwayNotificatonCenter {
                         img_d.data = (uint8[]) hint_value.get_child_value (6).get_data ();
 
                         img_d.is_initialized = true;
-                        image_data = img_d;
+                        if (hint == "icon_data") {
+                            icon_data = img_d;
+                        } else {
+                            image_data = img_d;
+                        }
                         break;
                     case "image-path":
                     case "image_path":
-                        print (hint_value.get_string () + "\n");
+                        if (hint_value.is_of_type (GLib.VariantType.STRING)) {
+                            image_path = hint_value.get_string ();
+                        }
                         break;
                     case "desktop-entry":
                         if (hint_value.is_of_type (GLib.VariantType.STRING)) {

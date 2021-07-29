@@ -1,5 +1,17 @@
 namespace SwayNotificatonCenter {
 
+    public struct Image_Data {
+        int width;
+        int height;
+        int rowstride;
+        bool has_alpha;
+        int bits_per_sample;
+        int channels;
+        unowned uint8[] data;
+
+        bool is_initialized;
+    }
+
     public struct NotifyParams {
         public uint32 applied_id { get; set; }
         public string app_name { get; set; }
@@ -11,6 +23,16 @@ namespace SwayNotificatonCenter {
         public HashTable<string, Variant> hints { get; set; }
         public int expire_timeout { get; set; }
         public int64 time { get; set; } // Epoch in seconds
+
+        // Hints
+        public bool action_icons { get; set; }
+        public Image_Data image_data { get; set; }
+        public string image_path { get; set; }
+        public string desktop_entry { get; set; }
+        public string category { get; set; }
+        public bool resident { get; set; }
+
+        // Actions
 
         public NotifyParams (uint32 applied_id,
                              string app_name,
@@ -31,6 +53,60 @@ namespace SwayNotificatonCenter {
             this.hints = hints;
             this.expire_timeout = expire_timeout;
             this.time = (int64) (GLib.get_real_time () * 0.000001);
+
+            s_hints ();
+        }
+
+        private void s_hints () {
+            foreach (var hint in hints.get_keys ()) {
+                var hint_value = hints[hint];
+                print (hint + "\n");
+                switch (hint) {
+                    case "action-icons":
+                        if (hint_value.is_of_type (GLib.VariantType.BOOLEAN)) {
+                            action_icons = hint_value.get_boolean ();
+                        }
+                        break;
+                    case "image-data":
+                    case "image_data":
+                    case "icon_data":
+                        if (image_data.is_initialized) break;
+                        var img_d = Image_Data ();
+                        // Read each value
+                        // https://specifications.freedesktop.org/notification-spec/latest/ar01s05.html
+                        img_d.width = hint_value.get_child_value (0).get_int32 ();
+                        img_d.height = hint_value.get_child_value (1).get_int32 ();
+                        img_d.rowstride = hint_value.get_child_value (2).get_int32 ();
+                        img_d.has_alpha = hint_value.get_child_value (3).get_boolean ();
+                        img_d.bits_per_sample = hint_value.get_child_value (4).get_int32 ();
+                        img_d.channels = hint_value.get_child_value (5).get_int32 ();
+                        // Read the raw image data
+                        img_d.data = (uint8[]) hint_value.get_child_value (6).get_data ();
+
+                        img_d.is_initialized = true;
+                        image_data = img_d;
+                        break;
+                    case "image-path":
+                    case "image_path":
+                        print (hint_value.get_string () + "\n");
+                        break;
+                    case "desktop-entry":
+                        if (hint_value.is_of_type (GLib.VariantType.STRING)) {
+                            desktop_entry = hint_value.get_string ();
+                        }
+                        break;
+                    case "category":
+                        if (hint_value.is_of_type (GLib.VariantType.STRING)) {
+                            category = hint_value.get_string ();
+                        }
+                        break;
+                    case "resident":
+                        if (hint_value.is_of_type (GLib.VariantType.BOOLEAN)) {
+                            resident = hint_value.get_boolean ();
+                        }
+                        break;
+                }
+            }
         }
 
         public void printParams () {
@@ -110,7 +186,7 @@ namespace SwayNotificatonCenter {
         }
 
         public void click_close_notification (uint32 id) throws DBusError, IOError {
-            notiWin.close_notification (id);
+            CloseNotification (id);
             dbusInit.ccDaemon.close_notification (id);
         }
 
@@ -127,7 +203,7 @@ namespace SwayNotificatonCenter {
             name = "SwayNotificationCenter";
             vendor = "ErikReider";
             version = "0.1";
-            spec_version = "1.0";
+            spec_version = "1.2";
         }
 
         public signal void NotificationClosed (uint32 id, uint32 reason);
@@ -183,7 +259,7 @@ namespace SwayNotificatonCenter {
             Gtk.CssProvider css_provider = new Gtk.CssProvider ();
             // TODO: Append css file to fixed absolute path like .config or /usr/share/...
             // css_provider.load_from_path ("src/style.css");
-            css_provider.load_from_data (new Constants().tmp_get_css);
+            css_provider.load_from_data (new Constants ().tmp_get_css);
             Gtk.StyleContext.
              add_provider_for_screen (
                 Gdk.Screen.get_default (),

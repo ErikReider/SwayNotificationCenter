@@ -22,10 +22,12 @@ namespace SwayNotificatonCenter {
         private const int millis = 10000;
 
         public NotifyParams param;
+        private NotiDaemon notiDaemon;
 
         public Notification (NotifyParams param,
                              NotiDaemon notiDaemon,
                              bool show = false) {
+            this.notiDaemon = notiDaemon;
             this.param = param;
 
             this.summary.set_text (param.summary);
@@ -35,18 +37,12 @@ namespace SwayNotificatonCenter {
             this.body.set_buffer (buffer);
 
             noti_button.clicked.connect (() => {
-                print ("CLICK\n");
+                if (param.actions.length == 0) close_notification ();
             });
 
-            close_button.clicked.connect ((widget) => {
-                try {
-                    notiDaemon.click_close_notification (param.applied_id);
-                } catch (Error e) {
-                    print ("Error: %s\n", e.message);
-                }
-            });
+            close_button.clicked.connect (close_notification);
 
-            set_icon ();
+            set_icon.begin();
 
             if (show) this.show ();
         }
@@ -86,8 +82,24 @@ namespace SwayNotificatonCenter {
             return value;
         }
 
-        private void set_icon () {
-            if(param.app_icon != "") {
+        private void close_notification () {
+            try {
+                notiDaemon.click_close_notification (param.applied_id);
+            } catch (Error e) {
+                print ("Error: %s\n", e.message);
+            }
+        }
+
+        private async void set_icon () {
+            if (param.image_data.is_initialized) {
+                var data = param.image_data;
+                // Rebuild and scale the image
+                var pixbuf = new Gdk.Pixbuf.with_unowned_data (data.data, Gdk.Colorspace.RGB,
+                                                               data.has_alpha, data.bits_per_sample,
+                                                               data.width, data.height, data.rowstride, null);
+                var scaled_pixbuf = pixbuf.scale_simple (64, 64, Gdk.InterpType.BILINEAR);
+                img.set_from_pixbuf (scaled_pixbuf);
+            } else if (param.app_icon != "") {
                 img.set_from_icon_name (param.app_icon, Gtk.IconSize.DIALOG);
             } else {
                 // Get the app icon

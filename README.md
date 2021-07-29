@@ -5,6 +5,7 @@ A simple notification daemon with a gui built for Sway (potentially any wm with 
 ## Features
 
 - A panel to view previous notifications
+- Do not disturb
 - The same features as any other basic notification daemon
 
 ## Planned Features
@@ -13,7 +14,6 @@ A simple notification daemon with a gui built for Sway (potentially any wm with 
 - Customization through a CSS file
 - Click notification to execute default action
 - Show alternative notification actions
-- Do not disturb
 - Slick animations 😎
 
 ## Install

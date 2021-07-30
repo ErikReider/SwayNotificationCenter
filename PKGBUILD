@@ -2,18 +2,17 @@ pkgname=swaync
 pkgver=0.1
 pkgrel=1
 pkgdesc="A simple notificaion daemon with a GTK panel"
-url="https://github.com/ErikReider/SwayNotificationCenter"
+pkgfoldername=SwayNotificationCenter
+url="https://github.com/ErikReider/$pkgfoldername"
 arch=(x86_64)
 license=(GPL)
 depends=(gtk3 gtk-layer-shell dbus)
 makedepends=(vala meson git)
-source=("git+https://github.com/ErikReider/SwayNotificationCenter")
+source=("git+https://github.com/ErikReider/$pkgfoldername")
 sha256sums=('SKIP')
 
 build() {
-  # cd SwayNotificationCenter
-  # pwd
-  arch-meson SwayNotificationCenter build
+  arch-meson $pkgfoldername build
   ninja -C build
 }
 

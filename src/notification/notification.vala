@@ -30,7 +30,7 @@ namespace SwayNotificatonCenter {
             this.notiDaemon = notiDaemon;
             this.param = param;
 
-            this.summary.set_text (param.summary);
+            this.summary.set_text (param.summary ?? param.app_name);
 
             buffer = new Gtk.TextBuffer (new Gtk.TextTagTable ());
             buffer.set_text (param.body);

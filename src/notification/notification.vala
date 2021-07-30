@@ -32,7 +32,8 @@ namespace SwayNotificatonCenter {
             this.body.set_text (param.body ?? "");
 
             noti_button.clicked.connect (() => {
-                if (param.default_action._name.down () == "default") {
+                if (param.default_action._name != null &&
+                    param.default_action._name.down () == "default") {
                     notiDaemon.ActionInvoked (param.applied_id,
                                               param.default_action._identifier);
                 }

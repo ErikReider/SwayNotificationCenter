@@ -67,10 +67,14 @@ namespace SwayNotificatonCenter {
                     var action = Action ();
                     action._identifier = actions[i];
                     action._name = actions[i + 1];
-                    if (action._name.down () == "default") {
-                        default_action = action;
-                    } else {
-                        ac_array += action;
+                    if (action._name != null && action._identifier != null
+                        && action._name != "" && action._identifier != "") {
+
+                        if (action._name.down () == "default") {
+                            default_action = action;
+                        } else {
+                            ac_array += action;
+                        }
                     }
                     i++;
                 }

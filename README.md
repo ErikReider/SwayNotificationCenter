@@ -20,10 +20,7 @@ A simple notification daemon with a gui built for Sway (potentially any wm with 
 ## Install
 
 Arch:
-
-```zsh
-makepkg -si
-```
+The package is available on the [AUR](https://aur.archlinux.org/packages/swaync-git/)
 
 Other:
 

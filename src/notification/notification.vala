@@ -32,7 +32,11 @@ namespace SwayNotificatonCenter {
             this.body.set_text (param.body ?? "");
 
             noti_button.clicked.connect (() => {
-                if (param.actions.length == 0) close_notification ();
+                if (param.default_action._name.down () == "default") {
+                    notiDaemon.ActionInvoked (param.applied_id,
+                                              param.default_action._identifier);
+                }
+                close_notification ();
             });
 
             close_button.clicked.connect (close_notification);

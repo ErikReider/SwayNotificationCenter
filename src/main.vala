@@ -12,14 +12,19 @@ namespace SwayNotificatonCenter {
         bool is_initialized;
     }
 
+    public struct Action {
+        string identifier { get; set; }
+        string name { get; set; }
+    }
+
     public struct NotifyParams {
         public uint32 applied_id { get; set; }
         public string app_name { get; set; }
         public uint32 replaces_id { get; set; }
         public string app_icon { get; set; }
+        public Action default_action { get; set; }
         public string summary { get; set; }
         public string body { get; set; }
-        public string[] actions { get; set; }
         public HashTable<string, Variant> hints { get; set; }
         public int expire_timeout { get; set; }
         public int64 time { get; set; } // Epoch in seconds
@@ -33,7 +38,7 @@ namespace SwayNotificatonCenter {
         public string category { get; set; }
         public bool resident { get; set; }
 
-        // Actions
+        public Action[] actions { get; set; }
 
         public NotifyParams (uint32 applied_id,
                              string app_name,
@@ -50,12 +55,28 @@ namespace SwayNotificatonCenter {
             this.app_icon = app_icon;
             this.summary = summary;
             this.body = body;
-            this.actions = actions;
             this.hints = hints;
             this.expire_timeout = expire_timeout;
             this.time = (int64) (GLib.get_real_time () * 0.000001);
 
             s_hints ();
+
+            Action[] ac_array = {};
+            if (actions.length > 1 && actions.length % 2 == 0) {
+                for (int i = 0; i < actions.length; i++) {
+                    var action = Action ();
+                    action._identifier = actions[i];
+                    action._name = actions[i + 1];
+                    if (action._name.down () == "default") {
+                        default_action = action;
+                    } else {
+                        ac_array += action;
+                    }
+                    print (action._name + "\n");
+                    i++;
+                }
+            }
+            this.actions = ac_array;
         }
 
         private void s_hints () {
@@ -113,30 +134,6 @@ namespace SwayNotificatonCenter {
                         break;
                 }
             }
-        }
-
-        public void printParams () {
-            // print (applied_id.to_string () + "\n");
-            // print (app_name + "\n");
-            // print (replaces_id.to_string () + "\n");
-            // print (app_icon + "\n");
-            // print (summary + "\n");
-            // print (body + "\n");
-            print ("----Actions----\n");
-            foreach (var action in actions) {
-                print (action + "\n");
-            }
-            print ("----END----\n");
-
-            // foreach (var hint in hints.get_values ()) {
-            // hint.print (false);
-            // }
-            print ("----Hints----\n");
-            foreach (var key in hints.get_keys ()) {
-                print (key + "\n");
-            }
-            print ("----END----\n");
-            // print (expire_timeout.to_string () + "\n");
         }
     }
 
@@ -219,7 +216,7 @@ namespace SwayNotificatonCenter {
 
         public signal void NotificationClosed (uint32 id, uint32 reason);
 
-        public signal void ActionInvoked (uint32 id, uint32 reason);
+        public signal void ActionInvoked (uint32 id, string action_key);
     }
 
     public class DBusInit {

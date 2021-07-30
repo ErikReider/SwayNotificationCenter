@@ -22,6 +22,7 @@ A simple notification daemon with a gui built for Sway (potentially any wm with 
 ```zsh
 meson build
 ninja -C build
+meson instakk -C build
 ```
 
 ## Run

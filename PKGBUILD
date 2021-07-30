@@ -1,5 +1,5 @@
 # Maintainer: Erik Reider <erik.reider@protonmail.com>
-pkgname=swaync
+pkgname=swaync-git
 pkgver=0.1
 pkgrel=1
 pkgdesc="A simple notificaion daemon with a GTK panel"

@@ -23,5 +23,26 @@ namespace SwayNotificatonCenter {
             var scaled_pixbuf = pixbuf.scale_simple (64, 64, Gdk.InterpType.BILINEAR);
             img.set_from_pixbuf (scaled_pixbuf);
         }
+
+        public static string get_style_path () {
+            string[] paths = {
+                GLib.Environment.get_user_config_dir () + "/swaync/style.css",
+                "~/.config/swaync/style.css",
+                "/etc/xdg/swaync/style.css",
+                "./src/style.css",
+            };
+            string path = "";
+            foreach (string try_path in paths) {
+                if (File.new_for_path (try_path).query_exists ()) {
+                    path = try_path;
+                    break;
+                }
+            }
+            if (path == "") {
+                stderr.printf ("COULD NOT FIND CSS FILE! REINSTALL THE PACKAGE!\n");
+                Process.exit (1);
+            }
+            return path;
+        }
     }
 }

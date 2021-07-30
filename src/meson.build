@@ -20,6 +20,7 @@ args = [
   '--pkg=GtkLayerShell-0.1',
 ]
 
+sysconfdir = get_option('sysconfdir')
 gnome = import('gnome')
 
 app_sources += gnome.compile_resources('sway_notificaton_center-resources',
@@ -40,3 +41,6 @@ executable('swaync-client',
   dependencies: app_deps,
   install: true,
 )
+
+install_data('style.css', install_dir : '/etc/xdg/swaync')
+

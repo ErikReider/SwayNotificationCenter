@@ -5,6 +5,7 @@ A simple notification daemon with a gui built for Sway (potentially any wm with 
 ## Features
 
 - A panel to view previous notifications
+- Show album art for notifications like Spotify
 - Do not disturb
 - The same features as any other basic notification daemon
 

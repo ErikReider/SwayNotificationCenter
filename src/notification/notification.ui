@@ -24,8 +24,7 @@
                   <object class="GtkImage" id="img">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="margin-left">6</property>
-                    <property name="margin-right">12</property>
+                    <property name="valign">start</property>
                     <property name="margin-start">6</property>
                     <property name="margin-end">12</property>
                     <property name="margin-top">6</property>
@@ -43,6 +42,8 @@
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="margin-end">14</property>
+                    <property name="hexpand">True</property>
+                    <property name="vexpand">True</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkBox">
@@ -94,16 +95,16 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkTextView" id="body">
+                      <object class="GtkLabel" id="body">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="editable">False</property>
-                        <property name="wrap-mode">word</property>
-                        <property name="cursor-visible">False</property>
-                        <property name="accepts-tab">False</property>
-                        <style>
-                          <class name="body"/>
-                        </style>
+                        <property name="hexpand">True</property>
+                        <property name="vexpand">True</property>
+                        <property name="wrap">True</property>
+                        <property name="ellipsize">end</property>
+                        <property name="lines">1</property>
+                        <property name="xalign">0</property>
+                        <property name="yalign">0</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>

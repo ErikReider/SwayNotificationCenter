@@ -72,7 +72,6 @@ namespace SwayNotificatonCenter {
                     } else {
                         ac_array += action;
                     }
-                    print (action._name + "\n");
                     i++;
                 }
             }

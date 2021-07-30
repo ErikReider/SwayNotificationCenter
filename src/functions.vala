@@ -29,8 +29,12 @@ namespace SwayNotificatonCenter {
                 GLib.Environment.get_user_config_dir () + "/swaync/style.css",
                 "~/.config/swaync/style.css",
                 "/etc/xdg/swaync/style.css",
-                "./src/style.css",
             };
+            foreach (var path in GLib.Environment.get_system_config_dirs ()) {
+                paths += path + "/swaync/style.css";
+            }
+            paths += "./src/style.css";
+
             string path = "";
             foreach (string try_path in paths) {
                 if (File.new_for_path (try_path).query_exists ()) {

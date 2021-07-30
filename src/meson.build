@@ -42,5 +42,5 @@ executable('swaync-client',
   install: true,
 )
 
-install_data('style.css', install_dir : '/etc/xdg/swaync')
+install_data('style.css', install_dir : sysconfdir + '/xdg/swaync')
 

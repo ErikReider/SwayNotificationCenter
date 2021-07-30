@@ -1,7 +1,0 @@
-data/org.erikreider.sway-notification-center.desktop.in
-data/org.erikreider.sway-notification-center.appdata.xml.in
-data/org.erikreider.sway-notification-center.gschema.xml
-src/window.ui
-src/main.vala
-src/window.vala
-

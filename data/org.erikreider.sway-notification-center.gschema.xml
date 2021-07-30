@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<schemalist gettext-domain="sway-notificaton-center">
-	<schema id="org.erikreider.sway-notification-center" path="/org/erikreider/sway-notification-center/">
-	</schema>
-</schemalist>

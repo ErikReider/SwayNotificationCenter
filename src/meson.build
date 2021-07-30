@@ -1,4 +1,4 @@
-sway_notificaton_center_sources = [
+app_sources = [
   'main.vala',
   'notiWindow/notiWindow.vala',
   'notification/notification.vala',
@@ -7,12 +7,12 @@ sway_notificaton_center_sources = [
   'functions.vala',
 ]
 
-sway_notificaton_center_deps = [
+app_deps = [
   dependency('gio-2.0', version: '>= 2.50'),
   dependency('gtk+-3.0', version: '>= 3.22'),
   dependency('libhandy-1', version: '>= 1.0.0'),
   meson.get_compiler('c').find_library('gtk-layer-shell'),
-  meson.get_compiler('c').find_library('m', required : false),
+  meson.get_compiler('c').find_library('m', required : true),
 ]
 
 args = [
@@ -22,21 +22,21 @@ args = [
 
 gnome = import('gnome')
 
-sway_notificaton_center_sources += gnome.compile_resources('sway_notificaton_center-resources',
+app_sources += gnome.compile_resources('sway_notificaton_center-resources',
   'sway_notificaton_center.gresource.xml',
   c_name: 'sway_notificaton_center'
 )
 
 executable('sway-nc',
-  sway_notificaton_center_sources,
+  app_sources,
   vala_args: args,
-  dependencies: sway_notificaton_center_deps,
+  dependencies: app_deps,
   install: true,
 )
 
 executable('sway-nc-client',
   ['client.vala', 'constants.vala'],
   vala_args: args,
-  dependencies: sway_notificaton_center_deps,
+  dependencies: app_deps,
   install: true,
 )

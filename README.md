@@ -19,6 +19,14 @@ A simple notification daemon with a gui built for Sway (potentially any wm with 
 
 ## Install
 
+Arch:
+
+```zsh
+makepkg -si
+```
+
+Other:
+
 ```zsh
 meson build
 ninja -C build

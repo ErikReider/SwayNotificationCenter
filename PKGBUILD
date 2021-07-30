@@ -1,3 +1,4 @@
+# Maintainer: Erik Reider <erik.reider@protonmail.com>
 pkgname=swaync
 pkgver=0.1
 pkgrel=1

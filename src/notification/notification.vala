@@ -94,9 +94,9 @@ namespace SwayNotificatonCenter {
             img.set_pixel_size (48);
             if (param.image_data.is_initialized) {
                 Functions.set_image_data (param.image_data, img);
-            } else if (param.image_path != null) {
+            } else if (param.image_path != null && param.image_path != "") {
                 Functions.set_image_path (param.image_path, img);
-            } else if (param.app_icon != null) {
+            } else if (param.app_icon != null && param.app_icon != "") {
                 Functions.set_image_path (param.app_icon, img);
             } else if (param.icon_data.is_initialized) {
                 Functions.set_image_data (param.icon_data, img);

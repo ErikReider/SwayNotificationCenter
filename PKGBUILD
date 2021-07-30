@@ -12,6 +12,11 @@ makedepends=(vala meson git)
 source=("git+https://github.com/ErikReider/$pkgfoldername")
 sha256sums=('SKIP')
 
+pkgver() {
+  cd $pkgfoldername
+  printf "0.1.r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
 build() {
   arch-meson $pkgfoldername build
   ninja -C build

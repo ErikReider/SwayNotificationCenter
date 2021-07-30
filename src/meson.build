@@ -27,14 +27,14 @@ app_sources += gnome.compile_resources('sway_notificaton_center-resources',
   c_name: 'sway_notificaton_center'
 )
 
-executable('sway-nc',
+executable('swaync',
   app_sources,
   vala_args: args,
   dependencies: app_deps,
   install: true,
 )
 
-executable('sway-nc-client',
+executable('swaync-client',
   ['client.vala', 'constants.vala'],
   vala_args: args,
   dependencies: app_deps,

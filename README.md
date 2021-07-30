@@ -29,13 +29,13 @@ ninja -C build
 To start the daemon (remember to kill any other notification daemon before running)
 
 ```zsh
-./build/src/sway-nc
+./build/src/swaync
 ```
 
 To toggle the panel
 
 ```zsh
-./build/src/sway-nc-client
+./build/src/swaync-client
 ```
 
 ## Screenshots

@@ -7,6 +7,11 @@ namespace SwayNotificatonCenter {
         [GtkChild]
         unowned Gtk.Button close_button;
 
+        private Gtk.ButtonBox button_box;
+
+        [GtkChild]
+        unowned Gtk.Box base_box;
+
         [GtkChild]
         unowned Gtk.Label summary;
         [GtkChild]
@@ -31,25 +36,40 @@ namespace SwayNotificatonCenter {
             this.summary.set_text (param.summary ?? param.app_name);
             this.body.set_text (param.body ?? "");
 
-            noti_button.clicked.connect (() => {
-                if (param.default_action._identifier != null &&
-                    param.default_action._identifier.down () == "default") {
-
-                    notiDaemon.ActionInvoked (param.applied_id,
-                                              param.default_action._identifier);
-                }
-                if (!param.resident) {
-                    close_notification ();
-                }
-            });
+            noti_button.clicked.connect (() => action_clicked (param.default_action));
 
             close_button.clicked.connect (close_notification);
 
             set_icon ();
+            set_actions ();
 
             if (show) {
                 this.body.set_lines (10);
                 this.show ();
+            }
+        }
+
+        private void action_clicked (Action action, bool is_default = false) {
+            if (action._identifier != null && action._identifier != "") {
+                notiDaemon.ActionInvoked (param.applied_id, action._identifier);
+            }
+            if (!param.resident) {
+                close_notification ();
+            }
+        }
+
+        private void set_actions () {
+            if (param.actions.length > 0) {
+                button_box = new Gtk.ButtonBox (Gtk.Orientation.HORIZONTAL);
+                button_box.set_layout (Gtk.ButtonBoxStyle.EXPAND);
+                foreach (var action in param.actions) {
+                    var actionButton = new Gtk.Button.with_label (action._name);
+                    actionButton.clicked.connect (() => action_clicked (action));
+                    actionButton.get_style_context ().add_class ("notification-action");
+                    button_box.add (actionButton);
+                }
+                button_box.show_all ();
+                base_box.add (button_box);
             }
         }
 

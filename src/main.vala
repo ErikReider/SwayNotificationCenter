@@ -70,7 +70,7 @@ namespace SwayNotificatonCenter {
                     if (action._name != null && action._identifier != null
                         && action._name != "" && action._identifier != "") {
 
-                        if (action._name.down () == "default") {
+                        if (action._identifier.down () == "default") {
                             default_action = action;
                         } else {
                             ac_array += action;

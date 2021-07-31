@@ -193,8 +193,15 @@ namespace SwayNotificatonCenter {
         }
 
         public bool toggle_dnd () throws DBusError, IOError {
-            return (dnd = !dnd);
+            on_dnd_toggle (dnd = !dnd);
+            return dnd;
         }
+
+        public bool get_dnd () throws DBusError, IOError {
+            return dnd;
+        }
+
+        public signal void on_dnd_toggle (bool dnd);
 
         public void click_close_notification (uint32 id) throws DBusError, IOError {
             CloseNotification (id);

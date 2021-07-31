@@ -7,9 +7,17 @@ namespace SwayNotificatonCenter {
         public CcDaemon (DBusInit dbusInit) {
             this.dbusInit = dbusInit;
             cc = new ControlCenterWidget ();
+
+            dbusInit.notiDaemon.on_dnd_toggle.connect ((dnd) => {
+                try {
+                    subscribe (notification_count (), dnd);
+                } catch (Error e) {
+                    stderr.printf (e.message + "\n");
+                }
+            });
         }
 
-        public signal void on_notificaion (uint count);
+        public signal void subscribe (uint count, bool dnd);
 
         public bool get_visibility () throws DBusError, IOError {
             return cc.visible;
@@ -35,12 +43,12 @@ namespace SwayNotificatonCenter {
 
         public void add_notification (NotifyParams param) throws DBusError, IOError {
             cc.add_notification (param, dbusInit.notiDaemon);
-            on_notificaion (notification_count ());
+            subscribe (notification_count (), dbusInit.notiDaemon.get_dnd ());
         }
 
         public void close_notification (uint32 id) throws DBusError, IOError {
             cc.close_notification (id);
-            on_notificaion (notification_count ());
+            subscribe (notification_count (), dbusInit.notiDaemon.get_dnd ());
         }
     }
 

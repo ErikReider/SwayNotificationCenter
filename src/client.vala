@@ -32,7 +32,6 @@ private void on_subscribe (uint count, bool dnd) {
 }
 
 public int command_line (string[] args) {
-    if (cc_daemon == null) return 1;
     try {
         if (args.length < 2) {
             print_help (args);
@@ -74,15 +73,36 @@ public int command_line (string[] args) {
     return 0;
 }
 
-public int main (string[] args) {
+void print_connection_error () {
+    stderr.printf ("Could not connect to CC service. Will wait for connection...\n");
+}
+
+int try_connect (string[] args) {
     try {
         cc_daemon = Bus.get_proxy_sync (
             BusType.SESSION,
             "org.erikreider.swaync.cc",
             "/org/erikreider/swaync/cc");
-        return command_line (args);
+        if (command_line (args) == 1) {
+            print_connection_error ();
+            return 1;
+        }
+        return 0;
     } catch (Error e) {
-        stderr.printf ("Could not connect to CC service\n");
+        print_connection_error ();
         return 1;
     }
+}
+
+public int main (string[] args) {
+    if (try_connect (args) == 1) {
+        MainLoop loop = new MainLoop ();
+        Bus.watch_name (BusType.SESSION,
+                        "org.erikreider.swaync.cc",
+                        GLib.BusNameWatcherFlags.NONE,
+                        (conn, name, name_owner) => { if (try_connect (args) == 0) loop.quit (); },
+                        null);
+        loop.run ();
+    }
+    return 0;
 }

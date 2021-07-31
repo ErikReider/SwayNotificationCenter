@@ -27,11 +27,10 @@ namespace SwayNotificatonCenter {
         public static string get_style_path () {
             string[] paths = {
                 GLib.Environment.get_user_config_dir () + "/swaync/style.css",
-                "~/.config/swaync/style.css",
-                "/etc/xdg/swaync/style.css",
             };
             foreach (var path in GLib.Environment.get_system_config_dirs ()) {
-                paths += path + "/swaync/style.css";
+                paths += Path.build_path (Path.DIR_SEPARATOR.to_string (),
+                                          path, "swaync/style.css");
             }
             paths += "./src/style.css";
 

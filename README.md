@@ -54,3 +54,5 @@ To customize the appearance of the widgets, you'll need to create a `style.css` 
 ![Screenshot of desktop notification](./assets/desktop.png)
 
 ![Screenshot of panel](./assets/panel.png)
+
+I wonder how this would look with some blur 🤔

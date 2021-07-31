@@ -14,9 +14,8 @@ A simple notification daemon with a gui built for Sway (potentially any wm with 
 
 ## Planned Features
 
-- PLKGBUILD file for arch (and any others if requested 😃)
-
 - Slick animations 😎
+- Other build scripts than a PKGBUILD (debian and/or RHEL systems)
 
 ## Install
 

@@ -3,9 +3,11 @@ interface CcDaemon : GLib.Object {
 
     public abstract uint notification_count () throws DBusError, IOError;
 
+    public abstract bool get_dnd () throws DBusError, IOError;
+
     public abstract void toggle () throws DBusError, IOError;
 
-    public abstract uint toggle_dnd () throws DBusError, IOError;
+    public abstract bool toggle_dnd () throws DBusError, IOError;
 
     public signal void subscribe (uint count, bool dnd);
 }
@@ -56,6 +58,8 @@ public int command_line (string[] args) {
             case "--subscribe":
             case "-s":
                 cc_daemon.subscribe.connect ((c, d) => on_subscribe (c, d));
+                on_subscribe (cc_daemon.notification_count (),
+                              cc_daemon.get_dnd ());
                 var loop = new MainLoop ();
                 loop.run ();
                 break;

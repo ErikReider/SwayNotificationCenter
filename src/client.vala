@@ -21,6 +21,7 @@ private void print_help (string[] args) {
     print (@"\t -h, --help \t\t Show help options\n");
     print (@"Options:\n");
     print (@"\t -t, --toggle-panel \t\t Toggle the notificaion panel\n");
+    print (@"\t -sw, --skip-wait \t\t Doesn't wait when swaync hasn't been started\n");
     print (@"\t -c, --count \t\t Print the current notificaion count\n");
     print (@"\t -d, --toggle-dnd \t\t Toggle and print the current dnd state\n");
     print (@"\t -s, --subscribe \t Subscribe to notificaion add and close events\n");
@@ -32,6 +33,8 @@ private void on_subscribe (uint count, bool dnd) {
 }
 
 public int command_line (string[] args) {
+    bool skip_wait = "--skip-wait" in args || "-sw" in args;
+
     try {
         if (args.length < 2) {
             print_help (args);
@@ -68,6 +71,7 @@ public int command_line (string[] args) {
         }
     } catch (Error e) {
         stderr.printf (e.message + "\n");
+        if (skip_wait) Process.exit (1);
         return 1;
     }
     return 0;

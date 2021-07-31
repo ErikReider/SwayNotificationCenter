@@ -271,7 +271,6 @@ namespace SwayNotificatonCenter {
 
     public void main (string[] args) {
         Gtk.init (ref args);
-        Hdy.init ();
 
         try {
             Gtk.CssProvider css_provider = new Gtk.CssProvider ();

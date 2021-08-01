@@ -15,6 +15,12 @@ namespace SwayNotificatonCenter {
                     stderr.printf (e.message + "\n");
                 }
             });
+            // Update on start
+            try {
+                subscribe (notification_count (), get_dnd ());
+            } catch (Error e) {
+                stderr.printf (e.message + "\n");
+            }
         }
 
         public signal void subscribe (uint count, bool dnd);

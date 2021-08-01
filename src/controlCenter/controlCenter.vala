@@ -31,7 +31,7 @@ namespace SwayNotificatonCenter {
             return cc.notification_count ();
         }
 
-        public void toggle () throws DBusError, IOError {
+        public void toggle_visibility () throws DBusError, IOError {
             if (cc.toggle_visibility ()) {
                 dbusInit.notiDaemon.set_noti_window_visibility (false);
             }

@@ -5,7 +5,7 @@ interface CcDaemon : GLib.Object {
 
     public abstract bool get_dnd () throws DBusError, IOError;
 
-    public abstract void toggle () throws DBusError, IOError;
+    public abstract void toggle_visibility () throws DBusError, IOError;
 
     public abstract bool toggle_dnd () throws DBusError, IOError;
 
@@ -51,7 +51,7 @@ public int command_line (string[] args) {
                 break;
             case "--toggle-panel":
             case "-t":
-                cc_daemon.toggle ();
+                cc_daemon.toggle_visibility ();
                 break;
             case "--toggle-dnd":
             case "-d":

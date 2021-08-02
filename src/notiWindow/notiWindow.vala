@@ -41,7 +41,8 @@ namespace SwayNotificatonCenter {
 
         public void close_notification (uint32 id) {
             foreach (var w in box.get_children ()) {
-                if (((Notification) w).param.applied_id == id) {
+                var noti = (Notification) w;
+                if (noti != null && noti.param.applied_id == id) {
                     removeWidget (w);
                     break;
                 }

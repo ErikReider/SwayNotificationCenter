@@ -1,8 +1,8 @@
 namespace SwayNotificatonCenter {
     [GtkTemplate (ui = "/org/erikreider/sway-notification-center/notification/notification.ui")]
-    private class Notification : Gtk.Box {
+    private class Notification : Gtk.ListBoxRow {
         [GtkChild]
-        unowned Gtk.Button noti_button;
+        unowned Gtk.Button default_button;
 
         [GtkChild]
         unowned Gtk.Button close_button;
@@ -36,7 +36,7 @@ namespace SwayNotificatonCenter {
             this.summary.set_text (param.summary ?? param.app_name);
             this.body.set_text (param.body ?? "");
 
-            noti_button.clicked.connect (() => action_clicked (param.default_action));
+            default_button.clicked.connect (click_default_action);
 
             close_button.clicked.connect (close_notification);
 
@@ -49,13 +49,20 @@ namespace SwayNotificatonCenter {
             }
         }
 
+        public void click_default_action () {
+            action_clicked (param.default_action, true);
+        }
+
+        public void click_alt_action (uint index) {
+            if (param.actions.length == 0 || index >= param.actions.length) return;
+            action_clicked (param.actions[index]);
+        }
+
         private void action_clicked (Action action, bool is_default = false) {
             if (action._identifier != null && action._identifier != "") {
                 notiDaemon.ActionInvoked (param.applied_id, action._identifier);
             }
-            if (!param.resident) {
-                close_notification ();
-            }
+            if (!param.resident) close_notification ();
         }
 
         private void set_actions () {
@@ -66,6 +73,7 @@ namespace SwayNotificatonCenter {
                     var actionButton = new Gtk.Button.with_label (action._name);
                     actionButton.clicked.connect (() => action_clicked (action));
                     actionButton.get_style_context ().add_class ("notification-action");
+                    actionButton.can_focus = false;
                     button_box.add (actionButton);
                 }
                 button_box.show_all ();

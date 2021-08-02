@@ -1,3 +1,18 @@
+/*
+ * vim: ft=less 
+ */
+
+@define-color bg rgb(58, 58, 58);
+@define-color bg-hover rgb(68, 68, 68);
+@define-color bg-focus rgb(0, 128, 255);
+
+.notification-row {
+  outline: none;
+}
+.notification-row:focus {
+  background: @bg-focus;
+}
+
 .notification {
   border-radius: 10px;
   margin: 6px 12px;
@@ -28,12 +43,13 @@
 
 .notification-default-action,
 .notification-action {
-  background: rgb(58, 58, 58);
+  box-shadow: none;
+  background: @bg;
 }
 
 .notification-default-action:hover,
 .notification-action:hover {
-  background: rgb(68, 68, 68);
+  background: @bg-hover;
 }
 
 .notification-default-action {
@@ -75,6 +91,10 @@
 
 .control-center {
   background: rgba(0, 0, 0, 0.7);
+}
+
+.control-center-list {
+  background: transparent;
 }
 
 .floating-notifications {

@@ -18,7 +18,7 @@
     <child>
       <object class="GtkScrolledWindow">
         <property name="visible">True</property>
-        <property name="can-focus">True</property>
+        <property name="can-focus">False</property>
         <property name="hscrollbar-policy">never</property>
         <child>
           <object class="GtkViewport">
@@ -26,12 +26,15 @@
             <property name="can-focus">False</property>
             <property name="shadow-type">none</property>
             <child>
-              <object class="GtkBox">
+              <object class="GtkListBox" id="list_box">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="orientation">vertical</property>
-                <child type="center">
-                  <object class="GtkLabel" id="empty_label">
+                <property name="can-focus">True</property>
+                <property name="has-focus">True</property>
+                <property name="is-focus">True</property>
+                <property name="selection-mode">none</property>
+                <property name="activate-on-single-click">False</property>
+                <child type="placeholder">
+                  <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">No Notifications</property>
@@ -39,28 +42,10 @@
                       <attribute name="size" value="16384"/>
                     </attributes>
                   </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
                 </child>
-                <child>
-                  <object class="GtkBox" id="box">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="valign">start</property>
-                    <property name="orientation">vertical</property>
-                    <child>
-                      <placeholder/>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
+                <style>
+                  <class name="control-center-list"/>
+                </style>
               </object>
             </child>
           </object>

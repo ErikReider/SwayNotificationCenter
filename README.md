@@ -4,6 +4,7 @@ A simple notification daemon with a gui built for Sway (potentially any wm with 
 
 ## Features
 
+- Keyboard shortcuts
 - A panel to view previous notifications
 - Show album art for notifications like Spotify
 - Do not disturb
@@ -43,6 +44,14 @@ To toggle the panel
 ```zsh
 ./build/src/swaync-client -t
 ```
+
+## Notification Panel Shortcuts
+
+- Up/Down: Navigate notifications
+- Escape/Caps_Lock: Close notification panel
+- Return: Execute default action or close notification if none
+- Delete/BackSpace: Close notification
+- Buttons 1-9: Execute alternative actions
 
 ## Configuring
 

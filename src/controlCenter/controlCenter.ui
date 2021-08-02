@@ -16,39 +16,50 @@
     <property name="gravity">north-east</property>
     <property name="show-menubar">False</property>
     <child>
-      <object class="GtkScrolledWindow">
+      <object class="GtkBox" id="box">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
-        <property name="hscrollbar-policy">never</property>
+        <property name="orientation">vertical</property>
         <child>
-          <object class="GtkViewport">
+          <object class="GtkScrolledWindow">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="shadow-type">none</property>
+            <property name="can-focus">True</property>
+            <property name="hscrollbar-policy">never</property>
             <child>
-              <object class="GtkListBox" id="list_box">
+              <object class="GtkViewport">
                 <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="has-focus">True</property>
-                <property name="is-focus">True</property>
-                <property name="selection-mode">none</property>
-                <property name="activate-on-single-click">False</property>
-                <child type="placeholder">
-                  <object class="GtkLabel">
+                <property name="can-focus">False</property>
+                <property name="shadow-type">none</property>
+                <child>
+                  <object class="GtkListBox" id="list_box">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="label" translatable="yes">No Notifications</property>
-                    <attributes>
-                      <attribute name="size" value="16384"/>
-                    </attributes>
+                    <property name="selection-mode">none</property>
+                    <property name="activate-on-single-click">False</property>
+                    <child type="placeholder">
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">No Notifications</property>
+                        <attributes>
+                          <attribute name="size" value="16384"/>
+                        </attributes>
+                      </object>
+                    </child>
+                    <style>
+                      <class name="control-center-list"/>
+                    </style>
                   </object>
                 </child>
-                <style>
-                  <class name="control-center-list"/>
-                </style>
               </object>
             </child>
           </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="pack-type">end</property>
+            <property name="position">2</property>
+          </packing>
         </child>
       </object>
     </child>

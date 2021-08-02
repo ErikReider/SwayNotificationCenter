@@ -3,6 +3,7 @@ app_sources = [
   'notiWindow/notiWindow.vala',
   'notification/notification.vala',
   'controlCenter/controlCenter.vala',
+  'controlCenter/topAction/topAction.vala',
   'constants.vala',
   'functions.vala',
 ]

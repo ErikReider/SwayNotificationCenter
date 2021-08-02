@@ -68,6 +68,8 @@ namespace SwayNotificatonCenter {
 
         [GtkChild]
         unowned Gtk.ListBox list_box;
+        [GtkChild]
+        unowned Gtk.Box box;
 
         private uint list_position = 0;
 
@@ -134,6 +136,11 @@ namespace SwayNotificatonCenter {
                 }
                 return 0;
             });
+
+            var clear_all_button = new Gtk.Button.with_label ("Clear All");
+            clear_all_button.get_style_context ().add_class ("control-center-clear-all");
+            clear_all_button.clicked.connect (close_all_notifications);
+            this.box.pack_start(new TopAction ("Notifications", clear_all_button, true), false);
         }
 
         public uint notification_count () {

@@ -4,5 +4,6 @@
     <file>notiWindow/notiWindow.ui</file>
     <file>notification/notification.ui</file>
     <file>controlCenter/controlCenter.ui</file>
+    <file>controlCenter/topAction/topAction.ui</file>
   </gresource>
 </gresources>

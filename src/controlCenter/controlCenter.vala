@@ -6,7 +6,7 @@ namespace SwayNotificatonCenter {
 
         public CcDaemon (DBusInit dbusInit) {
             this.dbusInit = dbusInit;
-            cc = new ControlCenterWidget ();
+            cc = new ControlCenterWidget (this);
 
             dbusInit.notiDaemon.on_dnd_toggle.connect ((dnd) => {
                 try {
@@ -54,12 +54,10 @@ namespace SwayNotificatonCenter {
 
         public void add_notification (NotifyParams param) throws DBusError, IOError {
             cc.add_notification (param, dbusInit.notiDaemon);
-            subscribe (notification_count (), dbusInit.notiDaemon.get_dnd ());
         }
 
         public void close_notification (uint32 id) throws DBusError, IOError {
             cc.close_notification (id);
-            subscribe (notification_count (), dbusInit.notiDaemon.get_dnd ());
         }
     }
 
@@ -71,9 +69,11 @@ namespace SwayNotificatonCenter {
         [GtkChild]
         unowned Gtk.Box box;
 
+        private CcDaemon cc_daemon;
         private uint list_position = 0;
 
-        public ControlCenterWidget () {
+        public ControlCenterWidget (CcDaemon cc_daemon) {
+            this.cc_daemon = cc_daemon;
             GtkLayerShell.init_for_window (this);
             GtkLayerShell.set_layer (this, GtkLayerShell.Layer.TOP);
             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
@@ -98,7 +98,7 @@ namespace SwayNotificatonCenter {
                             if (list_box.get_children ().last ().data == noti) {
                                 if (list_position > 0) --list_position;
                             }
-                            list_box.remove (noti);
+                            close_notification (noti.param.applied_id);
                         }
                     } else if (event_key.keyval == Gdk.keyval_from_name ("C")) {
                         close_all_notifications ();
@@ -151,6 +151,12 @@ namespace SwayNotificatonCenter {
             foreach (var w in list_box.get_children ()) {
                 list_box.remove (w);
             }
+
+            try {
+                cc_daemon.subscribe (notification_count (), cc_daemon.get_dnd ());
+            } catch (Error e) {
+                stderr.printf (e.message + "\n");
+            }
         }
 
         private void navigate_list (uint i) {
@@ -183,6 +189,11 @@ namespace SwayNotificatonCenter {
                     break;
                 }
             }
+            try {
+                cc_daemon.subscribe (notification_count (), cc_daemon.get_dnd ());
+            } catch (Error e) {
+                stderr.printf (e.message + "\n");
+            }
         }
 
         public void add_notification (NotifyParams param, NotiDaemon notiDaemon) {
@@ -195,6 +206,11 @@ namespace SwayNotificatonCenter {
             });
             noti.set_time ();
             list_box.add (noti);
+            try {
+                cc_daemon.subscribe (notification_count (), cc_daemon.get_dnd ());
+            } catch (Error e) {
+                stderr.printf (e.message + "\n");
+            }
         }
     }
 }

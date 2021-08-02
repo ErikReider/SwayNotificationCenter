@@ -51,6 +51,7 @@ To toggle the panel
 - Escape/Caps_Lock: Close notification panel
 - Return: Execute default action or close notification if none
 - Delete/BackSpace: Close notification
+- C: Close all notifications
 - Buttons 1-9: Execute alternative actions
 
 ## Configuring

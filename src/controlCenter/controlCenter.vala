@@ -31,7 +31,7 @@ namespace SwayNotificatonCenter {
 
         public void close_all_notifications () throws DBusError, IOError {
             cc.close_all_notifications ();
-            dbusInit.notiDaemon.close_all_notifications();
+            dbusInit.notiDaemon.close_all_notifications ();
         }
 
         public uint notification_count () throws DBusError, IOError {
@@ -98,6 +98,8 @@ namespace SwayNotificatonCenter {
                             }
                             list_box.remove (noti);
                         }
+                    } else if (event_key.keyval == Gdk.keyval_from_name ("C")) {
+                        close_all_notifications ();
                     } else if (event_key.keyval == Gdk.keyval_from_name ("Down")) {
                         if (list_position + 1 < list_box.get_children ().length ()) {
                             ++list_position;

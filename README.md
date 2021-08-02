@@ -48,6 +48,8 @@ To toggle the panel
 ## Notification Panel Shortcuts
 
 - Up/Down: Navigate notifications
+- Home: Navigate to the latest notification
+- End: Navigate to the oldest notification
 - Escape/Caps_Lock: Close notification panel
 - Return: Execute default action or close notification if none
 - Delete/BackSpace: Close notification

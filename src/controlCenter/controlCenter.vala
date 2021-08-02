@@ -31,6 +31,7 @@ namespace SwayNotificatonCenter {
 
         public void close_all_notifications () throws DBusError, IOError {
             cc.close_all_notifications ();
+            dbusInit.notiDaemon.close_all_notifications();
         }
 
         public uint notification_count () throws DBusError, IOError {

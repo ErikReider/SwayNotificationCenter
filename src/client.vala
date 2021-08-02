@@ -1,6 +1,8 @@
 [DBus (name = "org.erikreider.swaync.cc")]
 interface CcDaemon : GLib.Object {
 
+    public abstract void close_all_notifications () throws DBusError, IOError;
+
     public abstract uint notification_count () throws DBusError, IOError;
 
     public abstract bool get_dnd () throws DBusError, IOError;
@@ -21,9 +23,10 @@ private void print_help (string[] args) {
     print (@"\t -h, --help \t\t Show help options\n");
     print (@"Options:\n");
     print (@"\t -t, --toggle-panel \t\t Toggle the notificaion panel\n");
-    print (@"\t -sw, --skip-wait \t\t Doesn't wait when swaync hasn't been started\n");
-    print (@"\t -c, --count \t\t Print the current notificaion count\n");
     print (@"\t -d, --toggle-dnd \t\t Toggle and print the current dnd state\n");
+    print (@"\t -c, --count \t\t Print the current notificaion count\n");
+    print (@"\t -C, --close-all \t\t Closes all notifications\n");
+    print (@"\t -sw, --skip-wait \t\t Doesn't wait when swaync hasn't been started\n");
     print (@"\t -s, --subscribe \t Subscribe to notificaion add and close events\n");
 }
 
@@ -48,6 +51,10 @@ public int command_line (string[] args) {
             case "--count":
             case "-c":
                 print (cc_daemon.notification_count ().to_string ());
+                break;
+            case "--close-all":
+            case "-C":
+                cc_daemon.close_all_notifications ();
                 break;
             case "--toggle-panel":
             case "-t":

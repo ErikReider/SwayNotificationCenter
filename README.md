@@ -55,8 +55,11 @@ To toggle the panel
 
 ## Configuring
 
-To customize the appearance of the widgets, you'll need to create a `style.css` file in `~/.config/swaync/style.css`.
-<br>At the time of writing, creating the file will override the default theme which is located for most systems at `/etc/xdg/swaync/style.css`
+To customize the appearance of the widgets, you'll need to create a `style.css`
+file in `~/.config/swaync/style.css`.
+<br>
+At the time of writing, creating the file will override the default theme which
+is located for most systems at `/etc/xdg/swaync/style.css`
 
 ## Screenshots
 

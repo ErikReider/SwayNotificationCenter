@@ -168,7 +168,11 @@ namespace SwayNotificatonCenter {
                               HashTable<string, Variant> hints,
                               int expire_timeout)
         throws DBusError, IOError {
-            uint32 id = replaces_id == 0 ? ++noti_id : replaces_id;
+            uint32 id = replaces_id;
+            if (replaces_id == 0 || replaces_id > noti_id) {
+                noti_id++;
+                id = noti_id;
+            }
 
             var param = NotifyParams (
                 id,

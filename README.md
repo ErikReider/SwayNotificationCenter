@@ -54,6 +54,7 @@ To toggle the panel
 - Return: Execute default action or close notification if none
 - Delete/BackSpace: Close notification
 - C: Close all notifications
+- D: Toggle Do Not Disturb
 - Buttons 1-9: Execute alternative actions
 
 ## Configuring

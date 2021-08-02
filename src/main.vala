@@ -201,6 +201,11 @@ namespace SwayNotificatonCenter {
             return dnd;
         }
 
+        public void set_dnd (bool state) throws DBusError, IOError {
+            on_dnd_toggle (state);
+            dnd = state;
+        }
+
         public bool get_dnd () throws DBusError, IOError {
             return dnd;
         }

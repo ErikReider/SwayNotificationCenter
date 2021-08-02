@@ -10,11 +10,13 @@ namespace SwayNotificatonCenter {
 
             dbusInit.notiDaemon.on_dnd_toggle.connect ((dnd) => {
                 try {
+                    cc.set_switch_dnd_state (dnd);
                     subscribe (notification_count (), dnd);
                 } catch (Error e) {
                     stderr.printf (e.message + "\n");
                 }
             });
+
             // Update on start
             try {
                 subscribe (notification_count (), get_dnd ());
@@ -48,6 +50,10 @@ namespace SwayNotificatonCenter {
             return dbusInit.notiDaemon.toggle_dnd ();
         }
 
+        public void set_dnd (bool state) throws DBusError, IOError {
+            dbusInit.notiDaemon.set_dnd (state);
+        }
+
         public bool get_dnd () throws DBusError, IOError {
             return dbusInit.notiDaemon.get_dnd ();
         }
@@ -69,7 +75,11 @@ namespace SwayNotificatonCenter {
         [GtkChild]
         unowned Gtk.Box box;
 
+        private Gtk.Switch dnd_button;
+        private Gtk.Button clear_all_button;
+
         private CcDaemon cc_daemon;
+
         private uint list_position = 0;
 
         public ControlCenterWidget (CcDaemon cc_daemon) {
@@ -102,6 +112,8 @@ namespace SwayNotificatonCenter {
                         }
                     } else if (event_key.keyval == Gdk.keyval_from_name ("C")) {
                         close_all_notifications ();
+                    } else if (event_key.keyval == Gdk.keyval_from_name ("D")) {
+                        set_switch_dnd_state (!this.dnd_button.get_state ());
                     } else if (event_key.keyval == Gdk.keyval_from_name ("Down")) {
                         if (list_position + 1 < list_box.get_children ().length ()) {
                             ++list_position;
@@ -137,10 +149,22 @@ namespace SwayNotificatonCenter {
                 return 0;
             });
 
-            var clear_all_button = new Gtk.Button.with_label ("Clear All");
+            clear_all_button = new Gtk.Button.with_label ("Clear All");
             clear_all_button.get_style_context ().add_class ("control-center-clear-all");
             clear_all_button.clicked.connect (close_all_notifications);
-            this.box.pack_start(new TopAction ("Notifications", clear_all_button, true), false);
+            this.box.pack_start (new TopAction ("Notifications", clear_all_button, true), false);
+
+            dnd_button = new Gtk.Switch ();
+            dnd_button.get_style_context ().add_class ("control-center-dnd");
+            dnd_button.state_set.connect ((widget, state) => {
+                try {
+                    cc_daemon.set_dnd (state);
+                } catch (Error e) {
+                    stderr.printf (e.message + "\n");
+                }
+                return false;
+            });
+            this.box.pack_start (new TopAction ("Do Not Disturb", dnd_button, false), false);
         }
 
         public uint notification_count () {
@@ -165,6 +189,10 @@ namespace SwayNotificatonCenter {
                 list_box.set_focus_child (widget);
                 widget.grab_focus ();
             }
+        }
+
+        public void set_switch_dnd_state (bool state) {
+            if (this.dnd_button.state != state) this.dnd_button.state = state;
         }
 
         public bool toggle_visibility () {

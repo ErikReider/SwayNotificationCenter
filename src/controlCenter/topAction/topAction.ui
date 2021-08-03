@@ -18,6 +18,9 @@
         <attributes>
           <attribute name="size" value="14000"/>
         </attributes>
+        <style>
+          <class name="top-action-title"/>
+        </style>
       </object>
       <packing>
         <property name="expand">True</property>

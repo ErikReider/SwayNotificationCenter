@@ -2,9 +2,11 @@
  * vim: ft=less 
  */
 
+@define-color border-color rgb(7, 7, 7);
 @define-color bg rgb(58, 58, 58);
 @define-color bg-hover rgb(68, 68, 68);
-@define-color bg-focus rgb(0, 128, 255);
+@define-color bg-focus rgba(68, 68, 68, 0.6);
+@define-color bg-selected rgb(0, 128, 255);
 
 .notification-row {
   outline: none;
@@ -29,6 +31,7 @@
 .close-button {
   background: black;
   color: white;
+  text-shadow: none;
   box-shadow: 0px 2px 4px 2px rgba(0, 0, 0, 0.3);
   margin: 0 4px;
   padding: 0px;
@@ -43,8 +46,10 @@
 
 .notification-default-action,
 .notification-action {
+  padding: 4px;
   box-shadow: none;
   background: @bg;
+  border: 1px solid @border-color;
 }
 
 .notification-default-action:hover,
@@ -78,25 +83,55 @@
 
 .summary {
   color: white;
+  text-shadow: none;
 }
 
 .time {
   color: white;
+  text-shadow: none;
 }
 
 .body {
   background: transparent;
   color: white;
+  text-shadow: none;
 }
 
 .control-center {
   background: rgba(0, 0, 0, 0.7);
 }
 
+.top-action-title {
+  color: white;
+  text-shadow: none;
+}
+
 .control-center-clear-all {
+  color: white;
+  text-shadow: none;
+  background: @bg;
+  border: 1px solid @border-color;
+  box-shadow: none;
+  border-radius: 10px;
+}
+
+.control-center-clear-all:hover {
+  background: @bg-hover;
 }
 
 .control-center-dnd {
+  border-radius: 10px;
+  background: @bg;
+  border: 1px solid @border-color;
+  box-shadow: none;
+}
+
+.control-center-dnd:checked {
+  background: @bg-selected;
+}
+
+.control-center-dnd slider {
+  background: @bg-hover;
 }
 
 .control-center-list {

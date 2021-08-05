@@ -33,7 +33,9 @@ namespace SwayNotificatonCenter {
             var noti = new Notification (param, notiDaemon);
             box.pack_end (noti, false, false, 0);
             noti.show_notification ((v_noti) => {
-                box.remove (v_noti);
+                if (box.get_children ().index (v_noti) >= 0) {
+                    box.remove (v_noti);
+                }
                 if (box.get_children ().length () == 0) this.hide ();
             });
             this.show ();

@@ -226,6 +226,14 @@ namespace SwayNotificatonCenter {
             notiWin.close_notification (id);
         }
 
+        public string[] GetCapabilities () throws DBusError, IOError {
+            return {
+                "actions",
+                "body",
+                "persistence",
+            };
+        }
+
         public void GetServerInformation (out string name,
                                           out string vendor,
                                           out string version,

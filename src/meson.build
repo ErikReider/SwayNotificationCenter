@@ -1,5 +1,6 @@
 app_sources = [
   'main.vala',
+  'configModel/configModel.vala',
   'notiWindow/notiWindow.vala',
   'notification/notification.vala',
   'controlCenter/controlCenter.vala',
@@ -11,6 +12,7 @@ app_sources = [
 app_deps = [
   dependency('gio-2.0', version: '>= 2.50'),
   dependency('gtk+-3.0', version: '>= 3.22'),
+  dependency('json-glib-1.0', version: '>= 1.0'),
   meson.get_compiler('c').find_library('gtk-layer-shell'),
   meson.get_compiler('c').find_library('m', required : true),
 ]
@@ -43,4 +45,4 @@ executable('swaync-client',
 )
 
 install_data('style.css', install_dir : join_paths(sysconfdir, 'xdg/swaync'))
-
+install_data('config.json', install_dir : join_paths(sysconfdir, 'xdg/swaync'))

@@ -6,7 +6,7 @@ namespace SwayNotificatonCenter {
 
         public CcDaemon (DBusInit dbusInit) {
             this.dbusInit = dbusInit;
-            cc = new ControlCenterWidget (this);
+            cc = new ControlCenterWidget (this, dbusInit);
 
             dbusInit.notiDaemon.on_dnd_toggle.connect ((dnd) => {
                 try {
@@ -82,13 +82,22 @@ namespace SwayNotificatonCenter {
 
         private uint list_position = 0;
 
-        public ControlCenterWidget (CcDaemon cc_daemon) {
+        public ControlCenterWidget (CcDaemon cc_daemon, DBusInit dbusInit) {
             this.cc_daemon = cc_daemon;
             GtkLayerShell.init_for_window (this);
             GtkLayerShell.set_layer (this, GtkLayerShell.Layer.TOP);
+
             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
-            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
+            switch (dbusInit.configModel._positionX) {
+                case Positions.left:
+                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, true);
+                    break;
+                default:
+                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
+                    break;
+            }
+
             // Grabs the keyboard input until closed
             GtkLayerShell.set_keyboard_mode (this, GtkLayerShell.KeyboardMode.ON_DEMAND);
 
@@ -143,10 +152,8 @@ namespace SwayNotificatonCenter {
             list_box.set_sort_func ((w1, w2) => {
                 var a = (Notification) w1;
                 var b = (Notification) w2;
-                if (a != null && b != null) {
-                    return a.param._time > b.param._time ? -1 : 1;
-                }
-                return 0;
+                if (a == null || b == null) return 0;
+                return a.param._time > b.param._time ? -1 : 1;
             });
 
             clear_all_button = new Gtk.Button.with_label ("Clear All");

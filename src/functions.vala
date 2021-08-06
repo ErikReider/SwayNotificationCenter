@@ -47,5 +47,41 @@ namespace SwayNotificatonCenter {
             }
             return path;
         }
+
+        public static string get_config_path () {
+            string[] paths = {
+                "./src/config.json",
+                GLib.Environment.get_user_config_dir () + "/swaync/config.json",
+            };
+            foreach (var path in GLib.Environment.get_system_config_dirs ()) {
+                paths += Path.build_path (Path.DIR_SEPARATOR.to_string (),
+                                          path, "swaync/config.json");
+            }
+            paths += "./src/config.json";
+
+            string path = "";
+            foreach (string try_path in paths) {
+                if (File.new_for_path (try_path).query_exists ()) {
+                    path = try_path;
+                    break;
+                }
+            }
+            if (path == "") {
+                stderr.printf ("COULD NOT FIND CONFIG FILE! REINSTALL THE PACKAGE!\n");
+                Process.exit (1);
+            }
+            return path;
+        }
+
+        public static ConfigModel parse_config () {
+            try {
+                Json.Parser parser = new Json.Parser ();
+                parser.load_from_file (get_config_path ());
+                return ConfigModel (parser.get_root ());
+            } catch (Error e) {
+                print ("Unable to parse the JSON File: %s\n", e.message);
+                Process.exit (1);
+            }
+        }
     }
 }

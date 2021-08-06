@@ -15,15 +15,15 @@
     <property name="gravity">north-east</property>
     <property name="show-menubar">False</property>
     <child>
-      <object class="GtkScrolledWindow">
+      <object class="GtkScrolledWindow" id="scrolled_window">
         <property name="visible">True</property>
-        <property name="can-focus">True</property>
+        <property name="can-focus">False</property>
         <property name="hscrollbar-policy">never</property>
         <property name="window-placement">top-right</property>
         <property name="max-content-height">600</property>
         <property name="propagate-natural-height">True</property>
         <child>
-          <object class="GtkViewport">
+          <object class="GtkViewport" id="viewport">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="vexpand">True</property>
@@ -32,7 +32,6 @@
               <object class="GtkBox" id="box">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="valign">start</property>
                 <property name="orientation">vertical</property>
                 <child>
                   <placeholder/>

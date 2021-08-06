@@ -11,7 +11,8 @@ namespace SwayNotificatonCenter {
         public ConfigModel (Json.Node ? node) {
             try {
                 if (node.get_node_type () != Json.NodeType.OBJECT) {
-                    throw new JSONError.INVALID_FORMAT (@"JSON DOES NOT CONTAIN OBJECT!");
+                    throw new JSONError.INVALID_FORMAT (
+                              @"JSON DOES NOT CONTAIN OBJECT!");
                 }
                 Json.Object obj = node.get_object ();
 
@@ -25,10 +26,9 @@ namespace SwayNotificatonCenter {
 
         private Json.Node ? assert_node (Json.Object ? obj,
                                          string name,
-                                         string[] correct_values)
-        throws JSONError {
-            var node = obj.get_member (name);
-            if (node.get_node_type () != Json.NodeType.VALUE) {
+                                         string[] correct_values) throws JSONError {
+            Json.Node? node = obj.get_member (name);
+            if (node == null || node.get_node_type () != Json.NodeType.VALUE) {
                 throw new JSONError.INVALID_FORMAT (
                           @"JSON value $(name) wasn't defined!");
             }

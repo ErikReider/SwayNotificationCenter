@@ -178,7 +178,7 @@ namespace SwayNotificatonCenter {
             clear_all_button = new Gtk.Button.with_label ("Clear All");
             clear_all_button.get_style_context ().add_class ("control-center-clear-all");
             clear_all_button.clicked.connect (close_all_notifications);
-            var clear_action = new TopAction ("Notifications", clear_all_button, true);
+            this.box.add (new TopAction ("Notifications", clear_all_button, true));
 
             dnd_button = new Gtk.Switch ();
             dnd_button.get_style_context ().add_class ("control-center-dnd");
@@ -190,21 +190,19 @@ namespace SwayNotificatonCenter {
                 }
                 return false;
             });
-            var dnd_action = new TopAction ("Do Not Disturb", dnd_button, false);
-            this.box.add (clear_action);
-            this.box.add (dnd_action);
+            this.box.add (new TopAction ("Do Not Disturb", dnd_button, false));
         }
 
         private void size_alloc (bool reverse) {
             var adj = viewport.vadjustment;
             double upper = adj.get_upper ();
             if (last_upper < upper) {
-                scroll_start (reverse);
+                scroll_to_start (reverse);
             }
             last_upper = upper;
         }
 
-        private void scroll_start (bool reverse) {
+        private void scroll_to_start (bool reverse) {
             var adj = viewport.vadjustment;
             double val = adj.get_lower ();
             list_position = 0;
@@ -288,7 +286,7 @@ namespace SwayNotificatonCenter {
             });
             noti.set_time ();
             list_box.add (noti);
-            scroll_start (list_reverse);
+            scroll_to_start (list_reverse);
             try {
                 cc_daemon.subscribe (notification_count (), cc_daemon.get_dnd ());
             } catch (Error e) {

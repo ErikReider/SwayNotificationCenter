@@ -40,13 +40,14 @@ namespace SwayNotificatonCenter {
 
         private void size_alloc (bool reverse) {
             var adj = viewport.vadjustment;
-            if (last_upper < adj.get_upper ()) {
-                scroll_start (reverse);
+            double upper = adj.get_upper ();
+            if (last_upper < upper) {
+                scroll_to_start (reverse);
             }
-            last_upper = adj.get_upper ();
+            last_upper = upper;
         }
 
-        private void scroll_start (bool reverse) {
+        private void scroll_to_start (bool reverse) {
             var adj = viewport.vadjustment;
             var val = (reverse ? adj.get_upper () : adj.get_lower ());
             adj.set_value (val);
@@ -85,7 +86,7 @@ namespace SwayNotificatonCenter {
                 if (box.get_children ().length () == 0) this.hide ();
             });
             this.show ();
-            scroll_start (list_reverse);
+            scroll_to_start (list_reverse);
         }
 
         public void close_notification (uint32 id) {

@@ -29,24 +29,27 @@ namespace SwayNotificatonCenter {
             switch (dbusInit.configModel._positionY) {
                 case Positions.bottom:
                     GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
-                    // Reverse the list if positioned on the bottom
                     list_reverse = true;
-                    viewport.size_allocate.connect (() => size_alloc (true));
                     break;
                 default:
-                    viewport.size_allocate.connect (() => size_alloc ());
                     GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
                     break;
             }
+            viewport.size_allocate.connect (() => size_alloc (list_reverse));
         }
 
-        private void size_alloc (bool reverse = false) {
+        private void size_alloc (bool reverse) {
             var adj = viewport.vadjustment;
             if (last_upper < adj.get_upper ()) {
-                var val = (reverse ? adj.get_upper () : adj.get_lower ());
-                adj.set_value (val - adj.get_page_size ());
+                scroll_start (reverse);
             }
             last_upper = adj.get_upper ();
+        }
+
+        private void scroll_start (bool reverse) {
+            var adj = viewport.vadjustment;
+            var val = (reverse ? adj.get_upper () : adj.get_lower ());
+            adj.set_value (val);
         }
 
         public void change_visibility (bool value) {
@@ -82,6 +85,7 @@ namespace SwayNotificatonCenter {
                 if (box.get_children ().length () == 0) this.hide ();
             });
             this.show ();
+            scroll_start (list_reverse);
         }
 
         public void close_notification (uint32 id) {

@@ -71,6 +71,10 @@ namespace SwayNotificatonCenter {
     private class ControlCenterWidget : Gtk.ApplicationWindow {
 
         [GtkChild]
+        unowned Gtk.ScrolledWindow scrolled_window;
+        [GtkChild]
+        unowned Gtk.Viewport viewport;
+        [GtkChild]
         unowned Gtk.ListBox list_box;
         [GtkChild]
         unowned Gtk.Box box;
@@ -82,9 +86,15 @@ namespace SwayNotificatonCenter {
 
         private uint list_position = 0;
 
+        private double last_upper = 0;
+        private bool list_reverse = false;
+        private Gtk.Align list_align = Gtk.Align.START;
+
         public ControlCenterWidget (CcDaemon cc_daemon, DBusInit dbusInit) {
             this.cc_daemon = cc_daemon;
             GtkLayerShell.init_for_window (this);
+            // Grabs the keyboard input until closed
+            GtkLayerShell.set_keyboard_mode (this, GtkLayerShell.KeyboardMode.ON_DEMAND);
             GtkLayerShell.set_layer (this, GtkLayerShell.Layer.TOP);
 
             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
@@ -97,9 +107,22 @@ namespace SwayNotificatonCenter {
                     GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
                     break;
             }
-
-            // Grabs the keyboard input until closed
-            GtkLayerShell.set_keyboard_mode (this, GtkLayerShell.KeyboardMode.ON_DEMAND);
+            if (dbusInit.configModel._positionY == Positions.bottom) {
+                list_reverse = true;
+                list_align = Gtk.Align.END;
+                this.box.set_child_packing (scrolled_window, true, true, 0, Gtk.PackType.START);
+            }
+            viewport.size_allocate.connect (() => size_alloc (list_reverse));
+            list_box.set_valign (list_align);
+            list_box.set_sort_func ((w1, w2) => {
+                var a = (Notification) w1;
+                var b = (Notification) w2;
+                if (a == null || b == null) return 0;
+                // Sort the list in reverse if needed
+                int val1 = list_reverse ? 1 : -1;
+                int val2 = list_reverse ? -1 : 1;
+                return a.param._time > b.param._time ? val1 : val2;
+            });
 
             this.key_press_event.connect ((w, event_key) => {
                 if (event_key.type == Gdk.EventType.KEY_PRESS) {
@@ -114,8 +137,11 @@ namespace SwayNotificatonCenter {
                                event_key.keyval == Gdk.keyval_from_name ("BackSpace")) {
                         Notification noti = (Notification) list_box.get_focus_child ();
                         if (noti != null) {
-                            if (list_box.get_children ().last ().data == noti) {
-                                if (list_position > 0) --list_position;
+                            if (list_reverse &&
+                                list_box.get_children ().first ().data != noti) {
+                                list_position--;
+                            } else if (list_box.get_children ().last ().data == noti) {
+                                if (list_position > 0) list_position--;
                             }
                             close_notification (noti.param.applied_id);
                         }
@@ -133,7 +159,7 @@ namespace SwayNotificatonCenter {
                         list_position = 0;
                     } else if (event_key.keyval == Gdk.keyval_from_name ("End")) {
                         list_position = list_box.get_children ().length () - 1;
-                        if (list_position < 0) list_position = 0;
+                        if (list_position == uint.MAX) list_position = 0;
                     } else {
                         for (int i = 0; i < 9; i++) {
                             uint keyval = Gdk.keyval_from_name ((i + 1).to_string ());
@@ -149,17 +175,10 @@ namespace SwayNotificatonCenter {
                 return true;
             });
 
-            list_box.set_sort_func ((w1, w2) => {
-                var a = (Notification) w1;
-                var b = (Notification) w2;
-                if (a == null || b == null) return 0;
-                return a.param._time > b.param._time ? -1 : 1;
-            });
-
             clear_all_button = new Gtk.Button.with_label ("Clear All");
             clear_all_button.get_style_context ().add_class ("control-center-clear-all");
             clear_all_button.clicked.connect (close_all_notifications);
-            this.box.pack_start (new TopAction ("Notifications", clear_all_button, true), false);
+            var clear_action = new TopAction ("Notifications", clear_all_button, true);
 
             dnd_button = new Gtk.Switch ();
             dnd_button.get_style_context ().add_class ("control-center-dnd");
@@ -171,7 +190,31 @@ namespace SwayNotificatonCenter {
                 }
                 return false;
             });
-            this.box.pack_start (new TopAction ("Do Not Disturb", dnd_button, false), false);
+            var dnd_action = new TopAction ("Do Not Disturb", dnd_button, false);
+            this.box.add (clear_action);
+            this.box.add (dnd_action);
+        }
+
+        private void size_alloc (bool reverse) {
+            var adj = viewport.vadjustment;
+            double upper = adj.get_upper ();
+            if (last_upper < upper) {
+                scroll_start (reverse);
+            }
+            last_upper = upper;
+        }
+
+        private void scroll_start (bool reverse) {
+            var adj = viewport.vadjustment;
+            double val = adj.get_lower ();
+            list_position = 0;
+            if (reverse) {
+                val = adj.get_upper ();
+                list_position = list_reverse ? (list_box.get_children ().length () - 1) : 0;
+                if (list_position == uint.MAX) list_position = -1;
+            }
+            adj.set_value (val);
+            navigate_list (list_position);
         }
 
         public uint notification_count () {
@@ -207,6 +250,10 @@ namespace SwayNotificatonCenter {
             this.set_visible (cc_visibility);
 
             if (cc_visibility) {
+                // Focus the first notification
+                list_position = list_reverse ? (list_box.get_children ().length () - 1) : 0;
+                if (list_position == uint.MAX) list_position = 0;
+
                 list_box.grab_focus ();
                 navigate_list (list_position);
                 foreach (var w in list_box.get_children ()) {
@@ -241,6 +288,7 @@ namespace SwayNotificatonCenter {
             });
             noti.set_time ();
             list_box.add (noti);
+            scroll_start (list_reverse);
             try {
                 cc_daemon.subscribe (notification_count (), cc_daemon.get_dnd ());
             } catch (Error e) {

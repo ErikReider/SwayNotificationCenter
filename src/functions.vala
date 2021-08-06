@@ -50,7 +50,6 @@ namespace SwayNotificatonCenter {
 
         public static string get_config_path () {
             string[] paths = {
-                "./src/config.json",
                 GLib.Environment.get_user_config_dir () + "/swaync/config.json",
             };
             foreach (var path in GLib.Environment.get_system_config_dirs ()) {

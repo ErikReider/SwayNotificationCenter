@@ -37,7 +37,6 @@
   padding: 0px;
   border-radius: 100%;
 }
-
 .close-button:hover {
   background: rgb(40, 40, 40);
   transition: all 0.15s ease-in-out;
@@ -61,6 +60,7 @@
   border-radius: 10px;
 }
 
+/* When alternative actions are visible */
 .notification-default-action:not(:only-child) {
   border-bottom-left-radius: 0px;
   border-bottom-right-radius: 0px;
@@ -71,6 +71,7 @@
   border-top: none;
 }
 
+/* add bottom border radius to eliminate clipping */
 .notification-action:first-child {
   border-bottom-left-radius: 10px;
 }
@@ -97,10 +98,6 @@
   text-shadow: none;
 }
 
-.control-center {
-  background: rgba(0, 0, 0, 0.7);
-}
-
 .top-action-title {
   color: white;
   text-shadow: none;
@@ -114,7 +111,6 @@
   box-shadow: none;
   border-radius: 10px;
 }
-
 .control-center-clear-all:hover {
   background: @bg-hover;
 }
@@ -129,11 +125,13 @@
 .control-center-dnd:checked {
   background: @bg-selected;
 }
-
 .control-center-dnd slider {
   background: @bg-hover;
 }
 
+.control-center {
+  background: rgba(0, 0, 0, 0.7);
+}
 .control-center-list {
   background: transparent;
 }

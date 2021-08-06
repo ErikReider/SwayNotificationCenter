@@ -151,7 +151,7 @@ namespace SwayNotificatonCenter {
 
         public NotiDaemon (DBusInit dbusInit) {
             this.dbusInit = dbusInit;
-            this.notiWin = new NotiWindow ();
+            this.notiWin = new NotiWindow (dbusInit);
         }
 
         public void set_noti_window_visibility (bool value)
@@ -217,8 +217,8 @@ namespace SwayNotificatonCenter {
             dbusInit.ccDaemon.close_notification (id);
         }
 
-        public void close_all_notifications() throws DBusError, IOError{
-            notiWin.close_all_notifications();
+        public void close_all_notifications () throws DBusError, IOError {
+            notiWin.close_all_notifications ();
         }
 
         // Only remove the popup without removing the it from the panel
@@ -255,9 +255,14 @@ namespace SwayNotificatonCenter {
         public NotiDaemon notiDaemon;
         public CcDaemon ccDaemon;
 
+        public ConfigModel configModel;
+
         public DBusInit () {
+            configModel = Functions.parse_config ();
+
             this.notiDaemon = new NotiDaemon (this);
             this.ccDaemon = new CcDaemon (this);
+
 
             Bus.own_name (BusType.SESSION, "org.freedesktop.Notifications",
                           BusNameOwnerFlags.NONE,
@@ -296,8 +301,7 @@ namespace SwayNotificatonCenter {
         try {
             Gtk.CssProvider css_provider = new Gtk.CssProvider ();
             css_provider.load_from_path (Functions.get_style_path ());
-            Gtk.StyleContext.
-             add_provider_for_screen (
+            Gtk.StyleContext.add_provider_for_screen (
                 Gdk.Screen.get_default (),
                 css_provider,
                 Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);

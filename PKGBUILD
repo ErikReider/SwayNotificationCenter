@@ -1,6 +1,6 @@
 # Maintainer: Erik Reider <erik.reider@protonmail.com>
 pkgname=swaync-git
-pkgver=0.1.r82.c9ab1de
+pkgver=0.1.r103.f5292f3
 pkgrel=1
 pkgdesc="A simple notificaion daemon with a GTK panel for checking previous notifications like other DE's"
 _pkgfoldername=SwayNotificationCenter
@@ -15,6 +15,11 @@ sha256sums=('SKIP')
 pkgver() {
   cd $_pkgfoldername
   printf "0.1.r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+  cd SwayNotificationCenter
+  git checkout main
 }
 
 build() {

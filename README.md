@@ -60,16 +60,12 @@ To toggle the panel
 
 ## Configuring
 
-The main config file is located in `/etc/xdg/swaync/config.json`.
+The main config file is located in `/etc/xdg/swaync/config.json`. Copy it over to your `.config/swaync/` folder to customize without needing root access.
 
 - positionX: `left` or `right`
 - positionY: `top` or `bottom`
 
-To customize the appearance of the widgets, you'll need to create a `style.css`
-file in `~/.config/swaync/style.css`.
-<br>
-At the time of writing, creating the file will override the default theme which
-is located for most systems at `/etc/xdg/swaync/style.css`
+The main CSS style file is located in `/etc/xdg/swaync/style.css`. Copy it over to your `.config/swaync/` folder to customize without needing root access.
 
 ## Screenshots
 

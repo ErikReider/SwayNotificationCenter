@@ -1,5 +1,6 @@
 app_sources = [
   'main.vala',
+  'notiDaemon/notiDaemon.vala',
   'configModel/configModel.vala',
   'notiWindow/notiWindow.vala',
   'notification/notification.vala',

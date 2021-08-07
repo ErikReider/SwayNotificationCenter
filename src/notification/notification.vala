@@ -21,8 +21,7 @@ namespace SwayNotificatonCenter {
         [GtkChild]
         unowned Gtk.Image img;
 
-        private int open_timeout = 0;
-        private const int millis = 10000;
+        private const int timeout_delay = 10000;
 
         public NotifyParams param;
         private NotiDaemon notiDaemon;
@@ -164,13 +163,11 @@ namespace SwayNotificatonCenter {
         // Called to show a temp notification
         public void show_notification (On_hide_cb callback) {
             this.show ();
-            int ms = param.expire_timeout > 0 ? param.expire_timeout : millis;
+            int ms = param.expire_timeout > 0 ? param.expire_timeout : timeout_delay;
             if (param.expire_timeout != 0) {
-                open_timeout = 1;
                 Timeout.add (ms, () => {
-                    open_timeout--;
-                    if (open_timeout == 0) callback (this);
-                    return false;
+                    callback (this);
+                    return GLib.Source.REMOVE;
                 });
             }
         }

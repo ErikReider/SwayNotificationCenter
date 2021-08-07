@@ -167,6 +167,7 @@ namespace SwayNotificatonCenter {
             if (param.expire_timeout != 0) {
                 Timeout.add (ms, () => {
                     callback (this);
+                    notiDaemon.NotificationClosed(param.applied_id, ClosedReasons.EXPIRED);
                     return GLib.Source.REMOVE;
                 });
             }

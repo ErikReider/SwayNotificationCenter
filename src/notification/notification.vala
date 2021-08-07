@@ -175,12 +175,18 @@ namespace SwayNotificatonCenter {
 
         private void set_icon () {
             img.set_pixel_size (48);
+
+            var img_path_exists = File.new_for_path (param.image_path ?? "").query_exists ();
+            var app_icon_exists = File.new_for_path (param.app_icon ?? "").query_exists ();
+
             if (param.image_data.is_initialized) {
                 Functions.set_image_data (param.image_data, img);
-            } else if (param.image_path != null && param.image_path != "") {
-                Functions.set_image_path (param.image_path, img);
+            } else if (param.image_path != null &&
+                       param.image_path != "" &&
+                       img_path_exists) {
+                Functions.set_image_path (param.image_path, img, img_path_exists);
             } else if (param.app_icon != null && param.app_icon != "") {
-                Functions.set_image_path (param.app_icon, img);
+                Functions.set_image_path (param.app_icon, img, app_icon_exists);
             } else if (param.icon_data.is_initialized) {
                 Functions.set_image_data (param.icon_data, img);
             } else {

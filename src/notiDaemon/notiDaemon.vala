@@ -48,8 +48,11 @@ namespace SwayNotificatonCenter {
                 notiWin.close_notification (id);
                 dbusInit.ccDaemon.close_notification (id);
             }
-            if (!dbusInit.ccDaemon.get_visibility () && !dnd) {
-                notiWin.add_notification (param, this);
+            if (!dbusInit.ccDaemon.get_visibility ()) {
+                if (param.urgency == UrgencyLevels.CRITICAL ||
+                    (!dnd && param.urgency == UrgencyLevels.NORMAL)) {
+                    notiWin.add_notification (param, this);
+                }
             }
             dbusInit.ccDaemon.add_notification (param);
             return id;
@@ -121,6 +124,25 @@ namespace SwayNotificatonCenter {
         UNDEFINED = 4;
     }
 
+    public enum UrgencyLevels {
+        LOW = 0,
+        NORMAL = 1,
+        CRITICAL = 2;
+
+        public static UrgencyLevels from_value (int val) {
+            switch (val) {
+                case 0:
+                    return LOW;
+                case 1:
+                    return NORMAL;
+                case 2:
+                    return CRITICAL;
+                default:
+                    return NORMAL;
+            }
+        }
+    }
+
     public struct Image_Data {
         int width;
         int height;
@@ -158,6 +180,7 @@ namespace SwayNotificatonCenter {
         public string desktop_entry { get; set; }
         public string category { get; set; }
         public bool resident { get; set; }
+        public UrgencyLevels urgency { get; set; }
 
         public Action[] actions { get; set; }
 
@@ -254,6 +277,11 @@ namespace SwayNotificatonCenter {
                     case "resident":
                         if (hint_value.is_of_type (GLib.VariantType.BOOLEAN)) {
                             resident = hint_value.get_boolean ();
+                        }
+                        break;
+                    case "urgency":
+                        if (hint_value.is_of_type (GLib.VariantType.BYTE)) {
+                            urgency = UrgencyLevels.from_value (hint_value.get_byte ());
                         }
                         break;
                 }

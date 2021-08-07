@@ -47,7 +47,7 @@ namespace SwayNotificatonCenter {
             }
             if (!dbusInit.ccDaemon.get_visibility ()) {
                 if (param.urgency == UrgencyLevels.CRITICAL ||
-                    (!dnd && param.urgency == UrgencyLevels.NORMAL)) {
+                    (!dnd && param.urgency != UrgencyLevels.CRITICAL)) {
                     notiWin.add_notification (param, this);
                 }
             }

@@ -1,18 +1,18 @@
 namespace SwayNotificatonCenter {
     public class Functions {
-        public static void set_image_path (owned string path, Gtk.Image img) {
-            if (path.slice (0, 7) == "file://") {
+        public static void set_image_path (owned string path, Gtk.Image img, bool file_exists) {
+            if (path.slice (0, 7) == "file://" || file_exists) {
                 try {
-                    path = path.slice (7, path.length);
+                    if (!file_exists) path = path.slice (7, path.length);
+
                     var pixbuf = new Gdk.Pixbuf.from_file_at_size (path, 48, 48);
                     img.set_from_pixbuf (pixbuf);
+                    return;
                 } catch (Error e) {
                     stderr.printf (e.message + "\n");
-                    img.set_from_icon_name ("image-missing", Gtk.IconSize.DIALOG);
                 }
-                return;
             }
-            img.set_from_icon_name (path, Gtk.IconSize.DIALOG);
+            img.set_from_icon_name ("image-missing", Gtk.IconSize.DIALOG);
         }
 
         public static void set_image_data (Image_Data data, Gtk.Image img) {

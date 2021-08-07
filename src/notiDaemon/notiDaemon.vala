@@ -87,11 +87,13 @@ namespace SwayNotificatonCenter {
         }
 
         public string[] GetCapabilities () throws DBusError, IOError {
-            return {
-                       "actions",
-                       "body",
-                       "persistence",
+            string[] capabilities = {
+                "actions",
+                "body",
+                "body-markup",
+                "persistence",
             };
+            return capabilities;
         }
 
         public void GetServerInformation (out string name,

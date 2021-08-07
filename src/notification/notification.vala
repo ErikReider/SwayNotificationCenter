@@ -33,7 +33,7 @@ namespace SwayNotificatonCenter {
             this.param = param;
 
             this.summary.set_text (param.summary ?? param.app_name);
-            this.body.set_text (param.body ?? "");
+            this.body.set_markup (param.body ?? "");
 
             default_button.clicked.connect (click_default_action);
 

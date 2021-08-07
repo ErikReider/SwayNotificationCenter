@@ -5,7 +5,7 @@ namespace SwayNotificatonCenter {
                 try {
                     if (!file_exists) path = path.slice (7, path.length);
 
-                    var pixbuf = new Gdk.Pixbuf.from_file_at_size (path, 48, 48);
+                    var pixbuf = new Gdk.Pixbuf.from_file_at_size (path, 64, 64);
                     img.set_from_pixbuf (pixbuf);
                     return;
                 } catch (Error e) {

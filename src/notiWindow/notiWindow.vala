@@ -82,8 +82,6 @@ namespace SwayNotificatonCenter {
             noti.show_notification ((v_noti) => {
                 if (box.get_children ().index (v_noti) >= 0) {
                     box.remove (v_noti);
-                    notiDaemon.NotificationClosed (param.applied_id,
-                                                   ClosedReasons.EXPIRED);
                 }
                 if (box.get_children ().length () == 0) this.hide ();
             });

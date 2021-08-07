@@ -72,8 +72,9 @@ namespace SwayNotificatonCenter {
         public signal void on_dnd_toggle (bool dnd);
 
         public void click_close_notification (uint32 id) throws DBusError, IOError {
-            CloseNotification (id);
+            notiWin.close_notification (id);
             dbusInit.ccDaemon.close_notification (id);
+            NotificationClosed (id, ClosedReasons.DISMISSED);
         }
 
         public void close_all_notifications () throws DBusError, IOError {
@@ -82,7 +83,7 @@ namespace SwayNotificatonCenter {
 
         // Only remove the popup without removing the it from the panel
         public void CloseNotification (uint32 id) throws DBusError, IOError {
-            notiWin.close_notification (id);
+            NotificationClosed (id, ClosedReasons.CLOSED_BY_CLOSENOTIFICATION);
         }
 
         public string[] GetCapabilities () throws DBusError, IOError {
@@ -109,6 +110,12 @@ namespace SwayNotificatonCenter {
         public signal void ActionInvoked (uint32 id, string action_key);
     }
 
+    public enum ClosedReasons {
+        EXPIRED = 1,
+        DISMISSED = 2,
+        CLOSED_BY_CLOSENOTIFICATION = 3,
+        UNDEFINED = 4;
+    }
 
     public struct Image_Data {
         int width;

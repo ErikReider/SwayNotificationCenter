@@ -91,6 +91,7 @@ namespace SwayNotificatonCenter {
                 "actions",
                 "body",
                 "body-markup",
+                "body-hyperlinks",
                 "persistence",
             };
             return capabilities;

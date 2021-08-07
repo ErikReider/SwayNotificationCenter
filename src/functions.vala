@@ -82,5 +82,19 @@ namespace SwayNotificatonCenter {
                 Process.exit (1);
             }
         }
+
+        public static string get_match_from_info (MatchInfo info) {
+            var all = info.fetch_all ();
+            if (all.length > 1 && all[1].length > 0) {
+                string img = all[1];
+                // Replace "~/" with $HOME
+                if (img.index_of ("~/", 0) == 0) {
+                    img = GLib.Environment.get_home_dir () +
+                          img.slice (1, img.length);
+                }
+                return img;
+            }
+            return "";
+        }
     }
 }

@@ -82,6 +82,12 @@
 .image {
 }
 
+.body-image {
+  margin-top: 6px;
+  background-color: white;
+  border-radius: 10px;
+}
+
 .summary {
   color: white;
   text-shadow: none;

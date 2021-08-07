@@ -20,6 +20,8 @@ namespace SwayNotificatonCenter {
         unowned Gtk.Label body;
         [GtkChild]
         unowned Gtk.Image img;
+        [GtkChild]
+        unowned Gtk.Image body_image;
 
         private const int timeout_delay = 10000;
 
@@ -33,18 +35,66 @@ namespace SwayNotificatonCenter {
             this.param = param;
 
             this.summary.set_text (param.summary ?? param.app_name);
-            this.body.set_markup (param.body ?? "");
 
             default_button.clicked.connect (click_default_action);
 
             close_button.clicked.connect (close_notification);
 
+            set_body ();
             set_icon ();
             set_actions ();
 
             if (show) {
                 this.body.set_lines (10);
                 this.show ();
+            }
+        }
+
+        private void set_body () {
+            string text = param.body ?? "";
+            string[] img_paths = {};
+            if (text.length > 0) {
+                try {
+                    GLib.Regex img_exp = new Regex (
+                        """<img[^>]* src=\"([^\"]*)\"[^>]*>""",
+                        RegexCompileFlags.JAVASCRIPT_COMPAT);
+
+                    // Get src paths from images
+                    MatchInfo info;
+                    if (img_exp.match (text, 0, out info)) {
+                        img_paths += Functions.get_match_from_info (info);
+                        while (info.next ()) {
+                            img_paths += Functions.get_match_from_info (info);
+                        }
+                    }
+
+                    // Remove all images
+                    text = img_exp.replace (text, text.length, 0, "");
+                } catch (Error e) {
+                    stderr.printf (e.message);
+                }
+            }
+
+            this.body.set_markup (text);
+
+            try {
+                if (img_paths.length > 0) {
+                    var img = img_paths[0];
+                    var file = File.new_for_path (img);
+                    if (img.length > 0 && file.query_exists ()) {
+                        const int max_width = 200;
+                        const int max_height = 100;
+                        var buf = new Gdk.Pixbuf.from_file_at_scale (
+                            file.get_path (),
+                            max_width,
+                            max_height,
+                            true);
+                        this.body_image.set_from_pixbuf (buf);
+                        this.body_image.show ();
+                    }
+                }
+            } catch (Error e) {
+                stderr.printf (e.message);
             }
         }
 
@@ -167,7 +217,7 @@ namespace SwayNotificatonCenter {
             if (param.expire_timeout != 0) {
                 Timeout.add (ms, () => {
                     callback (this);
-                    notiDaemon.NotificationClosed(param.applied_id, ClosedReasons.EXPIRED);
+                    notiDaemon.NotificationClosed (param.applied_id, ClosedReasons.EXPIRED);
                     return GLib.Source.REMOVE;
                 });
             }

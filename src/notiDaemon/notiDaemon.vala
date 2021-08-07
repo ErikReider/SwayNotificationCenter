@@ -28,10 +28,7 @@ namespace SwayNotificatonCenter {
                               int expire_timeout)
         throws DBusError, IOError {
             uint32 id = replaces_id;
-            if (replaces_id == 0 || replaces_id > noti_id) {
-                noti_id++;
-                id = noti_id;
-            }
+            if (replaces_id == 0 || replaces_id > noti_id) id = ++noti_id;
 
             var param = NotifyParams (
                 id,

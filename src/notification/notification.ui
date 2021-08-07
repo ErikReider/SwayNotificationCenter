@@ -147,7 +147,6 @@
                           <object class="GtkImage" id="body_image">
                             <property name="can-focus">False</property>
                             <property name="halign">center</property>
-                            <property name="valign">center</property>
                             <style>
                               <class name="body-image"/>
                             </style>
@@ -183,22 +182,14 @@
             </child>
             <child type="overlay">
               <object class="GtkButton" id="close_button">
+                <property name="label">×</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="receives-default">True</property>
                 <property name="halign">end</property>
                 <property name="valign">start</property>
                 <property name="relief">none</property>
-                <child>
-                  <object class="GtkImage" id="close_button_img">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="xpad">6</property>
-                    <property name="pixel-size">12</property>
-                    <property name="icon-name">close-symbolic</property>
-                    <property name="icon_size">0</property>
-                  </object>
-                </child>
+                <property name="always-show-image">True</property>
                 <style>
                   <class name="close-button"/>
                 </style>

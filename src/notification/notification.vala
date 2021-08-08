@@ -75,6 +75,8 @@ namespace SwayNotificatonCenter {
                 }
             }
 
+            // To fix markup error with the '&' char
+            text = text.replace("&", "&amp;");
             this.body.set_markup (text);
 
             try {

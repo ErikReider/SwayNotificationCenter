@@ -23,7 +23,8 @@ namespace SwayNotificatonCenter {
         [GtkChild]
         unowned Gtk.Image body_image;
 
-        private const int timeout_delay = 10000;
+        private const int timeout_delay_normal = 10000;
+        private const int timeout_delay_low = 5000;
 
         public NotifyParams param;
         private NotiDaemon notiDaemon;
@@ -76,7 +77,7 @@ namespace SwayNotificatonCenter {
             }
 
             // To fix markup error with the '&' char
-            text = text.replace("&", "&amp;");
+            text = text.replace ("&", "&amp;");
             this.body.set_markup (text);
 
             try {
@@ -221,6 +222,19 @@ namespace SwayNotificatonCenter {
         // Called to show a temp notification
         public void show_notification (On_hide_cb callback) {
             this.show ();
+
+            int timeout_delay;
+            switch (param.urgency) {
+                case UrgencyLevels.LOW :
+                    timeout_delay = timeout_delay_low;
+                    break;
+                case UrgencyLevels.NORMAL:
+                default:
+                    timeout_delay = timeout_delay_normal;
+                    break;
+                case UrgencyLevels.CRITICAL:
+                    return;
+            }
             int ms = param.expire_timeout > 0 ? param.expire_timeout : timeout_delay;
             if (param.expire_timeout != 0) {
                 Timeout.add (ms, () => {

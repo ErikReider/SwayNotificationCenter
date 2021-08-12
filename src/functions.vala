@@ -24,15 +24,14 @@ namespace SwayNotificatonCenter {
             img.set_from_pixbuf (scaled_pixbuf);
         }
 
-        public static string get_style_path () {
-            string[] paths = {
-                GLib.Environment.get_user_config_dir () + "/swaync/style.css",
-            };
+        public static string get_style_path (string custon_path) {
+            string[] paths = {};
+            if (custon_path.length > 0) paths += custon_path;
+            paths += GLib.Environment.get_user_config_dir () + "/swaync/style.css";
             foreach (var path in GLib.Environment.get_system_config_dirs ()) {
                 paths += Path.build_path (Path.DIR_SEPARATOR.to_string (),
                                           path, "swaync/style.css");
             }
-            paths += "./src/style.css";
 
             string path = "";
             foreach (string try_path in paths) {
@@ -48,15 +47,14 @@ namespace SwayNotificatonCenter {
             return path;
         }
 
-        public static string get_config_path () {
-            string[] paths = {
-                GLib.Environment.get_user_config_dir () + "/swaync/config.json",
-            };
+        public static string get_config_path (string custon_path) {
+            string[] paths = {};
+            if (custon_path.length > 0) paths += custon_path;
+            paths += GLib.Environment.get_user_config_dir () + "/swaync/config.json";
             foreach (var path in GLib.Environment.get_system_config_dirs ()) {
                 paths += Path.build_path (Path.DIR_SEPARATOR.to_string (),
                                           path, "swaync/config.json");
             }
-            paths += "./src/config.json";
 
             string path = "";
             foreach (string try_path in paths) {
@@ -72,10 +70,10 @@ namespace SwayNotificatonCenter {
             return path;
         }
 
-        public static ConfigModel parse_config () {
+        public static ConfigModel parse_config (string custon_path) {
             try {
                 Json.Parser parser = new Json.Parser ();
-                parser.load_from_file (get_config_path ());
+                parser.load_from_file (get_config_path (custon_path));
                 return ConfigModel (parser.get_root ());
             } catch (Error e) {
                 print ("Unable to parse the JSON File: %s\n", e.message);

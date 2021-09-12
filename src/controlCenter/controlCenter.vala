@@ -94,11 +94,11 @@ namespace SwayNotificatonCenter {
             this.cc_daemon = cc_daemon;
             GtkLayerShell.init_for_window (this);
             // Grabs the keyboard input until closed
-            if (GtkLayerShell.get_minor_version () > 5) {
-                GtkLayerShell.set_keyboard_mode (this, GtkLayerShell.KeyboardMode.ON_DEMAND);
-            } else {
-                GtkLayerShell.set_keyboard_interactivity (this, true);
-            }
+#if HAVE_LATEST_GTK_LAYER_SHELL
+            GtkLayerShell.set_keyboard_mode (this, GtkLayerShell.KeyboardMode.ON_DEMAND);
+#else
+            GtkLayerShell.set_keyboard_interactivity (this, true);
+#endif
             GtkLayerShell.set_layer (this, GtkLayerShell.Layer.TOP);
 
             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);

@@ -18,6 +18,15 @@ app_deps = [
   meson.get_compiler('c').find_library('m', required : true),
 ]
 
+# Detect gtk-layer-shell version
+gtk_layer_shell = dependency(
+  'gtk-layer-shell-0',
+  fallback: ['gtk-layer-shell-0', 'gtk-layer-shell'],
+)
+if gtk_layer_shell.version() >= '0.6.0'
+    add_project_arguments('-D', 'HAVE_LATEST_GTK_LAYER_SHELL', language: 'vala')
+endif
+
 args = [
   '--target-glib=2.50',
   '--pkg=GtkLayerShell-0.1',

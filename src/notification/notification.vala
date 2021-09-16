@@ -2,6 +2,9 @@ namespace SwayNotificatonCenter {
     [GtkTemplate (ui = "/org/erikreider/sway-notification-center/notification/notification.ui")]
     private class Notification : Gtk.ListBoxRow {
         [GtkChild]
+        unowned Hdy.Carousel carousel;
+
+        [GtkChild]
         unowned Gtk.EventBox event_box;
 
         [GtkChild]
@@ -46,14 +49,19 @@ namespace SwayNotificatonCenter {
 
             close_button.clicked.connect (close_notification);
 
-            this.event_box.enter_notify_event.connect (()=> {
+            this.event_box.enter_notify_event.connect (() => {
                 close_revealer.set_reveal_child (true);
                 return false;
             });
 
-            this.event_box.leave_notify_event.connect (()=> {
+            this.event_box.leave_notify_event.connect (() => {
                 close_revealer.set_reveal_child (false);
                 return false;
+            });
+
+            this.carousel.scroll_to (event_box);
+            this.carousel.page_changed.connect ((_, i) => {
+                if (i == 0) close_notification ();
             });
 
             set_body ();

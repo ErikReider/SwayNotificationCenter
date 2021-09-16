@@ -55,6 +55,7 @@ namespace SwayNotificatonCenter {
 
     public void main (string[] args) {
         Gtk.init (ref args);
+        Hdy.init ();
 
         string style_path = "";
         string config_path = "";

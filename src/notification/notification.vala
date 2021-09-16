@@ -2,8 +2,13 @@ namespace SwayNotificatonCenter {
     [GtkTemplate (ui = "/org/erikreider/sway-notification-center/notification/notification.ui")]
     private class Notification : Gtk.ListBoxRow {
         [GtkChild]
+        unowned Gtk.EventBox event_box;
+
+        [GtkChild]
         unowned Gtk.Button default_button;
 
+        [GtkChild]
+        unowned Gtk.Revealer close_revealer;
         [GtkChild]
         unowned Gtk.Button close_button;
 
@@ -31,7 +36,7 @@ namespace SwayNotificatonCenter {
 
         public Notification (NotifyParams param,
                              NotiDaemon notiDaemon,
-                             bool show = false) {
+                             bool is_cc_noti = false) {
             this.notiDaemon = notiDaemon;
             this.param = param;
 
@@ -41,11 +46,21 @@ namespace SwayNotificatonCenter {
 
             close_button.clicked.connect (close_notification);
 
+            this.event_box.enter_notify_event.connect (()=> {
+                close_revealer.set_reveal_child (true);
+                return false;
+            });
+
+            this.event_box.leave_notify_event.connect (()=> {
+                close_revealer.set_reveal_child (false);
+                return false;
+            });
+
             set_body ();
             set_icon ();
             set_actions ();
 
-            if (show) {
+            if (is_cc_noti) {
                 this.body.set_lines (10);
                 this.show ();
             }

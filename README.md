@@ -32,6 +32,16 @@ ninja -C build
 meson install -C build
 ```
 
+## Sway Usage
+
+```ini
+# Notification Daemon
+exec swaync
+
+# Toggle notification panel
+bindsym $mod+Shift+n exec swaync-client -t -sw
+```
+
 ## Run
 
 To start the daemon (remember to kill any other notification daemon before running)

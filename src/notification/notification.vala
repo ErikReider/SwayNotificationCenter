@@ -104,13 +104,16 @@ namespace SwayNotificatonCenter {
          * https://github.com/elementary/notifications/blob/ff0668edd9313d8780a68880f054257c3a109971/src/Notification.vala#L137-L142
          */
         private string fix_markup (string markup) {
+            string text = markup;
             try {
                 Regex entity_regex = new Regex ("&(?!amp;|quot;|apos;|lt;|gt;)");
-                markup = entity_regex.replace (markup, markup.length, 0, "&amp;");
+                text = entity_regex.replace (markup, markup.length, 0, "&amp;");
+                Regex tag_regex = new Regex ("<(?!\\/?[biu]>)");
+                text = tag_regex.replace (text, text.length, 0, "&lt;");
             } catch (Error e) {
                 stderr.printf ("Invalid regex: %s", e.message);
             }
-            return markup;
+            return text;
         }
 
         public void click_default_action () {

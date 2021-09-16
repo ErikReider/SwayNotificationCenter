@@ -76,8 +76,7 @@ namespace SwayNotificatonCenter {
                 }
             }
 
-            // To fix markup error with the '&' char
-            text = text.replace ("&", "&amp;");
+            text = fix_markup (text);
             this.body.set_markup (text);
 
             try {
@@ -99,6 +98,19 @@ namespace SwayNotificatonCenter {
             } catch (Error e) {
                 stderr.printf (e.message);
             }
+        }
+
+        /** Copied from Elementary OS. Fixes some markup character issues
+         * https://github.com/elementary/notifications/blob/ff0668edd9313d8780a68880f054257c3a109971/src/Notification.vala#L137-L142
+         */
+        private string fix_markup (string markup) {
+            try {
+                Regex entity_regex = new Regex ("&(?!amp;|quot;|apos;|lt;|gt;)");
+                markup = entity_regex.replace (markup, markup.length, 0, "&amp;");
+            } catch (Error e) {
+                stderr.printf ("Invalid regex: %s", e.message);
+            }
+            return markup;
         }
 
         public void click_default_action () {

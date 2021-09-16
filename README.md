@@ -12,6 +12,7 @@ A simple notification daemon with a gui built for Sway (potentially any wm with 
 - Click notification to execute default action
 - Show alternative notification actions
 - Customization through a CSS file
+- Trackpad/mouse gesture to close notification
 - The same features as any other basic notification daemon
 
 ## Planned Features

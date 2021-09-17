@@ -40,7 +40,7 @@ namespace SwayNotificatonCenter {
 
         public delegate void On_hide_cb (Notification noti);
 
-        private On_hide_cb timeout_cb = null;
+        private unowned On_hide_cb timeout_cb = null;
 
         public Notification (NotifyParams param,
                              NotiDaemon notiDaemon) {

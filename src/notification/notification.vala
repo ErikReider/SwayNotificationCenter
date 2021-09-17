@@ -158,6 +158,8 @@ namespace SwayNotificatonCenter {
 
         private void set_actions () {
             if (param.actions.length > 0) {
+                var scroll = new Gtk.ScrolledWindow (null, null);
+                var viewport = new Gtk.Viewport (null, null);
                 alt_actions_box = new Gtk.ButtonBox (Gtk.Orientation.HORIZONTAL);
                 alt_actions_box.set_homogeneous (true);
                 alt_actions_box.set_layout (Gtk.ButtonBoxStyle.EXPAND);
@@ -165,11 +167,13 @@ namespace SwayNotificatonCenter {
                     var actionButton = new Gtk.Button.with_label (action._name);
                     actionButton.clicked.connect (() => action_clicked (action));
                     actionButton.get_style_context ().add_class ("notification-action");
-                    actionButton.can_focus = false;
+                    actionButton.set_can_focus (false);
                     alt_actions_box.add (actionButton);
                 }
-                alt_actions_box.show_all ();
-                base_box.add (alt_actions_box);
+                viewport.add (alt_actions_box);
+                scroll.add (viewport);
+                base_box.add (scroll);
+                scroll.show_all ();
             }
         }
 

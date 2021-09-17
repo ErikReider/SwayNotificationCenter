@@ -11,12 +11,14 @@ namespace SwayNotificatonCenter {
         unowned Gtk.Button default_button;
 
         [GtkChild]
+        unowned Gtk.Box base_box;
+
+        [GtkChild]
         unowned Gtk.Revealer close_revealer;
         [GtkChild]
         unowned Gtk.Button close_button;
 
-        [GtkChild]
-        unowned Gtk.ButtonBox alt_actions_button_box;
+        private Gtk.ButtonBox alt_actions_box;
 
         [GtkChild]
         unowned Gtk.Label summary;
@@ -156,14 +158,18 @@ namespace SwayNotificatonCenter {
 
         private void set_actions () {
             if (param.actions.length > 0) {
+                alt_actions_box = new Gtk.ButtonBox (Gtk.Orientation.HORIZONTAL);
+                alt_actions_box.set_homogeneous (true);
+                alt_actions_box.set_layout (Gtk.ButtonBoxStyle.EXPAND);
                 foreach (var action in param.actions) {
                     var actionButton = new Gtk.Button.with_label (action._name);
                     actionButton.clicked.connect (() => action_clicked (action));
                     actionButton.get_style_context ().add_class ("notification-action");
                     actionButton.can_focus = false;
-                    alt_actions_button_box.add (actionButton);
+                    alt_actions_box.add (actionButton);
                 }
-                alt_actions_button_box.show_all ();
+                alt_actions_box.show_all ();
+                base_box.add (alt_actions_box);
             }
         }
 

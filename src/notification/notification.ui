@@ -191,22 +191,6 @@
                             <property name="position">0</property>
                           </packing>
                         </child>
-                        <child>
-                          <object class="GtkButtonBox" id="alt_actions_button_box">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="homogeneous">True</property>
-                            <property name="layout-style">expand</property>
-                            <child>
-                              <placeholder/>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
                         <style>
                           <class name="notification"/>
                         </style>

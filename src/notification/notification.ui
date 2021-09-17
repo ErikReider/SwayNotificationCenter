@@ -191,6 +191,22 @@
                             <property name="position">0</property>
                           </packing>
                         </child>
+                        <child>
+                          <object class="GtkButtonBox" id="alt_actions_button_box">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="homogeneous">True</property>
+                            <property name="layout-style">expand</property>
+                            <child>
+                              <placeholder/>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
                         <style>
                           <class name="notification"/>
                         </style>
@@ -203,18 +219,37 @@
                       <object class="GtkRevealer" id="close_revealer">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="valign">start</property>
                         <property name="transition-type">crossfade</property>
                         <child>
                           <object class="GtkButton" id="close_button">
-                            <property name="label">×</property>
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
-                            <property name="receives-default">True</property>
-                            <property name="halign">end</property>
-                            <property name="valign">start</property>
+                            <property name="receives-default">False</property>
+                            <property name="halign">center</property>
+                            <property name="valign">center</property>
+                            <property name="margin-start">4</property>
+                            <property name="margin-end">4</property>
+                            <property name="margin-top">2</property>
+                            <property name="margin-bottom">2</property>
                             <property name="relief">none</property>
-                            <property name="always-show-image">True</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">center</property>
+                                <property name="valign">center</property>
+                                <property name="xpad">7</property>
+                                <property name="label" translatable="yes">×</property>
+                                <property name="justify">center</property>
+                                <attributes>
+                                  <attribute name="size" value="16384"/>
+                                </attributes>
+                              </object>
+                            </child>
                             <style>
+                              <class name="circular"/>
                               <class name="close-button"/>
                             </style>
                           </object>

@@ -66,6 +66,7 @@
 .notification-action {
   border-radius: 0px;
   border-top: none;
+  border-right: none;
 }
 
 /* add bottom border radius to eliminate clipping */
@@ -74,6 +75,7 @@
 }
 .notification-action:last-child {
   border-bottom-right-radius: 10px;
+  border-right: 1px solid @border-color;
 }
 
 .image {

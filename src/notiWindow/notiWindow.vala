@@ -60,11 +60,11 @@ namespace SwayNotificatonCenter {
 
         public void close_all_notifications () {
             foreach (var w in box.get_children ()) {
-                box.remove (w);
+                remove_notification ((Notification) w);
             }
         }
 
-        private void remove_noti (Notification noti) {
+        private void remove_notification (Notification noti) {
             if (box.get_children ().index (noti) >= 0) {
                 box.remove (noti);
             }
@@ -72,7 +72,9 @@ namespace SwayNotificatonCenter {
         }
 
         public void add_notification (NotifyParams param, NotiDaemon notiDaemon) {
-            var noti = new Notification.timed (param, notiDaemon, remove_noti);
+            var noti = new Notification.timed (param,
+                                               notiDaemon,
+                                               remove_notification);
 
             if (list_reverse) {
                 box.pack_start (noti);
@@ -88,7 +90,7 @@ namespace SwayNotificatonCenter {
             foreach (var w in box.get_children ()) {
                 var noti = (Notification) w;
                 if (noti != null && noti.param.applied_id == id) {
-                    remove_noti (noti);
+                    remove_notification (noti);
                     break;
                 }
             }

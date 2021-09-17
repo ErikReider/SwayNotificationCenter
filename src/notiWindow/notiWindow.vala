@@ -71,20 +71,19 @@ namespace SwayNotificatonCenter {
         }
 
         public void add_notification (NotifyParams param, NotiDaemon notiDaemon) {
-            var noti = new Notification (param, notiDaemon);
+            var noti = new Notification.timed (param, notiDaemon, (v_noti) => {
+                if (box.get_children ().index (v_noti) >= 0) {
+                    box.remove (v_noti);
+                }
+                if (box.get_children ().length () == 0) this.hide ();
+            });
 
             if (list_reverse) {
                 box.pack_start (noti);
             } else {
                 box.pack_end (noti);
             }
-
-            noti.show_notification ((v_noti) => {
-                if (box.get_children ().index (v_noti) >= 0) {
-                    box.remove (v_noti);
-                }
-                if (box.get_children ().length () == 0) this.hide ();
-            });
+            this.grab_focus ();
             this.show ();
             scroll_to_start (list_reverse);
         }

@@ -33,13 +33,31 @@ namespace SwayNotificatonCenter {
 
         private const int timeout_delay_normal = 10000;
         private const int timeout_delay_low = 5000;
+        private uint timeout_id = 0;
 
         public NotifyParams param;
         private NotiDaemon notiDaemon;
 
+        public delegate void On_hide_cb (Notification noti);
+
+        private On_hide_cb timeout_cb = null;
+
         public Notification (NotifyParams param,
-                             NotiDaemon notiDaemon,
-                             bool is_cc_noti = false) {
+                             NotiDaemon notiDaemon) {
+            build_noti (param, notiDaemon);
+            this.body.set_lines (10);
+        }
+
+        // Called to show a temp notification
+        public Notification.timed (NotifyParams param,
+                                   NotiDaemon notiDaemon,
+                                   On_hide_cb callback) {
+            this.timeout_cb = callback;
+            build_noti (param, notiDaemon);
+            add_noti_timeout ();
+        }
+
+        private void build_noti (NotifyParams param, NotiDaemon notiDaemon) {
             this.notiDaemon = notiDaemon;
             this.param = param;
 
@@ -51,12 +69,14 @@ namespace SwayNotificatonCenter {
 
             this.event_box.enter_notify_event.connect (() => {
                 close_revealer.set_reveal_child (true);
+                remove_noti_timeout ();
                 return false;
             });
 
             this.event_box.leave_notify_event.connect ((event) => {
                 if (event.detail == Gdk.NotifyType.INFERIOR) return true;
                 close_revealer.set_reveal_child (false);
+                add_noti_timeout ();
                 return false;
             });
 
@@ -69,10 +89,7 @@ namespace SwayNotificatonCenter {
             set_icon ();
             set_actions ();
 
-            if (is_cc_noti) {
-                this.body.set_lines (10);
-                this.show ();
-            }
+            this.show ();
         }
 
         private void set_body () {
@@ -215,6 +232,7 @@ namespace SwayNotificatonCenter {
         private void close_notification () {
             try {
                 notiDaemon.click_close_notification (param.applied_id);
+                remove_noti_timeout ();
             } catch (Error e) {
                 print ("Error: %s\n", e.message);
             }
@@ -261,12 +279,7 @@ namespace SwayNotificatonCenter {
             }
         }
 
-        public delegate void On_hide_cb (Notification noti);
-
-        // Called to show a temp notification
-        public void show_notification (On_hide_cb callback) {
-            this.show ();
-
+        private void add_noti_timeout () {
             int timeout_delay;
             switch (param.urgency) {
                 case UrgencyLevels.LOW :
@@ -281,10 +294,17 @@ namespace SwayNotificatonCenter {
             }
             int ms = param.expire_timeout > 0 ? param.expire_timeout : timeout_delay;
             if (param.expire_timeout != 0) {
-                Timeout.add (ms, () => {
-                    callback (this);
+                timeout_id = Timeout.add (ms, () => {
+                    if (timeout_cb != null) timeout_cb (this);
                     return GLib.Source.REMOVE;
                 });
+            }
+        }
+
+        private void remove_noti_timeout () {
+            if (timeout_id > 0) {
+                Source.remove (timeout_id);
+                timeout_id = 0;
             }
         }
     }

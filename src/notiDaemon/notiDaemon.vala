@@ -5,17 +5,15 @@ namespace SwayNotificatonCenter {
         private uint32 noti_id = 0;
         private bool dnd = false;
 
-        public NotiWindow notiWin;
         private DBusInit dbusInit;
 
         public NotiDaemon (DBusInit dbusInit) {
             this.dbusInit = dbusInit;
-            this.notiWin = new NotiWindow (dbusInit);
         }
 
         public void set_noti_window_visibility (bool value)
         throws DBusError, IOError {
-            notiWin.change_visibility (value);
+            NotiWindow.instance (dbusInit).change_visibility (value);
         }
 
         public uint32 Notify (string app_name,
@@ -42,13 +40,14 @@ namespace SwayNotificatonCenter {
                 expire_timeout);
 
             if (id == replaces_id) {
-                notiWin.close_notification (id);
+                NotiWindow.instance (dbusInit).close_notification (id);
                 dbusInit.ccDaemon.close_notification (id);
             }
             if (!dbusInit.ccDaemon.get_visibility ()) {
                 if (param.urgency == UrgencyLevels.CRITICAL ||
                     (!dnd && param.urgency != UrgencyLevels.CRITICAL)) {
-                    notiWin.add_notification (param, this);
+                    NotiWindow.instance (dbusInit)
+                     .add_notification (param, this);
                 }
             }
             dbusInit.ccDaemon.add_notification (param);
@@ -71,14 +70,15 @@ namespace SwayNotificatonCenter {
 
         public signal void on_dnd_toggle (bool dnd);
 
-        public void click_close_notification (uint32 id) throws DBusError, IOError {
-            notiWin.close_notification (id);
+        public void click_close_notification (uint32 id)
+        throws DBusError, IOError {
+            NotiWindow.instance (dbusInit).close_notification (id);
             dbusInit.ccDaemon.close_notification (id);
             NotificationClosed (id, ClosedReasons.DISMISSED);
         }
 
         public void close_all_notifications () throws DBusError, IOError {
-            notiWin.close_all_notifications ();
+            NotiWindow.instance (dbusInit).close_all_notifications ();
         }
 
         // Only remove the popup without removing the it from the panel

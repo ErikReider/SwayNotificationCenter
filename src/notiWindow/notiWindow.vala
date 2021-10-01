@@ -2,6 +2,13 @@ namespace SwayNotificatonCenter {
     [GtkTemplate (ui = "/org/erikreider/sway-notification-center/notiWindow/notiWindow.ui")]
     public class NotiWindow : Gtk.ApplicationWindow {
 
+        private static NotiWindow _noti_window = null;
+
+        public static NotiWindow instance (DBusInit dbusInit) {
+            if (_noti_window == null) _noti_window = new NotiWindow (dbusInit);
+            return _noti_window;
+        }
+
         [GtkChild]
         unowned Gtk.Viewport viewport;
         [GtkChild]
@@ -13,7 +20,7 @@ namespace SwayNotificatonCenter {
 
         private double last_upper = 0;
 
-        public NotiWindow (DBusInit dbusInit) {
+        private NotiWindow (DBusInit dbusInit) {
             this.dbusInit = dbusInit;
 
             GtkLayerShell.init_for_window (this);
@@ -68,7 +75,15 @@ namespace SwayNotificatonCenter {
             if (box.get_children ().index (noti) >= 0) {
                 box.remove (noti);
             }
-            if (box.get_children ().length () == 0) this.hide ();
+            if (box.get_children ().length () == 0) {
+                // Hack to close and recreate the window
+                // Fixes notifications enter_notify_event still being active
+                // when closed
+                this.close ();
+                this.destroy ();
+                this.dispose ();
+                _noti_window = null;
+            }
         }
 
         public void add_notification (NotifyParams param, NotiDaemon notiDaemon) {

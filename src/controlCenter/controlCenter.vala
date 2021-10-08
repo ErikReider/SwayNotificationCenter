@@ -31,6 +31,12 @@ namespace SwayNotificatonCenter {
             ConfigModel.reload_config ();
         }
 
+        public void change_config_value (string path,
+                                         string name,
+                                         Variant value) throws Error {
+            ConfigModel.instance.change_value (path, name, value);
+        }
+
         public bool get_visibility () throws DBusError, IOError {
             return cc.visible;
         }

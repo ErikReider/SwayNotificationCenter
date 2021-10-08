@@ -38,13 +38,22 @@ namespace SwayNotificatonCenter {
             return _instance;
         }
 
-        public static void reload_config () {
+        public delegate void ModifyNode (Json.Node node);
+
+        /** Reloads the config and calls `ModifyNode` before deserializing */
+        public static void reload_config (ModifyNode modify_cb = () => {}) {
             ConfigModel m = null;
             try {
                 if (_path.length == 0) return;
                 Json.Parser parser = new Json.Parser ();
                 parser.load_from_file (_path);
-                var node = parser.get_root ();
+                Json.Node ? node = parser.get_root ();
+                if (node == null) {
+                    throw new Json.ParserError.PARSE ("Node is null!");
+                }
+
+                modify_cb (node);
+
                 ConfigModel model = Json.gobject_deserialize (typeof (ConfigModel), node) as ConfigModel;
                 if (model == null) {
                     throw new Json.ParserError.UNKNOWN ("Json model is null!");
@@ -54,7 +63,7 @@ namespace SwayNotificatonCenter {
                 stderr.printf (e.message + "\n");
             }
             _instance = m ?? new ConfigModel ();
-            debug(_instance.json_serialized ());
+            debug (_instance.json_serialized ());
         }
 
         public PositionX positionX { get; set; default = PositionX.RIGHT; }
@@ -85,7 +94,7 @@ namespace SwayNotificatonCenter {
                                              ParamSpec pspec) {
             var node = new Json.Node (Json.NodeType.VALUE);
             switch (property_name) {
-                case "positionX":
+                case "positionX" :
                     node.set_string (((PositionX) value.get_enum ()).parse ());
                     break;
                 case "positionY":
@@ -101,6 +110,29 @@ namespace SwayNotificatonCenter {
         public string json_serialized () {
             var json = Json.gobject_serialize (_instance);
             return Json.to_string (json, true);
+        }
+
+        public void change_value (string path, string member_name, Variant value) {
+            reload_config ((node) => {
+                unowned Json.Object obj = node.get_object ();
+                if (!obj.has_member (member_name)) return;
+                debug ("Config change value type: %s", value.get_type_string ());
+                switch (value.get_type_string ()) {
+                    case "i":
+                        int val = value.get_int32 ();
+                        obj.set_int_member (member_name, val);
+                        break;
+                    case "s":
+                        debug ("STRING");
+                        string val = value.get_string ();
+                        obj.set_string_member (member_name, val);
+                        break;
+                    case "b":
+                        bool val = value.get_boolean ();
+                        obj.set_boolean_member (member_name, val);
+                        break;
+                }
+            });
         }
     }
 }

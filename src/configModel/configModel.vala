@@ -4,7 +4,7 @@ namespace SwayNotificatonCenter {
 
         public string parse () {
             EnumClass enumc = (EnumClass) typeof (PositionX).class_ref ();
-            return enumc.get_value_by_name (this.parse ()).value_nick;
+            return enumc.get_value_by_name (this.to_string ()).value_nick;
         }
     }
 
@@ -13,7 +13,7 @@ namespace SwayNotificatonCenter {
 
         public string parse () {
             EnumClass enumc = (EnumClass) typeof (PositionY).class_ref ();
-            return enumc.get_value_by_name (this.parse ()).value_nick;
+            return enumc.get_value_by_name (this.to_string ()).value_nick;
         }
     }
 
@@ -54,6 +54,7 @@ namespace SwayNotificatonCenter {
                 stderr.printf (e.message + "\n");
             }
             _instance = m ?? new ConfigModel ();
+            debug(_instance.json_serialized ());
         }
 
         public PositionX positionX { get; set; default = PositionX.RIGHT; }
@@ -98,9 +99,8 @@ namespace SwayNotificatonCenter {
         }
 
         public string json_serialized () {
-            var json = Json.gobject_serialize (this);
-            string json_string = Json.to_string (json, true);
-            return json_string;
+            var json = Json.gobject_serialize (_instance);
+            return Json.to_string (json, true);
         }
     }
 }

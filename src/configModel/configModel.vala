@@ -112,18 +112,20 @@ namespace SwayNotificatonCenter {
             return Json.to_string (json, true);
         }
 
-        public void change_value (string path, string member_name, Variant value) {
+        public void change_value (string path,
+                                  string member_name,
+                                  Variant value) {
             reload_config ((node) => {
                 unowned Json.Object obj = node.get_object ();
-                if (!obj.has_member (member_name)) return;
-                debug ("Config change value type: %s", value.get_type_string ());
+                if (obj == null) return;
+                debug ("Config change: %s %s",
+                       member_name, value.get_type_string ());
                 switch (value.get_type_string ()) {
                     case "i":
                         int val = value.get_int32 ();
                         obj.set_int_member (member_name, val);
                         break;
                     case "s":
-                        debug ("STRING");
                         string val = value.get_string ();
                         obj.set_string_member (member_name, val);
                         break;

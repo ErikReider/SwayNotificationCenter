@@ -39,7 +39,7 @@ namespace SwayNotificatonCenter {
         }
 
         public static void reload_config () {
-            ConfigModel m = new ConfigModel ();
+            ConfigModel m = null;
             try {
                 if (_path.length == 0) return;
                 Json.Parser parser = new Json.Parser ();
@@ -53,7 +53,7 @@ namespace SwayNotificatonCenter {
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }
-            _instance = m;
+            _instance = m ?? new ConfigModel ();
         }
 
         public PositionX positionX { get; set; default = PositionX.RIGHT; }

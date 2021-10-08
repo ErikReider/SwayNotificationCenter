@@ -1,9 +1,4 @@
 namespace SwayNotificatonCenter {
-    private errordomain JSONError {
-        INVALID_FORMAT,
-        INVALID_VALUE
-    }
-
     public enum PositionX {
         RIGHT, LEFT;
 

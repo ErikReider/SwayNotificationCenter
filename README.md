@@ -58,6 +58,12 @@ To toggle the panel
 ./build/src/swaync-client -t
 ```
 
+To reload the config
+
+```zsh
+./build/src/swaync-client -R
+```
+
 ## Notification Panel Shortcuts
 
 - Up/Down: Navigate notifications

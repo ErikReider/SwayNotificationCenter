@@ -31,12 +31,12 @@ namespace SwayNotificatonCenter {
         [GtkChild]
         unowned Gtk.Image body_image;
 
-        private const int timeout_delay_normal = 10000;
-        private const int timeout_delay_low = 5000;
         private uint timeout_id = 0;
 
         public NotifyParams param;
         private NotiDaemon notiDaemon;
+        private uint timeout_delay;
+        private uint timeout_low_delay;
 
         public delegate void On_hide_cb (Notification noti);
 
@@ -51,7 +51,11 @@ namespace SwayNotificatonCenter {
         // Called to show a temp notification
         public Notification.timed (NotifyParams param,
                                    NotiDaemon notiDaemon,
+                                   uint timeout,
+                                   uint timeout_low,
                                    On_hide_cb callback) {
+            this.timeout_delay = timeout;
+            this.timeout_low_delay = timeout_low;
             this.timeout_cb = callback;
             build_noti (param, notiDaemon);
             add_noti_timeout ();
@@ -280,19 +284,19 @@ namespace SwayNotificatonCenter {
         }
 
         private void add_noti_timeout () {
-            int timeout_delay;
+            uint timeout;
             switch (param.urgency) {
                 case UrgencyLevels.LOW :
-                    timeout_delay = timeout_delay_low;
+                    timeout = timeout_low_delay * 1000;
                     break;
                 case UrgencyLevels.NORMAL:
                 default:
-                    timeout_delay = timeout_delay_normal;
+                    timeout = timeout_delay * 1000;
                     break;
                 case UrgencyLevels.CRITICAL:
                     return;
             }
-            int ms = param.expire_timeout > 0 ? param.expire_timeout : timeout_delay;
+            uint ms = param.expire_timeout > 0 ? param.expire_timeout : timeout;
             if (param.expire_timeout != 0) {
                 timeout_id = Timeout.add (ms, () => {
                     if (timeout_cb != null) timeout_cb (this);

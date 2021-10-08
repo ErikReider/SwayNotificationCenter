@@ -4,55 +4,69 @@ namespace SwayNotificatonCenter {
         INVALID_VALUE
     }
 
-    public struct ConfigModel {
-        Positions positionX { get; set; }
-        Positions positionY { get; set; }
+    public enum PositionX {
+        RIGHT, LEFT;
 
-        public ConfigModel (Json.Node ? node) {
-            try {
-                if (node.get_node_type () != Json.NodeType.OBJECT) {
-                    throw new JSONError.INVALID_FORMAT (
-                              @"JSON DOES NOT CONTAIN OBJECT!");
-                }
-                Json.Object obj = node.get_object ();
-
-                positionX = Positions.from_string (assert_node (obj, "positionX", { "left", "right" }).get_string ());
-                positionY = Positions.from_string (assert_node (obj, "positionY", { "top", "bottom" }).get_string ());
-            } catch (JSONError e) {
-                stderr.printf (e.message + "\n");
-                Process.exit (1);
-            }
-        }
-
-        private Json.Node ? assert_node (Json.Object ? obj,
-                                         string name,
-                                         string[] correct_values) throws JSONError {
-            Json.Node? node = obj.get_member (name);
-            if (node == null || node.get_node_type () != Json.NodeType.VALUE) {
-                throw new JSONError.INVALID_FORMAT (
-                          @"JSON value $(name) wasn't defined!");
-            }
-            if (correct_values.length > 0 &&
-                !(node.get_value ().get_string () in correct_values)) {
-                throw new JSONError.INVALID_VALUE (
-                          @"JSON value $(name) does not contain a correct value!");
-            }
-            return node;
+        public string parse () {
+            EnumClass enumc = (EnumClass) typeof (PositionX).class_ref ();
+            return enumc.get_value_by_name (this.parse ()).value_nick;
         }
     }
 
-    public enum Positions {
-        left, right, top, bottom;
-
-        public static Positions from_string (string str) {
-            EnumClass enumc = (EnumClass) typeof (Positions).class_ref ();
-            unowned EnumValue ? eval = enumc.get_value_by_nick (str);
-            return (Positions) eval.value;
-        }
+    public enum PositionY {
+        TOP, BOTTOM;
 
         public string parse () {
-            EnumClass enumc = (EnumClass) typeof (Positions).class_ref ();
-            return enumc.get_value_by_name (this.to_string ()).value_nick;
+            EnumClass enumc = (EnumClass) typeof (PositionY).class_ref ();
+            return enumc.get_value_by_name (this.parse ()).value_nick;
+        }
+    }
+
+    public class ConfigModel : Object, Json.Serializable {
+        public PositionX positionX { get; set; default = PositionX.RIGHT; }
+        public PositionY positionY { get; set; default = PositionY.TOP; }
+        public uint timeout { get; set; default = 10; }
+        public uint timeout_low { get; set; default = 5; }
+
+        public static ConfigModel from_path (string path) {
+            try {
+                if (path.length == 0) return new ConfigModel ();
+                Json.Parser parser = new Json.Parser ();
+                parser.load_from_file (path);
+                var node = parser.get_root ();
+                ConfigModel model = Json.gobject_deserialize (typeof (ConfigModel), node) as ConfigModel;
+                if (model == null) {
+                    throw new Json.ParserError.UNKNOWN ("Json model is null!");
+                }
+                return model;
+            } catch (Error e) {
+                stderr.printf (e.message + "\n");
+                return new ConfigModel ();
+            }
+        }
+
+        public Json.Node serialize_property (string property_name,
+                                             Value value,
+                                             ParamSpec pspec) {
+            var node = new Json.Node (Json.NodeType.VALUE);
+            switch (property_name) {
+                case "positionX":
+                    node.set_string (((PositionX) value.get_enum ()).parse ());
+                    break;
+                case "positionY":
+                    node.set_string (((PositionY) value.get_enum ()).parse ());
+                    break;
+                default:
+                    node.set_value (value);
+                    break;
+            }
+            return node;
+        }
+
+        public string json_serialized () {
+            var json = Json.gobject_serialize (this);
+            string json_string = Json.to_string (json, true);
+            return json_string;
         }
     }
 }

@@ -1,4 +1,10 @@
 {
+  // X-axis position
   "positionX": "right",
-  "positionY": "top"
+  // Y-axis position
+  "positionY": "top",
+  // Timeout for normal priority notifications
+  "timeout": 10,
+  // Timeout for low priority notifications
+  "timeout_low": 5,
 }

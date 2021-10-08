@@ -75,15 +75,9 @@ namespace SwayNotificatonCenter {
             return path;
         }
 
-        public static ConfigModel parse_config (string custon_path) {
-            try {
-                Json.Parser parser = new Json.Parser ();
-                parser.load_from_file (get_config_path (custon_path));
-                return ConfigModel (parser.get_root ());
-            } catch (Error e) {
-                print ("Unable to parse the JSON File: %s\n", e.message);
-                Process.exit (1);
-            }
+        public static ConfigModel parse_config (string custom_path) {
+            string path = get_config_path (custom_path);
+            return ConfigModel.from_path (path);
         }
 
         public static string get_match_from_info (MatchInfo info) {

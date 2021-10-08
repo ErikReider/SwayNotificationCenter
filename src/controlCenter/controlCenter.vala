@@ -103,15 +103,15 @@ namespace SwayNotificatonCenter {
 
             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
-            switch (dbusInit.configModel._positionX) {
-                case Positions.left:
+            switch (dbusInit.configModel.positionX) {
+                case PositionX.LEFT:
                     GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, true);
                     break;
                 default:
                     GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
                     break;
             }
-            if (dbusInit.configModel._positionY == Positions.bottom) {
+            if (dbusInit.configModel.positionY == PositionY.BOTTOM) {
                 list_reverse = true;
                 list_align = Gtk.Align.END;
                 this.box.set_child_packing (scrolled_window, true, true, 0, Gtk.PackType.START);

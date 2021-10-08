@@ -83,7 +83,7 @@ The main config file is located in `/etc/xdg/swaync/config.json`. Copy it over t
 - `positionX`: `left` or `right`
 - `positionY`: `top` or `bottom`
 - `timeout`: Any positive number. The notification timeout for notifications with normal priority
-- `timeout_low`: Any positive number. The notification timeout for notifications with low priority
+- `timeout-low`: Any positive number. The notification timeout for notifications with low priority
 
 The main CSS style file is located in `/etc/xdg/swaync/style.css`. Copy it over to your `.config/swaync/` folder to customize without needing root access.
 

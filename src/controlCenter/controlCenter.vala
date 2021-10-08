@@ -96,41 +96,11 @@ namespace SwayNotificatonCenter {
 
         public ControlCenterWidget (CcDaemon cc_daemon, DBusInit dbusInit) {
             this.cc_daemon = cc_daemon;
-            GtkLayerShell.init_for_window (this);
-            // Grabs the keyboard input until closed
-#if HAVE_LATEST_GTK_LAYER_SHELL
-            GtkLayerShell.set_keyboard_mode (this, GtkLayerShell.KeyboardMode.ON_DEMAND);
-#else
-            GtkLayerShell.set_keyboard_interactivity (this, true);
-#endif
-            GtkLayerShell.set_layer (this, GtkLayerShell.Layer.TOP);
 
-            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
-            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
-            switch (ConfigModel.instance.positionX) {
-                case PositionX.LEFT:
-                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, true);
-                    break;
-                default:
-                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
-                    break;
-            }
-            if (ConfigModel.instance.positionY == PositionY.BOTTOM) {
-                list_reverse = true;
-                list_align = Gtk.Align.END;
-                this.box.set_child_packing (scrolled_window, true, true, 0, Gtk.PackType.START);
-            }
-            viewport.size_allocate.connect (() => size_alloc (list_reverse));
-            list_box.set_valign (list_align);
-            list_box.set_sort_func ((w1, w2) => {
-                var a = (Notification) w1;
-                var b = (Notification) w2;
-                if (a == null || b == null) return 0;
-                // Sort the list in reverse if needed
-                int val1 = list_reverse ? 1 : -1;
-                int val2 = list_reverse ? -1 : 1;
-                return a.param._time > b.param._time ? val1 : val2;
-            });
+            GtkLayerShell.init_for_window (this);
+            this.set_anchor ();
+
+            viewport.size_allocate.connect (size_alloc);
 
             this.key_press_event.connect ((w, event_key) => {
                 if (event_key.type == Gdk.EventType.KEY_PRESS) {
@@ -201,11 +171,58 @@ namespace SwayNotificatonCenter {
             this.box.add (new TopAction ("Do Not Disturb", dnd_button, false));
         }
 
-        private void size_alloc (bool reverse) {
+        /** Resets the UI positions */
+        private void set_anchor () {
+            // Grabs the keyboard input until closed
+#if HAVE_LATEST_GTK_LAYER_SHELL
+            GtkLayerShell.set_keyboard_mode (this, GtkLayerShell.KeyboardMode.ON_DEMAND);
+#else
+            GtkLayerShell.set_keyboard_interactivity (this, true);
+#endif
+            GtkLayerShell.set_layer (this, GtkLayerShell.Layer.TOP);
+
+            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
+            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
+            switch (ConfigModel.instance.positionX) {
+                case PositionX.LEFT:
+                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, false);
+                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, true);
+                    break;
+                default:
+                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, false);
+                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
+                    break;
+            }
+            switch (ConfigModel.instance.positionY) {
+                case PositionY.BOTTOM:
+                    list_reverse = true;
+                    list_align = Gtk.Align.END;
+                    this.box.set_child_packing (scrolled_window, true, true, 0, Gtk.PackType.START);
+                    break;
+                case PositionY.TOP:
+                    list_reverse = false;
+                    list_align = Gtk.Align.START;
+                    this.box.set_child_packing (scrolled_window, true, true, 0, Gtk.PackType.END);
+                    break;
+            }
+
+            list_box.set_valign (list_align);
+            list_box.set_sort_func ((w1, w2) => {
+                var a = (Notification) w1;
+                var b = (Notification) w2;
+                if (a == null || b == null) return 0;
+                // Sort the list in reverse if needed
+                int val1 = list_reverse ? 1 : -1;
+                int val2 = list_reverse ? -1 : 1;
+                return a.param._time > b.param._time ? val1 : val2;
+            });
+        }
+
+        private void size_alloc () {
             var adj = viewport.vadjustment;
             double upper = adj.get_upper ();
             if (last_upper < upper) {
-                scroll_to_start (reverse);
+                scroll_to_start (list_reverse);
             }
             last_upper = upper;
         }
@@ -229,7 +246,7 @@ namespace SwayNotificatonCenter {
 
         public void close_all_notifications () {
             foreach (var w in list_box.get_children ()) {
-                list_box.remove (w);
+                if (w != null) list_box.remove (w);
             }
 
             try {
@@ -256,6 +273,8 @@ namespace SwayNotificatonCenter {
             this.set_visible (cc_visibility);
 
             if (cc_visibility) {
+                // Reload the settings from config
+                this.set_anchor ();
                 // Focus the first notification
                 list_position = list_reverse ? (list_box.get_children ().length () - 1) : 0;
                 if (list_position == uint.MAX) list_position = 0;
@@ -272,7 +291,8 @@ namespace SwayNotificatonCenter {
 
         public void close_notification (uint32 id) {
             foreach (var w in list_box.get_children ()) {
-                if (((Notification) w).param.applied_id == id) {
+                var noti = (Notification) w;
+                if (noti != null && noti.param.applied_id == id) {
                     list_box.remove (w);
                     break;
                 }

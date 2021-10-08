@@ -25,31 +25,40 @@ namespace SwayNotificatonCenter {
 
             GtkLayerShell.init_for_window (this);
             GtkLayerShell.set_layer (this, GtkLayerShell.Layer.OVERLAY);
+            this.set_anchor ();
+            viewport.size_allocate.connect (size_alloc);
+        }
+
+        private void set_anchor () {
             switch (ConfigModel.instance.positionX) {
                 case PositionX.LEFT:
+                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, false);
                     GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, true);
                     break;
                 default:
+                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, false);
                     GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
                     break;
             }
             switch (ConfigModel.instance.positionY) {
                 case PositionY.BOTTOM:
+                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, false);
                     GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
                     list_reverse = true;
                     break;
-                default:
+                case PositionY.TOP:
+                    list_reverse = false;
+                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, false);
                     GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
                     break;
             }
-            viewport.size_allocate.connect (() => size_alloc (list_reverse));
         }
 
-        private void size_alloc (bool reverse) {
+        private void size_alloc () {
             var adj = viewport.vadjustment;
             double upper = adj.get_upper ();
             if (last_upper < upper) {
-                scroll_to_start (reverse);
+                scroll_to_start (list_reverse);
             }
             last_upper = upper;
         }
@@ -62,23 +71,29 @@ namespace SwayNotificatonCenter {
 
         public void change_visibility (bool value) {
             this.set_visible (value);
-            if (!value) close_all_notifications ();
+            if (!value) {
+                close_all_notifications ();
+            } else {
+                this.set_anchor ();
+            }
         }
 
         public void close_all_notifications () {
             foreach (var w in box.get_children ()) {
-                remove_notification ((Notification) w);
+                var noti = (Notification) w;
+                if (noti != null) remove_notification (noti);
             }
         }
 
         private void remove_notification (Notification noti) {
             if (box.get_children ().index (noti) >= 0) {
-                box.remove (noti);
+                if (noti != null) box.remove (noti);
             }
             if (box.get_children ().length () == 0) {
                 // Hack to close and recreate the window
                 // Fixes notifications enter_notify_event still being active
                 // when closed
+                if (_noti_window == null) return;
                 this.close ();
                 this.destroy ();
                 this.dispose ();

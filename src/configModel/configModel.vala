@@ -25,8 +25,26 @@ namespace SwayNotificatonCenter {
     public class ConfigModel : Object, Json.Serializable {
         public PositionX positionX { get; set; default = PositionX.RIGHT; }
         public PositionY positionY { get; set; default = PositionY.TOP; }
-        public uint timeout { get; set; default = 10; }
-        public uint timeout_low { get; set; default = 5; }
+
+        private const int _timeout_def = 10;
+        private int _timeout = _timeout_def;
+        public int timeout {
+            get {
+                return _timeout;
+            } set {
+                _timeout = value < 1 ? _timeout_def : value;
+            }
+        }
+
+        private const int _timeout_low_def = 5;
+        private int _timeout_low = _timeout_low_def;
+        public int timeout_low {
+            get {
+                return _timeout_low;
+            } set {
+                _timeout_low = value < 1 ? _timeout_low_def : value;
+            }
+        }
 
         public static ConfigModel from_path (string path) {
             try {

@@ -27,6 +27,10 @@ namespace SwayNotificatonCenter {
 
         public signal void subscribe (uint count, bool dnd);
 
+        public void reload_config () throws Error {
+            ConfigModel.reload_config ();
+        }
+
         public bool get_visibility () throws DBusError, IOError {
             return cc.visible;
         }
@@ -103,7 +107,7 @@ namespace SwayNotificatonCenter {
 
             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
-            switch (dbusInit.configModel.positionX) {
+            switch (ConfigModel.instance.positionX) {
                 case PositionX.LEFT:
                     GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, true);
                     break;
@@ -111,7 +115,7 @@ namespace SwayNotificatonCenter {
                     GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
                     break;
             }
-            if (dbusInit.configModel.positionY == PositionY.BOTTOM) {
+            if (ConfigModel.instance.positionY == PositionY.BOTTOM) {
                 list_reverse = true;
                 list_align = Gtk.Align.END;
                 this.box.set_child_packing (scrolled_window, true, true, 0, Gtk.PackType.START);

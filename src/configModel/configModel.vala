@@ -23,6 +23,44 @@ namespace SwayNotificatonCenter {
     }
 
     public class ConfigModel : Object, Json.Serializable {
+
+        private static ConfigModel _instance;
+        private static string _path = "";
+
+        /** Get the static singleton */
+        public static unowned ConfigModel instance {
+            get {
+                if (_instance == null) _instance = new ConfigModel ();
+                if (_path.length <= 0) _path = Functions.get_config_path ();
+                return _instance;
+            }
+        }
+
+        /** Get the static singleton and reload the config */
+        public static unowned ConfigModel init (string path) {
+            _path = Functions.get_config_path (path);
+            reload_config ();
+            return _instance;
+        }
+
+        public static void reload_config () {
+            ConfigModel m = new ConfigModel ();
+            try {
+                if (_path.length == 0) return;
+                Json.Parser parser = new Json.Parser ();
+                parser.load_from_file (_path);
+                var node = parser.get_root ();
+                ConfigModel model = Json.gobject_deserialize (typeof (ConfigModel), node) as ConfigModel;
+                if (model == null) {
+                    throw new Json.ParserError.UNKNOWN ("Json model is null!");
+                }
+                m = model;
+            } catch (Error e) {
+                stderr.printf (e.message + "\n");
+            }
+            _instance = m;
+        }
+
         public PositionX positionX { get; set; default = PositionX.RIGHT; }
         public PositionY positionY { get; set; default = PositionY.TOP; }
 
@@ -43,23 +81,6 @@ namespace SwayNotificatonCenter {
                 return _timeout_low;
             } set {
                 _timeout_low = value < 1 ? _timeout_low_def : value;
-            }
-        }
-
-        public static ConfigModel from_path (string path) {
-            try {
-                if (path.length == 0) return new ConfigModel ();
-                Json.Parser parser = new Json.Parser ();
-                parser.load_from_file (path);
-                var node = parser.get_root ();
-                ConfigModel model = Json.gobject_deserialize (typeof (ConfigModel), node) as ConfigModel;
-                if (model == null) {
-                    throw new Json.ParserError.UNKNOWN ("Json model is null!");
-                }
-                return model;
-            } catch (Error e) {
-                stderr.printf (e.message + "\n");
-                return new ConfigModel ();
             }
         }
 

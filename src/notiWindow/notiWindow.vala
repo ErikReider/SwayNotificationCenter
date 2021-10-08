@@ -25,7 +25,7 @@ namespace SwayNotificatonCenter {
 
             GtkLayerShell.init_for_window (this);
             GtkLayerShell.set_layer (this, GtkLayerShell.Layer.OVERLAY);
-            switch (dbusInit.configModel.positionX) {
+            switch (ConfigModel.instance.positionX) {
                 case PositionX.LEFT:
                     GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, true);
                     break;
@@ -33,7 +33,7 @@ namespace SwayNotificatonCenter {
                     GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
                     break;
             }
-            switch (dbusInit.configModel.positionY) {
+            switch (ConfigModel.instance.positionY) {
                 case PositionY.BOTTOM:
                     GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
                     list_reverse = true;
@@ -89,8 +89,8 @@ namespace SwayNotificatonCenter {
         public void add_notification (NotifyParams param, NotiDaemon notiDaemon) {
             var noti = new Notification.timed (param,
                                                notiDaemon,
-                                               dbusInit.configModel.timeout,
-                                               dbusInit.configModel.timeout_low,
+                                               ConfigModel.instance.timeout,
+                                               ConfigModel.instance.timeout_low,
                                                remove_notification);
 
             if (list_reverse) {

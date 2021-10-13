@@ -108,13 +108,13 @@ namespace SwayNotificatonCenter {
         }
 
         public string json_serialized () {
-            var json = Json.gobject_serialize (_instance);
+            var json = Json.gobject_serialize (ConfigModel.instance);
             return Json.to_string (json, true);
         }
 
-        public void change_value (string path,
-                                  string member_name,
-                                  Variant value) {
+        public void change_value (string member_name,
+                                  Variant value,
+                                  string ? path = null) {
             reload_config ((node) => {
                 unowned Json.Object obj = node.get_object ();
                 if (obj == null) return;
@@ -124,17 +124,64 @@ namespace SwayNotificatonCenter {
                     case "i":
                         int val = value.get_int32 ();
                         obj.set_int_member (member_name, val);
+                        debug ("Config changed %s", member_name);
                         break;
                     case "s":
                         string val = value.get_string ();
                         obj.set_string_member (member_name, val);
+                        debug ("Config changed %s", member_name);
                         break;
                     case "b":
                         bool val = value.get_boolean ();
                         obj.set_boolean_member (member_name, val);
+                        debug ("Config changed %s", member_name);
                         break;
                 }
             });
+
+            if (write_to_file (path)) {
+                debug ("Successfully wrote to %s", path);
+            } else {
+                error ("ERROR WRITING TO %s", path);
+            }
+        }
+
+        /**
+         * Writes and replaces settings with the new settings in `path`. If
+         * `path` is "null", the default user accessable config will be used
+         * ("~/.config/swaync/config.json")
+         */
+        private bool write_to_file (owned string ? path = null) {
+            try {
+                if (path == null) {
+                    // Use the default user accessable config
+                    string dir_path = Path.build_path (Path.DIR_SEPARATOR.to_string (),
+                                                       GLib.Environment.get_user_config_dir (),
+                                                       "swaync");
+                    path = Path.build_path (Path.DIR_SEPARATOR.to_string (),
+                                            dir_path, "config.json");
+                    var dir = File.new_for_path (dir_path);
+                    if (!dir.query_exists ()) {
+                        dir.make_directory ();
+                    }
+                    var file = File.new_for_path (path);
+                    if (!file.query_exists ()) {
+                        file.create (GLib.FileCreateFlags.NONE);
+                    }
+                }
+
+                var file = File.new_for_path (path);
+
+                string data = ConfigModel.instance.json_serialized ();
+                return file.replace_contents (data.data,
+                                              null,
+                                              false,
+                                              GLib.FileCreateFlags.REPLACE_DESTINATION,
+                                              null);
+            } catch (Error e) {
+                stderr.printf (e.message + "\n");
+                return false;
+            }
         }
     }
 }

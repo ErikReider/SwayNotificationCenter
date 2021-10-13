@@ -15,6 +15,7 @@ A simple notification daemon with a gui built for Sway (potentially any wm with 
 - Trackpad/mouse gesture to close notification
 - The same features as any other basic notification daemon
 - Basic configuration through a JSON config file
+- Hot-reload config through `swaync-client`
 
 ## Planned Features
 
@@ -79,6 +80,8 @@ To reload the config
 ## Configuring
 
 The main config file is located in `/etc/xdg/swaync/config.json`. Copy it over to your `.config/swaync/` folder to customize without needing root access.
+
+To reload the config, you'll need to run `swaync-client --reload-config`
 
 - `positionX`: `left` or `right`
 - `positionY`: `top` or `bottom`

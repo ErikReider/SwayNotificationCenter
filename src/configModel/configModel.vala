@@ -114,6 +114,7 @@ namespace SwayNotificatonCenter {
 
         public void change_value (string member_name,
                                   Variant value,
+                                  bool write = true,
                                   string ? path = null) {
             reload_config ((node) => {
                 unowned Json.Object obj = node.get_object ();
@@ -139,6 +140,10 @@ namespace SwayNotificatonCenter {
                 }
             });
 
+            if (!write) {
+                debug ("Skipped writing new config to %s", path);
+                return;
+            }
             if (write_to_file (path)) {
                 debug ("Successfully wrote to %s", path);
             } else {

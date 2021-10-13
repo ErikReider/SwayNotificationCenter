@@ -33,8 +33,12 @@ namespace SwayNotificatonCenter {
 
         public void change_config_value (string name,
                                          Variant value,
+                                         bool write_to_file = true,
                                          string ? path = null) throws Error {
-            ConfigModel.instance.change_value (name, value, path);
+            ConfigModel.instance.change_value (name,
+                                               value,
+                                               write_to_file,
+                                               path);
         }
 
         public bool get_visibility () throws DBusError, IOError {

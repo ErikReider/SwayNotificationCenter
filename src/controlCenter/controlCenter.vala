@@ -114,49 +114,62 @@ namespace SwayNotificatonCenter {
 
             this.key_press_event.connect ((w, event_key) => {
                 if (event_key.type == Gdk.EventType.KEY_PRESS) {
-                    if (event_key.keyval == Gdk.keyval_from_name ("Escape") ||
-                        event_key.keyval == Gdk.keyval_from_name ("Caps_Lock")) {
-                        toggle_visibility ();
-                        return true;
-                    } else if (event_key.keyval == Gdk.keyval_from_name ("Return")) {
-                        Notification noti = (Notification) list_box.get_focus_child ();
-                        if (noti != null) noti.click_default_action ();
-                    } else if (event_key.keyval == Gdk.keyval_from_name ("Delete") ||
-                               event_key.keyval == Gdk.keyval_from_name ("BackSpace")) {
-                        Notification noti = (Notification) list_box.get_focus_child ();
-                        if (noti != null) {
-                            if (list_reverse &&
-                                list_box.get_children ().first ().data != noti) {
-                                list_position--;
-                            } else if (list_box.get_children ().last ().data == noti) {
-                                if (list_position > 0) list_position--;
+                    var children = list_box.get_children ();
+                    Notification noti = (Notification)
+                                        list_box.get_focus_child ();
+                    switch (Gdk.keyval_name (event_key.keyval)) {
+                        case "Escape":
+                        case "Caps_Lock":
+                            toggle_visibility ();
+                            return true;
+                        case "Return":
+                            if (noti != null) noti.click_default_action ();
+                            break;
+                        case "Delete":
+                        case "BackSpace":
+                            if (noti != null) {
+                                if (children.length () == 0) break;
+                                if (list_reverse &&
+                                    children.first ().data != noti) {
+                                    list_position--;
+                                } else if (children.last ().data == noti) {
+                                    if (list_position > 0) list_position--;
+                                }
+                                close_notification (noti.param.applied_id);
                             }
-                            close_notification (noti.param.applied_id);
-                        }
-                    } else if (event_key.keyval == Gdk.keyval_from_name ("C")) {
-                        close_all_notifications ();
-                    } else if (event_key.keyval == Gdk.keyval_from_name ("D")) {
-                        set_switch_dnd_state (!this.dnd_button.get_state ());
-                    } else if (event_key.keyval == Gdk.keyval_from_name ("Down")) {
-                        if (list_position + 1 < list_box.get_children ().length ()) {
-                            ++list_position;
-                        }
-                    } else if (event_key.keyval == Gdk.keyval_from_name ("Up")) {
-                        if (list_position > 0) --list_position;
-                    } else if (event_key.keyval == Gdk.keyval_from_name ("Home")) {
-                        list_position = 0;
-                    } else if (event_key.keyval == Gdk.keyval_from_name ("End")) {
-                        list_position = list_box.get_children ().length () - 1;
-                        if (list_position == uint.MAX) list_position = 0;
-                    } else {
-                        for (int i = 0; i < 9; i++) {
-                            uint keyval = Gdk.keyval_from_name ((i + 1).to_string ());
-                            if (event_key.keyval == keyval) {
-                                Notification noti = (Notification) list_box.get_focus_child ();
-                                if (noti != null) noti.click_alt_action (i);
-                                break;
+                            break;
+                        case "C":
+                            close_all_notifications ();
+                            break;
+                        case "D":
+                            set_switch_dnd_state (!dnd_button.get_state ());
+                            break;
+                        case "Down":
+                            if (list_position + 1 < children.length ()) {
+                                ++list_position;
                             }
-                        }
+                            break;
+                        case "Up":
+                            if (list_position > 0) --list_position;
+                            break;
+                        case "Home":
+                            list_position = 0;
+                            break;
+                        case "End":
+                            list_position = children.length () - 1;
+                            if (list_position == uint.MAX) list_position = 0;
+                            break;
+                        default:
+                            // Pressing 1-9 to activate a notification action
+                            for (int i = 0; i < 9; i++) {
+                                uint keyval = Gdk.keyval_from_name (
+                                    (i + 1).to_string ());
+                                if (event_key.keyval == keyval) {
+                                    if (noti != null) noti.click_alt_action (i);
+                                    break;
+                                }
+                            }
+                            break;
                     }
                     navigate_list (list_position);
                 }

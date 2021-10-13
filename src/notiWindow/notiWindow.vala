@@ -86,6 +86,7 @@ namespace SwayNotificatonCenter {
         }
 
         private void remove_notification (Notification noti) {
+            if (_noti_window == null) return;
             if (box.get_children ().index (noti) >= 0) {
                 if (noti != null) box.remove (noti);
             }
@@ -93,7 +94,6 @@ namespace SwayNotificatonCenter {
                 // Hack to close and recreate the window
                 // Fixes notifications enter_notify_event still being active
                 // when closed
-                if (_noti_window == null) return;
                 this.close ();
                 this.destroy ();
                 this.dispose ();

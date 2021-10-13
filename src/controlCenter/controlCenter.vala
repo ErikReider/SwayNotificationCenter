@@ -72,7 +72,8 @@ namespace SwayNotificatonCenter {
             return dbusInit.notiDaemon.get_dnd ();
         }
 
-        public void add_notification (NotifyParams param) throws DBusError, IOError {
+        public void add_notification (NotifyParams param)
+        throws DBusError, IOError {
             cc.add_notification (param, dbusInit.notiDaemon);
         }
 
@@ -177,9 +178,12 @@ namespace SwayNotificatonCenter {
             });
 
             clear_all_button = new Gtk.Button.with_label ("Clear All");
-            clear_all_button.get_style_context ().add_class ("control-center-clear-all");
+            clear_all_button.get_style_context ().add_class (
+                "control-center-clear-all");
             clear_all_button.clicked.connect (close_all_notifications);
-            this.box.add (new TopAction ("Notifications", clear_all_button, true));
+            this.box.add (new TopAction ("Notifications",
+                                         clear_all_button,
+                                         true));
 
             dnd_button = new Gtk.Switch ();
             dnd_button.get_style_context ().add_class ("control-center-dnd");
@@ -199,7 +203,7 @@ namespace SwayNotificatonCenter {
             // Grabs the keyboard input until closed
             bool keyboard_shortcuts = ConfigModel.instance.keyboard_shortcuts;
 #if HAVE_LATEST_GTK_LAYER_SHELL
-            GtkLayerShell.KeyboardMode mode = keyboard_shortcuts ?
+            var mode = keyboard_shortcuts ?
                        GtkLayerShell.KeyboardMode.EXCLUSIVE :
                        GtkLayerShell.KeyboardMode.NONE;
             GtkLayerShell.set_keyboard_mode (this, mode);
@@ -212,24 +216,34 @@ namespace SwayNotificatonCenter {
             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
             switch (ConfigModel.instance.positionX) {
                 case PositionX.LEFT:
-                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, false);
-                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, true);
+                    GtkLayerShell.set_anchor (this,
+                                              GtkLayerShell.Edge.RIGHT,
+                                              false);
+                    GtkLayerShell.set_anchor (this,
+                                              GtkLayerShell.Edge.LEFT,
+                                              true);
                     break;
                 default:
-                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, false);
-                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
+                    GtkLayerShell.set_anchor (this,
+                                              GtkLayerShell.Edge.LEFT,
+                                              false);
+                    GtkLayerShell.set_anchor (this,
+                                              GtkLayerShell.Edge.RIGHT,
+                                              true);
                     break;
             }
             switch (ConfigModel.instance.positionY) {
                 case PositionY.BOTTOM:
                     list_reverse = true;
                     list_align = Gtk.Align.END;
-                    this.box.set_child_packing (scrolled_window, true, true, 0, Gtk.PackType.START);
+                    this.box.set_child_packing (
+                        scrolled_window, true, true, 0, Gtk.PackType.START);
                     break;
                 case PositionY.TOP:
                     list_reverse = false;
                     list_align = Gtk.Align.START;
-                    this.box.set_child_packing (scrolled_window, true, true, 0, Gtk.PackType.END);
+                    this.box.set_child_packing (
+                        scrolled_window, true, true, 0, Gtk.PackType.END);
                     break;
             }
 
@@ -260,7 +274,8 @@ namespace SwayNotificatonCenter {
             list_position = 0;
             if (reverse) {
                 val = adj.get_upper ();
-                list_position = list_reverse ? (list_box.get_children ().length () - 1) : 0;
+                list_position = list_reverse ?
+                                (list_box.get_children ().length () - 1) : 0;
                 if (list_position == uint.MAX) list_position = -1;
             }
             adj.set_value (val);
@@ -277,7 +292,8 @@ namespace SwayNotificatonCenter {
             }
 
             try {
-                cc_daemon.subscribe (notification_count (), cc_daemon.get_dnd ());
+                cc_daemon.subscribe (
+                    notification_count (), cc_daemon.get_dnd ());
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }
@@ -303,7 +319,8 @@ namespace SwayNotificatonCenter {
                 // Reload the settings from config
                 this.set_anchor ();
                 // Focus the first notification
-                list_position = list_reverse ? (list_box.get_children ().length () - 1) : 0;
+                list_position = list_reverse ?
+                                (list_box.get_children ().length () - 1) : 0;
                 if (list_position == uint.MAX) list_position = 0;
 
                 list_box.grab_focus ();
@@ -325,13 +342,15 @@ namespace SwayNotificatonCenter {
                 }
             }
             try {
-                cc_daemon.subscribe (notification_count (), cc_daemon.get_dnd ());
+                cc_daemon.subscribe (
+                    notification_count (), cc_daemon.get_dnd ());
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }
         }
 
-        public void add_notification (NotifyParams param, NotiDaemon notiDaemon) {
+        public void add_notification (NotifyParams param,
+                                      NotiDaemon notiDaemon) {
             var noti = new Notification (param, notiDaemon);
             noti.grab_focus.connect ((w) => {
                 uint i = list_box.get_children ().index (w);
@@ -343,7 +362,8 @@ namespace SwayNotificatonCenter {
             list_box.add (noti);
             scroll_to_start (list_reverse);
             try {
-                cc_daemon.subscribe (notification_count (), cc_daemon.get_dnd ());
+                cc_daemon.subscribe (
+                    notification_count (), cc_daemon.get_dnd ());
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }

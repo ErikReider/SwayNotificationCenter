@@ -54,7 +54,8 @@ namespace SwayNotificatonCenter {
 
                 modify_cb (node);
 
-                ConfigModel model = Json.gobject_deserialize (typeof (ConfigModel), node) as ConfigModel;
+                ConfigModel model = Json.gobject_deserialize (
+                    typeof (ConfigModel), node) as ConfigModel;
                 if (model == null) {
                     throw new Json.ParserError.UNKNOWN ("Json model is null!");
                 }
@@ -180,9 +181,10 @@ namespace SwayNotificatonCenter {
             try {
                 if (path == null) {
                     // Use the default user accessable config
-                    string dir_path = Path.build_path (Path.DIR_SEPARATOR.to_string (),
-                                                       GLib.Environment.get_user_config_dir (),
-                                                       "swaync");
+                    string dir_path = Path.build_path (
+                        Path.DIR_SEPARATOR.to_string (),
+                        Environment.get_user_config_dir (),
+                        "swaync");
                     path = Path.build_path (Path.DIR_SEPARATOR.to_string (),
                                             dir_path, "config.json");
                     var dir = File.new_for_path (dir_path);
@@ -191,18 +193,19 @@ namespace SwayNotificatonCenter {
                     }
                     var file = File.new_for_path (path);
                     if (!file.query_exists ()) {
-                        file.create (GLib.FileCreateFlags.NONE);
+                        file.create (FileCreateFlags.NONE);
                     }
                 }
 
                 var file = File.new_for_path (path);
 
                 string data = ConfigModel.instance.json_serialized ();
-                return file.replace_contents (data.data,
-                                              null,
-                                              false,
-                                              GLib.FileCreateFlags.REPLACE_DESTINATION,
-                                              null);
+                return file.replace_contents (
+                    data.data,
+                    null,
+                    false,
+                    FileCreateFlags.REPLACE_DESTINATION,
+                    null);
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
                 return false;

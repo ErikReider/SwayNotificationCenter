@@ -5,7 +5,9 @@ namespace SwayNotificatonCenter {
         [GtkChild]
         unowned Gtk.Label title;
 
-        public TopAction (string title_text, Gtk.Widget action, bool is_title = false) {
+        public TopAction (string title_text,
+                          Gtk.Widget action,
+                          bool is_title = false) {
             this.title.set_text (title_text);
             var attr = new Pango.AttrList ();
             if (is_title) attr.insert (new Pango.AttrSize (16000));

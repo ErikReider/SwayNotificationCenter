@@ -13,19 +13,24 @@ namespace SwayNotificatonCenter {
                           BusNameOwnerFlags.NONE,
                           on_noti_bus_aquired,
                           () => {},
-                          () => stderr.printf ("Could not aquire notification name. Please close any other notification daemon like mako or dunst\n"));
+                          () => stderr.printf (
+                              "Could not aquire notification name. " +
+                              "Please close any other notification daemon " +
+                              "like mako or dunst\n"));
 
 
             Bus.own_name (BusType.SESSION, "org.erikreider.swaync.cc",
                           BusNameOwnerFlags.NONE,
                           on_cc_bus_aquired,
                           () => {},
-                          () => stderr.printf ("Could not aquire control center name\n"));
+                          () => stderr.printf (
+                              "Could not aquire control center name\n"));
         }
 
         void on_noti_bus_aquired (DBusConnection conn) {
             try {
-                conn.register_object ("/org/freedesktop/Notifications", notiDaemon);
+                conn.register_object (
+                    "/org/freedesktop/Notifications", notiDaemon);
             } catch (IOError e) {
                 stderr.printf ("Could not register notification service\n");
             }

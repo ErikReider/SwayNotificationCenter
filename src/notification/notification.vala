@@ -166,7 +166,9 @@ namespace SwayNotificatonCenter {
         }
 
         public void click_alt_action (uint index) {
-            if (param.actions.length == 0 || index >= param.actions.length) return;
+            if (param.actions.length == 0 || index >= param.actions.length) {
+                return;
+            }
             action_clicked (param.actions[index]);
         }
 
@@ -187,7 +189,8 @@ namespace SwayNotificatonCenter {
                 foreach (var action in param.actions) {
                     var actionButton = new Gtk.Button.with_label (action._name);
                     actionButton.clicked.connect (() => action_clicked (action));
-                    actionButton.get_style_context ().add_class ("notification-action");
+                    actionButton
+                     .get_style_context ().add_class ("notification-action");
                     actionButton.set_can_focus (false);
                     alt_actions_box.add (actionButton);
                 }
@@ -245,8 +248,10 @@ namespace SwayNotificatonCenter {
         private void set_icon () {
             img.set_pixel_size (48);
 
-            var img_path_exists = File.new_for_path (param.image_path ?? "").query_exists ();
-            var app_icon_exists = File.new_for_path (param.app_icon ?? "").query_exists ();
+            var img_path_exists = File.new_for_path (
+                param.image_path ?? "").query_exists ();
+            var app_icon_exists = File.new_for_path (
+                param.app_icon ?? "").query_exists ();
 
             if (param.image_data.is_initialized) {
                 Functions.set_image_data (param.image_data, img);
@@ -269,7 +274,8 @@ namespace SwayNotificatonCenter {
                         entry_same = (entry == ref_entry);
                     }
 
-                    if (entry_same && app.get_name ().down () == param.app_name.down ()) {
+                    if (entry_same
+                        && app.get_name ().down () == param.app_name.down ()) {
                         icon = app.get_icon ();
                         break;
                     }

@@ -32,24 +32,32 @@ namespace SwayNotificatonCenter {
         private void set_anchor () {
             switch (ConfigModel.instance.positionX) {
                 case PositionX.LEFT:
-                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, false);
-                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, true);
+                    GtkLayerShell.set_anchor (
+                        this, GtkLayerShell.Edge.RIGHT, false);
+                    GtkLayerShell.set_anchor (
+                        this, GtkLayerShell.Edge.LEFT, true);
                     break;
                 default:
-                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, false);
-                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
+                    GtkLayerShell.set_anchor (
+                        this, GtkLayerShell.Edge.LEFT, false);
+                    GtkLayerShell.set_anchor (
+                        this, GtkLayerShell.Edge.RIGHT, true);
                     break;
             }
             switch (ConfigModel.instance.positionY) {
                 case PositionY.BOTTOM:
-                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, false);
-                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
+                    GtkLayerShell.set_anchor (
+                        this, GtkLayerShell.Edge.TOP, false);
+                    GtkLayerShell.set_anchor (
+                        this, GtkLayerShell.Edge.BOTTOM, true);
                     list_reverse = true;
                     break;
                 case PositionY.TOP:
                     list_reverse = false;
-                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, false);
-                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
+                    GtkLayerShell.set_anchor (
+                        this, GtkLayerShell.Edge.BOTTOM, false);
+                    GtkLayerShell.set_anchor (
+                        this, GtkLayerShell.Edge.TOP, true);
                     break;
             }
         }
@@ -101,7 +109,8 @@ namespace SwayNotificatonCenter {
             }
         }
 
-        public void add_notification (NotifyParams param, NotiDaemon notiDaemon) {
+        public void add_notification (NotifyParams param,
+                                      NotiDaemon notiDaemon) {
             var noti = new Notification.timed (param,
                                                notiDaemon,
                                                ConfigModel.instance.timeout,

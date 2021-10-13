@@ -92,7 +92,8 @@ public int command_line (string[] args) {
 }
 
 void print_connection_error () {
-    stderr.printf ("Could not connect to CC service. Will wait for connection...\n");
+    stderr.printf (
+        "Could not connect to CC service. Will wait for connection...\n");
 }
 
 int try_connect (string[] args) {
@@ -115,11 +116,14 @@ int try_connect (string[] args) {
 public int main (string[] args) {
     if (try_connect (args) == 1) {
         MainLoop loop = new MainLoop ();
-        Bus.watch_name (BusType.SESSION,
-                        "org.erikreider.swaync.cc",
-                        GLib.BusNameWatcherFlags.NONE,
-                        (conn, name, name_owner) => { if (try_connect (args) == 0) loop.quit (); },
-                        null);
+        Bus.watch_name (
+            BusType.SESSION,
+            "org.erikreider.swaync.cc",
+            GLib.BusNameWatcherFlags.NONE,
+            (conn, name, name_owner) => {
+            if (try_connect (args) == 0) loop.quit ();
+        },
+            null);
         loop.run ();
     }
     return 0;

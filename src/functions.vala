@@ -1,6 +1,8 @@
 namespace SwayNotificatonCenter {
     public class Functions {
-        public static void set_image_path (owned string path, Gtk.Image img, bool file_exists) {
+        public static void set_image_path (owned string path,
+                                           Gtk.Image img,
+                                           bool file_exists) {
             if (path.slice (0, 7) == "file://" || file_exists) {
                 try {
                     if (!file_exists) path = path.slice (7, path.length);
@@ -17,10 +19,16 @@ namespace SwayNotificatonCenter {
 
         public static void set_image_data (Image_Data data, Gtk.Image img) {
             // Rebuild and scale the image
-            var pixbuf = new Gdk.Pixbuf.with_unowned_data (data.data, Gdk.Colorspace.RGB,
-                                                           data.has_alpha, data.bits_per_sample,
-                                                           data.width, data.height, data.rowstride, null);
-            var scaled_pixbuf = pixbuf.scale_simple (64, 64, Gdk.InterpType.BILINEAR);
+            var pixbuf = new Gdk.Pixbuf.with_unowned_data (data.data,
+                                                           Gdk.Colorspace.RGB,
+                                                           data.has_alpha,
+                                                           data.bits_per_sample,
+                                                           data.width,
+                                                           data.height,
+                                                           data.rowstride,
+                                                           null);
+            var scaled_pixbuf = pixbuf.scale_simple (64, 64,
+                                                     Gdk.InterpType.BILINEAR);
             img.set_from_pixbuf (scaled_pixbuf);
         }
 
@@ -44,7 +52,8 @@ namespace SwayNotificatonCenter {
                 }
             }
             if (path == "") {
-                stderr.printf ("COULD NOT FIND CSS FILE! REINSTALL THE PACKAGE!\n");
+                stderr.printf (
+                    "COULD NOT FIND CSS FILE! REINSTALL THE PACKAGE!\n");
                 Process.exit (1);
             }
             return path;
@@ -69,7 +78,8 @@ namespace SwayNotificatonCenter {
                 }
             }
             if (path == "") {
-                stderr.printf ("COULD NOT FIND CONFIG FILE! REINSTALL THE PACKAGE!\n");
+                stderr.printf (
+                    "COULD NOT FIND CONFIG FILE! REINSTALL THE PACKAGE!\n");
                 Process.exit (1);
             }
             return path;

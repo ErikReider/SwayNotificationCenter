@@ -95,6 +95,12 @@ namespace SwayNotificatonCenter {
             }
         }
 
+        /*
+         * Specifies if the control center should use keyboard shortcuts
+         * and block keyboard input for other applications while open
+         */
+        public bool keyboard_shortcuts { get; set; default = true; }
+
         /* Methods */
 
         /**

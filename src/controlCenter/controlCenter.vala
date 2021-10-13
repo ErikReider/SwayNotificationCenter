@@ -184,10 +184,14 @@ namespace SwayNotificatonCenter {
         /** Resets the UI positions */
         private void set_anchor () {
             // Grabs the keyboard input until closed
+            bool keyboard_shortcuts = ConfigModel.instance.keyboard_shortcuts;
 #if HAVE_LATEST_GTK_LAYER_SHELL
-            GtkLayerShell.set_keyboard_mode (this, GtkLayerShell.KeyboardMode.ON_DEMAND);
+            GtkLayerShell.KeyboardMode mode = keyboard_shortcuts ?
+                       GtkLayerShell.KeyboardMode.EXCLUSIVE :
+                       GtkLayerShell.KeyboardMode.NONE;
+            GtkLayerShell.set_keyboard_mode (this, mode);
 #else
-            GtkLayerShell.set_keyboard_interactivity (this, true);
+            GtkLayerShell.set_keyboard_interactivity (this, keyboard_shortcuts);
 #endif
             GtkLayerShell.set_layer (this, GtkLayerShell.Layer.TOP);
 

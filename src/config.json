@@ -7,4 +7,6 @@
   "timeout": 10,
   // Timeout for low priority notifications
   "timeout-low": 5,
+  // If control center should use keyboard shortcuts
+  "keyboard_shortcuts": true
 }

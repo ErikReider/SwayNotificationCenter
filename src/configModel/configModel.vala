@@ -66,14 +66,16 @@ namespace SwayNotificatonCenter {
             debug (_instance.json_serialized ());
         }
 
+        /* Properties */
+
         /** The notifications and controlcenters horizontal alignment */
         public PositionX positionX { get; set; default = PositionX.RIGHT; }
         /** The notifications and controlcenters vertical alignment */
         public PositionY positionY { get; set; default = PositionY.TOP; }
 
+        /** The timeout for notifications with NORMAL priority */
         private const int _timeout_def = 10;
         private int _timeout = _timeout_def;
-        /** The timeout for notifications with NORMAL priority */
         public int timeout {
             get {
                 return _timeout;
@@ -82,9 +84,9 @@ namespace SwayNotificatonCenter {
             }
         }
 
+        /** The timeout for notifications with LOW priority */
         private const int _timeout_low_def = 5;
         private int _timeout_low = _timeout_low_def;
-        /** The timeout for notifications with LOW priority */
         public int timeout_low {
             get {
                 return _timeout_low;
@@ -92,6 +94,8 @@ namespace SwayNotificatonCenter {
                 _timeout_low = value < 1 ? _timeout_low_def : value;
             }
         }
+
+        /* Methods */
 
         /**
          * Called when `Json.gobject_serialize (ConfigModel.instance)` is called

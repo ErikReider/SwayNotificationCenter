@@ -1,6 +1,8 @@
 [DBus (name = "org.erikreider.swaync.cc")]
 interface CcDaemon : GLib.Object {
 
+    public abstract void reload_config () throws Error;
+
     public abstract void close_all_notifications () throws DBusError, IOError;
 
     public abstract uint notification_count () throws DBusError, IOError;
@@ -22,11 +24,12 @@ private void print_help (string[] args) {
     print (@"Help:\n");
     print (@"\t -h, --help \t\t Show help options\n");
     print (@"Options:\n");
-    print (@"\t -t, --toggle-panel \t\t Toggle the notificaion panel\n");
-    print (@"\t -d, --toggle-dnd \t\t Toggle and print the current dnd state\n");
+    print (@"\t -R, --reload-config \t Reload the config file\n");
+    print (@"\t -t, --toggle-panel \t Toggle the notificaion panel\n");
+    print (@"\t -d, --toggle-dnd \t Toggle and print the current dnd state\n");
     print (@"\t -c, --count \t\t Print the current notificaion count\n");
-    print (@"\t -C, --close-all \t\t Closes all notifications\n");
-    print (@"\t -sw, --skip-wait \t\t Doesn't wait when swaync hasn't been started\n");
+    print (@"\t -C, --close-all \t Closes all notifications\n");
+    print (@"\t -sw, --skip-wait \t Doesn't wait when swaync hasn't been started\n");
     print (@"\t -s, --subscribe \t Subscribe to notificaion add and close events\n");
 }
 
@@ -47,6 +50,10 @@ public int command_line (string[] args) {
             case "--help":
             case "-h":
                 print_help (args);
+                break;
+            case "--reload-config":
+            case "-R":
+                cc_daemon.reload_config ();
                 break;
             case "--count":
             case "-c":

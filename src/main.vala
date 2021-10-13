@@ -4,10 +4,7 @@ namespace SwayNotificatonCenter {
         public NotiDaemon notiDaemon;
         public CcDaemon ccDaemon;
 
-        public ConfigModel configModel;
-
-        public DBusInit (ConfigModel configModel) {
-            this.configModel = configModel;
+        public DBusInit () {
             this.notiDaemon = new NotiDaemon (this);
             this.ccDaemon = new CcDaemon (this);
 
@@ -94,7 +91,9 @@ namespace SwayNotificatonCenter {
             print ("Error: %s\n", e.message);
         }
 
-        new DBusInit (Functions.parse_config (config_path));
+        ConfigModel.init (config_path);
+
+        new DBusInit ();
 
         Gtk.main ();
     }

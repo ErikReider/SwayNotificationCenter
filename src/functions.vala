@@ -50,9 +50,9 @@ namespace SwayNotificatonCenter {
             return path;
         }
 
-        public static string get_config_path (string custon_path) {
+        public static string get_config_path (string custom_path = "") {
             string[] paths = {};
-            if (custon_path.length > 0) paths += custon_path;
+            if (custom_path.length > 0) paths += custom_path;
             paths += Path.build_path (Path.DIR_SEPARATOR.to_string (),
                                       GLib.Environment.get_user_config_dir (),
                                       "swaync/config.json");
@@ -73,17 +73,6 @@ namespace SwayNotificatonCenter {
                 Process.exit (1);
             }
             return path;
-        }
-
-        public static ConfigModel parse_config (string custon_path) {
-            try {
-                Json.Parser parser = new Json.Parser ();
-                parser.load_from_file (get_config_path (custon_path));
-                return ConfigModel (parser.get_root ());
-            } catch (Error e) {
-                print ("Unable to parse the JSON File: %s\n", e.message);
-                Process.exit (1);
-            }
         }
 
         public static string get_match_from_info (MatchInfo info) {

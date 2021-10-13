@@ -14,6 +14,8 @@ A simple notification daemon with a gui built for Sway (potentially any wm with 
 - Customization through a CSS file
 - Trackpad/mouse gesture to close notification
 - The same features as any other basic notification daemon
+- Basic configuration through a JSON config file
+- Hot-reload config through `swaync-client`
 
 ## Planned Features
 
@@ -57,6 +59,12 @@ To toggle the panel
 ./build/src/swaync-client -t
 ```
 
+To reload the config
+
+```zsh
+./build/src/swaync-client -R
+```
+
 ## Notification Panel Shortcuts
 
 - Up/Down: Navigate notifications
@@ -73,8 +81,12 @@ To toggle the panel
 
 The main config file is located in `/etc/xdg/swaync/config.json`. Copy it over to your `.config/swaync/` folder to customize without needing root access.
 
-- positionX: `left` or `right`
-- positionY: `top` or `bottom`
+To reload the config, you'll need to run `swaync-client --reload-config`
+
+- `positionX`: `left` or `right`
+- `positionY`: `top` or `bottom`
+- `timeout`: Any positive number. The notification timeout for notifications with normal priority
+- `timeout-low`: Any positive number. The notification timeout for notifications with low priority
 
 The main CSS style file is located in `/etc/xdg/swaync/style.css`. Copy it over to your `.config/swaync/` folder to customize without needing root access.
 

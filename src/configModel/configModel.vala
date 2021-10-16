@@ -17,6 +17,15 @@ namespace SwayNotificatonCenter {
         }
     }
 
+    public enum ImageVisibility {
+        ALWAYS, WHEN_AVAILABLE, NEVER;
+
+        public string parse () {
+            EnumClass enumc = (EnumClass) typeof (ImageVisibility).class_ref ();
+            return enumc.get_value_by_name (this.to_string ()).value_nick;
+        }
+    }
+
     public class ConfigModel : Object, Json.Serializable {
 
         private static ConfigModel _instance;
@@ -80,7 +89,8 @@ namespace SwayNotificatonCenter {
         public int timeout {
             get {
                 return _timeout;
-            } set {
+            }
+            set {
                 _timeout = value < 1 ? _timeout_def : value;
             }
         }
@@ -91,7 +101,8 @@ namespace SwayNotificatonCenter {
         public int timeout_low {
             get {
                 return _timeout_low;
-            } set {
+            }
+            set {
                 _timeout_low = value < 1 ? _timeout_low_def : value;
             }
         }
@@ -101,6 +112,13 @@ namespace SwayNotificatonCenter {
          * and block keyboard input for other applications while open
          */
         public bool keyboard_shortcuts { get; set; default = true; }
+
+        /** Specifies if the notifcation image should be shown or not */
+        public ImageVisibility image_visibility {
+            get;
+            set;
+            default = ImageVisibility.ALWAYS;
+        }
 
         /* Methods */
 
@@ -117,6 +135,10 @@ namespace SwayNotificatonCenter {
                     break;
                 case "positionY":
                     node.set_string (((PositionY) value.get_enum ()).parse ());
+                    break;
+                case "image-visibility":
+                    var val = ((ImageVisibility) value.get_enum ()).parse ();
+                    node.set_string (val);
                     break;
                 default:
                     node.set_value (value);

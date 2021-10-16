@@ -79,7 +79,8 @@ To reload the config
 
 ## Configuring
 
-The main config file is located in `/etc/xdg/swaync/config.json`. Copy it over to your `.config/swaync/` folder to customize without needing root access.
+The main config file is located in `/etc/xdg/swaync/config.json`. Copy it over
+to your `.config/swaync/` folder to customize without needing root access.
 
 To reload the config, you'll need to run `swaync-client --reload-config`
 
@@ -87,7 +88,7 @@ To reload the config, you'll need to run `swaync-client --reload-config`
 - `positionY`: `top` or `bottom`
 - `timeout`: Any positive number. The notification timeout for notifications with normal priority
 - `timeout-low`: Any positive number. The notification timeout for notifications with low priority
-- `keyboard_shortcuts`: Boolean. If control center should use keyboard shortcuts
+- `keyboard-shortcuts`: Boolean. If control center should use keyboard shortcuts
 
 The main CSS style file is located in `/etc/xdg/swaync/style.css`. Copy it over to your `.config/swaync/` folder to customize without needing root access.
 

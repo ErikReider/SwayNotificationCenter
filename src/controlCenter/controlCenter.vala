@@ -255,7 +255,7 @@ namespace SwayNotificatonCenter {
                 // Sort the list in reverse if needed
                 int val1 = list_reverse ? 1 : -1;
                 int val2 = list_reverse ? -1 : 1;
-                return a.param._time > b.param._time ? val1 : val2;
+                return a.param.time > b.param.time ? val1 : val2;
             });
         }
 

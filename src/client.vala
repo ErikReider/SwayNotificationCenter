@@ -27,6 +27,7 @@ private void print_help (string[] args) {
     print (@"\t -R, --reload-config \t Reload the config file\n");
     print (@"\t -t, --toggle-panel \t Toggle the notificaion panel\n");
     print (@"\t -d, --toggle-dnd \t Toggle and print the current dnd state\n");
+    print (@"\t -D, --get-dnd \t\t Print the current dnd state\n");
     print (@"\t -c, --count \t\t Print the current notificaion count\n");
     print (@"\t -C, --close-all \t Closes all notifications\n");
     print (@"\t -sw, --skip-wait \t Doesn't wait when swaync hasn't been started\n");
@@ -70,6 +71,10 @@ public int command_line (string[] args) {
             case "--toggle-dnd":
             case "-d":
                 print (cc_daemon.toggle_dnd ().to_string ());
+                break;
+            case "--get-dnd":
+            case "-D":
+                print (cc_daemon.get_dnd ().to_string ());
                 break;
             case "--subscribe":
             case "-s":

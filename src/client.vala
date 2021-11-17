@@ -1,6 +1,8 @@
 [DBus (name = "org.erikreider.swaync.cc")]
 interface CcDaemon : GLib.Object {
 
+    public abstract bool reload_css () throws Error;
+
     public abstract void reload_config () throws Error;
 
     public abstract void close_all_notifications () throws DBusError, IOError;
@@ -25,6 +27,7 @@ private void print_help (string[] args) {
     print (@"\t -h, --help \t\t Show help options\n");
     print (@"Options:\n");
     print (@"\t -R, --reload-config \t Reload the config file\n");
+    print (@"\t -rs, --reload-css \t Reload the css file. Location change requires restart\n");
     print (@"\t -t, --toggle-panel \t Toggle the notificaion panel\n");
     print (@"\t -d, --toggle-dnd \t Toggle and print the current dnd state\n");
     print (@"\t -D, --get-dnd \t\t Print the current dnd state\n");
@@ -55,6 +58,11 @@ public int command_line (string[] args) {
             case "--reload-config":
             case "-R":
                 cc_daemon.reload_config ();
+                break;
+            case "--reload-css":
+            case "-rs":
+                stdout.printf ("CSS reload success: %s\n",
+                               cc_daemon.reload_css ().to_string ());
                 break;
             case "--count":
             case "-c":

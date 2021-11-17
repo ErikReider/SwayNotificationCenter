@@ -27,6 +27,10 @@ namespace SwayNotificatonCenter {
 
         public signal void subscribe (uint count, bool dnd);
 
+        public bool reload_css () throws Error {
+            return Functions.load_css (dbusInit.style_path);
+        }
+
         public void reload_config () throws Error {
             ConfigModel.reload_config ();
         }

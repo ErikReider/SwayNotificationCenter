@@ -32,6 +32,21 @@ namespace SwayNotificatonCenter {
             img.set_from_pixbuf (scaled_pixbuf);
         }
 
+        public static bool load_css (string style_path) {
+            try {
+                Gtk.CssProvider css_provider = new Gtk.CssProvider ();
+                css_provider.load_from_path (get_style_path (style_path));
+                Gtk.StyleContext.add_provider_for_screen (
+                    Gdk.Screen.get_default (),
+                    css_provider,
+                    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+                return true;
+            } catch (Error e) {
+                print ("Error: %s\n", e.message);
+            }
+            return false;
+        }
+
         public static string get_style_path (string custon_path) {
             string[] paths = {};
             if (custon_path.length > 0) paths += custon_path;

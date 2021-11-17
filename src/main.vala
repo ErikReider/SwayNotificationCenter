@@ -4,7 +4,12 @@ namespace SwayNotificatonCenter {
         public NotiDaemon notiDaemon;
         public CcDaemon ccDaemon;
 
-        public DBusInit () {
+        public string style_path;
+        public string config_path;
+
+        public DBusInit (string style_path, string config_path) {
+            this.style_path = style_path;
+            this.config_path = config_path;
             this.notiDaemon = new NotiDaemon (this);
             this.ccDaemon = new CcDaemon (this);
 
@@ -85,20 +90,11 @@ namespace SwayNotificatonCenter {
             }
         }
 
-        try {
-            Gtk.CssProvider css_provider = new Gtk.CssProvider ();
-            css_provider.load_from_path (Functions.get_style_path (style_path));
-            Gtk.StyleContext.add_provider_for_screen (
-                Gdk.Screen.get_default (),
-                css_provider,
-                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
-        } catch (Error e) {
-            print ("Error: %s\n", e.message);
-        }
+        Functions.load_css (style_path);
 
         ConfigModel.init (config_path);
 
-        new DBusInit ();
+        new DBusInit (style_path, config_path);
 
         Gtk.main ();
     }

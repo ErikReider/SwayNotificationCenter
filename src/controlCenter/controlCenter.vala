@@ -227,6 +227,14 @@ namespace SwayNotificatonCenter {
                                               GtkLayerShell.Edge.LEFT,
                                               true);
                     break;
+                case PositionX.CENTER:
+                    GtkLayerShell.set_anchor (this,
+                                              GtkLayerShell.Edge.RIGHT,
+                                              false);
+                    GtkLayerShell.set_anchor (this,
+                                              GtkLayerShell.Edge.LEFT,
+                                              false);
+                    break;                    
                 default:
                     GtkLayerShell.set_anchor (this,
                                               GtkLayerShell.Edge.LEFT,

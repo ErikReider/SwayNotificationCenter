@@ -1,6 +1,6 @@
 namespace SwayNotificatonCenter {
     public enum PositionX {
-        RIGHT, LEFT;
+        RIGHT, LEFT, CENTER;
 
         public string parse () {
             EnumClass enumc = (EnumClass) typeof (PositionX).class_ref ();

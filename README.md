@@ -84,7 +84,7 @@ to your `.config/swaync/` folder to customize without needing root access.
 
 To reload the config, you'll need to run `swaync-client --reload-config`
 
-- `positionX`: `left` or `right`
+- `positionX`: `left`, `right` or `center`
 - `positionY`: `top` or `bottom`
 - `timeout`: uint (Any positive number). The notification timeout for notifications with normal priority
 - `timeout-low`: uint (any positive number). The notification timeout for notifications with low priority

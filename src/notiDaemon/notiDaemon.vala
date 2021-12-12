@@ -81,8 +81,9 @@ namespace SwayNotificatonCenter {
             NotiWindow.instance (dbusInit).close_all_notifications ();
         }
 
-        // Only remove the popup without removing the it from the panel
         public void CloseNotification (uint32 id) throws DBusError, IOError {
+            NotiWindow.instance (dbusInit).close_notification (id);
+            dbusInit.ccDaemon.close_notification (id);
             NotificationClosed (id, ClosedReasons.CLOSED_BY_CLOSENOTIFICATION);
         }
 

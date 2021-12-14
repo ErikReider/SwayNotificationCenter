@@ -1,14 +1,8 @@
 {
-  // X-axis position
   "positionX": "right",
-  // Y-axis position
   "positionY": "top",
-  // Timeout for normal priority notifications
   "timeout": 10,
-  // Timeout for low priority notifications
   "timeout-low": 5,
-  // If control center should use keyboard shortcuts
   "keyboard_shortcuts": true,
-  // Sets the notification image visiblilty
   "image-visibility": "always"
 }

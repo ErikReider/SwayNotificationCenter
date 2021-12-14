@@ -87,8 +87,8 @@ To reload the config, you'll need to run `swaync-client --reload-config`
 - `positionX`: `left`, `right` or `center`
 - `positionY`: `top` or `bottom`
 - `timeout`: uint (Any positive number). The notification timeout for notifications with normal priority
-- `timeout-low`: uint (any positive number). The notification timeout for notifications with low priority
-- `keyboard-shortcuts`: Boolean. If control center should use keyboard shortcuts
+- `timeout-low`: uint (any positive number without decimals). The notification timeout for notifications with low priority
+- `keyboard-shortcuts`: `true` or `false`. If control center should use keyboard shortcuts
 - `image-visibility`: `always`, `when-available` or `never`. Notification image visiblilty
 
 The main CSS style file is located in `/etc/xdg/swaync/style.css`. Copy it over to your `.config/swaync/` folder to customize without needing root access.

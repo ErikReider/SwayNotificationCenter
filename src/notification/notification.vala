@@ -37,6 +37,7 @@ namespace SwayNotificatonCenter {
         private NotiDaemon notiDaemon;
         private uint timeout_delay;
         private uint timeout_low_delay;
+        private uint timeout_critical_delay;
 
         public delegate void On_hide_cb (Notification noti);
 
@@ -53,9 +54,11 @@ namespace SwayNotificatonCenter {
                                    NotiDaemon notiDaemon,
                                    uint timeout,
                                    uint timeout_low,
+                                   uint timeout_critical,
                                    On_hide_cb callback) {
             this.timeout_delay = timeout;
             this.timeout_low_delay = timeout_low;
+            this.timeout_critical_delay = timeout_critical;
             this.timeout_cb = callback;
             this.body.set_lines (5);
             build_noti (param, notiDaemon);
@@ -247,7 +250,7 @@ namespace SwayNotificatonCenter {
                 notiDaemon.click_close_notification (param.applied_id);
                 remove_noti_timeout ();
             } catch (Error e) {
-                print ("Error: %s\n", e.message);
+                stderr.printf ("Error: %s\n", e.message);
             }
         }
 
@@ -316,10 +319,14 @@ namespace SwayNotificatonCenter {
                     timeout = timeout_delay * 1000;
                     break;
                 case UrgencyLevels.CRITICAL:
-                    return;
+                    if (timeout_critical_delay == 0) {
+                        return;
+                    }
+                    timeout = timeout_critical_delay * 1000;
+                    break;
             }
             uint ms = param.expire_timeout > 0 ? param.expire_timeout : timeout;
-            if (param.expire_timeout != 0) {
+            if (ms != 0) {
                 timeout_id = Timeout.add (ms, () => {
                     if (timeout_cb != null) timeout_cb (this);
                     return GLib.Source.REMOVE;

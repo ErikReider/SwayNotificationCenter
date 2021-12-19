@@ -121,6 +121,7 @@ namespace SwayNotificatonCenter {
                                                notiDaemon,
                                                ConfigModel.instance.timeout,
                                                ConfigModel.instance.timeout_low,
+                                               ConfigModel.instance.timeout_critical,
                                                remove_notification);
 
             if (list_reverse) {

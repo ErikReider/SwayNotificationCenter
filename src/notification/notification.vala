@@ -41,6 +41,7 @@ namespace SwayNotificationCenter {
 
         private uint timeout_id = 0;
 
+        private int number_of_body_lines = 10;
         public bool is_timed = false;
         public NotifyParams param;
         private NotiDaemon notiDaemon;
@@ -54,7 +55,6 @@ namespace SwayNotificationCenter {
         public Notification (NotifyParams param,
                              NotiDaemon notiDaemon) {
             build_noti (param, notiDaemon);
-            this.body.set_lines (10);
         }
 
         // Called to show a temp notification
@@ -67,6 +67,8 @@ namespace SwayNotificationCenter {
             this.timeout_delay = timeout;
             this.timeout_low_delay = timeout_low;
             this.timeout_critical_delay = timeout_critical;
+            this.number_of_body_lines = 5;
+
             build_noti (param, notiDaemon);
             add_noti_timeout ();
         }
@@ -77,7 +79,12 @@ namespace SwayNotificationCenter {
             this.notiDaemon = notiDaemon;
             this.param = param;
 
+            this.body.set_line_wrap (true);
+            this.body.set_line_wrap_mode (Pango.WrapMode.WORD_CHAR);
+            this.body.set_ellipsize (Pango.EllipsizeMode.END);
+
             this.summary.set_text (param.summary ?? param.app_name);
+            this.summary.set_ellipsize (Pango.EllipsizeMode.END);
 
             this.button_press_event.connect ((event) => {
                 if (event.button != Gdk.BUTTON_SECONDARY) return false;
@@ -158,6 +165,14 @@ namespace SwayNotificationCenter {
 
         private void set_body () {
             string text = param.body ?? "";
+
+            // Clip the text to the number of configured lines
+            string[] text_lines = text.split ("\n");
+            if (text_lines.length > this.number_of_body_lines) {
+                text_lines.resize (this.number_of_body_lines);
+                text = string.joinv ("\n", text_lines) + "...";
+            }
+            this.body.set_lines (this.number_of_body_lines);
 
             // Removes all image tags and adds them to an array
             if (text.length > 0) {

@@ -152,6 +152,11 @@ namespace SwayNotificatonCenter {
          */
         public int notification_center_width { get; set; default = 500; }
 
+        /**
+         * Notification window's width, in pixels.
+         */
+        public int notification_window_width { get; set; default = 500; }
+
         /* Methods */
 
         /**

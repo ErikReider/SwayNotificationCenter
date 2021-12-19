@@ -27,6 +27,8 @@ namespace SwayNotificatonCenter {
             GtkLayerShell.set_layer (this, GtkLayerShell.Layer.OVERLAY);
             this.set_anchor ();
             viewport.size_allocate.connect (size_alloc);
+
+            this.default_width = ConfigModel.instance.notification_window_width;
         }
 
         private void set_anchor () {

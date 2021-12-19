@@ -120,6 +120,20 @@ namespace SwayNotificatonCenter {
             default = ImageVisibility.ALWAYS;
         }
 
+        /** Whether to expand the notification center across both edges of the screen */
+        public bool fit_to_screen { get; set; default = true; }
+
+        /**
+         * Notification center's height, in pixels.
+         * `0` will not set a maximum height, allowing it to expand.
+         */
+        public int notification_center_height { get; set; default = 0; }
+
+        /**
+         * Notification center's width, in pixels.
+         */
+        public int notification_center_width { get; set; default = 500; }
+
         /* Methods */
 
         /**

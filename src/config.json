@@ -3,6 +3,6 @@
   "positionY": "top",
   "timeout": 10,
   "timeout-low": 5,
-  "keyboard_shortcuts": true,
+  "keyboard-shortcuts": true,
   "image-visibility": "always"
 }

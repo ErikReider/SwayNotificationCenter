@@ -200,6 +200,11 @@ namespace SwayNotificatonCenter {
                 return false;
             });
             this.box.add (new TopAction ("Do Not Disturb", dnd_button, false));
+
+            if (ConfigModel.instance.notification_center_height != 0) {
+                this.default_height = ConfigModel.instance.notification_center_height;
+            }
+            this.default_width = ConfigModel.instance.notification_center_width;
         }
 
         /** Resets the UI positions */
@@ -216,8 +221,6 @@ namespace SwayNotificatonCenter {
 #endif
             GtkLayerShell.set_layer (this, GtkLayerShell.Layer.TOP);
 
-            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
-            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
             switch (ConfigModel.instance.positionX) {
                 case PositionX.LEFT:
                     GtkLayerShell.set_anchor (this,
@@ -234,7 +237,7 @@ namespace SwayNotificatonCenter {
                     GtkLayerShell.set_anchor (this,
                                               GtkLayerShell.Edge.LEFT,
                                               false);
-                    break;                    
+                    break;
                 default:
                     GtkLayerShell.set_anchor (this,
                                               GtkLayerShell.Edge.LEFT,
@@ -248,15 +251,22 @@ namespace SwayNotificatonCenter {
                 case PositionY.BOTTOM:
                     list_reverse = true;
                     list_align = Gtk.Align.END;
+                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
                     this.box.set_child_packing (
                         scrolled_window, true, true, 0, Gtk.PackType.START);
                     break;
                 case PositionY.TOP:
                     list_reverse = false;
                     list_align = Gtk.Align.START;
+                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
                     this.box.set_child_packing (
                         scrolled_window, true, true, 0, Gtk.PackType.END);
                     break;
+            }
+
+            if (ConfigModel.instance.fit_to_screen) {
+                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
+                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
             }
 
             list_box.set_valign (list_align);

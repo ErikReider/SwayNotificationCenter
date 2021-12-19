@@ -3,6 +3,7 @@
   "positionY": "top",
   "timeout": 10,
   "timeout-low": 5,
+  "notification-window-width": 500,
   "keyboard-shortcuts": true,
   "image-visibility": "always",
   "transition-time": 200

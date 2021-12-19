@@ -15,12 +15,12 @@
           <object class="HdyCarousel" id="carousel">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="halign">end</property>
             <property name="allow-scroll-wheel">False</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="hexpand">True</property>
                 <child>
                   <placeholder/>
                 </child>
@@ -30,6 +30,7 @@
               <object class="GtkEventBox" id="event_box">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="hexpand">True</property>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>

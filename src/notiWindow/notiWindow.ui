@@ -6,7 +6,6 @@
     <property name="can-focus">False</property>
     <property name="role">NotificationWindow</property>
     <property name="resizable">False</property>
-    <property name="default-width">500</property>
     <property name="type-hint">notification</property>
     <property name="skip-taskbar-hint">True</property>
     <property name="skip-pager-hint">True</property>

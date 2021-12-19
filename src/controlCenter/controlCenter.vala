@@ -296,17 +296,12 @@ namespace SwayNotificatonCenter {
         }
 
         private void scroll_to_start (bool reverse) {
-            var adj = viewport.vadjustment;
-            double val = adj.get_lower ();
-            list_position = 0;
+            const bool horizontal_scroll = false;
+            Gtk.ScrollType scroll_type = Gtk.ScrollType.START;
             if (reverse) {
-                val = adj.get_upper ();
-                list_position = list_reverse ?
-                                (list_box.get_children ().length () - 1) : 0;
-                if (list_position == uint.MAX) list_position = -1;
+                scroll_type = Gtk.ScrollType.END;
             }
-            adj.set_value (val);
-            navigate_list (list_position);
+            scrolled_window.scroll_child (scroll_type, horizontal_scroll);
         }
 
         public uint notification_count () {

@@ -57,6 +57,7 @@ namespace SwayNotificatonCenter {
             this.timeout_delay = timeout;
             this.timeout_low_delay = timeout_low;
             this.timeout_cb = callback;
+            this.body.set_lines (5);
             build_noti (param, notiDaemon);
             add_noti_timeout ();
         }
@@ -65,7 +66,12 @@ namespace SwayNotificatonCenter {
             this.notiDaemon = notiDaemon;
             this.param = param;
 
+            this.body.set_line_wrap (true);
+            this.body.set_line_wrap_mode (Pango.WrapMode.WORD_CHAR);
+            this.body.set_ellipsize (Pango.EllipsizeMode.END);
+
             this.summary.set_text (param.summary ?? param.app_name);
+            this.summary.set_ellipsize (Pango.EllipsizeMode.END);
 
             default_button.clicked.connect (click_default_action);
 

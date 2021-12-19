@@ -120,6 +120,12 @@ namespace SwayNotificatonCenter {
             default = ImageVisibility.ALWAYS;
         }
 
+        /** GtkLayerShell margins around the notification center */
+        public int margin_top { get; set; default = 0; }
+        public int margin_bottom { get; set; default = 0; }
+        public int margin_left { get; set; default = 0; }
+        public int margin_right { get; set; default = 0; }
+
         /** Whether to expand the notification center across both edges of the screen */
         public bool fit_to_screen { get; set; default = true; }
 

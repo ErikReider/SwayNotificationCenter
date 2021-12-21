@@ -121,8 +121,9 @@ namespace SwayNotificatonCenter {
         }
 
         private void remove_notification (Notification noti) {
-            // Remove notification
+            // Remove notification and its destruction timeout
             if (noti != null) {
+                noti.remove_noti_timeout ();
                 noti.destroy ();
             }
 

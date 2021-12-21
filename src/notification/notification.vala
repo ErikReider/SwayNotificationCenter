@@ -299,7 +299,7 @@ namespace SwayNotificatonCenter {
             }
         }
 
-        private void add_noti_timeout () {
+        public void add_noti_timeout () {
             uint timeout;
             switch (param.urgency) {
                 case UrgencyLevels.LOW :
@@ -321,7 +321,7 @@ namespace SwayNotificatonCenter {
             }
         }
 
-        private void remove_noti_timeout () {
+        public void remove_noti_timeout () {
             if (timeout_id > 0) {
                 Source.remove (timeout_id);
                 timeout_id = 0;

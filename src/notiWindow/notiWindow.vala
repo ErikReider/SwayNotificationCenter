@@ -1,28 +1,50 @@
 namespace SwayNotificatonCenter {
-    [GtkTemplate (ui = "/org/erikreider/sway-notification-center/notiWindow/notiWindow.ui")]
-    public class NotiWindow : Gtk.ApplicationWindow {
+    public class NotiWindow {
+        private DBusInit dbusInit;
+        private NotificationWindow notis = new NotificationWindow ();
 
-        private static NotiWindow _noti_window = null;
-
-        public static NotiWindow instance (DBusInit dbusInit) {
-            if (_noti_window == null) _noti_window = new NotiWindow (dbusInit);
-            return _noti_window;
+        private unowned NotificationWindow notificationWindow {
+            get {
+                if (!notis.get_realized ()) notis = new NotificationWindow ();
+                return notis;
+            }
         }
+
+        public NotiWindow (DBusInit dbusInit) {
+            this.dbusInit = dbusInit;
+        }
+
+        public void change_visibility (bool value) {
+            notificationWindow.change_visibility (value);
+        }
+
+        public void close_all_notifications () {
+            notificationWindow.close_all_notifications ();
+        }
+
+        public void add_notification (NotifyParams param,
+                                      NotiDaemon notiDaemon) {
+            notificationWindow.add_notification (param, notiDaemon);
+        }
+
+        public void close_notification (uint32 id) {
+            notificationWindow.close_notification (id);
+        }
+    }
+
+    [GtkTemplate (ui = "/org/erikreider/sway-notification-center/notiWindow/notiWindow.ui")]
+    private class NotificationWindow : Gtk.ApplicationWindow {
 
         [GtkChild]
         unowned Gtk.Viewport viewport;
         [GtkChild]
         unowned Gtk.Box box;
 
-        private DBusInit dbusInit;
-
         private bool list_reverse = false;
 
         private double last_upper = 0;
 
-        private NotiWindow (DBusInit dbusInit) {
-            this.dbusInit = dbusInit;
-
+        public NotificationWindow () {
             GtkLayerShell.init_for_window (this);
             GtkLayerShell.set_layer (this, GtkLayerShell.Layer.OVERLAY);
             this.set_anchor ();
@@ -42,7 +64,7 @@ namespace SwayNotificatonCenter {
                         this, GtkLayerShell.Edge.RIGHT, false);
                     GtkLayerShell.set_anchor (
                         this, GtkLayerShell.Edge.LEFT, false);
-                    break;                    
+                    break;
                 default:
                     GtkLayerShell.set_anchor (
                         this, GtkLayerShell.Edge.LEFT, false);
@@ -84,7 +106,6 @@ namespace SwayNotificatonCenter {
         }
 
         public void change_visibility (bool value) {
-            this.set_visible (value);
             if (!value) {
                 close_all_notifications ();
             } else {
@@ -93,26 +114,20 @@ namespace SwayNotificatonCenter {
         }
 
         public void close_all_notifications () {
+            if (!this.get_realized ()) return;
             foreach (var w in box.get_children ()) {
-                var noti = (Notification) w;
-                if (noti != null) remove_notification (noti);
+                remove_notification ((Notification) w);
             }
         }
 
         private void remove_notification (Notification noti) {
-            if (_noti_window == null) return;
-            if (box.get_children ().index (noti) >= 0) {
-                if (noti != null) box.remove (noti);
+            // Remove notification
+            if (noti != null) {
+                noti.destroy ();
             }
-            if (box.get_children ().length () == 0) {
-                // Hack to close and recreate the window
-                // Fixes notifications enter_notify_event still being active
-                // when closed
-                this.close ();
-                this.destroy ();
-                this.dispose ();
-                _noti_window = null;
-            }
+
+            if (!this.get_realized ()) return;
+            if (box.get_children ().length () == 0) this.close ();
         }
 
         public void add_notification (NotifyParams param,

@@ -2,8 +2,9 @@
 <!-- Generated with glade 3.38.2 -->
 <interface>
   <requires lib="gtk+" version="3.24"/>
-  <template class="SwayNotificatonCenterNotiWindow" parent="GtkApplicationWindow">
+  <template class="SwayNotificatonCenterNotificationWindow" parent="GtkApplicationWindow">
     <property name="can-focus">False</property>
+    <property name="role">NotificationWindow</property>
     <property name="resizable">False</property>
     <property name="default-width">500</property>
     <property name="type-hint">notification</property>

@@ -6,14 +6,16 @@ namespace SwayNotificatonCenter {
         private bool dnd = false;
 
         private DBusInit dbusInit;
+        private NotiWindow notiWindow;
 
         public NotiDaemon (DBusInit dbusInit) {
             this.dbusInit = dbusInit;
+            this.notiWindow = new NotiWindow (this.dbusInit);
         }
 
         public void set_noti_window_visibility (bool value)
         throws DBusError, IOError {
-            NotiWindow.instance (dbusInit).change_visibility (value);
+            notiWindow.change_visibility (value);
         }
 
         public uint32 Notify (string app_name,
@@ -40,14 +42,13 @@ namespace SwayNotificatonCenter {
                 expire_timeout);
 
             if (id == replaces_id) {
-                NotiWindow.instance (dbusInit).close_notification (id);
+                notiWindow.close_notification (id);
                 dbusInit.ccDaemon.close_notification (id);
             }
             if (!dbusInit.ccDaemon.get_visibility ()) {
                 if (param.urgency == UrgencyLevels.CRITICAL ||
                     (!dnd && param.urgency != UrgencyLevels.CRITICAL)) {
-                    NotiWindow.instance (dbusInit)
-                     .add_notification (param, this);
+                    notiWindow.add_notification (param, this);
                 }
             }
             dbusInit.ccDaemon.add_notification (param);
@@ -72,17 +73,17 @@ namespace SwayNotificatonCenter {
 
         public void click_close_notification (uint32 id)
         throws DBusError, IOError {
-            NotiWindow.instance (dbusInit).close_notification (id);
+            notiWindow.close_notification (id);
             dbusInit.ccDaemon.close_notification (id);
             NotificationClosed (id, ClosedReasons.DISMISSED);
         }
 
         public void close_all_notifications () throws DBusError, IOError {
-            NotiWindow.instance (dbusInit).close_all_notifications ();
+            notiWindow.close_all_notifications ();
         }
 
         public void CloseNotification (uint32 id) throws DBusError, IOError {
-            NotiWindow.instance (dbusInit).close_notification (id);
+            notiWindow.close_notification (id);
             dbusInit.ccDaemon.close_notification (id);
             NotificationClosed (id, ClosedReasons.CLOSED_BY_CLOSENOTIFICATION);
         }

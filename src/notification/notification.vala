@@ -314,6 +314,9 @@ namespace SwayNotificatonCenter {
         }
 
         public void add_noti_timeout () {
+            // Removes the previous timeout
+            remove_noti_timeout ();
+
             uint timeout;
             switch (param.urgency) {
                 case UrgencyLevels.LOW :

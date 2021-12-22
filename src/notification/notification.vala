@@ -2,6 +2,8 @@ namespace SwayNotificatonCenter {
     [GtkTemplate (ui = "/org/erikreider/sway-notification-center/notification/notification.ui")]
     private class Notification : Gtk.ListBoxRow {
         [GtkChild]
+        unowned Gtk.Revealer revealer;
+        [GtkChild]
         unowned Hdy.Carousel carousel;
 
         [GtkChild]
@@ -37,10 +39,7 @@ namespace SwayNotificatonCenter {
         private NotiDaemon notiDaemon;
         private uint timeout_delay;
         private uint timeout_low_delay;
-
-        public delegate void On_hide_cb (Notification noti);
-
-        private unowned On_hide_cb timeout_cb = null;
+        private int transition_time;
 
         public Notification (NotifyParams param,
                              NotiDaemon notiDaemon) {
@@ -52,16 +51,16 @@ namespace SwayNotificatonCenter {
         public Notification.timed (NotifyParams param,
                                    NotiDaemon notiDaemon,
                                    uint timeout,
-                                   uint timeout_low,
-                                   On_hide_cb callback) {
+                                   uint timeout_low) {
             this.timeout_delay = timeout;
             this.timeout_low_delay = timeout_low;
-            this.timeout_cb = callback;
             build_noti (param, notiDaemon);
             add_noti_timeout ();
         }
 
         private void build_noti (NotifyParams param, NotiDaemon notiDaemon) {
+            this.transition_time = ConfigModel.instance.transition_time;
+
             this.notiDaemon = notiDaemon;
             this.param = param;
 
@@ -69,7 +68,9 @@ namespace SwayNotificatonCenter {
 
             default_button.clicked.connect (click_default_action);
 
-            close_button.clicked.connect (close_notification);
+            close_revealer.set_transition_duration (this.transition_time);
+
+            close_button.clicked.connect (() => close_notification ());
 
             this.event_box.enter_notify_event.connect (() => {
                 close_revealer.set_reveal_child (true);
@@ -84,6 +85,8 @@ namespace SwayNotificatonCenter {
                 return false;
             });
 
+            this.revealer.set_transition_duration (this.transition_time);
+
             this.carousel.scroll_to (event_box);
             this.carousel.page_changed.connect ((_, i) => {
                 if (i == 0) close_notification ();
@@ -94,6 +97,11 @@ namespace SwayNotificatonCenter {
             set_actions ();
 
             this.show ();
+
+            Timeout.add (0, () => {
+                this.revealer.set_reveal_child (true);
+                return GLib.Source.REMOVE;
+            });
         }
 
         private void set_body () {
@@ -236,13 +244,19 @@ namespace SwayNotificatonCenter {
             return value;
         }
 
-        private void close_notification () {
-            try {
-                notiDaemon.click_close_notification (param.applied_id);
-                remove_noti_timeout ();
-            } catch (Error e) {
-                print ("Error: %s\n", e.message);
-            }
+        private void close_notification (bool is_timeout = false) {
+            remove_noti_timeout ();
+            this.revealer.set_reveal_child (false);
+            Timeout.add (this.transition_time, () => {
+                try {
+                    notiDaemon.manually_close_notification (param.applied_id,
+                                                            is_timeout);
+                } catch (Error e) {
+                    print ("Error: %s\n", e.message);
+                    this.destroy ();
+                }
+                return GLib.Source.REMOVE;
+            });
         }
 
         private void set_icon () {
@@ -315,7 +329,7 @@ namespace SwayNotificatonCenter {
             uint ms = param.expire_timeout > 0 ? param.expire_timeout : timeout;
             if (param.expire_timeout != 0) {
                 timeout_id = Timeout.add (ms, () => {
-                    if (timeout_cb != null) timeout_cb (this);
+                    close_notification (true);
                     return GLib.Source.REMOVE;
                 });
             }

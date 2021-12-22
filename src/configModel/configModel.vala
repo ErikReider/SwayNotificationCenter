@@ -107,6 +107,18 @@ namespace SwayNotificatonCenter {
             }
         }
 
+        /** The transition time for all animations */
+        private const int _transition_time_def = 200;
+        private int _transition_time = _transition_time_def;
+        public int transition_time {
+            get {
+                return _transition_time;
+            }
+            set {
+                _transition_time = value < 0 ? _transition_time_def : value;
+            }
+        }
+
         /*
          * Specifies if the control center should use keyboard shortcuts
          * and block keyboard input for other applications while open

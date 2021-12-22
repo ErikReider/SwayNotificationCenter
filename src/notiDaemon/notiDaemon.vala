@@ -71,16 +71,23 @@ namespace SwayNotificatonCenter {
 
         public signal void on_dnd_toggle (bool dnd);
 
-        public void click_close_notification (uint32 id)
+        public void manually_close_notification (uint32 id, bool timeout)
         throws DBusError, IOError {
             notiWindow.close_notification (id);
-            dbusInit.ccDaemon.close_notification (id);
-            NotificationClosed (id, ClosedReasons.DISMISSED);
+            if (!timeout) {
+                dbusInit.ccDaemon.close_notification (id);
+                NotificationClosed (id, ClosedReasons.DISMISSED);
+            }
         }
 
         public void close_all_notifications () throws DBusError, IOError {
             notiWindow.close_all_notifications ();
         }
+
+        /*
+         * Specification
+         * https://specifications.freedesktop.org/notification-spec/latest/ar01s09.html
+         */
 
         public void CloseNotification (uint32 id) throws DBusError, IOError {
             notiWindow.close_notification (id);

@@ -136,8 +136,7 @@ namespace SwayNotificatonCenter {
             var noti = new Notification.timed (param,
                                                notiDaemon,
                                                ConfigModel.instance.timeout,
-                                               ConfigModel.instance.timeout_low,
-                                               remove_notification);
+                                               ConfigModel.instance.timeout_low);
 
             if (list_reverse) {
                 box.pack_start (noti);

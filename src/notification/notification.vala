@@ -89,7 +89,15 @@ namespace SwayNotificatonCenter {
 
             this.carousel.scroll_to (event_box);
             this.carousel.page_changed.connect ((_, i) => {
-                if (i == 0) close_notification ();
+                if (i != 0) return;
+                remove_noti_timeout ();
+                try {
+                    notiDaemon.manually_close_notification (
+                        param.applied_id, false);
+                } catch (Error e) {
+                    print ("Error: %s\n", e.message);
+                    this.destroy ();
+                }
             });
 
             set_body ();

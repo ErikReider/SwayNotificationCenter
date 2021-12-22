@@ -41,6 +41,8 @@ namespace SwayNotificatonCenter {
         private uint timeout_low_delay;
         private int transition_time;
 
+        private int carpusel_empty_widget_index = 0;
+
         public Notification (NotifyParams param,
                              NotiDaemon notiDaemon) {
             build_noti (param, notiDaemon);
@@ -87,9 +89,21 @@ namespace SwayNotificatonCenter {
 
             this.revealer.set_transition_duration (this.transition_time);
 
-            this.carousel.scroll_to (event_box);
+            this.carousel.set_animation_duration (this.transition_time);
+            // Changes the swipte direction depending on the notifications X position
+            switch (ConfigModel.instance.positionX) {
+                case PositionX.LEFT:
+                    this.carousel.reorder (event_box, 0);
+                    this.carpusel_empty_widget_index = 1;
+                    break;
+                case PositionX.RIGHT:
+                case PositionX.CENTER:
+                    this.carousel.scroll_to (event_box);
+                    this.carpusel_empty_widget_index = 0;
+                    break;
+            }
             this.carousel.page_changed.connect ((_, i) => {
-                if (i != 0) return;
+                if (i != this.carpusel_empty_widget_index) return;
                 remove_noti_timeout ();
                 try {
                     notiDaemon.manually_close_notification (

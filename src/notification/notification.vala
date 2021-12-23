@@ -130,7 +130,8 @@ namespace SwayNotificatonCenter {
 
         private void set_body () {
             string text = param.body ?? "";
-            string[] img_paths = {};
+
+            // Removes all image tags and adds them to an array
             if (text.length > 0) {
                 try {
                     GLib.Regex img_exp = new Regex (
@@ -138,6 +139,7 @@ namespace SwayNotificatonCenter {
                         RegexCompileFlags.JAVASCRIPT_COMPAT);
 
                     // Get src paths from images
+                    string[] img_paths = {};
                     MatchInfo info;
                     if (img_exp.match (text, 0, out info)) {
                         img_paths += Functions.get_match_from_info (info);
@@ -148,32 +150,43 @@ namespace SwayNotificatonCenter {
 
                     // Remove all images
                     text = img_exp.replace (text, text.length, 0, "");
+
+                    // Set the image if exists and is valid
+                    if (img_paths.length > 0) {
+                        var img = img_paths[0];
+                        var file = File.new_for_path (img);
+                        if (img.length > 0 && file.query_exists ()) {
+                            const int max_width = 200;
+                            const int max_height = 100;
+                            var buf = new Gdk.Pixbuf.from_file_at_scale (
+                                file.get_path (),
+                                max_width,
+                                max_height,
+                                true);
+                            this.body_image.set_from_pixbuf (buf);
+                            this.body_image.show ();
+                        }
+                    }
                 } catch (Error e) {
                     stderr.printf (e.message);
                 }
             }
 
-            text = fix_markup (text);
-            this.body.set_markup (text);
-
             try {
-                if (img_paths.length > 0) {
-                    var img = img_paths[0];
-                    var file = File.new_for_path (img);
-                    if (img.length > 0 && file.query_exists ()) {
-                        const int max_width = 200;
-                        const int max_height = 100;
-                        var buf = new Gdk.Pixbuf.from_file_at_scale (
-                            file.get_path (),
-                            max_width,
-                            max_height,
-                            true);
-                        this.body_image.set_from_pixbuf (buf);
-                        this.body_image.show ();
+                Pango.AttrList ? attr = null;
+                string ? buf = null;
+                Pango.parse_markup (text, -1, 0, out attr, out buf, null);
+                if (buf != null) {
+                    this.body.set_markup (buf);
+                    if (attr != null) {
+                        this.body.set_attributes (attr);
                     }
                 }
             } catch (Error e) {
-                stderr.printf (e.message);
+                stderr.printf ("Could not parse Pango markup: %s\n", e.message);
+                // Removes all tags
+                text = fix_markup (text);
+                this.body.set_markup (text);
             }
         }
 

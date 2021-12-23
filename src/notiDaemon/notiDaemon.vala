@@ -29,9 +29,10 @@ namespace SwayNotificatonCenter {
             }
         }
 
-        /** 
+        /**
          * Changes the popup-notification window visibility.
-         * Closes all notifications and hides window if `value` is false */
+         * Closes all notifications and hides window if `value` is false
+         */
         public void set_noti_window_visibility (bool value)
         throws DBusError, IOError {
             notiWindow.change_visibility (value);

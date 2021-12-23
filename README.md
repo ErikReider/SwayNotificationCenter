@@ -88,6 +88,7 @@ To reload the config, you'll need to run `swaync-client --reload-config`
 - `positionY`: `top` or `bottom`
 - `timeout`: uint (Any positive number). The notification timeout for notifications with normal priority
 - `timeout-low`: uint (any positive number without decimals). The notification timeout for notifications with low priority
+- `timeout-critical`: uint (any positive number without decimals, 0 to disable). The notification timeout for notifications with critical priority
 - `keyboard-shortcuts`: `true` or `false`. If control center should use keyboard shortcuts
 - `image-visibility`: `always`, `when-available` or `never`. Notification image visiblilty
 - `transition-time`: uint (Any positive number, 0 to disable). The notification animation duration

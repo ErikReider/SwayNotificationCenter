@@ -144,6 +144,11 @@ namespace SwayNotificatonCenter {
             default = ImageVisibility.ALWAYS;
         }
 
+        /**
+         * Notification window's width, in pixels.
+         */
+        public int notification_window_width { get; set; default = 500; }
+
         /* Methods */
 
         /**

@@ -48,7 +48,6 @@ namespace SwayNotificatonCenter {
         }
 
         public void close_all_notifications () throws DBusError, IOError {
-            controlCenter.close_all_notifications ();
             notiDaemon.close_all_notifications ();
         }
 

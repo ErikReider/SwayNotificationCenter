@@ -153,23 +153,18 @@ namespace SwayNotificatonCenter {
                 }
             }
 
-            bool success = false;
             try {
                 Pango.AttrList ? attr = null;
                 string ? buf = null;
-                if (Pango.parse_markup (text, -1, 0, out attr, out buf, null)) {
-                    if (buf != null) {
-                        success = true;
-                        this.body.set_markup (buf);
-                        if (attr != null) {
-                            this.body.set_attributes (attr);
-                        }
+                Pango.parse_markup (text, -1, 0, out attr, out buf, null);
+                if (buf != null) {
+                    this.body.set_markup (buf);
+                    if (attr != null) {
+                        this.body.set_attributes (attr);
                     }
                 }
             } catch (Error e) {
                 stderr.printf ("Could not parse Pango markup: %s\n", e.message);
-            }
-            if (!success) {
                 // Removes all tags
                 text = fix_markup (text);
                 this.body.set_markup (text);

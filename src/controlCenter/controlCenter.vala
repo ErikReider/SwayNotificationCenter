@@ -297,5 +297,13 @@ namespace SwayNotificatonCenter {
         public bool get_visibility () {
             return this.visible;
         }
+
+        /** Forces each notification EventBox to reload its style_context #27 */
+        public void reload_notifications_style () {
+            foreach (var c in list_box.get_children ()) {
+                Notification noti = (Notification) c;
+                if (noti != null) noti.reload_style_context ();
+            }
+        }
     }
 }

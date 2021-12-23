@@ -383,5 +383,10 @@ namespace SwayNotificatonCenter {
                 timeout_id = 0;
             }
         }
+
+        /** Forces the EventBox to reload its style_context #27 */
+        public void reload_style_context () {
+            event_box.get_style_context ().changed ();
+        }
     }
 }

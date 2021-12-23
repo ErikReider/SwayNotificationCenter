@@ -6,7 +6,7 @@ namespace SwayNotificatonCenter {
 
         public CcDaemon (NotiDaemon notiDaemon) {
             this.notiDaemon = notiDaemon;
-            this.controlCenter = new ControlCenter(this);
+            this.controlCenter = new ControlCenter (this);
 
             notiDaemon.on_dnd_toggle.connect ((dnd) => {
                 this.controlCenter.set_switch_dnd_state (dnd);
@@ -24,7 +24,9 @@ namespace SwayNotificatonCenter {
         public signal void subscribe (uint count, bool dnd);
 
         public bool reload_css () throws Error {
-            return Functions.load_css (style_path);
+            bool result = Functions.load_css (style_path);
+            if (result) controlCenter.reload_notifications_style ();
+            return result;
         }
 
         public void reload_config () throws Error {

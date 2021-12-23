@@ -41,6 +41,7 @@ namespace SwayNotificatonCenter {
         private uint timeout_delay;
         private uint timeout_low_delay;
         private int transition_time;
+        private uint timeout_critical_delay;
 
         private int carpusel_empty_widget_index = 0;
 
@@ -54,10 +55,12 @@ namespace SwayNotificatonCenter {
         public Notification.timed (NotifyParams param,
                                    NotiDaemon notiDaemon,
                                    uint timeout,
-                                   uint timeout_low) {
+                                   uint timeout_low,
+                                   uint timeout_critical) {
             this.is_timed = true;
             this.timeout_delay = timeout;
             this.timeout_low_delay = timeout_low;
+            this.timeout_critical_delay = timeout_critical;
             build_noti (param, notiDaemon);
             add_noti_timeout ();
         }
@@ -366,10 +369,14 @@ namespace SwayNotificatonCenter {
                     timeout = timeout_delay * 1000;
                     break;
                 case UrgencyLevels.CRITICAL:
-                    return;
+                    if (timeout_critical_delay == 0) {
+                        return;
+                    }
+                    timeout = timeout_critical_delay * 1000;
+                    break;
             }
             uint ms = param.expire_timeout > 0 ? param.expire_timeout : timeout;
-            if (param.expire_timeout != 0) {
+            if (ms != 0) {
                 timeout_id = Timeout.add (ms, () => {
                     close_notification (true);
                     return GLib.Source.REMOVE;

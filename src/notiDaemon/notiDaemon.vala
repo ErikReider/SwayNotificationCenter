@@ -34,43 +34,6 @@ namespace SwayNotificatonCenter {
             notiWindow.change_visibility (value);
         }
 
-        public uint32 Notify (string app_name,
-                              uint32 replaces_id,
-                              string app_icon,
-                              string summary,
-                              string body,
-                              string[] actions,
-                              HashTable<string, Variant> hints,
-                              int expire_timeout)
-        throws DBusError, IOError {
-            uint32 id = replaces_id;
-            if (replaces_id == 0 || replaces_id > noti_id) id = ++noti_id;
-
-            var param = NotifyParams (
-                id,
-                app_name,
-                replaces_id,
-                app_icon,
-                summary,
-                body,
-                actions,
-                hints,
-                expire_timeout);
-
-            if (id == replaces_id) {
-                notiWindow.close_notification (id);
-                ccDaemon.controlCenter.close_notification (id);
-            }
-            if (!ccDaemon.controlCenter.get_visibility ()) {
-                if (param.urgency == UrgencyLevels.CRITICAL ||
-                    (!dnd && param.urgency != UrgencyLevels.CRITICAL)) {
-                    notiWindow.add_notification (param, this);
-                }
-            }
-            ccDaemon.controlCenter.add_notification (param, this);
-            return id;
-        }
-
         public bool toggle_dnd () throws DBusError, IOError {
             on_dnd_toggle (dnd = !dnd);
             return dnd;
@@ -104,6 +67,42 @@ namespace SwayNotificatonCenter {
          * Specification
          * https://specifications.freedesktop.org/notification-spec/latest/ar01s09.html
          */
+
+        public uint32 Notify (string app_name,
+                              uint32 replaces_id,
+                              string app_icon,
+                              string summary,
+                              string body,
+                              string[] actions,
+                              HashTable<string, Variant> hints,
+                              int expire_timeout) throws DBusError, IOError {
+            uint32 id = replaces_id;
+            if (replaces_id == 0 || replaces_id > noti_id) id = ++noti_id;
+
+            var param = NotifyParams (
+                id,
+                app_name,
+                replaces_id,
+                app_icon,
+                summary,
+                body,
+                actions,
+                hints,
+                expire_timeout);
+
+            if (id == replaces_id) {
+                notiWindow.close_notification (id);
+                ccDaemon.controlCenter.close_notification (id);
+            }
+            if (!ccDaemon.controlCenter.get_visibility ()) {
+                if (param.urgency == UrgencyLevels.CRITICAL ||
+                    (!dnd && param.urgency != UrgencyLevels.CRITICAL)) {
+                    notiWindow.add_notification (param, this);
+                }
+            }
+            ccDaemon.controlCenter.add_notification (param, this);
+            return id;
+        }
 
         public void CloseNotification (uint32 id) throws DBusError, IOError {
             notiWindow.close_notification (id);

@@ -32,7 +32,7 @@ namespace SwayNotificatonCenter {
             img.set_from_pixbuf (scaled_pixbuf);
         }
 
-        public static bool load_css (string style_path) {
+        public static bool load_css (string ? style_path) {
             try {
                 Gtk.CssProvider css_provider = new Gtk.CssProvider ();
                 css_provider.load_from_path (get_style_path (style_path));
@@ -47,9 +47,11 @@ namespace SwayNotificatonCenter {
             return false;
         }
 
-        public static string get_style_path (string custon_path) {
+        public static string get_style_path (string ? custom_path) {
             string[] paths = {};
-            if (custon_path.length > 0) paths += custon_path;
+            if (custom_path != null && custom_path.length > 0) {
+                paths += custom_path;
+            }
             paths += Path.build_path (Path.DIR_SEPARATOR.to_string (),
                                       GLib.Environment.get_user_config_dir (),
                                       "swaync/style.css");
@@ -74,9 +76,11 @@ namespace SwayNotificatonCenter {
             return path;
         }
 
-        public static string get_config_path (string custom_path = "") {
+        public static string get_config_path (string ? custom_path) {
             string[] paths = {};
-            if (custom_path.length > 0) paths += custom_path;
+            if (custom_path != null && custom_path.length > 0) {
+                paths += custom_path;
+            }
             paths += Path.build_path (Path.DIR_SEPARATOR.to_string (),
                                       GLib.Environment.get_user_config_dir (),
                                       "swaync/config.json");

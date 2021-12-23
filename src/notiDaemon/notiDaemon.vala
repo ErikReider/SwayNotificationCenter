@@ -5,12 +5,28 @@ namespace SwayNotificatonCenter {
         private uint32 noti_id = 0;
         private bool dnd = false;
 
-        private DBusInit dbusInit;
+        private CcDaemon ccDaemon;
         private NotiWindow notiWindow;
 
-        public NotiDaemon (DBusInit dbusInit) {
-            this.dbusInit = dbusInit;
-            this.notiWindow = new NotiWindow (this.dbusInit);
+        public NotiDaemon () {
+            this.ccDaemon = new CcDaemon (this);
+            Bus.own_name (BusType.SESSION, "org.erikreider.swaync.cc",
+                          BusNameOwnerFlags.NONE,
+                          on_cc_bus_aquired,
+                          () => {},
+                          () => stderr.printf (
+                              "Could not aquire control center name\n"));
+
+            this.notiWindow = new NotiWindow ();
+        }
+
+        private void on_cc_bus_aquired (DBusConnection conn) {
+            try {
+                conn.register_object ("/org/erikreider/swaync/cc", ccDaemon);
+            } catch (IOError e) {
+                stderr.printf ("Could not register CC service\n");
+                Process.exit (1);
+            }
         }
 
         public void set_noti_window_visibility (bool value)
@@ -43,15 +59,15 @@ namespace SwayNotificatonCenter {
 
             if (id == replaces_id) {
                 notiWindow.close_notification (id);
-                dbusInit.ccDaemon.close_notification (id);
+                ccDaemon.controlCenter.close_notification (id);
             }
-            if (!dbusInit.ccDaemon.get_visibility ()) {
+            if (!ccDaemon.controlCenter.get_visibility ()) {
                 if (param.urgency == UrgencyLevels.CRITICAL ||
                     (!dnd && param.urgency != UrgencyLevels.CRITICAL)) {
                     notiWindow.add_notification (param, this);
                 }
             }
-            dbusInit.ccDaemon.add_notification (param);
+            ccDaemon.controlCenter.add_notification (param, this);
             return id;
         }
 
@@ -75,7 +91,7 @@ namespace SwayNotificatonCenter {
         throws DBusError, IOError {
             notiWindow.close_notification (id);
             if (!timeout) {
-                dbusInit.ccDaemon.close_notification (id);
+                ccDaemon.controlCenter.close_notification (id);
                 NotificationClosed (id, ClosedReasons.DISMISSED);
             }
         }
@@ -91,7 +107,7 @@ namespace SwayNotificatonCenter {
 
         public void CloseNotification (uint32 id) throws DBusError, IOError {
             notiWindow.close_notification (id);
-            dbusInit.ccDaemon.close_notification (id);
+            ccDaemon.controlCenter.close_notification (id);
             NotificationClosed (id, ClosedReasons.CLOSED_BY_CLOSENOTIFICATION);
         }
 

@@ -4,6 +4,7 @@ app_sources = [
   'configModel/configModel.vala',
   'notiWindow/notiWindow.vala',
   'notification/notification.vala',
+  'ccDaemon/ccDaemon.vala',
   'controlCenter/controlCenter.vala',
   'controlCenter/topAction/topAction.vala',
   'constants.vala',

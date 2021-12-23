@@ -1,6 +1,5 @@
 namespace SwayNotificatonCenter {
     public class NotiWindow {
-        private DBusInit dbusInit;
         private NotificationWindow notis = new NotificationWindow ();
 
         private unowned NotificationWindow notificationWindow {
@@ -8,10 +7,6 @@ namespace SwayNotificatonCenter {
                 if (!notis.get_realized ()) notis = new NotificationWindow ();
                 return notis;
             }
-        }
-
-        public NotiWindow (DBusInit dbusInit) {
-            this.dbusInit = dbusInit;
         }
 
         public void change_visibility (bool value) {

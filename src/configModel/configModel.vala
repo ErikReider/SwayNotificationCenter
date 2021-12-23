@@ -35,13 +35,13 @@ namespace SwayNotificatonCenter {
         public static unowned ConfigModel instance {
             get {
                 if (_instance == null) _instance = new ConfigModel ();
-                if (_path.length <= 0) _path = Functions.get_config_path ();
+                if (_path.length <= 0) _path = Functions.get_config_path (null);
                 return _instance;
             }
         }
 
         /** Get the static singleton and reload the config */
-        public static unowned ConfigModel init (string path) {
+        public static unowned ConfigModel init (string ? path) {
             _path = Functions.get_config_path (path);
             reload_config ();
             return _instance;

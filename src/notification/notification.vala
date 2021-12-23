@@ -35,6 +35,7 @@ namespace SwayNotificatonCenter {
 
         private uint timeout_id = 0;
 
+        public bool is_timed = false;
         public NotifyParams param;
         private NotiDaemon notiDaemon;
         private uint timeout_delay;
@@ -54,6 +55,7 @@ namespace SwayNotificatonCenter {
                                    NotiDaemon notiDaemon,
                                    uint timeout,
                                    uint timeout_low) {
+            this.is_timed = true;
             this.timeout_delay = timeout;
             this.timeout_low_delay = timeout_low;
             build_noti (param, notiDaemon);
@@ -336,6 +338,8 @@ namespace SwayNotificatonCenter {
         }
 
         public void add_noti_timeout () {
+            if (!this.is_timed) return;
+
             // Removes the previous timeout
             remove_noti_timeout ();
 

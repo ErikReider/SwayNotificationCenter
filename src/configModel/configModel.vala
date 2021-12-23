@@ -119,6 +119,18 @@ namespace SwayNotificatonCenter {
             }
         }
 
+        /** The timeout for notifications with CRITICAL priority */
+        private const int _timeout_critical_def = 0;
+        private int _timeout_critical = _timeout_critical_def;
+        public int timeout_critical {
+            get {
+                return _timeout_critical;
+            }
+            set {
+                _timeout_critical = value < 0 ? _timeout_critical_def : value;
+            }
+        }
+
         /*
          * Specifies if the control center should use keyboard shortcuts
          * and block keyboard input for other applications while open

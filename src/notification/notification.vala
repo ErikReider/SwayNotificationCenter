@@ -128,6 +128,8 @@ namespace SwayNotificatonCenter {
 
         private void set_body () {
             string text = param.body ?? "";
+
+            // Removes all image tags and adds them to an array
             string[] img_paths = {};
             if (text.length > 0) {
                 try {
@@ -151,8 +153,27 @@ namespace SwayNotificatonCenter {
                 }
             }
 
-            text = fix_markup (text);
-            this.body.set_markup (text);
+            bool success = false;
+            try {
+                Pango.AttrList ? attr = null;
+                string ? buf = null;
+                if (Pango.parse_markup (text, -1, 0, out attr, out buf, null)) {
+                    if (buf != null) {
+                        success = true;
+                        this.body.set_markup (buf);
+                        if (attr != null) {
+                            this.body.set_attributes (attr);
+                        }
+                    }
+                }
+            } catch (Error e) {
+                stderr.printf ("Could not parse Pango markup: %s\n", e.message);
+            }
+            if (!success) {
+                // Removes all tags
+                text = fix_markup (text);
+                this.body.set_markup (text);
+            }
 
             try {
                 if (img_paths.length > 0) {

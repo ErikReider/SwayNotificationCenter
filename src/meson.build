@@ -59,3 +59,15 @@ executable('swaync-client',
 
 install_data('style.css', install_dir : join_paths(sysconfdir, 'xdg/swaync'))
 install_data('config.json', install_dir : join_paths(sysconfdir, 'xdg/swaync'))
+
+datadir = get_option('datadir')
+
+if get_option('zsh-completions')
+  zsh_files = files(
+    '../completions/zsh/_swaync',
+    '../completions/zsh/_swaync-client',
+  )
+  zsh_install_dir = join_paths(datadir, 'zsh', 'site-functions')
+
+  install_data(zsh_files, install_dir: zsh_install_dir)
+endif

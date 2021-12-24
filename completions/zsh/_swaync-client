@@ -1,0 +1,13 @@
+#compdef swaync-client
+
+_arguments -s \
+    '(-h --help)'{-h,--help}'[Show help options]' \
+    '(-R --reload-config)'{-R --reload-config}'[Reload the config file]' \
+    '(-rs --reload-css)'{-rs --reload-css}'[Reload the css file. Location change requires restart]' \
+    '(-t --toggle-panel)'{-t --toggle-panel}'[Toggle the notificaion panel]' \
+    '(-d --toggle-dnd)'{-d --toggle-dnd}'[Toggle and print the current dnd state]' \
+    '(-D --get-dnd)'{-D --get-dnd}'[Print the current dnd state]' \
+    '(-c --count)'{-c --count}'[Print the current notificaion count]' \
+    '(-C --close-all)'{-C --close-all}'[Closes all notifications]' \
+    '(-sw --skip-wait)'{-sw --skip-wait}'[Doesn't wait when swaync hasn't been started]' \
+    '(-s --subscribe)'{-s --subscribe}'[Subscribe to notificaion add and close events]' \

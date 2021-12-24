@@ -1,0 +1,6 @@
+#compdef swaync
+
+_arguments -s \
+    '(-h --help)'{-h,--help}'[Show help options]' \
+    '(-s --style)'{-s,--style}'[Use a custom Stylesheet file]:files:_files' \
+    '(-c --config)'{-c,--config}'[Use a custom config file]:files:_files' \

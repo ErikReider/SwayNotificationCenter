@@ -3,5 +3,8 @@
 pkg
 build
 SwayNotificationCenter
-swaync
-swaync*
+./swaync
+./swaync*
+./src/swaync
+./src/swaync*
+swaync-git*

@@ -1,0 +1,3 @@
+option('zsh-completions', type: 'boolean', value: true, description: 'Install zsh shell completions.')
+option('bash-completions', type: 'boolean', value: true, description: 'Install bash shell completions.')
+option('fish-completions', type: 'boolean', value: true, description: 'Install fish shell completions.')

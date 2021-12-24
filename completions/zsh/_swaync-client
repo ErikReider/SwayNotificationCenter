@@ -9,5 +9,5 @@ _arguments -s \
     '(-D --get-dnd)'{-D --get-dnd}'[Print the current dnd state]' \
     '(-c --count)'{-c --count}'[Print the current notificaion count]' \
     '(-C --close-all)'{-C --close-all}'[Closes all notifications]' \
-    '(-sw --skip-wait)'{-sw --skip-wait}'[Doesn't wait when swaync hasn't been started]' \
+    '(-sw --skip-wait)'{-sw --skip-wait}"[Doesn't wait when swaync hasn't been started]" \
     '(-s --subscribe)'{-s --subscribe}'[Subscribe to notificaion add and close events]' \

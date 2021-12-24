@@ -1,0 +1,38 @@
+_swaync() {
+    local cur prev
+    _get_comp_words_by_ref cur prev
+
+    short=(
+        -h
+        -s
+        -c
+    )
+
+    long=(
+        --help
+        --style
+        --config
+    )
+    case $prev in
+        -s | --style)
+            _filedir
+            return
+            ;;
+        -c | --config)
+            _filedir
+            return
+            ;;
+    esac
+
+    if [[ $cur == --* ]]; then
+        COMPREPLY=($(compgen -W "${long[*]}" -- "$cur"))
+    elif [[ $cur == -* ]]; then
+        COMPREPLY=($(compgen -W "${short[*]}" -- "$cur"))
+        COMPREPLY+=($(compgen -W "${long[*]}" -- "$cur"))
+    else
+        COMPREPLY=($(compgen -W "${short[*]}" -- "$cur"))
+        COMPREPLY+=($(compgen -W "${long[*]}" -- "$cur"))
+        COMPREPLY+=($(compgen -c -- "$cur"))
+    fi
+
+} && complete -F _swaync swaync

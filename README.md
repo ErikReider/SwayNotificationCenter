@@ -1,6 +1,6 @@
 # SwayNotificationCenter
 
-A simple notification daemon with a gui built for Sway (potentially any wm with wlroots).
+A simple notification daemon with a GTK gui for notifications and the control center
 
 ## Features
 

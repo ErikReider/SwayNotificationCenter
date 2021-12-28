@@ -4,7 +4,9 @@ namespace SwayNotificatonCenter {
 
         private unowned NotificationWindow notificationWindow {
             get {
-                if (!notis.get_realized ()) notis = new NotificationWindow ();
+                if (!notis.get_realized () || notis.closed) {
+                    notis = new NotificationWindow ();
+                }
                 return notis;
             }
         }
@@ -38,6 +40,8 @@ namespace SwayNotificatonCenter {
         private bool list_reverse = false;
 
         private double last_upper = 0;
+
+        public bool closed = false;
 
         public NotificationWindow () {
             GtkLayerShell.init_for_window (this);
@@ -125,7 +129,10 @@ namespace SwayNotificatonCenter {
             }
 
             if (!this.get_realized ()) return;
-            if (box.get_children ().length () == 0) this.close ();
+            if (box.get_children ().length () == 0) {
+                this.closed = true;
+                this.close ();
+            }
         }
 
         public void add_notification (NotifyParams param,

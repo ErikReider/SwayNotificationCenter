@@ -1,6 +1,6 @@
 # SwayNotificationCenter
 
-A simple notification daemon with a gui built for Sway (potentially any wm with wlroots).
+A simple notification daemon with a GTK gui for notifications and the control center
 
 ## Features
 
@@ -41,7 +41,7 @@ meson install -C build
 # Notification Daemon
 exec swaync
 
-# Toggle notification panel
+# Toggle control center
 bindsym $mod+Shift+n exec swaync-client -t -sw
 ```
 
@@ -65,7 +65,7 @@ To reload the config
 ./build/src/swaync-client -R
 ```
 
-## Notification Panel Shortcuts
+## Control Center Shortcuts
 
 - Up/Down: Navigate notifications
 - Home: Navigate to the latest notification

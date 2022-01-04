@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=org.freedesktop.Notifications
+Exec=@bindir@/swaync
+SystemdService=swaync.service

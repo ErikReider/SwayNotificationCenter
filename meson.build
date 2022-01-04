@@ -7,6 +7,35 @@ project('sway-notificaton-center', ['c', 'vala'],
 subdir('src')
 
 datadir = get_option('datadir')
+libdir = get_option('libdir')
+
+conf_data = configuration_data()
+conf_data.set('bindir', join_paths(get_option('prefix'), get_option('bindir')))
+
+# Dbus service
+configure_file(
+  configuration: conf_data,
+  input: 'services/dbus/org.erikreider.swaync.service.in',
+  output: '@BASENAME@',
+  install_dir: datadir + '/dbus-1/services'
+)
+
+# Systemd service unit
+systemd = dependency('systemd', required: false)
+if get_option('systemd-service')
+  if systemd.found()
+    systemd_service_install_dir = systemd.get_pkgconfig_variable('systemduserunitdir')
+  else
+    systemd_service_install_dir = join_paths(libdir, 'systemd', 'user')
+  endif
+
+  configure_file(
+    configuration: conf_data,
+    input: 'services/systemd/swaync.service.in',
+    output: '@BASENAME@',
+    install_dir: systemd_service_install_dir
+  )
+endif
 
 # Zsh completion
 if get_option('zsh-completions')

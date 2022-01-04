@@ -7,6 +7,8 @@ _swaync-client() {
         -R
         -rs
         -t
+        -op
+        -cp
         -d
         -D
         -c
@@ -20,6 +22,8 @@ _swaync-client() {
         --reload-config
         --reload-css
         --toggle-panel
+        --open-panel
+        --close-panel
         --toggle-dnd
         --get-dnd
         --count

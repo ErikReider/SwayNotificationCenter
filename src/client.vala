@@ -15,6 +15,8 @@ interface CcDaemon : GLib.Object {
 
     public abstract bool toggle_dnd () throws DBusError, IOError;
 
+    public abstract void set_visibility (bool value) throws DBusError, IOError;
+
     public signal void subscribe (uint count, bool dnd);
 }
 
@@ -26,15 +28,17 @@ private void print_help (string[] args) {
     print (@"Help:\n");
     print (@"\t -h, --help \t\t Show help options\n");
     print (@"Options:\n");
-    print (@"\t -R, --reload-config \t Reload the config file\n");
+    print (@"\t -R,  --reload-config \t Reload the config file\n");
     print (@"\t -rs, --reload-css \t Reload the css file. Location change requires restart\n");
-    print (@"\t -t, --toggle-panel \t Toggle the notificaion panel\n");
-    print (@"\t -d, --toggle-dnd \t Toggle and print the current dnd state\n");
-    print (@"\t -D, --get-dnd \t\t Print the current dnd state\n");
-    print (@"\t -c, --count \t\t Print the current notificaion count\n");
-    print (@"\t -C, --close-all \t Closes all notifications\n");
+    print (@"\t -t,  --toggle-panel \t Toggle the notificaion panel\n");
+    print (@"\t -op, --open-panel \t Opens the notificaion panel\n");
+    print (@"\t -cp, --close-panel \t Closes the notificaion panel\n");
+    print (@"\t -d,  --toggle-dnd \t Toggle and print the current dnd state\n");
+    print (@"\t -D,  --get-dnd \t Print the current dnd state\n");
+    print (@"\t -c,  --count \t\t Print the current notificaion count\n");
+    print (@"\t -C,  --close-all \t Closes all notifications\n");
     print (@"\t -sw, --skip-wait \t Doesn't wait when swaync hasn't been started\n");
-    print (@"\t -s, --subscribe \t Subscribe to notificaion add and close events\n");
+    print (@"\t -s,  --subscribe \t Subscribe to notificaion add and close events\n");
 }
 
 private void on_subscribe (uint count, bool dnd) {
@@ -75,6 +79,14 @@ public int command_line (string[] args) {
             case "--toggle-panel":
             case "-t":
                 cc_daemon.toggle_visibility ();
+                break;
+            case "--open-panel":
+            case "-op":
+                cc_daemon.set_visibility (true);
+                break;
+            case "--close-panel":
+            case "-cp":
+                cc_daemon.set_visibility (false);
                 break;
             case "--toggle-dnd":
             case "-d":

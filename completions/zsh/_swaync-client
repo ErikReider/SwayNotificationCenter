@@ -5,6 +5,8 @@ _arguments -s \
     '(-R --reload-config)'{-R,--reload-config}'[Reload the config file]' \
     '(-rs --reload-css)'{-rs,--reload-css}'[Reload the css file. Location change requires restart]' \
     '(-t --toggle-panel)'{-t,--toggle-panel}'[Toggle the notificaion panel]' \
+    '(-op --open-panel)'{-op,--open-panel}'[Opens the notificaion panel]' \
+    '(-cp --close-panel)'{-cp,--close-panel}'[Closes the notificaion panel]' \
     '(-d --toggle-dnd)'{-d,--toggle-dnd}'[Toggle and print the current dnd state]' \
     '(-D --get-dnd)'{-D,--get-dnd}'[Print the current dnd state]' \
     '(-c --count)'{-c,--count}'[Print the current notificaion count]' \

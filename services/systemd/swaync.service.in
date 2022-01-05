@@ -11,7 +11,7 @@ ConditionEnvironment=WAYLAND_DISPLAY
 Type=dbus
 BusName=org.freedesktop.Notifications
 ExecStart=@bindir@/swaync
-ExecReload=@bindir@/swaync-client --reload-config --reload-css
+ExecReload=@bindir@/swaync-client --reload-config && @bindir@/swaync-client --reload-css
 Restart=on-failure
 
 [Install]

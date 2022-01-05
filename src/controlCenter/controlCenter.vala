@@ -227,15 +227,8 @@ namespace SwayNotificatonCenter {
             }
         }
 
-        public void set_switch_dnd_state (bool state) {
-            if (this.dnd_button.state != state) this.dnd_button.state = state;
-        }
-
-        public bool toggle_visibility () {
-            var cc_visibility = !this.visible;
-            this.set_visible (cc_visibility);
-
-            if (cc_visibility) {
+        private void on_visibility_change () {
+            if (this.visible) {
                 // Reload the settings from config
                 this.set_anchor ();
                 // Focus the first notification
@@ -250,7 +243,25 @@ namespace SwayNotificatonCenter {
                     if (noti != null) noti.set_time ();
                 }
             }
+        }
+
+        public void set_switch_dnd_state (bool state) {
+            if (this.dnd_button.state != state) this.dnd_button.state = state;
+        }
+
+        public bool toggle_visibility () {
+            var cc_visibility = !this.visible;
+            if (this.visible != cc_visibility) {
+                this.set_visible (cc_visibility);
+                on_visibility_change ();
+            }
             return cc_visibility;
+        }
+
+        public void set_visibility (bool visibility) {
+            if (this.visible == visibility) return;
+            this.set_visible (visibility);
+            on_visibility_change ();
         }
 
         public void close_notification (uint32 id) {

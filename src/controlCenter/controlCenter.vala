@@ -218,6 +218,10 @@ namespace SwayNotificatonCenter {
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }
+
+            // hide window
+            this.set_visible (false);
+            on_visibility_change ();
         }
 
         private void navigate_list (uint i) {

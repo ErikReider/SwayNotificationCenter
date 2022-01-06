@@ -284,7 +284,7 @@ namespace SwayNotificatonCenter {
             return value;
         }
 
-        private void close_notification (bool is_timeout = false) {
+        public void close_notification (bool is_timeout = false) {
             remove_noti_timeout ();
             this.revealer.set_reveal_child (false);
             Timeout.add (this.transition_time, () => {

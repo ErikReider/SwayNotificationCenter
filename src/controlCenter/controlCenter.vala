@@ -208,7 +208,8 @@ namespace SwayNotificatonCenter {
 
         public void close_all_notifications () {
             foreach (var w in list_box.get_children ()) {
-                if (w != null) list_box.remove (w);
+                Notification noti = (Notification) w;
+                if (noti != null) noti.close_notification (false);
             }
 
             try {

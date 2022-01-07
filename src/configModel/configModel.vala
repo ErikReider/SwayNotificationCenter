@@ -149,6 +149,11 @@ namespace SwayNotificatonCenter {
          */
         public int notification_window_width { get; set; default = 500; }
 
+        /*
+         * Hides the control center after clearing all notifications
+         */
+        public bool hide_on_clear { get; set; default = false; }
+
         /* Methods */
 
         /**

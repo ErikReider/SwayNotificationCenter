@@ -219,9 +219,9 @@ namespace SwayNotificatonCenter {
                 stderr.printf (e.message + "\n");
             }
 
-            // hide window
-            this.set_visible (false);
-            on_visibility_change ();
+            if (ConfigModel.instance.hide_on_clear) {
+                this.set_visibility (false);
+            }
         }
 
         private void navigate_list (uint i) {

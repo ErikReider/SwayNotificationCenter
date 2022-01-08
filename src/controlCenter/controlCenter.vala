@@ -273,6 +273,7 @@ namespace SwayNotificatonCenter {
             foreach (var w in list_box.get_children ()) {
                 var noti = (Notification) w;
                 if (noti != null && noti.param.applied_id == id) {
+                    noti.close_notification (false);
                     list_box.remove (w);
                     break;
                 }

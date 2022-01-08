@@ -218,6 +218,10 @@ namespace SwayNotificatonCenter {
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }
+
+            if (ConfigModel.instance.hide_on_clear) {
+                this.set_visibility (false);
+            }
         }
 
         private void navigate_list (uint i) {

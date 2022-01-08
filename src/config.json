@@ -7,5 +7,6 @@
   "notification-window-width": 500,
   "keyboard-shortcuts": true,
   "image-visibility": "always",
-  "transition-time": 200
+  "transition-time": 200,
+  "hide-on-clear": false
 }

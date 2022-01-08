@@ -26,6 +26,7 @@ A simple notification daemon with a GTK gui for notifications and the control ce
 
 Arch:
 The package is available on the AUR:
+
 - [swaync](https://aur.archlinux.org/packages/swaync/)
 - [swaync-git](https://aur.archlinux.org/packages/swaync-git/)
 
@@ -96,6 +97,7 @@ To reload the config, you'll need to run `swaync-client --reload-config`
 - `transition-time`: uint (Any positive number, 0 to disable). The notification animation duration
 - `notification-window-width`: uint (Any positive number). Width of the notification in pixels
 - `hide-on-clear`: bool. Hides the control center after pressing "Clear All"
+- `hide-on-action`: bool. Hides the control center when clicking on notification action
 
 The main CSS style file is located in `/etc/xdg/swaync/style.css`. Copy it over to your `.config/swaync/` folder to customize without needing root access.
 

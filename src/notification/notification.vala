@@ -223,6 +223,13 @@ namespace SwayNotificatonCenter {
         private void action_clicked (Action action, bool is_default = false) {
             if (action._identifier != null && action._identifier != "") {
                 notiDaemon.ActionInvoked (param.applied_id, action._identifier);
+                if (ConfigModel.instance.hide_on_action) {
+                    try {
+                        this.notiDaemon.ccDaemon.set_visibility (false);
+                    } catch (Error e) {
+                        print ("Error: %s\n", e.message);
+                    }
+                }
             }
             if (!param.resident) close_notification ();
         }

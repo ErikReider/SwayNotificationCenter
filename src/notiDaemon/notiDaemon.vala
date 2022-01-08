@@ -5,8 +5,8 @@ namespace SwayNotificatonCenter {
         private uint32 noti_id = 0;
         private bool dnd = false;
 
-        private CcDaemon ccDaemon;
-        private NotiWindow notiWindow;
+        public CcDaemon ccDaemon;
+        public NotiWindow notiWindow;
 
         public NotiDaemon () {
             this.ccDaemon = new CcDaemon (this);

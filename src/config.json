@@ -8,5 +8,6 @@
   "keyboard-shortcuts": true,
   "image-visibility": "always",
   "transition-time": 200,
-  "hide-on-clear": false
+  "hide-on-clear": false,
+  "hide-on-action": true
 }

@@ -152,6 +152,9 @@ namespace SwayNotificatonCenter {
         /** Hides the control center after clearing all notifications */
         public bool hide_on_clear { get; set; default = false; }
 
+        /** Hides the control center when clicking on notification action */
+        public bool hide_on_action { get; set; default = true; }
+
         /* Methods */
 
         /**

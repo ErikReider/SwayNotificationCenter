@@ -25,7 +25,9 @@ A simple notification daemon with a GTK gui for notifications and the control ce
 ## Install
 
 Arch:
-The package is available on the [AUR](https://aur.archlinux.org/packages/swaync-git/)
+The package is available on the AUR:
+- [swaync](https://aur.archlinux.org/packages/swaync/)
+- [swaync-git](https://aur.archlinux.org/packages/swaync-git/)
 
 Other:
 

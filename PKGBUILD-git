@@ -1,6 +1,6 @@
 # Maintainer: Erik Reider <erik.reider@protonmail.com>
-pkgname=swaync
-pkgver=0.3
+pkgname=swaync-git
+pkgver=0.3.r206.37142fc
 pkgrel=1
 pkgdesc="A simple notificaion daemon with a GTK panel for checking previous notifications like other DE's"
 _pkgfoldername=SwayNotificationCenter
@@ -11,11 +11,21 @@ depends=("gtk3>=3.22" "gtk-layer-shell>=0.1" "dbus" "glib2>=2.50" "vala-dbus-bin
 conflicts=("swaync" "swaync-client")
 provides=("swaync" "swaync-client")
 makedepends=(vala meson git)
-source=("${_pkgfoldername}-${pkgver}.tar.gz::${url}/archive/v${pkgver}.tar.gz")
+source=("git+$url")
 sha256sums=('SKIP')
 
+pkgver() {
+  cd $_pkgfoldername
+  printf "0.3.r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+  cd SwayNotificationCenter
+  git checkout main
+}
+
 build() {
-  arch-meson "${_pkgfoldername}-${pkgver}" build
+  arch-meson $_pkgfoldername build
   ninja -C build
 }
 

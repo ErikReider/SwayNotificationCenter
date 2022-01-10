@@ -269,12 +269,17 @@ namespace SwayNotificatonCenter {
             on_visibility_change ();
         }
 
-        public void close_notification (uint32 id) {
+        public void close_notification (uint32 id, bool replaces = false) {
             foreach (var w in list_box.get_children ()) {
                 var noti = (Notification) w;
                 if (noti != null && noti.param.applied_id == id) {
-                    noti.close_notification (false);
-                    list_box.remove (w);
+                    if (replaces) {
+                        noti.remove_noti_timeout ();
+                        noti.destroy ();
+                    } else {
+                        noti.close_notification (false);
+                        list_box.remove (w);
+                    }
                     break;
                 }
             }

@@ -140,7 +140,7 @@ namespace SwayNotificatonCenter {
 
             if (id == replaces_id) {
                 notiWindow.close_notification (id);
-                ccDaemon.controlCenter.close_notification (id);
+                ccDaemon.controlCenter.close_notification (id, true);
             }
             if (!ccDaemon.controlCenter.get_visibility ()) {
                 if (param.urgency == UrgencyLevels.CRITICAL ||

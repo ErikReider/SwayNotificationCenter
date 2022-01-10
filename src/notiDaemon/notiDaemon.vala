@@ -14,8 +14,11 @@ namespace SwayNotificatonCenter {
                           BusNameOwnerFlags.NONE,
                           on_cc_bus_aquired,
                           () => {},
-                          () => stderr.printf (
-                              "Could not aquire control center name\n"));
+                          () => {
+                stderr.printf (
+                    "Could not aquire control center name\n");
+                Process.exit (1);
+            });
 
             this.notiWindow = new NotiWindow ();
         }

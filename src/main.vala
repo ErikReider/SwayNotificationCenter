@@ -1,7 +1,7 @@
 namespace SwayNotificatonCenter {
     static NotiDaemon notiDaemon;
-    static string? style_path;
-    static string? config_path;
+    static string ? style_path;
+    static string ? config_path;
 
     public void main (string[] args) {
         Gtk.init (ref args);
@@ -30,20 +30,23 @@ namespace SwayNotificatonCenter {
             }
         }
 
+        Bus.own_name (BusType.SESSION, "org.freedesktop.Notifications",
+                      BusNameOwnerFlags.NONE,
+                      on_noti_bus_aquired,
+                      () => {},
+                      () => {
+            stderr.printf (
+                "Could not aquire notification name. " +
+                "Please close any other notification daemon " +
+                "like mako or dunst\n");
+            Process.exit (1);
+        });
+
         Functions.load_css (style_path);
 
         ConfigModel.init (config_path);
 
         notiDaemon = new NotiDaemon ();
-
-        Bus.own_name (BusType.SESSION, "org.freedesktop.Notifications",
-                      BusNameOwnerFlags.NONE,
-                      on_noti_bus_aquired,
-                      () => {},
-                      () => stderr.printf (
-                          "Could not aquire notification name. " +
-                          "Please close any other notification daemon " +
-                          "like mako or dunst\n"));
 
         Gtk.main ();
     }

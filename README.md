@@ -98,6 +98,10 @@ To reload the config, you'll need to run `swaync-client --reload-config`
 - `notification-window-width`: uint (Any positive number). Width of the notification in pixels
 - `hide-on-clear`: bool. Hides the control center after pressing "Clear All"
 - `hide-on-action`: bool. Hides the control center when clicking on notification action
+- `control-center-margin-top`: uint (Any positive number, 0 to disable). The margin (in pixels) at the top of the notification center
+- `control-center-margin-bottom`: uint (Any positive number, 0 to disable). The margin (in pixels) at the bottom of the notification center
+- `control-center-margin-right`: uint (Any positive number, 0 to disable). The margin (in pixels) at the right of the notification center
+- `control-center-margin-left`: uint (Any positive number, 0 to disable). The margin (in pixels) at the left of the notification center
 
 The main CSS style file is located in `/etc/xdg/swaync/style.css`. Copy it over to your `.config/swaync/` folder to customize without needing root access.
 

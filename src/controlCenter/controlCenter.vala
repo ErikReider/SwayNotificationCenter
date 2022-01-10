@@ -129,6 +129,11 @@ namespace SwayNotificatonCenter {
 #endif
             GtkLayerShell.set_layer (this, GtkLayerShell.Layer.TOP);
 
+            GtkLayerShell.set_margin (this, GtkLayerShell.Edge.TOP, ConfigModel.instance.control_center_margin_top);
+            GtkLayerShell.set_margin (this, GtkLayerShell.Edge.BOTTOM, ConfigModel.instance.control_center_margin_bottom);
+            GtkLayerShell.set_margin (this, GtkLayerShell.Edge.RIGHT, ConfigModel.instance.control_center_margin_right);
+            GtkLayerShell.set_margin (this, GtkLayerShell.Edge.LEFT, ConfigModel.instance.control_center_margin_left);
+
             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
             switch (ConfigModel.instance.positionX) {

@@ -52,7 +52,7 @@ public int command_line (string[] args) {
     try {
         if (args.length < 2) {
             print_help (args);
-            return 1;
+            Process.exit (1);
         }
         switch (args[1]) {
             case "--help":

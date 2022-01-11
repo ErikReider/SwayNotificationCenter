@@ -13,3 +13,4 @@ _arguments -s \
     '(-C --close-all)'{-C,--close-all}'[Closes all notifications]' \
     '(-sw --skip-wait)'{-sw,--skip-wait}"[Doesn't wait when swaync hasn't been started]" \
     '(-s --subscribe)'{-s,--subscribe}'[Subscribe to notificaion add and close events]' \
+    '(-swb --subscribe-waybar)'{-swb,--subscribe-waybar}'[Subscribe to notificaion add and close events with waybar support. Read README for example]' \

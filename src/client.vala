@@ -26,24 +26,31 @@ private void print_help (string[] args) {
     print (@"Usage:\n");
     print (@"\t $(args[0]) <OPTION>\n");
     print (@"Help:\n");
-    print (@"\t -h, --help \t\t Show help options\n");
+    print (@"\t -h, \t --help \t\t Show help options\n");
     print (@"Options:\n");
-    print (@"\t -R,  --reload-config \t Reload the config file\n");
-    print (@"\t -rs, --reload-css \t Reload the css file. Location change requires restart\n");
-    print (@"\t -t,  --toggle-panel \t Toggle the notificaion panel\n");
-    print (@"\t -op, --open-panel \t Opens the notificaion panel\n");
-    print (@"\t -cp, --close-panel \t Closes the notificaion panel\n");
-    print (@"\t -d,  --toggle-dnd \t Toggle and print the current dnd state\n");
-    print (@"\t -D,  --get-dnd \t Print the current dnd state\n");
-    print (@"\t -c,  --count \t\t Print the current notificaion count\n");
-    print (@"\t -C,  --close-all \t Closes all notifications\n");
-    print (@"\t -sw, --skip-wait \t Doesn't wait when swaync hasn't been started\n");
-    print (@"\t -s,  --subscribe \t Subscribe to notificaion add and close events\n");
+    print (@"\t -R, \t --reload-config \t Reload the config file\n");
+    print (@"\t -rs, \t --reload-css \t\t Reload the css file. Location change requires restart\n");
+    print (@"\t -t, \t --toggle-panel \t Toggle the notificaion panel\n");
+    print (@"\t -op, \t --open-panel \t\t Opens the notificaion panel\n");
+    print (@"\t -cp, \t --close-panel \t\t Closes the notificaion panel\n");
+    print (@"\t -d, \t --toggle-dnd \t\t Toggle and print the current dnd state\n");
+    print (@"\t -D, \t --get-dnd \t\t Print the current dnd state\n");
+    print (@"\t -c, \t --count \t\t Print the current notificaion count\n");
+    print (@"\t -C, \t --close-all \t\t Closes all notifications\n");
+    print (@"\t -sw, \t --skip-wait \t\t Doesn't wait when swaync hasn't been started\n");
+    print (@"\t -s, \t --subscribe \t\t Subscribe to notificaion add and close events\n");
+    print (@"\t -swb, \t --subscribe-waybar \t Subscribe to notificaion add and close events with waybar support. Read README for example\n");
 }
 
 private void on_subscribe (uint count, bool dnd) {
     stdout.write (@"{ \"count\": $(count), \"dnd\": $(dnd) }".data);
     print ("\n");
+}
+
+private void on_subscribe_waybar (uint count, bool dnd) {
+    string state = (dnd ? "dnd-" : "") + (count > 0 ? "notification" : "none");
+    print ("{\"text\": \"\", \"alt\": \"%s\", \"tooltip\": \"\", \"class\": \"%s\"}\n",
+           state, state);
 }
 
 public int command_line (string[] args) {
@@ -101,6 +108,14 @@ public int command_line (string[] args) {
                 cc_daemon.subscribe.connect ((c, d) => on_subscribe (c, d));
                 on_subscribe (cc_daemon.notification_count (),
                               cc_daemon.get_dnd ());
+                var loop = new MainLoop ();
+                loop.run ();
+                break;
+            case "--subscribe-waybar":
+            case "-swb":
+                cc_daemon.subscribe.connect ((c, d) => on_subscribe_waybar (c, d));
+                on_subscribe_waybar (cc_daemon.notification_count (),
+                                     cc_daemon.get_dnd ());
                 var loop = new MainLoop ();
                 loop.run ();
                 break;

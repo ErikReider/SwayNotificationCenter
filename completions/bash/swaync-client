@@ -15,6 +15,7 @@ _swaync-client() {
         -C
         -sw
         -s
+        -swb
     )
 
     long=(
@@ -30,6 +31,7 @@ _swaync-client() {
         --close-all
         --skip-wait
         --subscribe
+        --subscribe-waybar
     )
     case $prev in
         -s | --style)

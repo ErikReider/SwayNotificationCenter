@@ -176,37 +176,28 @@ namespace SwayNotificatonCenter {
             }
 
             try {
+                // Escapes text just incase it's not escaped yet
+                text = Markup.escape_text (text);
+
+                // Turns it back to markdown, defaults to escaped if not valid
                 Pango.AttrList ? attr = null;
                 string ? buf = null;
                 Pango.parse_markup (text, -1, 0, out attr, out buf, null);
-                if (buf != null) {
-                    this.body.set_markup (buf);
-                    if (attr != null) {
-                        this.body.set_attributes (attr);
-                    }
+
+                this.body.set_markup (buf);
+                if (attr != null) this.body.set_attributes (attr);
+
+                // Something has gone wrong... Use the escaped text instead
+                if (this.body.get_text ().length == 0 && buf.length != 0) {
+                    stderr.printf ("Could for some reason not set markup. Text: %s\n",
+                                   text);
+                    this.body.set_markup (text);
                 }
             } catch (Error e) {
-                stderr.printf ("Could not parse Pango markup: %s\n", e.message);
-                // Removes all tags
-                text = fix_markup (text);
+                stderr.printf ("Could not parse Pango markup %s: %s\n",
+                               text, e.message);
                 this.body.set_markup (text);
             }
-        }
-
-        /** Copied from Elementary OS. Fixes some markup character issues
-         * https://github.com/elementary/notifications/blob/ff0668edd9313d8780a68880f054257c3a109971/src/Notification.vala#L137-L142
-         */
-        private string fix_markup (string markup) {
-            string text = markup;
-            try {
-                Regex entity_regex = new Regex ("&(?!amp;|quot;|apos;|lt;|gt;)");
-                text = entity_regex.replace (markup, markup.length, 0, "&amp;");
-                Regex tag_regex = new Regex ("<(?!\\/?[biu]>)");
-                text = tag_regex.replace (text, text.length, 0, "&lt;");
-            } catch (Error e) {
-                stderr.printf ("Invalid regex: %s", e.message);
-            }
-            return text;
         }
 
         public void click_default_action () {
@@ -371,8 +362,8 @@ namespace SwayNotificatonCenter {
                 case UrgencyLevels.LOW :
                     timeout = timeout_low_delay * 1000;
                     break;
-                case UrgencyLevels.NORMAL:
-                default:
+                case UrgencyLevels.NORMAL :
+                default :
                     timeout = timeout_delay * 1000;
                     break;
                 case UrgencyLevels.CRITICAL:

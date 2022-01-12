@@ -158,42 +158,42 @@ namespace SwayNotificatonCenter {
         /** GtkLayerShell margins around the notification center */
         private int control_center_margin_top_ = 0;
         public int control_center_margin_top {
-          get {
-            return control_center_margin_top_;
-          }
-          set {
-            control_center_margin_top_ = value < 0 ? 0 : value;
-          }
+            get {
+                return control_center_margin_top_;
+            }
+            set {
+                control_center_margin_top_ = value < 0 ? 0 : value;
+            }
         }
 
         private int control_center_margin_bottom_ = 0;
         public int control_center_margin_bottom {
-          get {
-            return control_center_margin_bottom_;
-          }
-          set {
-            control_center_margin_bottom_ = value < 0 ? 0 : value;
-          }
+            get {
+                return control_center_margin_bottom_;
+            }
+            set {
+                control_center_margin_bottom_ = value < 0 ? 0 : value;
+            }
         }
 
         private int control_center_margin_left_ = 0;
         public int control_center_margin_left {
-          get {
-            return control_center_margin_left_;
-          }
-          set {
-            control_center_margin_left_ = value < 0 ? 0 : value;
-          }
+            get {
+                return control_center_margin_left_;
+            }
+            set {
+                control_center_margin_left_ = value < 0 ? 0 : value;
+            }
         }
 
         private int control_center_margin_right_ = 0;
         public int control_center_margin_right {
-          get {
-            return control_center_margin_right_;
-          }
-          set {
-            control_center_margin_right_ = value < 0 ? 0 : value;
-          }
+            get {
+                return control_center_margin_right_;
+            }
+            set {
+                control_center_margin_right_ = value < 0 ? 0 : value;
+            }
         }
 
         /* Methods */

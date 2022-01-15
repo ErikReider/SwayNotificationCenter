@@ -30,6 +30,14 @@ The package is available on the AUR:
 - [swaync](https://aur.archlinux.org/packages/swaync/)
 - [swaync-git](https://aur.archlinux.org/packages/swaync-git/)
 
+Fedora:
+An **unofficial** build is available in copr:
+
+``` zsh
+dnf copr enable lexa/SwayNotificationCenter
+dnf install SwayNotificationCenter
+```
+
 Other:
 
 ```zsh

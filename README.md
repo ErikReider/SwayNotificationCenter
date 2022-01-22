@@ -30,6 +30,14 @@ The package is available on the AUR:
 - [swaync](https://aur.archlinux.org/packages/swaync/)
 - [swaync-git](https://aur.archlinux.org/packages/swaync-git/)
 
+Fedora:
+An **unofficial** build is available in copr:
+
+``` zsh
+dnf copr enable lexa/SwayNotificationCenter
+dnf install SwayNotificationCenter
+```
+
 Other:
 
 ```zsh
@@ -76,8 +84,8 @@ To reload the config
 - Escape/Caps_Lock: Close notification panel
 - Return: Execute default action or close notification if none
 - Delete/BackSpace: Close notification
-- C: Close all notifications
-- D: Toggle Do Not Disturb
+- Shift+C: Close all notifications
+- Shift+D: Toggle Do Not Disturb
 - Buttons 1-9: Execute alternative actions
 
 ## Configuring

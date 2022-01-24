@@ -117,6 +117,9 @@ namespace SwayNotificatonCenter {
 
         /** Resets the UI positions */
         private void set_anchor () {
+            // Sets which monitor to display on
+            // TODO: logic
+
             // Grabs the keyboard input until closed
             bool keyboard_shortcuts = ConfigModel.instance.keyboard_shortcuts;
 #if HAVE_LATEST_GTK_LAYER_SHELL

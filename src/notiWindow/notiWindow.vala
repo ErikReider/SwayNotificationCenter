@@ -53,6 +53,9 @@ namespace SwayNotificatonCenter {
         }
 
         private void set_anchor () {
+            // Sets which monitor to display on
+            // TODO: logic
+
             switch (ConfigModel.instance.positionX) {
                 case PositionX.LEFT:
                     GtkLayerShell.set_anchor (

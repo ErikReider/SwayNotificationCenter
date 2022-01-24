@@ -30,15 +30,15 @@ namespace SwayNotificatonCenter {
 
             viewport.size_allocate.connect (size_alloc);
 
-            this.key_press_event.connect ((w, event_key) => {
-                if (event_key.type == Gdk.EventType.KEY_PRESS) {
+            this.key_release_event.connect ((w, event_key) => {
+                if (event_key.type == Gdk.EventType.KEY_RELEASE) {
                     var children = list_box.get_children ();
                     Notification noti = (Notification)
                                         list_box.get_focus_child ();
                     switch (Gdk.keyval_name (event_key.keyval)) {
                         case "Escape":
                         case "Caps_Lock":
-                            toggle_visibility ();
+                            this.set_visibility (false);
                             return true;
                         case "Return":
                             if (noti != null) noti.click_default_action ();

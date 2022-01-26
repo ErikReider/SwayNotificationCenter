@@ -57,5 +57,16 @@ executable('swaync-client',
   install: true,
 )
 
-install_data('style.css', install_dir : join_paths(sysconfdir, 'xdg/swaync'))
-install_data('config.json', install_dir : join_paths(sysconfdir, 'xdg/swaync'))
+config_path = join_paths(sysconfdir, 'xdg/swaync')
+
+config_data = configuration_data()
+config_data.set_quoted('JSONPATH', join_paths('/', config_path, 'configSchema.json'))
+config_json = configure_file(
+  input : 'config.json.in',
+  output : 'config.json',
+  configuration : config_data
+)
+
+install_data('style.css', install_dir : config_path)
+install_data(config_json, install_dir : config_path)
+install_data('configSchema.json', install_dir : config_path)

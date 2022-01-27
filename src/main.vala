@@ -21,7 +21,7 @@ namespace SwayNotificatonCenter {
                         break;
                     case "-v":
                     case "--version":
-                        print ("%s\n", Constants.version);
+                        stdout.printf ("%s\n", Constants.version);
                         return;
                     case "-h":
                     case "--help":

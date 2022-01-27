@@ -27,6 +27,7 @@ private void print_help (string[] args) {
     print (@"\t $(args[0]) <OPTION>\n");
     print (@"Help:\n");
     print (@"\t -h, \t --help \t\t Show help options\n");
+    print (@"\t -v, \t --version \t\t Prints version\n");
     print (@"Options:\n");
     print (@"\t -R, \t --reload-config \t Reload the config file\n");
     print (@"\t -rs, \t --reload-css \t\t Reload the css file. Location change requires restart\n");
@@ -65,6 +66,10 @@ public int command_line (string[] args) {
             case "--help":
             case "-h":
                 print_help (args);
+                break;
+            case "--version":
+            case "-v":
+                stdout.printf ("%s\n", Constants.version);
                 break;
             case "--reload-config":
             case "-R":

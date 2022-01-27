@@ -4,6 +4,7 @@ _swaync-client() {
 
     short=(
         -h
+        -v
         -R
         -rs
         -t
@@ -20,6 +21,7 @@ _swaync-client() {
 
     long=(
         --help
+        --version
         --reload-config
         --reload-css
         --toggle-panel

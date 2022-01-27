@@ -2,5 +2,6 @@
 
 _arguments -s \
     '(-h --help)'{-h,--help}'[Show help options]' \
+    '(-v --version)'{-v,--version}'[Prints version]' \
     '(-s --style)'{-s,--style}'[Use a custom Stylesheet file]:files:_files' \
     '(-c --config)'{-c,--config}'[Use a custom config file]:files:_files' \

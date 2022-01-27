@@ -13,7 +13,6 @@ if git.found()
   endif
 endif
 version = 'swaync @0@'.format(version)
-message('Building version:', version)
 const_config_data = configuration_data()
 const_config_data.set_quoted('VERSION', version)
 const_config_data.set_quoted('VERSION_NUM', meson.project_version())

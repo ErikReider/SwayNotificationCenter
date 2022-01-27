@@ -1,4 +1,5 @@
 namespace SwayNotificatonCenter {
     public class Constants {
+        public const string version = @VERSION@;
     }
 }

@@ -182,7 +182,7 @@ namespace SwayNotificatonCenter {
         throws DBusError, IOError {
             name = "SwayNotificationCenter";
             vendor = "ErikReider";
-            version = "0.3";
+            version = Constants.versionNum;
             spec_version = "1.2";
         }
 

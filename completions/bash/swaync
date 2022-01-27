@@ -4,12 +4,14 @@ _swaync() {
 
     short=(
         -h
+        -v
         -s
         -c
     )
 
     long=(
         --help
+        --version
         --style
         --config
     )

@@ -22,7 +22,7 @@ jobs:
       - name: Apt update
         run: apt update
       - name: Install depends
-        run: apt install meson libwayland-dev libgtk-3-dev gobject-introspection libgirepository1.0-dev valac libjson-glib-dev libhandy-1-dev libgtk-layer-shell-dev
+        run: apt install -y meson libwayland-dev libgtk-3-dev gobject-introspection libgirepository1.0-dev valac libjson-glib-dev libhandy-1-dev libgtk-layer-shell-dev
       - name: Meson
         run: meson build
       - name: Build

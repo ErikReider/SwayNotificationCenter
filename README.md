@@ -1,3 +1,5 @@
+[![Building](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/building.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/building.yml)
+
 # SwayNotificationCenter
 
 A simple notification daemon with a GTK gui for notifications and the control center

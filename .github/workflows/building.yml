@@ -27,3 +27,16 @@ jobs:
         run: meson build
       - name: Build
         run: ninja -C build
+  arch:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install depends
+        run: |
+          pacman-key --init
+          pacman -Sy --noconfirm meson gtk3 gobject-introspection vala json-glib libhandy gtk-layer-shell
+      - name: Meson
+        run: meson build
+      - name: Build
+        run: ninja -C build

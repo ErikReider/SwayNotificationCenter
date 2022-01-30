@@ -14,29 +14,19 @@ on:
   workflow_dispatch:
 
 jobs:
-  ubuntu:
+  build:
+    strategy:
+      matrix:
+        distro:
+          - archlinux
+          - ubuntu
+
     runs-on: ubuntu-latest
-    container: ubuntu:21.10
+    container:
+      image: erikreider/swaync:${{ matrix.distro }}
     steps:
       - uses: actions/checkout@v2
-      - name: Apt update
-        run: apt update
-      - name: Install depends
-        run: DEBIAN_FRONTEND=noninteractive apt install -y meson libwayland-dev libgtk-3-dev gobject-introspection libgirepository1.0-dev valac libjson-glib-dev libhandy-1-dev libgtk-layer-shell-dev
-      - name: Meson
-        run: meson build
-      - name: Build
-        run: ninja -C build
-  arch:
-    runs-on: ubuntu-latest
-    container: archlinux:latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install depends
-        run: |
-          pacman-key --init
-          pacman -Sy --noconfirm meson gtk3 gobject-introspection vala json-glib libhandy gtk-layer-shell
-      - name: Meson
+      - name: Meson configure
         run: meson build
       - name: Build
         run: ninja -C build

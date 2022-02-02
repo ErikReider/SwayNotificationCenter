@@ -23,6 +23,18 @@ namespace SwayNotificatonCenter {
                     return NORMAL;
             }
         }
+
+        public string to_string () {
+            switch (this) {
+                case LOW:
+                    return "Low";
+                case NORMAL:
+                    return "Normal";
+                case CRITICAL:
+                    return "Critical";
+            }
+            return "Normal";
+        }
     }
 
     public struct Image_Data {
@@ -40,6 +52,10 @@ namespace SwayNotificatonCenter {
     public struct Action {
         string identifier { get; set; }
         string name { get; set; }
+
+        public string to_string () {
+            return @"Name: $name, Id: $identifier";
+        }
     }
 
     public struct NotifyParams {
@@ -168,6 +184,51 @@ namespace SwayNotificatonCenter {
                         break;
                 }
             }
+        }
+
+        public string to_string () {
+            var params = new HashTable<string, string ? >(str_hash, str_equal);
+
+            params.set ("applied_id", applied_id.to_string ());
+            params.set ("app_name", app_name);
+            params.set ("replaces_id", replaces_id.to_string ());
+            params.set ("app_icon", app_icon);
+            params.set ("default_action", default_action.to_string ());
+            params.set ("summary", summary);
+            params.set ("body\t", body);
+            string[] _hints = {};
+            foreach (var key in hints.get_keys ()) {
+                Variant v = hints[key];
+                string data = "data";
+                if (!key.contains ("image") && !key.contains ("icon")) {
+                    data = v.print (true);
+                }
+                _hints += @"\n\t$key: " + data;
+            }
+            params.set ("hints", string.joinv ("", _hints));
+            params.set ("expire_timeout", expire_timeout.to_string ());
+            params.set ("time\t", time.to_string ());
+
+            params.set ("action_icons", action_icons.to_string ());
+            params.set ("image_data", image_data.is_initialized.to_string ());
+            params.set ("icon_data", icon_data.is_initialized.to_string ());
+            params.set ("image_path", image_path);
+            params.set ("desktop_entry", desktop_entry);
+            params.set ("category", category);
+            params.set ("resident", resident.to_string ());
+            params.set ("urgency", urgency.to_string ());
+            string[] _actions = {};
+            foreach (var _action in actions) {
+                _actions += "\n\t" + _action.to_string ();
+            }
+            params.set ("actions", string.joinv ("", _actions));
+
+            string[] result = {};
+            foreach (var k in params.get_keys ()) {
+                string ? v = params[k];
+                result += @"$k:\t\t" + v;
+            }
+            return "\n" + string.joinv ("\n", result);
         }
     }
 }

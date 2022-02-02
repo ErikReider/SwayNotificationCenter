@@ -138,6 +138,8 @@ namespace SwayNotificatonCenter {
                 hints,
                 expire_timeout);
 
+            debug ("Notification: %s\n", param.to_string());
+
             if (id == replaces_id) {
                 notiWindow.close_notification (id);
                 ccDaemon.controlCenter.close_notification (id, true);

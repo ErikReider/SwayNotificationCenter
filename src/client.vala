@@ -110,7 +110,7 @@ public int command_line (string[] args) {
                 break;
             case "--subscribe":
             case "-s":
-                cc_daemon.subscribe.connect ((c, d) => on_subscribe (c, d));
+                cc_daemon.subscribe.connect (on_subscribe);
                 on_subscribe (cc_daemon.notification_count (),
                               cc_daemon.get_dnd ());
                 var loop = new MainLoop ();
@@ -118,7 +118,7 @@ public int command_line (string[] args) {
                 break;
             case "--subscribe-waybar":
             case "-swb":
-                cc_daemon.subscribe.connect ((c, d) => on_subscribe_waybar (c, d));
+                cc_daemon.subscribe.connect (on_subscribe_waybar);
                 on_subscribe_waybar (cc_daemon.notification_count (),
                                      cc_daemon.get_dnd ());
                 var loop = new MainLoop ();

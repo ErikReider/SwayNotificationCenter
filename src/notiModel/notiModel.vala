@@ -54,6 +54,7 @@ namespace SwayNotificatonCenter {
         string name { get; set; }
 
         public string to_string () {
+            if (identifier == null || name == null) return "None";
             return @"Name: $name, Id: $identifier";
         }
     }
@@ -195,7 +196,7 @@ namespace SwayNotificatonCenter {
             params.set ("app_icon", app_icon);
             params.set ("default_action", default_action.to_string ());
             params.set ("summary", summary);
-            params.set ("body\t", body);
+            params.set ("body", "\t" + body);
             string[] _hints = {};
             foreach (var key in hints.get_keys ()) {
                 Variant v = hints[key];
@@ -207,7 +208,7 @@ namespace SwayNotificatonCenter {
             }
             params.set ("hints", string.joinv ("", _hints));
             params.set ("expire_timeout", expire_timeout.to_string ());
-            params.set ("time\t", time.to_string ());
+            params.set ("time", "\t" + time.to_string ());
 
             params.set ("action_icons", action_icons.to_string ());
             params.set ("image_data", image_data.is_initialized.to_string ());

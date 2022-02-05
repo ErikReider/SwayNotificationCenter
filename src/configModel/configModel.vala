@@ -244,13 +244,16 @@ namespace SwayNotificatonCenter {
         }
 
         /**
-         * Extracts and returns a Glib.Object from a nested JSON Object
+         * Extracts and returns a GLib.Object from a nested JSON Object
          */
         private HashTable<string, T> extract_hashtable<T>(string property_name,
                                                           Json.Node node,
                                                           out bool status) {
             status = false;
             var tmp_table = new HashTable<string, T>(str_hash, str_equal);
+
+            // Check if T is a descendant of GLib.Object
+            assert (typeof (T).is_a (Type.OBJECT));
 
             if (node.get_node_type () != Json.NodeType.OBJECT) {
                 stderr.printf ("Node %s is not a json object!...\n",
@@ -270,7 +273,7 @@ namespace SwayNotificatonCenter {
                     continue;
                 }
 
-                // Creates a new Glib.Object with all of the properties of T
+                // Creates a new GLib.Object with all of the properties of T
                 Object obj = Object.new (typeof (T));
                 foreach (var name in object->get_members ()) {
                     Value value = object->get_member (name).get_value ();
@@ -286,11 +289,15 @@ namespace SwayNotificatonCenter {
 
         private Json.Object serialize_hashtable<T>(HashTable<string, T> table) {
             var obj = new Json.Object ();
-            if (table != null) {
-                table.foreach ((key, value) => {
-                    obj.set_member (key, Json.gobject_serialize (value as Object));
-                });
-            }
+
+            // Check if T is a descendant of GLib.Object
+            assert (typeof (T).is_a (Type.OBJECT));
+
+            if (table == null) return obj;
+
+            table.foreach ((key, value) => {
+                obj.set_member (key, Json.gobject_serialize (value as Object));
+            });
             return obj;
         }
 

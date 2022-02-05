@@ -26,6 +26,18 @@ namespace SwayNotificatonCenter {
         }
     }
 
+    public class Category : Object {
+        public string ? sound { get; set; default = null; }
+        public string ? icon { get; set; default = null; }
+
+        public string to_string () {
+            string[] fields = {};
+            if (sound != null) fields += @"sound: $sound";
+            if (icon != null) fields += @"icon: $icon";
+            return string.joinv (", ", fields);
+        }
+    }
+
     public class ConfigModel : Object, Json.Serializable {
 
         private static ConfigModel _instance;
@@ -73,7 +85,7 @@ namespace SwayNotificatonCenter {
                 stderr.printf (e.message + "\n");
             }
             _instance = m ?? new ConfigModel ();
-            debug (_instance.json_serialized ());
+            debug (_instance.to_string ());
         }
 
         /* Properties */
@@ -137,7 +149,7 @@ namespace SwayNotificatonCenter {
          */
         public bool keyboard_shortcuts { get; set; default = true; }
 
-        /** Specifies if the notifcation image should be shown or not */
+        /** Specifies if the notification image should be shown or not */
         public ImageVisibility image_visibility {
             get;
             set;
@@ -196,7 +208,98 @@ namespace SwayNotificatonCenter {
             }
         }
 
+        /** Categories settings */
+        public HashTable<string, Category> categories_settings {
+            get;
+            set;
+            default = new HashTable<string, Category>(str_hash, str_equal);
+        }
+
         /* Methods */
+
+        /**
+         * Selects the deserialization method based on the property name.
+         * Needed to parse those parameters of complex types like hashtables,
+         * which are not natively supported by the default deserialization function.
+         */
+        public override bool deserialize_property (string property_name,
+                                                   out Value value,
+                                                   ParamSpec pspec,
+                                                   Json.Node property_node) {
+            switch (property_name) {
+                case "categories-settings" :
+                    bool status;
+                    HashTable<string, Category> result =
+                        extract_hashtable<Category>(
+                            property_name,
+                            property_node,
+                            out status);
+                    value = result;
+                    return status;
+                default:
+                    // Handles all other properties
+                    return default_deserialize_property (
+                        property_name, out value, pspec, property_node);
+            }
+        }
+
+        /**
+         * Extracts and returns a GLib.Object from a nested JSON Object
+         */
+        private HashTable<string, T> extract_hashtable<T>(string property_name,
+                                                          Json.Node node,
+                                                          out bool status) {
+            status = false;
+            var tmp_table = new HashTable<string, T>(str_hash, str_equal);
+
+            // Check if T is a descendant of GLib.Object
+            assert (typeof (T).is_a (Type.OBJECT));
+
+            if (node.get_node_type () != Json.NodeType.OBJECT) {
+                stderr.printf ("Node %s is not a json object!...\n",
+                               property_name);
+                return tmp_table;
+            }
+
+            Json.Object ? root_object = node.get_object ();
+            if (root_object == null) return tmp_table;
+
+            foreach (string * member in root_object.get_members ()) {
+                Json.Object * object = root_object.get_object_member (member);
+                if (object == null) {
+                    stderr.printf (
+                        "%s category is not a json object, skipping...\n",
+                        member);
+                    continue;
+                }
+
+                // Creates a new GLib.Object with all of the properties of T
+                Object obj = Object.new (typeof (T));
+                foreach (var name in object->get_members ()) {
+                    Value value = object->get_member (name).get_value ();
+                    obj.set_property (name, value);
+                }
+
+                tmp_table.insert (member, (T) obj);
+            }
+
+            status = true;
+            return tmp_table;
+        }
+
+        private Json.Object serialize_hashtable<T>(HashTable<string, T> table) {
+            var obj = new Json.Object ();
+
+            // Check if T is a descendant of GLib.Object
+            assert (typeof (T).is_a (Type.OBJECT));
+
+            if (table == null) return obj;
+
+            table.foreach ((key, value) => {
+                obj.set_member (key, Json.gobject_serialize (value as Object));
+            });
+            return obj;
+        }
 
         /**
          * Called when `Json.gobject_serialize (ConfigModel.instance)` is called
@@ -206,7 +309,7 @@ namespace SwayNotificatonCenter {
                                              ParamSpec pspec) {
             var node = new Json.Node (Json.NodeType.VALUE);
             switch (property_name) {
-                case "positionX" :
+                case "positionX":
                     node.set_string (((PositionX) value.get_enum ()).parse ());
                     break;
                 case "positionY":
@@ -216,6 +319,11 @@ namespace SwayNotificatonCenter {
                     var val = ((ImageVisibility) value.get_enum ()).parse ();
                     node.set_string (val);
                     break;
+                case "categories-settings":
+                    node = new Json.Node (Json.NodeType.OBJECT);
+                    var table = (HashTable<string, Category>) value.get_boxed ();
+                    node.set_object (serialize_hashtable<Category>(table));
+                    break;
                 default:
                     node.set_value (value);
                     break;
@@ -223,7 +331,7 @@ namespace SwayNotificatonCenter {
             return node;
         }
 
-        public string json_serialized () {
+        public string to_string () {
             var json = Json.gobject_serialize (ConfigModel.instance);
             return Json.to_string (json, true);
         }
@@ -241,21 +349,21 @@ namespace SwayNotificatonCenter {
                 debug ("Config change: %s %s",
                        member_name, value.get_type_string ());
                 switch (value.get_type_string ()) {
-                    case "i":
-                        int val = value.get_int32 ();
-                        obj.set_int_member (member_name, val);
-                        debug ("Config changed %s", member_name);
-                        break;
-                    case "s":
-                        string val = value.get_string ();
-                        obj.set_string_member (member_name, val);
-                        debug ("Config changed %s", member_name);
-                        break;
-                    case "b":
-                        bool val = value.get_boolean ();
-                        obj.set_boolean_member (member_name, val);
-                        debug ("Config changed %s", member_name);
-                        break;
+                        case "i":
+                            int val = value.get_int32 ();
+                            obj.set_int_member (member_name, val);
+                            debug ("Config changed %s", member_name);
+                            break;
+                        case "s":
+                            string val = value.get_string ();
+                            obj.set_string_member (member_name, val);
+                            debug ("Config changed %s", member_name);
+                            break;
+                        case "b":
+                            bool val = value.get_boolean ();
+                            obj.set_boolean_member (member_name, val);
+                            debug ("Config changed %s", member_name);
+                            break;
                 }
             });
 
@@ -297,7 +405,7 @@ namespace SwayNotificatonCenter {
 
                 var file = File.new_for_path (path);
 
-                string data = ConfigModel.instance.json_serialized ();
+                string data = ConfigModel.instance.to_string ();
                 return file.replace_contents (
                     data.data,
                     null,

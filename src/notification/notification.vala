@@ -327,20 +327,10 @@ namespace SwayNotificationCenter {
                 // Get the app icon
                 GLib.Icon ? icon = null;
                 if (param.desktop_entry != null) {
-                    foreach (var app in AppInfo.get_all ()) {
-                        var entry = app.get_id ();
-                        var ref_entry = param.desktop_entry;
-                        var entry_same = true;
-                        if (entry != null && ref_entry != null) {
-                            entry_same = (entry == ref_entry);
-                        }
-
-                        if (entry_same &&
-                            app.get_name ().down () == param.app_name.down ()) {
-                            icon = app.get_icon ();
-                            break;
-                        }
-                    }
+                    string entry = param.desktop_entry;
+                    entry = entry.replace (".desktop", "");
+                    var entry_info = new DesktopAppInfo (@"$entry.desktop");
+                    icon = entry_info.get_icon ();
                 }
                 if (icon != null) {
                     img.set_from_gicon (icon, icon_size);

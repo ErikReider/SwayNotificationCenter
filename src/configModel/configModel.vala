@@ -38,6 +38,7 @@ namespace SwayNotificationCenter {
         }
     }
 
+#if WANT_SCRIPTING
     public class Script : Object {
         public string ? exec { get; set; default = null; }
 
@@ -143,6 +144,7 @@ namespace SwayNotificationCenter {
             return string.joinv (", ", fields);
         }
     }
+#endif
 
     public class ConfigModel : Object, Json.Serializable {
 
@@ -314,6 +316,7 @@ namespace SwayNotificationCenter {
             }
         }
 
+#if WANT_SCRIPTING
         /** Categories settings */
         public HashTable<string, Category> categories_settings {
             get;
@@ -329,6 +332,7 @@ namespace SwayNotificationCenter {
         }
         /** Show notification if script fails */
         public bool script_fail_notify { get; set; default = true; }
+#endif
 
         /* Methods */
 
@@ -351,6 +355,7 @@ namespace SwayNotificationCenter {
                             out status);
                     value = result;
                     return status;
+#if WANT_SCRIPTING
                 case "scripts":
                     bool status;
                     HashTable<string, Script> result =
@@ -360,11 +365,54 @@ namespace SwayNotificationCenter {
                             out status);
                     value = result;
                     return status;
+#endif
                 default:
                     // Handles all other properties
                     return default_deserialize_property (
                         property_name, out value, pspec, property_node);
             }
+        }
+
+        /**
+         * Called when `Json.gobject_serialize (ConfigModel.instance)` is called
+         */
+        public Json.Node serialize_property (string property_name,
+                                             Value value,
+                                             ParamSpec pspec) {
+            var node = new Json.Node (Json.NodeType.VALUE);
+            switch (property_name) {
+                case "positionX":
+                    node.set_string (((PositionX) value.get_enum ()).parse ());
+                    break;
+                case "positionY":
+                    node.set_string (((PositionY) value.get_enum ()).parse ());
+                    break;
+                case "image-visibility":
+                    var val = ((ImageVisibility) value.get_enum ()).parse ();
+                    node.set_string (val);
+                    break;
+                case "categories-settings":
+                    node = new Json.Node (Json.NodeType.OBJECT);
+                    var table = (HashTable<string, Category>) value.get_boxed ();
+                    node.set_object (serialize_hashtable<Category>(table));
+                    break;
+#if WANT_SCRIPTING
+                case "scripts":
+                    node = new Json.Node (Json.NodeType.OBJECT);
+                    var table = (HashTable<string, Script>) value.get_boxed ();
+                    node.set_object (serialize_hashtable<Script>(table));
+                    break;
+#endif
+                default:
+                    node.set_value (value);
+                    break;
+            }
+            return node;
+        }
+
+        public string to_string () {
+            var json = Json.gobject_serialize (ConfigModel.instance);
+            return Json.to_string (json, true);
         }
 
         /**
@@ -423,46 +471,6 @@ namespace SwayNotificationCenter {
                 obj.set_member (key, Json.gobject_serialize (value as Object));
             });
             return obj;
-        }
-
-        /**
-         * Called when `Json.gobject_serialize (ConfigModel.instance)` is called
-         */
-        public Json.Node serialize_property (string property_name,
-                                             Value value,
-                                             ParamSpec pspec) {
-            var node = new Json.Node (Json.NodeType.VALUE);
-            switch (property_name) {
-                case "positionX":
-                    node.set_string (((PositionX) value.get_enum ()).parse ());
-                    break;
-                case "positionY":
-                    node.set_string (((PositionY) value.get_enum ()).parse ());
-                    break;
-                case "image-visibility":
-                    var val = ((ImageVisibility) value.get_enum ()).parse ();
-                    node.set_string (val);
-                    break;
-                case "categories-settings":
-                    node = new Json.Node (Json.NodeType.OBJECT);
-                    var table = (HashTable<string, Category>) value.get_boxed ();
-                    node.set_object (serialize_hashtable<Category>(table));
-                    break;
-                case "scripts":
-                    node = new Json.Node (Json.NodeType.OBJECT);
-                    var table = (HashTable<string, Script>) value.get_boxed ();
-                    node.set_object (serialize_hashtable<Script>(table));
-                    break;
-                default:
-                    node.set_value (value);
-                    break;
-            }
-            return node;
-        }
-
-        public string to_string () {
-            var json = Json.gobject_serialize (ConfigModel.instance);
-            return Json.to_string (json, true);
         }
 
         /**

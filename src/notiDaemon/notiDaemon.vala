@@ -152,6 +152,7 @@ namespace SwayNotificationCenter {
             }
             ccDaemon.controlCenter.add_notification (param, this);
 
+#if WANT_SCRIPTING
             if (param.swaync_no_script) {
                 debug ("Skipped scripts for this notification\n");
                 return id;
@@ -201,6 +202,7 @@ namespace SwayNotificationCenter {
                 });
                 break;
             }
+#endif
 
             return id;
         }

@@ -2,8 +2,8 @@
 version = '@0@'.format(meson.project_version())
 git = find_program('git', native: true, required: false)
 if git.found()
-  git_commit = run_command([git, 'rev-parse', '--short', 'HEAD'])
-  git_branch = run_command([git, 'rev-parse', '--abbrev-ref', 'HEAD'])
+  git_commit = run_command([git, 'rev-parse', '--short', 'HEAD'], check: false)
+  git_branch = run_command([git, 'rev-parse', '--abbrev-ref', 'HEAD'], check: false)
   if git_commit.returncode() == 0 and git_branch.returncode() == 0
     version = '@0@ (git-@1@, branch \'@2@\')'.format(
       meson.project_version(),
@@ -44,6 +44,11 @@ app_deps = [
   meson.get_compiler('c').find_library('gtk-layer-shell'),
   meson.get_compiler('c').find_library('m', required : true),
 ]
+
+# Checks if the user wants scripting enabled
+if get_option('scripting')
+    add_project_arguments('-D', 'WANT_SCRIPTING', language: 'vala')
+endif
 
 # Detect gtk-layer-shell version
 gtk_layer_shell = dependency(

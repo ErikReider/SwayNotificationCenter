@@ -1,94 +1,89 @@
 {
-    "title": "SwayNotificationCenter JSON schema",
-    "type": "object",
-    "properties": {
-        "positionX": {
-            "type": "string",
-            "description": "Horizontal position of control center and notification window",
-            "default": "right",
-            "enum": [
-                "right",
-                "left"
-            ]
-        },
-        "positionY": {
-            "type": "string",
-            "description": "Vertical position of control center and notification window",
-            "default": "top",
-            "enum": [
-                "top",
-                "bottom"
-            ]
-        },
-        "control-center-margin-top": {
-            "type": "integer",
-            "description": "The margin (in pixels) at the top of the notification center. 0 to disable",
-            "default": 0
-        },
-        "control-center-margin-bottom": {
-            "type": "integer",
-            "description": "The margin (in pixels) at the bottom of the notification center. 0 to disable",
-            "default": 0
-        },
-        "control-center-margin-right": {
-            "type": "integer",
-            "description": "The margin (in pixels) at the right of the notification center. 0 to disable",
-            "default": 0
-        },
-        "control-center-margin-left": {
-            "type": "integer",
-            "description": "The margin (in pixels) at the left of the notification center. 0 to disable",
-            "default": 0
-        },
-        "timeout": {
-            "type": "integer",
-            "description": "The notification timeout for notifications with normal priority",
-            "default": 10
-        },
-        "timeout-low": {
-            "type": "integer",
-            "description": "The notification timeout for notifications with low priority",
-            "default": 5
-        },
-        "timeout-critical": {
-            "type": "integer",
-            "description": "The notification timeout for notifications with critical priority. 0 to disable",
-            "default": 0
-        },
-        "notification-window-width": {
-            "type": "integer",
-            "description": "Width of the notification in pixels",
-            "default": 500
-        },
-        "keyboard-shortcuts": {
-            "type": "boolean",
-            "description": "If control center should use keyboard shortcuts",
-            "default": true
-        },
-        "image-visibility": {
-            "type": "string",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "always",
-            "enum": [
-                "always",
-                "when-available",
-                "never"
-            ]
-        },
-        "transition-time": {
-            "type": "integer",
-            "description": "The notification animation duration. 0 to disable",
-            "default": 200
-        },
-        "hide-on-clear": {
-            "type": "boolean",
-            "description": "Hides the control center after pressing \"Clear All\"",
-            "default": false
-        },
-        "hide-on-action": {
-            "type": "boolean",
-            "description": "Hides the control center when clicking on notification action",
-            "default": true
-        }
+  "title": "SwayNotificationCenter JSON schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Pointer to the schema against which this document should be validated."
+    },
+    "positionX": {
+      "type": "string",
+      "description": "Horizontal position of control center and notification window",
+      "default": "right",
+      "enum": ["right", "left"]
+    },
+    "positionY": {
+      "type": "string",
+      "description": "Vertical position of control center and notification window",
+      "default": "top",
+      "enum": ["top", "bottom"]
+    },
+    "control-center-margin-top": {
+      "type": "integer",
+      "description": "The margin (in pixels) at the top of the notification center. 0 to disable",
+      "default": 0
+    },
+    "control-center-margin-bottom": {
+      "type": "integer",
+      "description": "The margin (in pixels) at the bottom of the notification center. 0 to disable",
+      "default": 0
+    },
+    "control-center-margin-right": {
+      "type": "integer",
+      "description": "The margin (in pixels) at the right of the notification center. 0 to disable",
+      "default": 0
+    },
+    "control-center-margin-left": {
+      "type": "integer",
+      "description": "The margin (in pixels) at the left of the notification center. 0 to disable",
+      "default": 0
+    },
+    "timeout": {
+      "type": "integer",
+      "description": "The notification timeout for notifications with normal priority",
+      "default": 10
+    },
+    "timeout-low": {
+      "type": "integer",
+      "description": "The notification timeout for notifications with low priority",
+      "default": 5
+    },
+    "timeout-critical": {
+      "type": "integer",
+      "description": "The notification timeout for notifications with critical priority. 0 to disable",
+      "default": 0
+    },
+    "notification-window-width": {
+      "type": "integer",
+      "description": "Width of the notification in pixels",
+      "default": 500
+    },
+    "keyboard-shortcuts": {
+      "type": "boolean",
+      "description": "If control center should use keyboard shortcuts",
+      "default": true
+    },
+    "image-visibility": {
+      "type": "string",
+      "description": "An explanation about the purpose of this instance.",
+      "default": "always",
+      "enum": ["always", "when-available", "never"]
+    },
+    "transition-time": {
+      "type": "integer",
+      "description": "The notification animation duration. 0 to disable",
+      "default": 200
+    },
+    "hide-on-clear": {
+      "type": "boolean",
+      "description": "Hides the control center after pressing \"Clear All\"",
+      "default": false
+    },
+    "hide-on-action": {
+      "type": "boolean",
+      "description": "Hides the control center when clicking on notification action",
+      "default": true
     }
+  }
 }

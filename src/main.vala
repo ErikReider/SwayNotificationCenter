@@ -1,4 +1,4 @@
-namespace SwayNotificatonCenter {
+namespace SwayNotificationCenter {
     static NotiDaemon notiDaemon;
     static string ? style_path;
     static string ? config_path;

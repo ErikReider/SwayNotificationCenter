@@ -1,4 +1,4 @@
-namespace SwayNotificatonCenter {
+namespace SwayNotificationCenter {
     [DBus (name = "org.erikreider.swaync.cc")]
     public class CcDaemon : Object {
         public ControlCenter controlCenter;

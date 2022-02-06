@@ -62,9 +62,9 @@ args = [
 sysconfdir = get_option('sysconfdir')
 gnome = import('gnome')
 
-app_sources += gnome.compile_resources('sway_notificaton_center-resources',
-  'sway_notificaton_center.gresource.xml',
-  c_name: 'sway_notificaton_center'
+app_sources += gnome.compile_resources('sway_notification_center-resources',
+  'sway_notification_center.gresource.xml',
+  c_name: 'sway_notification_center'
 )
 
 executable('swaync',

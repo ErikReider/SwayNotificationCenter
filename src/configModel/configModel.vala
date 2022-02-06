@@ -1,4 +1,4 @@
-namespace SwayNotificatonCenter {
+namespace SwayNotificationCenter {
     public enum PositionX {
         RIGHT, LEFT, CENTER;
 

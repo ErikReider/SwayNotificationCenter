@@ -1,4 +1,4 @@
-namespace SwayNotificatonCenter {
+namespace SwayNotificationCenter {
     public class NotiWindow {
         private NotificationWindow notis = new NotificationWindow ();
 

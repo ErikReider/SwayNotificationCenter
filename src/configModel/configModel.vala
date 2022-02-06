@@ -47,6 +47,47 @@ namespace SwayNotificationCenter {
         public string ? urgency { get; set; default = null; }
         public string ? category { get; set; default = null; }
 
+        public bool matches_notification (NotifyParams param) {
+            if (exec == null) return false;
+
+            if (app_name != null) {
+                bool result = Regex.match_simple (
+                    app_name, param.app_name,
+                    RegexCompileFlags.JAVASCRIPT_COMPAT,
+                    RegexMatchFlags.NOTEMPTY);
+                if (!result) return false;
+            }
+            if (summary != null) {
+                bool result = Regex.match_simple (
+                    summary, param.summary,
+                    RegexCompileFlags.JAVASCRIPT_COMPAT,
+                    RegexMatchFlags.NOTEMPTY);
+                if (!result) return false;
+            }
+            if (body != null) {
+                bool result = Regex.match_simple (
+                    body, param.body,
+                    RegexCompileFlags.JAVASCRIPT_COMPAT,
+                    RegexMatchFlags.NOTEMPTY);
+                if (!result) return false;
+            }
+            if (urgency != null) {
+                bool result = Regex.match_simple (
+                    urgency, param.urgency.to_string (),
+                    RegexCompileFlags.JAVASCRIPT_COMPAT,
+                    RegexMatchFlags.NOTEMPTY);
+                if (!result) return false;
+            }
+            if (category != null) {
+                bool result = Regex.match_simple (
+                    category, param.category,
+                    RegexCompileFlags.JAVASCRIPT_COMPAT,
+                    RegexMatchFlags.NOTEMPTY);
+                if (!result) return false;
+            }
+            return true;
+        }
+
         public string to_string () {
             string[] fields = {};
             if (app_name != null) fields += @"sound: $app_name";
@@ -263,7 +304,7 @@ namespace SwayNotificationCenter {
                             out status);
                     value = result;
                     return status;
-                case "scripts" :
+                case "scripts":
                     bool status;
                     HashTable<string, Script> result =
                         extract_hashtable<Script>(

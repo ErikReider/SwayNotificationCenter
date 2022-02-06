@@ -138,7 +138,7 @@ namespace SwayNotificationCenter {
                 hints,
                 expire_timeout);
 
-            debug ("Notification: %s\n", param.to_string());
+            debug ("Notification: %s\n", param.to_string ());
 
             if (id == replaces_id) {
                 notiWindow.close_notification (id);
@@ -152,6 +152,13 @@ namespace SwayNotificationCenter {
             }
             ccDaemon.controlCenter.add_notification (param, this);
 
+            // Run the first script if notification meets requirements
+            HashTable<string, Script> scripts = ConfigModel.instance.scripts;
+            if (scripts.length == 0) return id;
+            foreach (string key in scripts.get_keys ()) {
+                unowned Script script = scripts[key];
+                if (!script.matches_notification (param)) continue;
+            }
 
             return id;
         }

@@ -90,6 +90,7 @@ namespace SwayNotificationCenter {
             if (exec == null) return false;
 
             if (app_name != null) {
+                if (param.app_name == null) return false;
                 bool result = Regex.match_simple (
                     app_name, param.app_name,
                     RegexCompileFlags.JAVASCRIPT_COMPAT,
@@ -97,6 +98,7 @@ namespace SwayNotificationCenter {
                 if (!result) return false;
             }
             if (summary != null) {
+                if (param.summary == null) return false;
                 bool result = Regex.match_simple (
                     summary, param.summary,
                     RegexCompileFlags.JAVASCRIPT_COMPAT,
@@ -104,6 +106,7 @@ namespace SwayNotificationCenter {
                 if (!result) return false;
             }
             if (body != null) {
+                if (param.body == null) return false;
                 bool result = Regex.match_simple (
                     body, param.body,
                     RegexCompileFlags.JAVASCRIPT_COMPAT,
@@ -118,6 +121,7 @@ namespace SwayNotificationCenter {
                 if (!result) return false;
             }
             if (category != null) {
+                if (param.category == null) return false;
                 bool result = Regex.match_simple (
                     category, param.category,
                     RegexCompileFlags.JAVASCRIPT_COMPAT,

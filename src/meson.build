@@ -1,3 +1,27 @@
+# Sets the version to a vala variable in Contants.vala
+version = '@0@'.format(meson.project_version())
+git = find_program('git', native: true, required: false)
+if git.found()
+  git_commit = run_command([git, 'rev-parse', '--short', 'HEAD'])
+  git_branch = run_command([git, 'rev-parse', '--abbrev-ref', 'HEAD'])
+  if git_commit.returncode() == 0 and git_branch.returncode() == 0
+    version = '@0@ (git-@1@, branch \'@2@\')'.format(
+      meson.project_version(),
+      git_commit.stdout().strip(),
+      git_branch.stdout().strip(),
+    )
+  endif
+endif
+version = 'swaync @0@'.format(version)
+const_config_data = configuration_data()
+const_config_data.set_quoted('VERSION', version)
+const_config_data.set_quoted('VERSION_NUM', meson.project_version())
+constants = configure_file(
+  input : 'constants.vala.in',
+  output : 'constants.vala',
+  configuration : const_config_data
+)
+
 app_sources = [
   'main.vala',
   'configModel/configModel.vala',
@@ -8,8 +32,8 @@ app_sources = [
   'ccDaemon/ccDaemon.vala',
   'controlCenter/controlCenter.vala',
   'controlCenter/topAction/topAction.vala',
-  'constants.vala',
   'functions.vala',
+  constants,
 ]
 
 app_deps = [
@@ -51,11 +75,22 @@ executable('swaync',
 )
 
 executable('swaync-client',
-  ['client.vala', 'constants.vala'],
+  ['client.vala', constants],
   vala_args: args,
   dependencies: app_deps,
   install: true,
 )
 
-install_data('style.css', install_dir : join_paths(sysconfdir, 'xdg/swaync'))
-install_data('config.json', install_dir : join_paths(sysconfdir, 'xdg/swaync'))
+config_path = join_paths(sysconfdir, 'xdg/swaync')
+
+config_data = configuration_data()
+config_data.set_quoted('JSONPATH', join_paths('/', config_path, 'configSchema.json'))
+config_json = configure_file(
+  input : 'config.json.in',
+  output : 'config.json',
+  configuration : config_data
+)
+
+install_data('style.css', install_dir : config_path)
+install_data(config_json, install_dir : config_path)
+install_data('configSchema.json', install_dir : config_path)

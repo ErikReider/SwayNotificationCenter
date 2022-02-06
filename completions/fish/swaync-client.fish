@@ -1,5 +1,6 @@
 complete -f -c swaync-client
 complete -c swaync-client -s h -l help --description "Show help options"
+complete -c swaync-client -s v -l version --description "Prints version"
 complete -c swaync-client -s R -l reload-config --description "Reload the config file" -r
 complete -c swaync-client -s rs -l reload-css --description "Reload the css file. Location change requires restart" -r
 complete -c swaync-client -s t -l toggle-panel --description "Toggle the notificaion panel" -r

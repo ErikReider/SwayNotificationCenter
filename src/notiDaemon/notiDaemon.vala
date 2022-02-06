@@ -138,6 +138,8 @@ namespace SwayNotificatonCenter {
                 hints,
                 expire_timeout);
 
+            debug ("Notification: %s\n", param.to_string());
+
             if (id == replaces_id) {
                 notiWindow.close_notification (id);
                 ccDaemon.controlCenter.close_notification (id, true);
@@ -182,7 +184,7 @@ namespace SwayNotificatonCenter {
         throws DBusError, IOError {
             name = "SwayNotificationCenter";
             vendor = "ErikReider";
-            version = "0.3";
+            version = Constants.versionNum;
             spec_version = "1.2";
         }
 

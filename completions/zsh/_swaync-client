@@ -2,6 +2,7 @@
 
 _arguments -s \
     '(-h --help)'{-h,--help}'[Show help options]' \
+    '(-v --version)'{-v,--version}'[Prints version]' \
     '(-R --reload-config)'{-R,--reload-config}'[Reload the config file]' \
     '(-rs --reload-css)'{-rs,--reload-css}'[Reload the css file. Location change requires restart]' \
     '(-t --toggle-panel)'{-t,--toggle-panel}'[Toggle the notificaion panel]' \

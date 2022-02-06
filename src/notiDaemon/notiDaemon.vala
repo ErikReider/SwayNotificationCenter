@@ -159,7 +159,7 @@ namespace SwayNotificationCenter {
                 unowned Script script = scripts[key];
                 if (!script.matches_notification (param)) continue;
 
-                script.run_script.begin ((obj, res) => {
+                script.run_script.begin (param, (obj, res) => {
                     // Gets the end status
                     if (!script.run_script.end (res)) {
                         stderr.printf (

@@ -47,9 +47,20 @@ namespace SwayNotificationCenter {
         public string ? urgency { get; set; default = null; }
         public string ? category { get; set; default = null; }
 
-        public async bool run_script () {
+        public async bool run_script (NotifyParams param) {
             try {
                 string[] spawn_env = Environ.get ();
+                // Export env variables
+                spawn_env += @"SWAYNC_APP_NAME=$(param.app_name)";
+                spawn_env += @"SWAYNC_SUMMARY=$(param.summary)";
+                spawn_env += @"SWAYNC_BODY=$(param.body)";
+                spawn_env += @"SWAYNC_URGENCY=$(param.urgency.to_string ())";
+                spawn_env += @"SWAYNC_CATEGORY=$(param.category)";
+                spawn_env += @"SWAYNC_ID=$(param.applied_id)";
+                spawn_env += @"SWAYNC_REPLACES_ID=$(param.replaces_id)";
+                spawn_env += @"SWAYNC_TIME=$(param.time)";
+                spawn_env += @"SWAYNC_DESKTOP_ENTRY=" + param.desktop_entry ?? "";
+
                 Pid child_pid;
                 Process.spawn_async (
                     "/",

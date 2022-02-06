@@ -47,6 +47,34 @@ namespace SwayNotificationCenter {
         public string ? urgency { get; set; default = null; }
         public string ? category { get; set; default = null; }
 
+        public async bool run_script () {
+            try {
+                string[] spawn_env = Environ.get ();
+                Pid child_pid;
+                Process.spawn_async (
+                    "/",
+                    exec.split (" "),
+                    spawn_env,
+                    SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD,
+                    null,
+                    out child_pid);
+
+                // Close the child when the spawned process is idling
+                int end_status = 0;
+                ChildWatch.add (child_pid, (pid, status) => {
+                    Process.close_pid (pid);
+                    end_status = status;
+                    run_script.callback ();
+                });
+                // Waits until `run_script.callback()` is called above
+                yield;
+                return end_status == 0;
+            } catch (Error e) {
+                stderr.printf ("Run_Script Error: %s\n", e.message);
+                return false;
+            }
+        }
+
         public bool matches_notification (NotifyParams param) {
             if (exec == null) return false;
 

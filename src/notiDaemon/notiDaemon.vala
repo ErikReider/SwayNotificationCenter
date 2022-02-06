@@ -158,6 +158,16 @@ namespace SwayNotificationCenter {
             foreach (string key in scripts.get_keys ()) {
                 unowned Script script = scripts[key];
                 if (!script.matches_notification (param)) continue;
+
+                script.run_script.begin ((obj, res) => {
+                    // Gets the end status
+                    if (!script.run_script.end (res)) {
+                        stderr.printf (
+                            "Failed to run script: \"%s\" with exec: \"%s\"\n",
+                            key, script.exec);
+                    }
+                });
+                break;
             }
 
             return id;

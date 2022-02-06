@@ -133,11 +133,11 @@ namespace SwayNotificationCenter {
 
         public string to_string () {
             string[] fields = {};
-            if (app_name != null) fields += @"sound: $app_name";
-            if (summary != null) fields += @"sound: $summary";
-            if (body != null) fields += @"sound: $body";
-            if (urgency != null) fields += @"sound: $urgency";
-            if (category != null) fields += @"sound: $category";
+            if (app_name != null) fields += @"app-name: $app_name";
+            if (summary != null) fields += @"summary: $summary";
+            if (body != null) fields += @"body: $body";
+            if (urgency != null) fields += @"urgency: $urgency";
+            if (category != null) fields += @"category: $category";
             return string.joinv (", ", fields);
         }
     }

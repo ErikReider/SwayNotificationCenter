@@ -152,6 +152,10 @@ namespace SwayNotificationCenter {
             }
             ccDaemon.controlCenter.add_notification (param, this);
 
+            if (param.swaync_no_script) {
+                debug ("Skipped scripts for this notification\n");
+                return id;
+            }
             // Run the first script if notification meets requirements
             HashTable<string, Script> scripts = ConfigModel.instance.scripts;
             if (scripts.length == 0) return id;
@@ -161,10 +165,38 @@ namespace SwayNotificationCenter {
 
                 script.run_script.begin (param, (obj, res) => {
                     // Gets the end status
-                    if (!script.run_script.end (res)) {
+                    string error_msg;
+                    if (script.run_script.end (res, out error_msg)) return;
+
+                    if (!ConfigModel.instance.script_fail_notify) {
                         stderr.printf (
                             "Failed to run script: \"%s\" with exec: \"%s\"\n",
                             key, script.exec);
+                    } else {
+                        // Send notification with error message
+                        try {
+                            var _hints = new HashTable<string, Variant>(
+                                str_hash,
+                                str_equal);
+                            // Disable scripts for this notification
+                            _hints.insert ("SWAYNC_NO_SCRIPT", true);
+                            _hints.insert ("urgency",
+                                           UrgencyLevels.CRITICAL.to_byte ());
+
+                            string _summary = @"Failed to run script: $key";
+                            string _body = "<b>Output:</b> " + error_msg;
+                            this.Notify ("SwayNotificationCenter",
+                                         0,
+                                         "dialog-error",
+                                         _summary,
+                                         _body,
+                                         {},
+                                         _hints,
+                                         -1);
+                        } catch (Error e) {
+                            stderr.printf ("NOTIFING SCRIPT-FAIL ERROR: %s\n",
+                                           e.message);
+                        }
                     }
                 });
                 break;

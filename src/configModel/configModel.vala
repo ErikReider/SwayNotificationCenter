@@ -47,7 +47,8 @@ namespace SwayNotificationCenter {
         public string ? urgency { get; set; default = null; }
         public string ? category { get; set; default = null; }
 
-        public async bool run_script (NotifyParams param) {
+        public async bool run_script (NotifyParams param, out string msg) {
+            msg = "";
             try {
                 string[] spawn_env = Environ.get ();
                 // Export env variables
@@ -82,6 +83,7 @@ namespace SwayNotificationCenter {
                 return end_status == 0;
             } catch (Error e) {
                 stderr.printf ("Run_Script Error: %s\n", e.message);
+                msg = e.message;
                 return false;
             }
         }
@@ -325,6 +327,8 @@ namespace SwayNotificationCenter {
             set;
             default = new HashTable<string, Script>(str_hash, str_equal);
         }
+        /** Show notification if script fails */
+        public bool script_fail_notify { get; set; default = true; }
 
         /* Methods */
 

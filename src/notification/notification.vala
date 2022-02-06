@@ -34,6 +34,7 @@ namespace SwayNotificationCenter {
         unowned Gtk.Image body_image;
 
         public static Gtk.IconSize icon_size = Gtk.IconSize.DIALOG;
+        public static int icon_image_size = 64;
 
         private uint timeout_id = 0;
 

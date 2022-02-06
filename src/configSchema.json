@@ -92,7 +92,7 @@
     },
     "scripts": {
       "type": "object",
-      "description": "Which scripts to check and potentially run for every notification. If the notification doesn't include one of the properites, that property will be ignored. All properties (except for exec and urgency) use regex. If all properties match the given notification, the script will be run. Only the first matching script will be run.",
+      "description": "Which scripts to check and potentially run for every notification. If the notification doesn't include one of the properites, that property will be ignored. All properties (except for exec) use regex. If all properties match the given notification, the script will be run. Only the first matching script will be run.",
       "minProperties": 1,
       "additionalProperties": false,
       "patternProperties": {

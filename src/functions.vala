@@ -4,6 +4,7 @@ namespace SwayNotificationCenter {
                                            Gtk.Image img,
                                            bool file_exists) {
             if (path.slice (0, 7) == "file://" || file_exists) {
+                // Try as a URI (file:// is the only URI schema supported right now)
                 try {
                     if (!file_exists) path = path.slice (7, path.length);
 
@@ -13,8 +14,12 @@ namespace SwayNotificationCenter {
                 } catch (Error e) {
                     stderr.printf (e.message + "\n");
                 }
+            } else if (Gtk.IconTheme.get_default ().has_icon (path)) {
+                // Try as a freedesktop.org-compliant icon theme
+                img.set_from_icon_name (path, Gtk.IconSize.DIALOG);
+            } else {
+                img.set_from_icon_name ("image-missing", Gtk.IconSize.DIALOG);
             }
-            img.set_from_icon_name ("image-missing", Gtk.IconSize.DIALOG);
         }
 
         public static void set_image_data (Image_Data data, Gtk.Image img) {

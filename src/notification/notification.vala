@@ -33,6 +33,8 @@ namespace SwayNotificationCenter {
         [GtkChild]
         unowned Gtk.Image body_image;
 
+        public static Gtk.IconSize icon_size = Gtk.IconSize.DIALOG;
+
         private uint timeout_id = 0;
 
         public bool is_timed = false;
@@ -341,10 +343,10 @@ namespace SwayNotificationCenter {
                     }
                 }
                 if (icon != null) {
-                    img.set_from_gicon (icon, Gtk.IconSize.DIALOG);
+                    img.set_from_gicon (icon, icon_size);
                 } else if (image_visibility == ImageVisibility.ALWAYS) {
                     // Default icon
-                    img.set_from_icon_name ("image-missing", Gtk.IconSize.DIALOG);
+                    img.set_from_icon_name ("image-missing", icon_size);
                 } else {
                     img.set_visible (false);
                 }

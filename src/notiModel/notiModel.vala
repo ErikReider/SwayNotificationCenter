@@ -1,4 +1,4 @@
-namespace SwayNotificatonCenter {
+namespace SwayNotificationCenter {
     public enum ClosedReasons {
         EXPIRED = 1,
         DISMISSED = 2,

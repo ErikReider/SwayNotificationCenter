@@ -1,4 +1,4 @@
-namespace SwayNotificatonCenter {
+namespace SwayNotificationCenter {
     public class Functions {
         public static void set_image_path (owned string path,
                                            Gtk.Image img,

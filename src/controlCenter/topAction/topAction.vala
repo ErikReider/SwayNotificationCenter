@@ -1,4 +1,4 @@
-namespace SwayNotificatonCenter {
+namespace SwayNotificationCenter {
     [GtkTemplate (ui = "/org/erikreider/sway-notification-center/controlCenter/topAction/topAction.ui")]
     class TopAction : Gtk.Box {
 

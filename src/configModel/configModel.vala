@@ -38,6 +38,24 @@ namespace SwayNotificationCenter {
         }
     }
 
+    public class Script : Object {
+        public string ? app_name { get; set; default = null; }
+        public string ? summary { get; set; default = null; }
+        public string ? body { get; set; default = null; }
+        public string ? urgency { get; set; default = null; }
+        public string ? category { get; set; default = null; }
+
+        public string to_string () {
+            string[] fields = {};
+            if (app_name != null) fields += @"sound: $app_name";
+            if (summary != null) fields += @"sound: $summary";
+            if (body != null) fields += @"sound: $body";
+            if (urgency != null) fields += @"sound: $urgency";
+            if (category != null) fields += @"sound: $category";
+            return string.joinv (", ", fields);
+        }
+    }
+
     public class ConfigModel : Object, Json.Serializable {
 
         private static ConfigModel _instance;
@@ -215,6 +233,13 @@ namespace SwayNotificationCenter {
             default = new HashTable<string, Category>(str_hash, str_equal);
         }
 
+        /** Scripts */
+        public HashTable<string, Script> scripts {
+            get;
+            set;
+            default = new HashTable<string, Script>(str_hash, str_equal);
+        }
+
         /* Methods */
 
         /**
@@ -231,6 +256,15 @@ namespace SwayNotificationCenter {
                     bool status;
                     HashTable<string, Category> result =
                         extract_hashtable<Category>(
+                            property_name,
+                            property_node,
+                            out status);
+                    value = result;
+                    return status;
+                case "scripts" :
+                    bool status;
+                    HashTable<string, Script> result =
+                        extract_hashtable<Script>(
                             property_name,
                             property_node,
                             out status);
@@ -323,6 +357,11 @@ namespace SwayNotificationCenter {
                     node = new Json.Node (Json.NodeType.OBJECT);
                     var table = (HashTable<string, Category>) value.get_boxed ();
                     node.set_object (serialize_hashtable<Category>(table));
+                    break;
+                case "scripts":
+                    node = new Json.Node (Json.NodeType.OBJECT);
+                    var table = (HashTable<string, Script>) value.get_boxed ();
+                    node.set_object (serialize_hashtable<Script>(table));
                     break;
                 default:
                     node.set_value (value);

@@ -112,6 +112,7 @@ To reload the config, you'll need to run `swaync-client --reload-config`
 - `control-center-margin-bottom`: uint (Any positive number, 0 to disable). The margin (in pixels) at the bottom of the notification center
 - `control-center-margin-right`: uint (Any positive number, 0 to disable). The margin (in pixels) at the right of the notification center
 - `control-center-margin-left`: uint (Any positive number, 0 to disable). The margin (in pixels) at the left of the notification center
+- `script-fail-notify`: bool. Sends a notification with error message if a script fails
 
 The main CSS style file is located in `/etc/xdg/swaync/style.css`. Copy it over to your `.config/swaync/` folder to customize without needing root access.
 
@@ -123,10 +124,10 @@ Scripting rules and logic:
 - Each script requires `exec` and at least one of the other properties
 - All listed properties must match the notification for the script to be ran
 - If any of the propeties doesn't match, the script will be skipped
-- If a notification doesn't include one of the properties, that property will 
+- If a notification doesn't include one of the properties, that property will
 be skipped
 
-Notification information can be printed into a terminal by running 
+Notification information can be printed into a terminal by running
 `G_MESSAGES_DEBUG=all swaync` (when a notification appears).
 
 Config properties:

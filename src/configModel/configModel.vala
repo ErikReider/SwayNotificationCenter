@@ -39,6 +39,8 @@ namespace SwayNotificationCenter {
     }
 
     public class Script : Object {
+        public string ? exec { get; set; default = null; }
+
         public string ? app_name { get; set; default = null; }
         public string ? summary { get; set; default = null; }
         public string ? body { get; set; default = null; }

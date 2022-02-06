@@ -38,6 +38,114 @@ namespace SwayNotificationCenter {
         }
     }
 
+#if WANT_SCRIPTING
+    public class Script : Object {
+        public string ? exec { get; set; default = null; }
+
+        public string ? app_name { get; set; default = null; }
+        public string ? summary { get; set; default = null; }
+        public string ? body { get; set; default = null; }
+        public string ? urgency { get; set; default = null; }
+        public string ? category { get; set; default = null; }
+
+        public async bool run_script (NotifyParams param, out string msg) {
+            msg = "";
+            try {
+                string[] spawn_env = Environ.get ();
+                // Export env variables
+                spawn_env += @"SWAYNC_APP_NAME=$(param.app_name)";
+                spawn_env += @"SWAYNC_SUMMARY=$(param.summary)";
+                spawn_env += @"SWAYNC_BODY=$(param.body)";
+                spawn_env += @"SWAYNC_URGENCY=$(param.urgency.to_string ())";
+                spawn_env += @"SWAYNC_CATEGORY=$(param.category)";
+                spawn_env += @"SWAYNC_ID=$(param.applied_id)";
+                spawn_env += @"SWAYNC_REPLACES_ID=$(param.replaces_id)";
+                spawn_env += @"SWAYNC_TIME=$(param.time)";
+                spawn_env += @"SWAYNC_DESKTOP_ENTRY=" + param.desktop_entry ?? "";
+
+                Pid child_pid;
+                Process.spawn_async (
+                    "/",
+                    exec.split (" "),
+                    spawn_env,
+                    SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD,
+                    null,
+                    out child_pid);
+
+                // Close the child when the spawned process is idling
+                int end_status = 0;
+                ChildWatch.add (child_pid, (pid, status) => {
+                    Process.close_pid (pid);
+                    end_status = status;
+                    run_script.callback ();
+                });
+                // Waits until `run_script.callback()` is called above
+                yield;
+                return end_status == 0;
+            } catch (Error e) {
+                stderr.printf ("Run_Script Error: %s\n", e.message);
+                msg = e.message;
+                return false;
+            }
+        }
+
+        public bool matches_notification (NotifyParams param) {
+            if (exec == null) return false;
+
+            if (app_name != null) {
+                if (param.app_name == null) return false;
+                bool result = Regex.match_simple (
+                    app_name, param.app_name,
+                    RegexCompileFlags.JAVASCRIPT_COMPAT,
+                    RegexMatchFlags.NOTEMPTY);
+                if (!result) return false;
+            }
+            if (summary != null) {
+                if (param.summary == null) return false;
+                bool result = Regex.match_simple (
+                    summary, param.summary,
+                    RegexCompileFlags.JAVASCRIPT_COMPAT,
+                    RegexMatchFlags.NOTEMPTY);
+                if (!result) return false;
+            }
+            if (body != null) {
+                if (param.body == null) return false;
+                bool result = Regex.match_simple (
+                    body, param.body,
+                    RegexCompileFlags.JAVASCRIPT_COMPAT,
+                    RegexMatchFlags.NOTEMPTY);
+                if (!result) return false;
+            }
+            if (urgency != null) {
+                bool result = Regex.match_simple (
+                    urgency, param.urgency.to_string (),
+                    RegexCompileFlags.JAVASCRIPT_COMPAT,
+                    RegexMatchFlags.NOTEMPTY);
+                if (!result) return false;
+            }
+            if (category != null) {
+                if (param.category == null) return false;
+                bool result = Regex.match_simple (
+                    category, param.category,
+                    RegexCompileFlags.JAVASCRIPT_COMPAT,
+                    RegexMatchFlags.NOTEMPTY);
+                if (!result) return false;
+            }
+            return true;
+        }
+
+        public string to_string () {
+            string[] fields = {};
+            if (app_name != null) fields += @"app-name: $app_name";
+            if (summary != null) fields += @"summary: $summary";
+            if (body != null) fields += @"body: $body";
+            if (urgency != null) fields += @"urgency: $urgency";
+            if (category != null) fields += @"category: $category";
+            return string.joinv (", ", fields);
+        }
+    }
+#endif
+
     public class ConfigModel : Object, Json.Serializable {
 
         private static ConfigModel _instance;
@@ -208,12 +316,23 @@ namespace SwayNotificationCenter {
             }
         }
 
+#if WANT_SCRIPTING
         /** Categories settings */
         public HashTable<string, Category> categories_settings {
             get;
             set;
             default = new HashTable<string, Category>(str_hash, str_equal);
         }
+
+        /** Scripts */
+        public HashTable<string, Script> scripts {
+            get;
+            set;
+            default = new HashTable<string, Script>(str_hash, str_equal);
+        }
+        /** Show notification if script fails */
+        public bool script_fail_notify { get; set; default = true; }
+#endif
 
         /* Methods */
 
@@ -236,11 +355,64 @@ namespace SwayNotificationCenter {
                             out status);
                     value = result;
                     return status;
+#if WANT_SCRIPTING
+                case "scripts":
+                    bool status;
+                    HashTable<string, Script> result =
+                        extract_hashtable<Script>(
+                            property_name,
+                            property_node,
+                            out status);
+                    value = result;
+                    return status;
+#endif
                 default:
                     // Handles all other properties
                     return default_deserialize_property (
                         property_name, out value, pspec, property_node);
             }
+        }
+
+        /**
+         * Called when `Json.gobject_serialize (ConfigModel.instance)` is called
+         */
+        public Json.Node serialize_property (string property_name,
+                                             Value value,
+                                             ParamSpec pspec) {
+            var node = new Json.Node (Json.NodeType.VALUE);
+            switch (property_name) {
+                case "positionX":
+                    node.set_string (((PositionX) value.get_enum ()).parse ());
+                    break;
+                case "positionY":
+                    node.set_string (((PositionY) value.get_enum ()).parse ());
+                    break;
+                case "image-visibility":
+                    var val = ((ImageVisibility) value.get_enum ()).parse ();
+                    node.set_string (val);
+                    break;
+                case "categories-settings":
+                    node = new Json.Node (Json.NodeType.OBJECT);
+                    var table = (HashTable<string, Category>) value.get_boxed ();
+                    node.set_object (serialize_hashtable<Category>(table));
+                    break;
+#if WANT_SCRIPTING
+                case "scripts":
+                    node = new Json.Node (Json.NodeType.OBJECT);
+                    var table = (HashTable<string, Script>) value.get_boxed ();
+                    node.set_object (serialize_hashtable<Script>(table));
+                    break;
+#endif
+                default:
+                    node.set_value (value);
+                    break;
+            }
+            return node;
+        }
+
+        public string to_string () {
+            var json = Json.gobject_serialize (ConfigModel.instance);
+            return Json.to_string (json, true);
         }
 
         /**
@@ -299,41 +471,6 @@ namespace SwayNotificationCenter {
                 obj.set_member (key, Json.gobject_serialize (value as Object));
             });
             return obj;
-        }
-
-        /**
-         * Called when `Json.gobject_serialize (ConfigModel.instance)` is called
-         */
-        public Json.Node serialize_property (string property_name,
-                                             Value value,
-                                             ParamSpec pspec) {
-            var node = new Json.Node (Json.NodeType.VALUE);
-            switch (property_name) {
-                case "positionX":
-                    node.set_string (((PositionX) value.get_enum ()).parse ());
-                    break;
-                case "positionY":
-                    node.set_string (((PositionY) value.get_enum ()).parse ());
-                    break;
-                case "image-visibility":
-                    var val = ((ImageVisibility) value.get_enum ()).parse ();
-                    node.set_string (val);
-                    break;
-                case "categories-settings":
-                    node = new Json.Node (Json.NodeType.OBJECT);
-                    var table = (HashTable<string, Category>) value.get_boxed ();
-                    node.set_object (serialize_hashtable<Category>(table));
-                    break;
-                default:
-                    node.set_value (value);
-                    break;
-            }
-            return node;
-        }
-
-        public string to_string () {
-            var json = Json.gobject_serialize (ConfigModel.instance);
-            return Json.to_string (json, true);
         }
 
         /**

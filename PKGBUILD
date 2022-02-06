@@ -15,7 +15,7 @@ source=("${_pkgfoldername}-${pkgver}.tar.gz::${url}/archive/v${pkgver}.tar.gz")
 sha256sums=('SKIP')
 
 build() {
-  arch-meson "${_pkgfoldername}-${pkgver}" build
+  arch-meson "${_pkgfoldername}-${pkgver}" build -Dscripting=true
   ninja -C build
 }
 

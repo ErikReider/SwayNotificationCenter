@@ -84,6 +84,54 @@
       "type": "boolean",
       "description": "Hides the control center when clicking on notification action",
       "default": true
+    },
+    "script-fail-notify": {
+      "type": "boolean",
+      "description": "Sends a notification if a script fails to run",
+      "default": true
+    },
+    "scripts": {
+      "type": "object",
+      "description": "Which scripts to check and potentially run for every notification. If the notification doesn't include one of the properites, that property will be ignored. All properties (except for exec) use regex. If all properties match the given notification, the script will be run. Only the first matching script will be run.",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "patternProperties": {
+        "^.{1,}$": {
+          "type": "object",
+          "description": "Your script object.",
+          "required": ["exec"],
+          "minProperties": 2,
+          "additionalProperties": false,
+          "properties": {
+            "exec": {
+              "type": "string",
+              "description": "The script to run. Can also run regular shell commands."
+            },
+            "app-name": {
+              "type": "string",
+              "description": "The app-name. Uses Regex."
+            },
+            "summary": {
+              "type": "string",
+              "description": "The summary of the notification. Uses Regex."
+            },
+            "body": {
+              "type": "string",
+              "description": "The body of the notification. Uses Regex."
+            },
+            "urgency": {
+              "type": "string",
+              "description": "The urgency of the notification.",
+              "default": "Normal",
+              "enum": ["Low", "Normal", "Critical"]
+            },
+            "category": {
+              "type": "string",
+              "description": "Which category the notification belongs to. Uses Regex."
+            }
+          }
+        }
+      }
     }
   }
 }

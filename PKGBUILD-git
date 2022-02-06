@@ -25,7 +25,7 @@ prepare() {
 }
 
 build() {
-  arch-meson $_pkgfoldername build
+  arch-meson $_pkgfoldername build -Dscripting=true
   ninja -C build
 }
 

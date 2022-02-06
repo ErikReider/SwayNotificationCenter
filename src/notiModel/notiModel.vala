@@ -24,6 +24,10 @@ namespace SwayNotificationCenter {
             }
         }
 
+        public uint8 to_byte () {
+            return this;
+        }
+
         public string to_string () {
             switch (this) {
                 case LOW:
@@ -81,6 +85,10 @@ namespace SwayNotificationCenter {
         public bool resident { get; set; }
         public UrgencyLevels urgency { get; set; }
 
+        // Custom hints
+        /** Disables scripting for notification */
+        public bool swaync_no_script { get; set; }
+
         public Action[] actions { get; set; }
 
         public NotifyParams (uint32 applied_id,
@@ -129,6 +137,11 @@ namespace SwayNotificationCenter {
             foreach (var hint in hints.get_keys ()) {
                 Variant hint_value = hints[hint];
                 switch (hint) {
+                    case "SWAYNC_NO_SCRIPT":
+                        if (hint_value.is_of_type (GLib.VariantType.BOOLEAN)) {
+                            swaync_no_script = hint_value.get_boolean ();
+                        }
+                        break;
                     case "action-icons":
                         if (hint_value.is_of_type (GLib.VariantType.BOOLEAN)) {
                             action_icons = hint_value.get_boolean ();

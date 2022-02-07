@@ -166,6 +166,16 @@ Config properties:
 }
 ```
 
+### Disable scripting
+
+To completely disable scripting, the project needs to be built like so:
+
+```zsh
+meson build -Dscripting=false
+ninja -C build
+meson install -C build
+```
+
 ## Waybar Example
 
 This example requires `NotoSansMono Nerd Font` to get the icons looking right

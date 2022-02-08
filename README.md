@@ -78,6 +78,12 @@ To reload the config
 ./build/src/swaync-client -R
 ```
 
+To reload css after changes
+
+```zsh
+./build/src/swaync-client -rs
+```
+
 ## Control Center Shortcuts
 
 - Up/Down: Navigate notifications

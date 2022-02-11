@@ -432,7 +432,8 @@ namespace SwayNotificationCenter {
         }
 
         /**
-         * Extracts and returns a GLib.Object from a nested JSON Object
+         * Extracts and returns a HashTable<string, GLib.Object>
+         * from a nested JSON Object
          */
         private HashTable<string, T> extract_hashtable<T>(string property_name,
                                                           Json.Node node,

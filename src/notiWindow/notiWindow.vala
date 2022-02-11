@@ -44,6 +44,13 @@ namespace SwayNotificationCenter {
         public bool closed = false;
 
         public NotificationWindow () {
+            if (!GtkLayerShell.is_supported ()) {
+                stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
+                stderr.printf ("Swaync only works on Wayland!\n");
+                stderr.printf ("If running waylans session, try running:\n");
+                stderr.printf ("\tGDK_BACKEND=wayland swaync\n");
+                Process.exit (1);
+            }
             GtkLayerShell.init_for_window (this);
             GtkLayerShell.set_layer (this, GtkLayerShell.Layer.OVERLAY);
             this.set_anchor ();

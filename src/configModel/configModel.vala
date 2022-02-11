@@ -332,7 +332,6 @@ namespace SwayNotificationCenter {
             }
         }
 
-#if WANT_SCRIPTING
         /** Categories settings */
         public HashTable<string, Category> categories_settings {
             get;
@@ -340,6 +339,7 @@ namespace SwayNotificationCenter {
             default = new HashTable<string, Category>(str_hash, str_equal);
         }
 
+#if WANT_SCRIPTING
         /** Scripts */
         public HashTable<string, Script> scripts {
             get;

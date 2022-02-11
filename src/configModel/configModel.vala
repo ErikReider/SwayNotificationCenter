@@ -491,6 +491,82 @@ namespace SwayNotificationCenter {
         }
 
         /**
+         * Extracts a JSON array and returns a GLib.GenericArray<T>
+         */
+        private GenericArray<T> extract_array<T>(string property_name,
+                                                 Json.Node node,
+                                                 out bool status) {
+            status = false;
+            GenericArray<T> tmp_array = new GenericArray<T>();
+
+            if (node.get_node_type () != Json.NodeType.ARRAY) {
+                stderr.printf ("Node %s is not a json array!...\n",
+                               property_name);
+                return tmp_array;
+            }
+
+            Json.Array ? root_array = node.get_array ();
+            if (root_array == null) return tmp_array;
+
+            foreach (Json.Node * member in root_array.get_elements ()) {
+                if (!member->get_value_type ().is_a (typeof (T))) continue;
+                switch (member->get_value_type ()) {
+                    case Type.STRING:
+                        unowned string ? str = member->get_string ();
+                        if (str != null) tmp_array.add (str);
+                        break;
+                    case Type.BOOLEAN :
+                        tmp_array.add (member->get_boolean ());
+                        break;
+                    case Type.INT64:
+                        tmp_array.add (member->get_int ());
+                        break;
+                    default:
+                        // Return an empty array due to the type not being JSON
+                        // compatible
+                        return tmp_array;
+                }
+            }
+
+            status = true;
+            return tmp_array;
+        }
+
+        private Json.Array serialize_array<T>(GenericArray<T> array) {
+            var json_array = new Json.Array ();
+
+            if (array == null) return json_array;
+
+            array.foreach ((item) => {
+                switch (typeof (T)) {
+                        case Type.STRING:
+                            string ? casted = (string) item;
+                            if (casted != null) {
+                                json_array.add_string_element (casted);
+                            }
+                            break;
+                        case Type.BOOLEAN :
+                            bool ? casted = (bool) item;
+                            if (casted != null) {
+                                json_array.add_boolean_element (casted);
+                            }
+                            break;
+                        case Type.INT64 :
+                            int64 ? casted = (int64) item;
+                            if (casted != null) {
+                                json_array.add_int_element (casted);
+                            }
+                            break;
+                        default :
+                            // Return an empty array due to the type not being
+                            // JSON compatible
+                            return;
+                }
+            });
+            return json_array;
+        }
+
+        /**
          * Changes the `member_name` to the specified value if their types match
          */
         public void change_value (string member_name,

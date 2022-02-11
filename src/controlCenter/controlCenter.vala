@@ -25,6 +25,13 @@ namespace SwayNotificationCenter {
         public ControlCenter (CcDaemon cc_daemon) {
             this.cc_daemon = cc_daemon;
 
+            if (!GtkLayerShell.is_supported ()) {
+                stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
+                stderr.printf ("Swaync only works on Wayland!\n");
+                stderr.printf ("If running waylans session, try running:\n");
+                stderr.printf ("\tGDK_BACKEND=wayland swaync\n");
+                Process.exit (1);
+            }
             GtkLayerShell.init_for_window (this);
             this.set_anchor ();
 

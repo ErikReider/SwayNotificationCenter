@@ -3,8 +3,14 @@ namespace SwayNotificationCenter {
         RIGHT, LEFT, CENTER;
 
         public string parse () {
-            EnumClass enumc = (EnumClass) typeof (PositionX).class_ref ();
-            return enumc.get_value_by_name (this.to_string ()).value_nick;
+            switch (this) {
+                default:
+                    return "right";
+                case LEFT:
+                    return "left";
+                case CENTER:
+                    return "center";
+            }
         }
     }
 
@@ -12,8 +18,12 @@ namespace SwayNotificationCenter {
         TOP, BOTTOM;
 
         public string parse () {
-            EnumClass enumc = (EnumClass) typeof (PositionY).class_ref ();
-            return enumc.get_value_by_name (this.to_string ()).value_nick;
+            switch (this) {
+                default:
+                    return "top";
+                case BOTTOM:
+                    return "bottom";
+            }
         }
     }
 
@@ -21,8 +31,14 @@ namespace SwayNotificationCenter {
         ALWAYS, WHEN_AVAILABLE, NEVER;
 
         public string parse () {
-            EnumClass enumc = (EnumClass) typeof (ImageVisibility).class_ref ();
-            return enumc.get_value_by_name (this.to_string ()).value_nick;
+            switch (this) {
+                default:
+                    return "always";
+                case WHEN_AVAILABLE:
+                    return "when_available";
+                case NEVER:
+                    return "never";
+            }
         }
     }
 

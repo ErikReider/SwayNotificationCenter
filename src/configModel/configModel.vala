@@ -509,8 +509,13 @@ namespace SwayNotificationCenter {
             if (root_array == null) return tmp_array;
 
             foreach (Json.Node * member in root_array.get_elements ()) {
-                if (!member->get_value_type ().is_a (typeof (T))) continue;
-                switch (member->get_value_type ()) {
+                Type generic_type = Functions.get_base_type (typeof (T));
+                if (!member->get_value_type ().is_a (generic_type)
+                    && !member->get_value_type ().is_a (typeof (Json.Object))) {
+                    continue;
+                }
+
+                switch (generic_type) {
                     case Type.STRING:
                         unowned string ? str = member->get_string ();
                         if (str != null) tmp_array.add (str);
@@ -521,7 +526,22 @@ namespace SwayNotificationCenter {
                     case Type.INT64:
                         tmp_array.add (member->get_int ());
                         break;
-                    default:
+                    case Type.OBJECT:
+                        if (!typeof (T).is_a (Type.OBJECT)) break;
+
+                        unowned Json.Object ? object = member->get_object ();
+                        if (object == null) break;
+
+                        // Creates a new GLib.Object with all of the properties of T
+                        Object obj = Object.new (typeof (T));
+                        foreach (var name in object.get_members ()) {
+                            Value value = object.get_member (name).get_value ();
+                            obj.set_property (name, value);
+                        }
+
+                        tmp_array.add ((T) obj);
+                        break;
+                    default :
                         // Return an empty array due to the type not being JSON
                         // compatible
                         return tmp_array;
@@ -538,7 +558,8 @@ namespace SwayNotificationCenter {
             if (array == null) return json_array;
 
             array.foreach ((item) => {
-                switch (typeof (T)) {
+                Type generic_type = Functions.get_base_type (typeof (T));
+                switch (generic_type) {
                         case Type.STRING:
                             string ? casted = (string) item;
                             if (casted != null) {
@@ -557,7 +578,11 @@ namespace SwayNotificationCenter {
                                 json_array.add_int_element (casted);
                             }
                             break;
-                        default :
+                        case Type.OBJECT :
+                            var node = Json.gobject_serialize (item as Object);
+                            json_array.add_element (node);
+                            break;
+                        default:
                             // Return an empty array due to the type not being
                             // JSON compatible
                             return;

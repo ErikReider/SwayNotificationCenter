@@ -23,16 +23,21 @@ namespace SwayNotificationCenter {
         private Gtk.Align list_align = Gtk.Align.START;
 
         public ControlCenter (CcDaemon cc_daemon) {
+            var type = is_wayland ? Gtk.WindowType.TOPLEVEL : Gtk.WindowType.POPUP;
+            Object (type: type);
+
             this.cc_daemon = cc_daemon;
 
-            if (!GtkLayerShell.is_supported ()) {
-                stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
-                stderr.printf ("Swaync only works on Wayland!\n");
-                stderr.printf ("If running waylans session, try running:\n");
-                stderr.printf ("\tGDK_BACKEND=wayland swaync\n");
-                Process.exit (1);
+            if (is_wayland) {
+                GtkLayerShell.init_for_window (this);
+            } else {
+                // Set transparent window
+                var screen = Gdk.Screen.get_default ();
+                var visual = screen.get_rgba_visual ();
+                if (visual != null && screen.is_composited ()) {
+                    this.set_visual (visual);
+                }
             }
-            GtkLayerShell.init_for_window (this);
             this.set_anchor ();
 
             viewport.size_allocate.connect (size_alloc);
@@ -126,6 +131,43 @@ namespace SwayNotificationCenter {
         private void set_anchor () {
             // Grabs the keyboard input until closed
             bool keyboard_shortcuts = ConfigModel.instance.keyboard_shortcuts;
+
+            if (is_wayland) {
+                layer_shell_ (keyboard_shortcuts);
+            } else {
+                x11_ (keyboard_shortcuts);
+            }
+
+            switch (ConfigModel.instance.positionY) {
+                case PositionY.BOTTOM:
+                    list_reverse = true;
+                    list_align = Gtk.Align.END;
+                    this.box.set_child_packing (
+                        scrolled_window, true, true, 0, Gtk.PackType.START);
+                    break;
+                case PositionY.TOP:
+                    list_reverse = false;
+                    list_align = Gtk.Align.START;
+                    this.box.set_child_packing (
+                        scrolled_window, true, true, 0, Gtk.PackType.END);
+                    break;
+            }
+
+            list_box.set_valign (list_align);
+            list_box.set_sort_func ((w1, w2) => {
+                var a = (Notification) w1;
+                var b = (Notification) w2;
+                if (a == null || b == null) return 0;
+                // Sort the list in reverse if needed
+                int val1 = list_reverse ? 1 : -1;
+                int val2 = list_reverse ? -1 : 1;
+                return a.param.time > b.param.time ? val1 : val2;
+            });
+        }
+
+        private void layer_shell_ (bool keyboard_shortcuts) {
+            GtkLayerShell.set_layer (this, GtkLayerShell.Layer.TOP);
+
 #if HAVE_LATEST_GTK_LAYER_SHELL
             var mode = keyboard_shortcuts ?
                        GtkLayerShell.KeyboardMode.EXCLUSIVE :
@@ -134,7 +176,6 @@ namespace SwayNotificationCenter {
 #else
             GtkLayerShell.set_keyboard_interactivity (this, keyboard_shortcuts);
 #endif
-            GtkLayerShell.set_layer (this, GtkLayerShell.Layer.TOP);
 
             GtkLayerShell.set_margin (this, GtkLayerShell.Edge.TOP, ConfigModel.instance.control_center_margin_top);
             GtkLayerShell.set_margin (this, GtkLayerShell.Edge.BOTTOM, ConfigModel.instance.control_center_margin_bottom);
@@ -169,31 +210,48 @@ namespace SwayNotificationCenter {
                                               true);
                     break;
             }
-            switch (ConfigModel.instance.positionY) {
-                case PositionY.BOTTOM:
-                    list_reverse = true;
-                    list_align = Gtk.Align.END;
-                    this.box.set_child_packing (
-                        scrolled_window, true, true, 0, Gtk.PackType.START);
+        }
+
+        private void x11_ (bool keyboard_shortcuts) {
+            if (!this.get_realized ()) return;
+            var display = Gdk.Display.get_default ();
+            var primary_monitor = display.get_primary_monitor ();
+            var geometry = primary_monitor.get_geometry ();
+            Gdk.Window win = this.get_window ();
+
+            win.set_events (Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK);
+
+            // TODO: Get monitor at pointer position
+            // int pointer_x;
+            // int pointer_y;
+            // this.get_pointer (out pointer_x, out int y);
+
+            int x = geometry.x;
+            int y = geometry.y;
+
+            switch (ConfigModel.instance.positionX) {
+                case PositionX.LEFT:
                     break;
-                case PositionY.TOP:
-                    list_reverse = false;
-                    list_align = Gtk.Align.START;
-                    this.box.set_child_packing (
-                        scrolled_window, true, true, 0, Gtk.PackType.END);
+                case PositionX.CENTER:
+                    x += (geometry.width - this.get_allocated_width ()) / 2;
+                    break;
+                case PositionX.RIGHT:
+                default:
+                    x += geometry.width - this.get_allocated_width ();
                     break;
             }
 
-            list_box.set_valign (list_align);
-            list_box.set_sort_func ((w1, w2) => {
-                var a = (Notification) w1;
-                var b = (Notification) w2;
-                if (a == null || b == null) return 0;
-                // Sort the list in reverse if needed
-                int val1 = list_reverse ? 1 : -1;
-                int val2 = list_reverse ? -1 : 1;
-                return a.param.time > b.param.time ? val1 : val2;
-            });
+            Gdk.property_change (win,
+                                 Gdk.Atom.intern_static_string ("_NET_WM_STATE"),
+                                 Gdk.Atom.intern_static_string ("ATOM"),
+                                 32,
+                                 Gdk.PropMode.APPEND,
+                                 { (uint8) Gdk.Atom.intern_static_string ("_NET_WM_STATE_ABOVE") },
+                                 1);
+
+            win.move_resize (x, y, this.get_allocated_width (), geometry.height);
+            win.stick ();
+            win.set_keep_above (true);
         }
 
         private void size_alloc () {

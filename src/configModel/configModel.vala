@@ -553,33 +553,33 @@ namespace SwayNotificationCenter {
 
             if (array == null) return json_array;
 
-            array.foreach ((item) => {
+            foreach (T item in array) {
                 Type generic_type = Functions.get_base_type (typeof (T));
                 switch (generic_type) {
-                        case Type.STRING:
-                            string ? casted = (string) item;
-                            if (casted != null) {
-                                json_array.add_string_element (casted);
-                            }
-                            break;
-                        case Type.BOOLEAN :
-                            bool ? casted = (bool) item;
-                            if (casted != null) {
-                                json_array.add_boolean_element (casted);
-                            }
-                            break;
-                        case Type.INT64 :
-                            int64 ? casted = (int64) item;
-                            if (casted != null) {
-                                json_array.add_int_element (casted);
-                            }
-                            break;
-                        case Type.OBJECT :
-                            var node = Json.gobject_serialize (item as Object);
-                            json_array.add_element (node);
-                            break;
+                    case Type.STRING :
+                        string ? casted = (string) item;
+                        if (casted != null) {
+                            json_array.add_string_element (casted);
+                        }
+                        break;
+                    case Type.BOOLEAN :
+                        bool ? casted = (bool) item;
+                        if (casted != null) {
+                            json_array.add_boolean_element (casted);
+                        }
+                        break;
+                    case Type.INT64 :
+                        int64 ? casted = (int64) item;
+                        if (casted != null) {
+                            json_array.add_int_element (casted);
+                        }
+                        break;
+                    case Type.OBJECT :
+                        var node = Json.gobject_serialize (item as Object);
+                        json_array.add_element (node);
+                        break;
                 }
-            });
+            }
             return json_array;
         }
 

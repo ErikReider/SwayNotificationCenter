@@ -553,7 +553,7 @@ namespace SwayNotificationCenter {
 
             if (array == null) return json_array;
 
-            foreach (T item in array) {
+            foreach (T item in array.data) {
                 if (item == null) continue;
                 Type generic_type = Functions.get_base_type (typeof (T));
                 switch (generic_type) {

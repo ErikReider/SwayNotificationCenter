@@ -126,5 +126,15 @@ namespace SwayNotificationCenter {
             }
             return "";
         }
+
+        /** Gets the base type of a type if it's derivited */
+        public static Type get_base_type (Type type) {
+            if (type.is_derived ()) {
+                while (type.is_derived ()) {
+                    type = type.parent ();
+                }
+            }
+            return type;
+        }
     }
 }

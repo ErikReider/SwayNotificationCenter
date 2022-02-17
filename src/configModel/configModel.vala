@@ -491,6 +491,100 @@ namespace SwayNotificationCenter {
         }
 
         /**
+         * Extracts a JSON array and returns a GLib.GenericArray<T>
+         */
+        private GenericArray<T> extract_array<T>(string property_name,
+                                                 Json.Node node,
+                                                 out bool status) {
+            status = false;
+            GenericArray<T> tmp_array = new GenericArray<T>();
+
+            if (node.get_node_type () != Json.NodeType.ARRAY) {
+                stderr.printf ("Node %s is not a json array!...\n",
+                               property_name);
+                return tmp_array;
+            }
+
+            Json.Array ? root_array = node.get_array ();
+            if (root_array == null) return tmp_array;
+
+            foreach (Json.Node * member in root_array.get_elements ()) {
+                Type generic_type = Functions.get_base_type (typeof (T));
+                if (!member->get_value_type ().is_a (generic_type)
+                    && !member->get_value_type ().is_a (typeof (Json.Object))) {
+                    continue;
+                }
+
+                switch (generic_type) {
+                    case Type.STRING:
+                        unowned string ? str = member->get_string ();
+                        if (str != null) tmp_array.add (str);
+                        break;
+                    case Type.BOOLEAN :
+                        tmp_array.add (member->get_boolean ());
+                        break;
+                    case Type.INT64:
+                        tmp_array.add (member->get_int ());
+                        break;
+                    case Type.OBJECT:
+                        if (!typeof (T).is_a (Type.OBJECT)) break;
+
+                        unowned Json.Object ? object = member->get_object ();
+                        if (object == null) break;
+
+                        // Creates a new GLib.Object with all of the properties of T
+                        Object obj = Object.new (typeof (T));
+                        foreach (var name in object.get_members ()) {
+                            Value value = object.get_member (name).get_value ();
+                            obj.set_property (name, value);
+                        }
+
+                        tmp_array.add ((T) obj);
+                        break;
+                }
+            }
+
+            status = true;
+            return tmp_array;
+        }
+
+        private Json.Array serialize_array<T>(GenericArray<T> array) {
+            var json_array = new Json.Array ();
+
+            if (array == null) return json_array;
+
+            foreach (T item in array.data) {
+                if (item == null) continue;
+                Type generic_type = Functions.get_base_type (typeof (T));
+                switch (generic_type) {
+                    case Type.STRING :
+                        string ? casted = (string) item;
+                        if (casted != null) {
+                            json_array.add_string_element (casted);
+                        }
+                        break;
+                    case Type.BOOLEAN :
+                        bool ? casted = (bool) item;
+                        if (casted != null) {
+                            json_array.add_boolean_element (casted);
+                        }
+                        break;
+                    case Type.INT64 :
+                        int64 ? casted = (int64) item;
+                        if (casted != null) {
+                            json_array.add_int_element (casted);
+                        }
+                        break;
+                    case Type.OBJECT :
+                        var node = Json.gobject_serialize (item as Object);
+                        json_array.add_element (node);
+                        break;
+                }
+            }
+            return json_array;
+        }
+
+        /**
          * Changes the `member_name` to the specified value if their types match
          */
         public void change_value (string member_name,

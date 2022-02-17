@@ -541,10 +541,6 @@ namespace SwayNotificationCenter {
 
                         tmp_array.add ((T) obj);
                         break;
-                    default :
-                        // Return an empty array due to the type not being JSON
-                        // compatible
-                        return tmp_array;
                 }
             }
 
@@ -582,10 +578,6 @@ namespace SwayNotificationCenter {
                             var node = Json.gobject_serialize (item as Object);
                             json_array.add_element (node);
                             break;
-                        default:
-                            // Return an empty array due to the type not being
-                            // JSON compatible
-                            return;
                 }
             });
             return json_array;

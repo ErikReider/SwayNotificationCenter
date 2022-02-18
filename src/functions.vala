@@ -3,7 +3,7 @@ namespace SwayNotificationCenter {
         public static void set_image_path (owned string path,
                                            Gtk.Image img,
                                            bool file_exists) {
-            if (path.slice (0, 7) == "file://" || file_exists) {
+            if ((path.length > 6 && path.slice (0, 7) == "file://") || file_exists) {
                 // Try as a URI (file:// is the only URI schema supported right now)
                 try {
                     if (!file_exists) path = path.slice (7, path.length);

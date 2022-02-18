@@ -433,16 +433,19 @@ namespace SwayNotificationCenter {
 
         /**
          * Extracts and returns a HashTable<string, GLib.Object>
-         * from a nested JSON Object
+         * from a nested JSON Object.
+         *
+         * Can only accept these types:
+         * - string
+         * - bool
+         * - int64
+         * - GLib.Object
          */
         private HashTable<string, T> extract_hashtable<T>(string property_name,
                                                           Json.Node node,
                                                           out bool status) {
             status = false;
             var tmp_table = new HashTable<string, T>(str_hash, str_equal);
-
-            // Check if T is a descendant of GLib.Object
-            assert (typeof (T).is_a (Type.OBJECT));
 
             if (node.get_node_type () != Json.NodeType.OBJECT) {
                 stderr.printf ("Node %s is not a json object!...\n",
@@ -453,23 +456,44 @@ namespace SwayNotificationCenter {
             Json.Object ? root_object = node.get_object ();
             if (root_object == null) return tmp_table;
 
-            foreach (string * member in root_object.get_members ()) {
-                Json.Object * object = root_object.get_object_member (member);
-                if (object == null) {
-                    stderr.printf (
-                        "%s category is not a json object, skipping...\n",
-                        member);
+            Type generic_type = Functions.get_base_type (typeof (T));
+            foreach (string * key in root_object.get_members ()) {
+                unowned Json.Node ? member = root_object.get_member (key);
+                if (member == null) continue;
+
+                if (!member.get_value_type ().is_a (generic_type)
+                    && !member.get_value_type ().is_a (typeof (Json.Object))) {
                     continue;
                 }
 
-                // Creates a new GLib.Object with all of the properties of T
-                Object obj = Object.new (typeof (T));
-                foreach (var name in object->get_members ()) {
-                    Value value = object->get_member (name).get_value ();
-                    obj.set_property (name, value);
-                }
+                switch (generic_type) {
+                    case Type.STRING:
+                        unowned string ? str = member.get_string ();
+                        if (str != null) tmp_table.insert (key, str);
+                        break;
+                    case Type.BOOLEAN :
+                        tmp_table.insert (key, member.get_boolean ());
+                        break;
+                    case Type.INT64:
+                        tmp_table.insert (key, (int64 ? ) member.get_int ());
+                        break;
+                    case Type.OBJECT:
+                        if (!typeof (T).is_a (Type.OBJECT)) break;
 
-                tmp_table.insert (member, (T) obj);
+                        unowned Json.Object ? object =
+                            root_object.get_object_member (key);
+                        if (object == null) break;
+
+                        // Creates a new GLib.Object with all of the properties of T
+                        Object obj = Object.new (typeof (T));
+                        foreach (var name in object.get_members ()) {
+                            Value value = object.get_member (name).get_value ();
+                            obj.set_property (name, value);
+                        }
+
+                        tmp_table.insert (key, (T) obj);
+                        break;
+                }
             }
 
             status = true;
@@ -477,21 +501,51 @@ namespace SwayNotificationCenter {
         }
 
         private Json.Object serialize_hashtable<T>(HashTable<string, T> table) {
-            var obj = new Json.Object ();
+            var json_object = new Json.Object ();
 
-            // Check if T is a descendant of GLib.Object
-            assert (typeof (T).is_a (Type.OBJECT));
+            if (table == null) return json_object;
 
-            if (table == null) return obj;
+            foreach (string * key in table.get_keys ()) {
+                unowned T item = table.get (key);
+                if (item == null) continue;
 
-            table.foreach ((key, value) => {
-                obj.set_member (key, Json.gobject_serialize (value as Object));
-            });
-            return obj;
+                Type generic_type = Functions.get_base_type (typeof (T));
+                switch (generic_type) {
+                    case Type.STRING :
+                        string ? casted = (string) item;
+                        if (casted != null) {
+                            json_object.set_string_member (key, casted);
+                        }
+                        break;
+                    case Type.BOOLEAN :
+                        bool ? casted = (bool) item;
+                        if (casted != null) {
+                            json_object.set_boolean_member (key, casted);
+                        }
+                        break;
+                    case Type.INT64 :
+                        int64 ? casted = (int64 ? ) item;
+                        if (casted != null) {
+                            json_object.set_int_member (key, casted);
+                        }
+                        break;
+                    case Type.OBJECT:
+                        var node = Json.gobject_serialize (item as Object);
+                        json_object.set_member (key, node);
+                        break;
+                }
+            }
+            return json_object;
         }
 
         /**
          * Extracts a JSON array and returns a GLib.GenericArray<T>
+         *
+         * Can only accept these types:
+         * - string
+         * - bool
+         * - int64
+         * - GLib.Object
          */
         private GenericArray<T> extract_array<T>(string property_name,
                                                  Json.Node node,

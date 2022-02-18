@@ -64,6 +64,9 @@ namespace SwayNotificationCenter {
             this.timeout_delay = timeout;
             this.timeout_low_delay = timeout_low;
             this.timeout_critical_delay = timeout_critical;
+#if HAVE_LATEST_LIBHANDY
+            this.carousel.allow_scroll_wheel = false;
+#endif
             build_noti (param, notiDaemon);
             add_noti_timeout ();
         }

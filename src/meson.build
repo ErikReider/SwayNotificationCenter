@@ -41,7 +41,7 @@ app_deps = [
   dependency('gio-unix-2.0', version: '>= 2.50'),
   dependency('gtk+-3.0', version: '>= 3.22'),
   dependency('json-glib-1.0', version: '>= 1.0'),
-  dependency('libhandy-1', version: '>= 1.2.0'),
+  dependency('libhandy-1', version: '>= 1.2.3'),
   meson.get_compiler('c').find_library('gtk-layer-shell'),
   meson.get_compiler('c').find_library('m', required : true),
 ]
@@ -49,6 +49,12 @@ app_deps = [
 # Checks if the user wants scripting enabled
 if get_option('scripting')
     add_project_arguments('-D', 'WANT_SCRIPTING', language: 'vala')
+endif
+
+# Detect libhandy version
+libhandy = dependency('libhandy-1')
+if libhandy.version() >= '1.3.9'
+    add_project_arguments('-D', 'HAVE_LATEST_LIBHANDY', language: 'vala')
 endif
 
 # Detect gtk-layer-shell version

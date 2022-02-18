@@ -131,10 +131,14 @@ namespace SwayNotificationCenter {
 
             this.show ();
 
-            Timeout.add (0, () => {
+            if (param.replaces) {
                 this.revealer.set_reveal_child (true);
-                return GLib.Source.REMOVE;
-            });
+            } else {
+                Timeout.add (0, () => {
+                    this.revealer.set_reveal_child (true);
+                    return GLib.Source.REMOVE;
+                });
+            }
         }
 
         private void set_body () {

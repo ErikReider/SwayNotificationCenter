@@ -84,12 +84,20 @@ namespace SwayNotificationCenter {
         public string category { get; set; }
         public bool resident { get; set; }
         public UrgencyLevels urgency { get; set; }
+        /** Replaces the old notification with the same value of:
+         * - x-canonical-private-synchronous
+         * - synchronous
+         */
+        public string ? synchronous { get; set; }
 
         // Custom hints
         /** Disables scripting for notification */
         public bool swaync_no_script { get; set; }
 
         public Action[] actions { get; set; }
+
+        /** If the notification replaces another */
+        public bool replaces { get; set; }
 
         public NotifyParams (uint32 applied_id,
                              string app_name,
@@ -109,6 +117,8 @@ namespace SwayNotificationCenter {
             this.hints = hints;
             this.expire_timeout = expire_timeout;
             this.time = (int64) (GLib.get_real_time () * 0.000001);
+
+            this.replaces = false;
 
             s_hints ();
 
@@ -140,6 +150,13 @@ namespace SwayNotificationCenter {
                     case "SWAYNC_NO_SCRIPT":
                         if (hint_value.is_of_type (GLib.VariantType.BOOLEAN)) {
                             swaync_no_script = hint_value.get_boolean ();
+                        }
+                        break;
+                    case "synchronous":
+                    case "private-synchronous":
+                    case "x-canonical-private-synchronous":
+                        if (hint_value.is_of_type (GLib.VariantType.STRING)) {
+                            synchronous = hint_value.get_string ();
                         }
                         break;
                     case "action-icons":

@@ -1,9 +1,10 @@
 namespace SwayNotificationCenter {
     [DBus (name = "org.freedesktop.Notifications")]
     public class NotiDaemon : Object {
-
         private uint32 noti_id = 0;
         private bool dnd = false;
+        private HashTable<string, uint32> synchronous_ids =
+            new HashTable<string, uint32>(str_hash, str_equal);
 
         public CcDaemon ccDaemon;
         public NotiWindow notiWindow;
@@ -92,15 +93,17 @@ namespace SwayNotificationCenter {
          * and dashes ("-").
          */
         public string[] GetCapabilities () throws DBusError, IOError {
-            string[] capabilities = {
-                "actions",
-                "body",
-                "body-markup",
-                "body-images",
-                "body-hyperlinks",
-                "persistence",
+            return {
+                       "actions",
+                       "body",
+                       "body-markup",
+                       "body-images",
+                       "body-hyperlinks",
+                       "persistence",
+                       "synchronous",
+                       "private-synchronous",
+                       "x-canonical-private-synchronous",
             };
-            return capabilities;
         }
 
         /**
@@ -140,10 +143,26 @@ namespace SwayNotificationCenter {
 
             debug ("Notification: %s\n", param.to_string ());
 
+            // Replace notification logic
+            string ? synchronous = param.synchronous;
             if (id == replaces_id) {
                 notiWindow.close_notification (id);
                 ccDaemon.controlCenter.close_notification (id, true);
+                param.replaces = true;
+            } else if (synchronous != null
+                       && synchronous.length > 0) {
+                // Tries replacing without replaces_id instead
+                if (synchronous in synchronous_ids) {
+                    uint32 r_id = synchronous_ids.get (synchronous);
+
+                    // Close the notification
+                    notiWindow.close_notification (r_id);
+                    ccDaemon.controlCenter.close_notification (r_id, true);
+                    param.replaces = true;
+                }
+                synchronous_ids.set (synchronous, id);
             }
+
             if (!ccDaemon.controlCenter.get_visibility ()) {
                 if (param.urgency == UrgencyLevels.CRITICAL ||
                     (!dnd && param.urgency != UrgencyLevels.CRITICAL)) {

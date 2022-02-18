@@ -144,23 +144,23 @@ namespace SwayNotificationCenter {
             debug ("Notification: %s\n", param.to_string ());
 
             // Replace notification logic
-            string ? synchronous = param.synchronous;
             if (id == replaces_id) {
+                param.replaces = true;
                 notiWindow.close_notification (id);
                 ccDaemon.controlCenter.close_notification (id, true);
-                param.replaces = true;
-            } else if (synchronous != null
-                       && synchronous.length > 0) {
+            } else if (param.synchronous != null
+                       && param.synchronous.length > 0) {
                 // Tries replacing without replaces_id instead
-                if (synchronous in synchronous_ids) {
-                    uint32 r_id = synchronous_ids.get (synchronous);
-
+                uint32 r_id;
+                // if there is any notification to replace
+                if (synchronous_ids.lookup_extended (
+                        param.synchronous, null, out r_id)) {
+                    param.replaces = true;
                     // Close the notification
                     notiWindow.close_notification (r_id);
                     ccDaemon.controlCenter.close_notification (r_id, true);
-                    param.replaces = true;
                 }
-                synchronous_ids.set (synchronous, id);
+                synchronous_ids.set (param.synchronous, id);
             }
 
             if (!ccDaemon.controlCenter.get_visibility ()) {

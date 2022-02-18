@@ -13,6 +13,9 @@ namespace SwayNotificationCenter {
         unowned Gtk.Button default_button;
 
         [GtkChild]
+        unowned Gtk.ProgressBar progress_bar;
+
+        [GtkChild]
         unowned Gtk.Box base_box;
 
         [GtkChild]
@@ -124,6 +127,10 @@ namespace SwayNotificationCenter {
                     this.destroy ();
                 }
             });
+
+            if (this.progress_bar.visible = !(param.value == null)) {
+                this.progress_bar.set_fraction (param.value * 0.01);
+            }
 
             set_body ();
             set_icon ();

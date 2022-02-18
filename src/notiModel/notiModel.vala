@@ -89,6 +89,16 @@ namespace SwayNotificationCenter {
          * - synchronous
          */
         public string ? synchronous { get; set; }
+        /** Used for notification progress bar (0->100) */
+        public int? value {
+            get {
+                return _value;
+            }
+            set {
+                _value = value?.clamp (0, 100);
+            }
+        }
+        private int ? _value { private get; private set; }
 
         // Custom hints
         /** Disables scripting for notification */
@@ -119,6 +129,7 @@ namespace SwayNotificationCenter {
             this.time = (int64) (GLib.get_real_time () * 0.000001);
 
             this.replaces = false;
+            this.value = null;
 
             s_hints ();
 
@@ -150,6 +161,11 @@ namespace SwayNotificationCenter {
                     case "SWAYNC_NO_SCRIPT":
                         if (hint_value.is_of_type (GLib.VariantType.BOOLEAN)) {
                             swaync_no_script = hint_value.get_boolean ();
+                        }
+                        break;
+                    case "value":
+                        if (hint_value.is_of_type (GLib.VariantType.INT32)) {
+                            value = hint_value.get_int32 ();
                         }
                         break;
                     case "synchronous":

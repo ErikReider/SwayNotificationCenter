@@ -48,13 +48,14 @@
                             <child>
                               <object class="GtkButton" id="default_button">
                                 <property name="visible">True</property>
-                                <property name="can-focus">True</property>
+                                <property name="can-focus">False</property>
                                 <property name="receives-default">False</property>
                                 <child>
                                   <object class="GtkBox">
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="orientation">vertical</property>
+                                    <property name="spacing">8</property>
                                     <child>
                                       <object class="GtkBox">
                                         <property name="visible">True</property>
@@ -82,7 +83,6 @@
                                             <property name="visible">True</property>
                                             <property name="can-focus">False</property>
                                             <property name="margin-right">14</property>
-                                            <property name="margin-end">14</property>
                                             <property name="hexpand">True</property>
                                             <property name="vexpand">True</property>
                                             <property name="orientation">vertical</property>
@@ -173,6 +173,17 @@
                                       </packing>
                                     </child>
                                     <child>
+                                      <object class="GtkProgressBar" id="progress_bar">
+                                        <property name="visible">True</property>
+                                        <property name="can-focus">False</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
                                       <object class="GtkImage" id="body_image">
                                         <property name="can-focus">False</property>
                                         <property name="halign">center</property>
@@ -183,7 +194,7 @@
                                       <packing>
                                         <property name="expand">False</property>
                                         <property name="fill">False</property>
-                                        <property name="position">1</property>
+                                        <property name="position">2</property>
                                       </packing>
                                     </child>
                                     <style>

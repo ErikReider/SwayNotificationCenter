@@ -90,12 +90,12 @@ namespace SwayNotificationCenter {
          */
         public string ? synchronous { get; set; }
         /** Used for notification progress bar (0->100) */
-        public int? value {
+        public int ? value {
             get {
                 return _value;
             }
             set {
-                _value = value?.clamp (0, 100);
+                _value = value == null ? value : value.clamp (0, 100);
             }
         }
         private int ? _value { private get; private set; }

@@ -82,6 +82,7 @@ namespace SwayNotificationCenter {
         /** Sets the visibility of the controlcenter */
         public void set_visibility (bool visibility) throws DBusError, IOError {
             controlCenter.set_visibility (visibility);
+            if (visibility) notiDaemon.set_noti_window_visibility (false);
         }
 
         /** Toggles the current Do Not Disturb state */

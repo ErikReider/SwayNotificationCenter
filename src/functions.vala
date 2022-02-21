@@ -8,10 +8,11 @@ namespace SwayNotificationCenter {
                 try {
                     if (!file_exists) path = path.slice (7, path.length);
 
-                    var pixbuf = new Gdk.Pixbuf.from_file_at_size (
+                    var pixbuf = new Gdk.Pixbuf.from_file_at_scale (
                         path,
                         Notification.icon_image_size * img.scale_factor,
-                        Notification.icon_image_size * img.scale_factor);
+                        Notification.icon_image_size * img.scale_factor,
+                        true);
                     var surface = Gdk.cairo_surface_create_from_pixbuf (
                         pixbuf,
                         img.scale_factor,

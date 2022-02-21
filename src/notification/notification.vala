@@ -36,7 +36,7 @@ namespace SwayNotificationCenter {
         [GtkChild]
         unowned Gtk.Image body_image;
 
-        public static Gtk.IconSize icon_size = Gtk.IconSize.DIALOG;
+        public static Gtk.IconSize icon_size = Gtk.IconSize.INVALID;
         public static int icon_image_size = 64;
 
         private uint timeout_id = 0;
@@ -321,7 +321,9 @@ namespace SwayNotificationCenter {
                 return;
             }
 
-            img.set_pixel_size (48);
+            img.set_pixel_size (Notification.icon_image_size);
+            img.height_request = Notification.icon_image_size;
+            img.width_request = Notification.icon_image_size;
 
             var img_path_exists = File.new_for_path (
                 param.image_path ?? "").query_exists ();

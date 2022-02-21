@@ -10,9 +10,13 @@ namespace SwayNotificationCenter {
 
                     var pixbuf = new Gdk.Pixbuf.from_file_at_size (
                         path,
-                        Notification.icon_image_size,
-                        Notification.icon_image_size);
-                    img.set_from_pixbuf (pixbuf);
+                        Notification.icon_image_size * img.scale_factor,
+                        Notification.icon_image_size * img.scale_factor);
+                    var surface = Gdk.cairo_surface_create_from_pixbuf (
+                        pixbuf,
+                        img.scale_factor,
+                        img.get_window ());
+                    img.set_from_surface (surface);
                     return;
                 } catch (Error e) {
                     stderr.printf (e.message + "\n");
@@ -21,7 +25,9 @@ namespace SwayNotificationCenter {
                 // Try as a freedesktop.org-compliant icon theme
                 img.set_from_icon_name (path, Notification.icon_size);
             } else {
-                img.set_from_icon_name ("image-missing", Notification.icon_size);
+                img.set_from_icon_name (
+                    "image-missing",
+                    Notification.icon_size);
             }
         }
 
@@ -35,10 +41,16 @@ namespace SwayNotificationCenter {
                                                            data.height,
                                                            data.rowstride,
                                                            null);
-            var scaled_pixbuf = pixbuf.scale_simple (
-                Notification.icon_image_size, Notification.icon_image_size,
+
+            pixbuf = pixbuf.scale_simple (
+                Notification.icon_image_size * img.scale_factor,
+                Notification.icon_image_size * img.scale_factor,
                 Gdk.InterpType.BILINEAR);
-            img.set_from_pixbuf (scaled_pixbuf);
+            var surface = Gdk.cairo_surface_create_from_pixbuf (
+                pixbuf,
+                img.scale_factor,
+                img.get_window ());
+            img.set_from_surface (surface);
         }
 
         public static bool load_css (string ? style_path) {

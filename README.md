@@ -41,7 +41,7 @@ dnf install SwayNotificationCenter
 ```
 
 Gentoo:
-An **unofficial** ebuild is available in GURU:
+An **unofficial** ebuild is available in [GURU](https://github.com/gentoo/guru)
 
 ``` zsh
 eselect repository enable guru

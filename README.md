@@ -46,7 +46,7 @@ An **unofficial** ebuild is available in GURU:
 ``` zsh
 eselect repository enable guru
 emaint sync -r guru
-emerge --ask swaync
+emerge --ask gui-apps/swaync
 ```
 
 Other:

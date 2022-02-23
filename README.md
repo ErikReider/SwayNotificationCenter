@@ -40,6 +40,15 @@ dnf copr enable lexa/SwayNotificationCenter
 dnf install SwayNotificationCenter
 ```
 
+Gentoo:
+An **unofficial** ebuild is available in [GURU](https://github.com/gentoo/guru)
+
+``` zsh
+eselect repository enable guru
+emaint sync -r guru
+emerge --ask gui-apps/swaync
+```
+
 Other:
 
 ```zsh

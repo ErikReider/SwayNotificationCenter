@@ -135,7 +135,7 @@ namespace SwayNotificationCenter {
             set_body ();
             set_icon ();
             set_actions ();
-            set_urgency();
+            set_style_urgency();
 
             this.show ();
 
@@ -243,7 +243,7 @@ namespace SwayNotificationCenter {
             if (!param.resident) close_notification ();
         }
 
-        private void set_urgency () {
+        private void set_style_urgency () {
             switch (param.urgency) {
                 case UrgencyLevels.LOW :
                     base_box.get_style_context ().add_class ("low");

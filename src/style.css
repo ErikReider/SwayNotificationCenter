@@ -23,6 +23,7 @@
   padding: 0;
 }
 
+/* Uncomment to enable specific urgency colors
 .low {
   background: yellow;
   padding: 6px;
@@ -40,6 +41,7 @@
   padding: 6px;
   border-radius: 10px;
 }
+*/
 
 .notification-content {
   background: transparent;

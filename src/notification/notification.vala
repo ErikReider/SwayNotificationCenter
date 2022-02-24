@@ -49,7 +49,7 @@ namespace SwayNotificationCenter {
         private int transition_time;
         private uint timeout_critical_delay;
 
-        private int carpusel_empty_widget_index = 0;
+        private int carousel_empty_widget_index  = 0;
 
         public Notification (NotifyParams param,
                              NotiDaemon notiDaemon) {
@@ -108,16 +108,16 @@ namespace SwayNotificationCenter {
             switch (ConfigModel.instance.positionX) {
                 case PositionX.LEFT:
                     this.carousel.reorder (event_box, 0);
-                    this.carpusel_empty_widget_index = 1;
+                    this.carousel_empty_widget_index  = 1;
                     break;
                 case PositionX.RIGHT:
                 case PositionX.CENTER:
                     this.carousel.scroll_to (event_box);
-                    this.carpusel_empty_widget_index = 0;
+                    this.carousel_empty_widget_index  = 0;
                     break;
             }
             this.carousel.page_changed.connect ((_, i) => {
-                if (i != this.carpusel_empty_widget_index) return;
+                if (i != this.carousel_empty_widget_index ) return;
                 remove_noti_timeout ();
                 try {
                     notiDaemon.manually_close_notification (

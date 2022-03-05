@@ -162,6 +162,9 @@ namespace SwayNotificationCenter {
             }
             this.grab_focus ();
             this.show ();
+
+            // IMPORTANT: queue a resize event to force the layout to be recomputed
+            noti.queue_resize ();
             scroll_to_start (list_reverse);
         }
 

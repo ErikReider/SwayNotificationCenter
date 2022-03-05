@@ -71,6 +71,17 @@ namespace SwayNotificationCenter {
 
             build_noti (param, notiDaemon);
             add_noti_timeout ();
+            this.size_allocate.connect (on_size_allocation);
+        }
+
+        private void on_size_allocation (Gtk.Allocation _ignored) {
+            // Force recomputing the allocated size of the wrapped GTK label in the body.
+            // `queue_resize` alone DOES NOT WORK because it does not properly invalidate
+            // the cache, this is a GTK bug!
+            // See https://gitlab.gnome.org/GNOME/gtk/-/issues/2556
+            if (body != null) {
+                body.set_size_request (-1, body.get_allocated_height ());
+            }
         }
 
         private void build_noti (NotifyParams param, NotiDaemon notiDaemon) {
@@ -83,6 +94,7 @@ namespace SwayNotificationCenter {
             this.body.set_line_wrap_mode (Pango.WrapMode.WORD_CHAR);
             this.body.set_ellipsize (Pango.EllipsizeMode.END);
 
+            this.summary.set_line_wrap (false);
             this.summary.set_text (param.summary ?? param.app_name);
             this.summary.set_ellipsize (Pango.EllipsizeMode.END);
 

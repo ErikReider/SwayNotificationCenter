@@ -49,7 +49,7 @@ namespace SwayNotificationCenter {
         private int transition_time;
         private uint timeout_critical_delay;
 
-        private int carousel_empty_widget_index  = 0;
+        private int carousel_empty_widget_index = 0;
 
         public Notification (NotifyParams param,
                              NotiDaemon notiDaemon) {
@@ -67,9 +67,6 @@ namespace SwayNotificationCenter {
             this.timeout_delay = timeout;
             this.timeout_low_delay = timeout_low;
             this.timeout_critical_delay = timeout_critical;
-#if HAVE_LATEST_LIBHANDY
-            this.carousel.allow_scroll_wheel = false;
-#endif
             build_noti (param, notiDaemon);
             add_noti_timeout ();
         }
@@ -108,16 +105,16 @@ namespace SwayNotificationCenter {
             switch (ConfigModel.instance.positionX) {
                 case PositionX.LEFT:
                     this.carousel.reorder (event_box, 0);
-                    this.carousel_empty_widget_index  = 1;
+                    this.carousel_empty_widget_index = 1;
                     break;
                 case PositionX.RIGHT:
                 case PositionX.CENTER:
                     this.carousel.scroll_to (event_box);
-                    this.carousel_empty_widget_index  = 0;
+                    this.carousel_empty_widget_index = 0;
                     break;
             }
             this.carousel.page_changed.connect ((_, i) => {
-                if (i != this.carousel_empty_widget_index ) return;
+                if (i != this.carousel_empty_widget_index) return;
                 remove_noti_timeout ();
                 try {
                     notiDaemon.manually_close_notification (
@@ -127,6 +124,9 @@ namespace SwayNotificationCenter {
                     this.destroy ();
                 }
             });
+#if HAVE_LATEST_LIBHANDY
+            this.carousel.allow_scroll_wheel = false;
+#endif
 
             if (this.progress_bar.visible = !(param.value == null)) {
                 this.progress_bar.set_fraction (param.value * 0.01);
@@ -135,7 +135,7 @@ namespace SwayNotificationCenter {
             set_body ();
             set_icon ();
             set_actions ();
-            set_style_urgency();
+            set_style_urgency ();
 
             this.show ();
 
@@ -249,7 +249,7 @@ namespace SwayNotificationCenter {
                     base_box.get_style_context ().add_class ("low");
                     break;
                 case UrgencyLevels.NORMAL :
-                default :
+                default:
                     base_box.get_style_context ().add_class ("normal");
                     break;
                 case UrgencyLevels.CRITICAL:
@@ -387,8 +387,8 @@ namespace SwayNotificationCenter {
                 case UrgencyLevels.LOW :
                     timeout = timeout_low_delay * 1000;
                     break;
-                case UrgencyLevels.NORMAL :
-                default :
+                case UrgencyLevels.NORMAL:
+                default:
                     timeout = timeout_delay * 1000;
                     break;
                 case UrgencyLevels.CRITICAL:

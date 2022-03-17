@@ -11,13 +11,15 @@ interface CcDaemon : GLib.Object {
 
     public abstract bool get_dnd () throws DBusError, IOError;
 
+    public abstract bool get_visibility () throws DBusError, IOError;
+
     public abstract void toggle_visibility () throws DBusError, IOError;
 
     public abstract bool toggle_dnd () throws DBusError, IOError;
 
     public abstract void set_visibility (bool value) throws DBusError, IOError;
 
-    public signal void subscribe (uint count, bool dnd);
+    public signal void subscribe (uint count, bool dnd, bool cc_open);
 }
 
 private CcDaemon cc_daemon = null;
@@ -43,15 +45,19 @@ private void print_help (string[] args) {
     print (@"\t -swb, \t --subscribe-waybar \t Subscribe to notificaion add and close events with waybar support. Read README for example\n");
 }
 
-private void on_subscribe (uint count, bool dnd) {
-    stdout.write (@"{ \"count\": $(count), \"dnd\": $(dnd) }".data);
-    print ("\n");
+private void on_subscribe (uint count, bool dnd, bool cc_open) {
+    stdout.write (
+        @"{ \"count\": $(count), \"dnd\": $(dnd), \"visible\": $(cc_open) }\n".data);
 }
 
-private void on_subscribe_waybar (uint count, bool dnd) {
+private void on_subscribe_waybar (uint count, bool dnd, bool cc_open) {
     string state = (dnd ? "dnd-" : "") + (count > 0 ? "notification" : "none");
-    print ("{\"text\": \"\", \"alt\": \"%s\", \"tooltip\": \"\", \"class\": \"%s\"}\n",
-           state, state);
+    if (cc_open) state += " cc-open";
+
+    string tooltip = "";
+
+    print ("{\"text\": \"\", \"alt\": \"%s\", \"tooltip\": \"%s\", \"class\": \"%s\"}\n",
+           state, tooltip, state);
 }
 
 public int command_line (string[] args) {
@@ -112,7 +118,8 @@ public int command_line (string[] args) {
             case "-s":
                 cc_daemon.subscribe.connect (on_subscribe);
                 on_subscribe (cc_daemon.notification_count (),
-                              cc_daemon.get_dnd ());
+                              cc_daemon.get_dnd (),
+                              cc_daemon.get_visibility ());
                 var loop = new MainLoop ();
                 loop.run ();
                 break;
@@ -120,7 +127,8 @@ public int command_line (string[] args) {
             case "-swb":
                 cc_daemon.subscribe.connect (on_subscribe_waybar);
                 on_subscribe_waybar (cc_daemon.notification_count (),
-                                     cc_daemon.get_dnd ());
+                                     cc_daemon.get_dnd (),
+                                     cc_daemon.get_visibility ());
                 var loop = new MainLoop ();
                 loop.run ();
                 break;

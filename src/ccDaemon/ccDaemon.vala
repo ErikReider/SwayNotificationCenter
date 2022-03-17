@@ -10,12 +10,20 @@ namespace SwayNotificationCenter {
 
             notiDaemon.on_dnd_toggle.connect ((dnd) => {
                 this.controlCenter.set_switch_dnd_state (dnd);
-                subscribe (controlCenter.notification_count (), dnd);
+                try {
+                    subscribe (controlCenter.notification_count (),
+                               dnd,
+                               get_visibility ());
+                } catch (Error e) {
+                    stderr.printf (e.message + "\n");
+                }
             });
 
             // Update on start
             try {
-                subscribe (notification_count (), get_dnd ());
+                subscribe (notification_count (),
+                           get_dnd (),
+                           get_visibility ());
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }
@@ -25,7 +33,7 @@ namespace SwayNotificationCenter {
          * Called when Dot Not Disturb state changes and when
          * notification gets added/removed
          */
-        public signal void subscribe (uint count, bool dnd);
+        public signal void subscribe (uint count, bool dnd, bool cc_open);
 
         /** Reloads the CSS file */
         public bool reload_css () throws Error {
@@ -77,12 +85,26 @@ namespace SwayNotificationCenter {
             if (controlCenter.toggle_visibility ()) {
                 notiDaemon.set_noti_window_visibility (false);
             }
+            try {
+                subscribe (controlCenter.notification_count (),
+                           get_dnd (),
+                           get_visibility ());
+            } catch (Error e) {
+                stderr.printf (e.message + "\n");
+            }
         }
 
         /** Sets the visibility of the controlcenter */
         public void set_visibility (bool visibility) throws DBusError, IOError {
             controlCenter.set_visibility (visibility);
             if (visibility) notiDaemon.set_noti_window_visibility (false);
+            try {
+                subscribe (controlCenter.notification_count (),
+                           get_dnd (),
+                           visibility);
+            } catch (Error e) {
+                stderr.printf (e.message + "\n");
+            }
         }
 
         /** Toggles the current Do Not Disturb state */

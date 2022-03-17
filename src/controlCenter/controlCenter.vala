@@ -236,8 +236,9 @@ namespace SwayNotificationCenter {
             }
 
             try {
-                cc_daemon.subscribe (
-                    notification_count (), cc_daemon.get_dnd ());
+                cc_daemon.subscribe (notification_count (),
+                                     cc_daemon.get_dnd (),
+                                     get_visibility ());
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }
@@ -307,8 +308,9 @@ namespace SwayNotificationCenter {
                 }
             }
             try {
-                cc_daemon.subscribe (
-                    notification_count (), cc_daemon.get_dnd ());
+                cc_daemon.subscribe (notification_count (),
+                                     cc_daemon.get_dnd (),
+                                     get_visibility ());
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }
@@ -327,8 +329,9 @@ namespace SwayNotificationCenter {
             list_box.add (noti);
             scroll_to_start (list_reverse);
             try {
-                cc_daemon.subscribe (
-                    notification_count (), cc_daemon.get_dnd ());
+                cc_daemon.subscribe (notification_count (),
+                                     cc_daemon.get_dnd (),
+                                     get_visibility ());
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }

@@ -55,6 +55,9 @@ private void on_subscribe_waybar (uint count, bool dnd, bool cc_open) {
     if (cc_open) state += " cc-open";
 
     string tooltip = "";
+    if (count > 0) {
+        tooltip = @"$(count) Notification" + (count > 1 ? "s" : "");
+    }
 
     print ("{\"text\": \"\", \"alt\": \"%s\", \"tooltip\": \"%s\", \"class\": \"%s\"}\n",
            state, tooltip, state);

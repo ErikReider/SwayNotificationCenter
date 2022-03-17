@@ -50,6 +50,16 @@ private void on_subscribe (uint count, bool dnd, bool cc_open) {
         @"{ \"count\": $(count), \"dnd\": $(dnd), \"visible\": $(cc_open) }\n".data);
 }
 
+private void print_subscribe () {
+    try {
+        on_subscribe (cc_daemon.notification_count (),
+                      cc_daemon.get_dnd (),
+                      cc_daemon.get_visibility ());
+    } catch (Error e) {
+        on_subscribe (0, false, false);
+    }
+}
+
 private void on_subscribe_waybar (uint count, bool dnd, bool cc_open) {
     string state = (dnd ? "dnd-" : "") + (count > 0 ? "notification" : "none");
     if (cc_open) state += " cc-open";
@@ -61,6 +71,16 @@ private void on_subscribe_waybar (uint count, bool dnd, bool cc_open) {
 
     print ("{\"text\": \"\", \"alt\": \"%s\", \"tooltip\": \"%s\", \"class\": \"%s\"}\n",
            state, tooltip, state);
+}
+
+private void print_subscribe_waybar () {
+    try {
+        on_subscribe_waybar (cc_daemon.notification_count (),
+                             cc_daemon.get_dnd (),
+                             cc_daemon.get_visibility ());
+    } catch (Error e) {
+        on_subscribe_waybar (0, false, false);
+    }
 }
 
 public int command_line (string[] args) {
@@ -124,15 +144,24 @@ public int command_line (string[] args) {
                               cc_daemon.get_dnd (),
                               cc_daemon.get_visibility ());
                 var loop = new MainLoop ();
+                Bus.watch_name (
+                    BusType.SESSION,
+                    "org.erikreider.swaync.cc",
+                    GLib.BusNameWatcherFlags.NONE,
+                    print_subscribe,
+                    print_subscribe);
                 loop.run ();
                 break;
             case "--subscribe-waybar":
             case "-swb":
                 cc_daemon.subscribe.connect (on_subscribe_waybar);
-                on_subscribe_waybar (cc_daemon.notification_count (),
-                                     cc_daemon.get_dnd (),
-                                     cc_daemon.get_visibility ());
                 var loop = new MainLoop ();
+                Bus.watch_name (
+                    BusType.SESSION,
+                    "org.erikreider.swaync.cc",
+                    GLib.BusNameWatcherFlags.NONE,
+                    print_subscribe_waybar,
+                    print_subscribe_waybar);
                 loop.run ();
                 break;
             default:

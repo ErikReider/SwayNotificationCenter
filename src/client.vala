@@ -57,13 +57,15 @@ private void on_subscribe_waybar (uint count, bool dnd, bool cc_open) {
     if (count > 0) {
         tooltip = @"$(count) Notification" + (count > 1 ? "s" : "");
     }
-    print ("{\"text\": \"\", \"alt\": \"%s\", \"tooltip\": \"%s\", \"class\": ",state, tooltip);
+
+    string _class = @"\"$(state)\"";
     if (cc_open) {
-        print("[\"%s\", \"cc-open\"]", state);
-    } else {
-        print("\"%s\"", state);
+        _class = @"[$(_class), \"cc-open\"]";
     }
-    print("}\n");
+
+    print (
+        "{\"text\": \"\", \"alt\": \"%s\", \"tooltip\": \"%s\", \"class\": %s}\n",
+        state, tooltip, _class);
 }
 
 public int command_line (string[] args) {

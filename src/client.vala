@@ -62,15 +62,20 @@ private void print_subscribe () {
 
 private void on_subscribe_waybar (uint count, bool dnd, bool cc_open) {
     string state = (dnd ? "dnd-" : "") + (count > 0 ? "notification" : "none");
-    if (cc_open) state += " cc-open";
 
     string tooltip = "";
     if (count > 0) {
         tooltip = @"$(count) Notification" + (count > 1 ? "s" : "");
     }
 
-    print ("{\"text\": \"\", \"alt\": \"%s\", \"tooltip\": \"%s\", \"class\": \"%s\"}\n",
-           state, tooltip, state);
+    string _class = @"\"$(state)\"";
+    if (cc_open) {
+        _class = @"[$(_class), \"cc-open\"]";
+    }
+
+    print (
+        "{\"text\": \"\", \"alt\": \"%s\", \"tooltip\": \"%s\", \"class\": %s}\n",
+        state, tooltip, _class);
 }
 
 private void print_subscribe_waybar () {

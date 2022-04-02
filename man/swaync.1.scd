@@ -143,4 +143,3 @@ Waybar css file
 	font-family: "NotoSansMono Nerd Font";
 }
 ```
-``

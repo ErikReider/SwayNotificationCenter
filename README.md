@@ -1,6 +1,6 @@
-[![Building](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/building.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/building.yml)
-
 # SwayNotificationCenter
+
+[![Building](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/building.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/building.yml)
 
 A simple notification daemon with a GTK gui for notifications and the control center
 
@@ -35,7 +35,7 @@ The package is available on the AUR:
 Fedora:
 An **unofficial** build is available in copr:
 
-``` zsh
+```zsh
 dnf copr enable lexa/SwayNotificationCenter
 dnf install SwayNotificationCenter
 ```
@@ -43,7 +43,7 @@ dnf install SwayNotificationCenter
 Gentoo:
 An **unofficial** ebuild is available in [GURU](https://github.com/gentoo/guru)
 
-``` zsh
+```zsh
 eselect repository enable guru
 emaint sync -r guru
 emerge --ask gui-apps/swaync
@@ -109,38 +109,24 @@ To reload css after changes
 
 The main config file is located in `/etc/xdg/swaync/config.json`. Copy it over
 to your `.config/swaync/` folder to customize without needing root access.
+See `swaync(1)` man page for more information
 
 To reload the config, you'll need to run `swaync-client --reload-config`
 
-- `positionX`: `left`, `right` or `center`
-- `positionY`: `top` or `bottom`
-- `timeout`: uint (Any positive number). The notification timeout for notifications with normal priority
-- `timeout-low`: uint (any positive number without decimals). The notification timeout for notifications with low priority
-- `timeout-critical`: uint (any positive number without decimals, 0 to disable). The notification timeout for notifications with critical priority
-- `keyboard-shortcuts`: `true` or `false`. If control center should use keyboard shortcuts
-- `image-visibility`: `always`, `when-available` or `never`. Notification image visiblilty
-- `transition-time`: uint (Any positive number, 0 to disable). The notification animation duration
-- `notification-window-width`: uint (Any positive number). Width of the notification in pixels
-- `hide-on-clear`: bool. Hides the control center after pressing "Clear All"
-- `hide-on-action`: bool. Hides the control center when clicking on notification action
-- `control-center-margin-top`: uint (Any positive number, 0 to disable). The margin (in pixels) at the top of the notification center
-- `control-center-margin-bottom`: uint (Any positive number, 0 to disable). The margin (in pixels) at the bottom of the notification center
-- `control-center-margin-right`: uint (Any positive number, 0 to disable). The margin (in pixels) at the right of the notification center
-- `control-center-margin-left`: uint (Any positive number, 0 to disable). The margin (in pixels) at the left of the notification center
-- `script-fail-notify`: bool. Sends a notification with error message if a script fails
-
-The main CSS style file is located in `/etc/xdg/swaync/style.css`. Copy it over to your `.config/swaync/` folder to customize without needing root access.
+The main CSS style file is located in `/etc/xdg/swaync/style.css`. Copy it over to your `~/.config/swaync/` folder to customize without needing root access.
 
 ## Scripting
 
 Scripting rules and logic:
 
-- <b>Only one</b> script can be fired per notification
-- Each script requires `exec` and at least one of the other properties
-- All listed properties must match the notification for the script to be ran
-- If any of the propeties doesn't match, the script will be skipped
-- If a notification doesn't include one of the properties, that property will
+. <b>Only one</b> script can be fired per notification
+. Each script requires `exec` and at least one of the other properties
+. All listed properties must match the notification for the script to be ran
+. If any of the propeties doesn't match, the script will be skipped
+. If a notification doesn't include one of the properties, that property will
 be skipped
+
+More information can be found in the `swaync(5)` man page
 
 Notification information can be printed into a terminal by running
 `G_MESSAGES_DEBUG=all swaync` (when a notification appears).

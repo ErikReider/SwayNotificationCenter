@@ -468,17 +468,19 @@ namespace SwayNotificationCenter {
                                              Value value,
                                              ParamSpec pspec) {
             var node = new Json.Node (Json.NodeType.VALUE);
+            if (value.type ().is_a (Type.ENUM)) {
+                EnumClass enumc = (EnumClass) pspec.value_type.class_ref ();
+                EnumValue ? eval
+                    = enumc.get_value (value.get_enum ());
+                if (eval == null) {
+                    node.set_value (value);
+                    return node;
+                }
+                node.set_string (eval.value_nick);
+                return node;
+            }
+            // All other properties that can't be serialized
             switch (property_name) {
-                case "positionX":
-                    node.set_string (((PositionX) value.get_enum ()).parse ());
-                    break;
-                case "positionY":
-                    node.set_string (((PositionY) value.get_enum ()).parse ());
-                    break;
-                case "image-visibility":
-                    var val = ((ImageVisibility) value.get_enum ()).parse ();
-                    node.set_string (val);
-                    break;
                 case "categories-settings":
                     node = new Json.Node (Json.NodeType.OBJECT);
                     var table = (HashTable<string, Category>) value.get_boxed ();

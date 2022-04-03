@@ -87,6 +87,59 @@ config file to be able to detect config errors
 	default: true ++
 	description: Hides the control center when clicking on notification action
 
+*notification-visibility* ++
+	type: object ++
+	visibility object properties: ++
+		*state*++
+			type: string ++
+			optional: false ++
+			default: enabled ++
+			values: ignored, muted, enabled ++
+			description: The notification visibility state. ++
+		*app-name*++
+			type: string ++
+			optional: true ++
+			description: The app-name. Uses Regex.++
+		*summary*++
+			type: string ++
+			optional: true ++
+			description: The summary of the notification. Uses Regex.++
+		*body*++
+			type: string ++
+			optional: true ++
+			description: The body of the notification. Uses Regex.++
+		*urgency*++
+			type: string ++
+			optional: true ++
+			default: Normal ++
+			values: Low, Normal, Critical ++
+			description: The urgency of the notification.++
+		*category*++
+			type: string ++
+			optional: true ++
+			description: Which category the notification belongs to. Uses Regex.++
+	description: Set the visibility of each incoming notification. ++
+		If the notification doesn't include one of the properites, that ++
+		property will be ignored. All properties (except for state) use ++
+		regex. If all properties match the given notification, the ++
+		notification will be follow the provided state. ++
+		Only the first matching object will be used. ++
+	example:
+```
+{
+	"notification-visibility": {
+		"example-name": {
+			"state": "The notification state",
+			"app-name": "Notification app-name Regex",
+			"summary": "Notification summary Regex",
+			"body": "Notification body Regex",
+			"urgency": "Low or Normal or Critical",
+			"category": "Notification category Regex"
+		}
+	}
+}
+```
+
 # IF BUILT WITH SCRIPTING
 
 *script-fail-notify* ++

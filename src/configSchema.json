@@ -132,6 +132,51 @@
           }
         }
       }
+    },
+    "notification-visibility": {
+      "type": "object",
+      "description": "Set the visibility of each incoming notification. If the notification doesn't include one of the properites, that property will be ignored. All properties (except for state) use regex. If all properties match the given notification, the notification will be follow the provided state. Only the first matching object will be used.",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "patternProperties": {
+        "^.{1,}$": {
+          "type": "object",
+          "description": "Your script object.",
+          "required": ["state"],
+          "minProperties": 2,
+          "additionalProperties": false,
+          "properties": {
+            "state": {
+              "type": "string",
+              "description": "The notification visibility state.",
+              "default": "enabled",
+              "enum": ["ignored", "muted", "enabled"]
+            },
+            "app-name": {
+              "type": "string",
+              "description": "The app-name. Uses Regex."
+            },
+            "summary": {
+              "type": "string",
+              "description": "The summary of the notification. Uses Regex."
+            },
+            "body": {
+              "type": "string",
+              "description": "The body of the notification. Uses Regex."
+            },
+            "urgency": {
+              "type": "string",
+              "description": "The urgency of the notification.",
+              "default": "Normal",
+              "enum": ["Low", "Normal", "Critical"]
+            },
+            "category": {
+              "type": "string",
+              "description": "Which category the notification belongs to. Uses Regex."
+            }
+          }
+        }
+      }
     }
   }
 }

@@ -54,60 +54,14 @@ namespace SwayNotificationCenter {
         }
     }
 
-#if WANT_SCRIPTING
-    public class Script : Object {
-        public string ? exec { get; set; default = null; }
-
+    public class NotificationMatching : Object, Json.Serializable {
         public string ? app_name { get; set; default = null; }
         public string ? summary { get; set; default = null; }
         public string ? body { get; set; default = null; }
         public string ? urgency { get; set; default = null; }
         public string ? category { get; set; default = null; }
 
-        public async bool run_script (NotifyParams param, out string msg) {
-            msg = "";
-            try {
-                string[] spawn_env = Environ.get ();
-                // Export env variables
-                spawn_env += @"SWAYNC_APP_NAME=" + param.app_name;
-                spawn_env += @"SWAYNC_SUMMARY=" + param.summary;
-                spawn_env += @"SWAYNC_BODY=" + param.body;
-                spawn_env += @"SWAYNC_URGENCY=" + param.urgency.to_string ();
-                spawn_env += @"SWAYNC_CATEGORY=" + param.category;
-                spawn_env += @"SWAYNC_ID=" + param.applied_id.to_string ();
-                spawn_env += @"SWAYNC_REPLACES_ID=" + param.replaces_id.to_string ();
-                spawn_env += @"SWAYNC_TIME=" + param.time.to_string ();
-                spawn_env += @"SWAYNC_DESKTOP_ENTRY=" + param.desktop_entry ?? "";
-
-                Pid child_pid;
-                Process.spawn_async (
-                    "/",
-                    exec.split (" "),
-                    spawn_env,
-                    SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD,
-                    null,
-                    out child_pid);
-
-                // Close the child when the spawned process is idling
-                int end_status = 0;
-                ChildWatch.add (child_pid, (pid, status) => {
-                    Process.close_pid (pid);
-                    end_status = status;
-                    run_script.callback ();
-                });
-                // Waits until `run_script.callback()` is called above
-                yield;
-                return end_status == 0;
-            } catch (Error e) {
-                stderr.printf ("Run_Script Error: %s\n", e.message);
-                msg = e.message;
-                return false;
-            }
-        }
-
-        public bool matches_notification (NotifyParams param) {
-            if (exec == null) return false;
-
+        public virtual bool matches_notification (NotifyParams param) {
             if (app_name != null) {
                 if (param.app_name == null) return false;
                 bool result = Regex.match_simple (
@@ -158,6 +112,108 @@ namespace SwayNotificationCenter {
             if (urgency != null) fields += @"urgency: $urgency";
             if (category != null) fields += @"category: $category";
             return string.joinv (", ", fields);
+        }
+
+        public override Json.Node serialize_property (string property_name,
+                                                      Value value,
+                                                      ParamSpec pspec) {
+            // Return enum nickname instead of enum int value
+            if (value.type ().is_a (Type.ENUM)) {
+                var node = new Json.Node (Json.NodeType.VALUE);
+                EnumClass enumc = (EnumClass) value.type ().class_ref ();
+                unowned EnumValue ? eval
+                    = enumc.get_value (value.get_enum ());
+                if (eval == null) {
+                    node.set_value (value);
+                    return node;
+                }
+                node.set_string (eval.value_nick);
+                return node;
+            }
+            return default_serialize_property (property_name, value, pspec);
+        }
+    }
+
+    public enum NotificationStatusEnum {
+        ENABLED,
+        MUTED,
+        IGNORED;
+
+        public string to_string () {
+            switch (this) {
+                default :
+                    return "enabled";
+                case MUTED:
+                    return "muted";
+                case IGNORED:
+                    return "ignored";
+            }
+        }
+
+        public static NotificationStatusEnum from_value (string value) {
+            switch (value) {
+                default:
+                    return ENABLED;
+                case "muted":
+                    return MUTED;
+                case "ignored":
+                    return IGNORED;
+            }
+        }
+    }
+
+    public class NotificationVisibility : NotificationMatching {
+        public NotificationStatusEnum state { get; set; }
+    }
+
+#if WANT_SCRIPTING
+    public class Script : NotificationMatching {
+        public string ? exec { get; set; default = null; }
+
+        public async bool run_script (NotifyParams param, out string msg) {
+            msg = "";
+            try {
+                string[] spawn_env = Environ.get ();
+                // Export env variables
+                spawn_env += @"SWAYNC_APP_NAME=" + param.app_name;
+                spawn_env += @"SWAYNC_SUMMARY=" + param.summary;
+                spawn_env += @"SWAYNC_BODY=" + param.body;
+                spawn_env += @"SWAYNC_URGENCY=" + param.urgency.to_string ();
+                spawn_env += @"SWAYNC_CATEGORY=" + param.category;
+                spawn_env += @"SWAYNC_ID=" + param.applied_id.to_string ();
+                spawn_env += @"SWAYNC_REPLACES_ID=" + param.replaces_id.to_string ();
+                spawn_env += @"SWAYNC_TIME=" + param.time.to_string ();
+                spawn_env += @"SWAYNC_DESKTOP_ENTRY=" + param.desktop_entry ?? "";
+
+                Pid child_pid;
+                Process.spawn_async (
+                    "/",
+                    exec.split (" "),
+                    spawn_env,
+                    SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD,
+                    null,
+                    out child_pid);
+
+                // Close the child when the spawned process is idling
+                int end_status = 0;
+                ChildWatch.add (child_pid, (pid, status) => {
+                    Process.close_pid (pid);
+                    end_status = status;
+                    run_script.callback ();
+                });
+                // Waits until `run_script.callback()` is called above
+                yield;
+                return end_status == 0;
+            } catch (Error e) {
+                stderr.printf ("Run_Script Error: %s\n", e.message);
+                msg = e.message;
+                return false;
+            }
+        }
+
+        public override bool matches_notification (NotifyParams param) {
+            if (exec == null) return false;
+            return base.matches_notification (param);
         }
     }
 #endif
@@ -339,6 +395,13 @@ namespace SwayNotificationCenter {
             default = new HashTable<string, Category>(str_hash, str_equal);
         }
 
+        /** Notification Status */
+        public HashTable<string, NotificationVisibility> notification_visibility {
+            get;
+            set;
+            default = new HashTable<string, NotificationVisibility>(str_hash, str_equal);
+        }
+
 #if WANT_SCRIPTING
         /** Scripts */
         public HashTable<string, Script> scripts {
@@ -366,6 +429,15 @@ namespace SwayNotificationCenter {
                     bool status;
                     HashTable<string, Category> result =
                         extract_hashtable<Category>(
+                            property_name,
+                            property_node,
+                            out status);
+                    value = result;
+                    return status;
+                case "notification-visibility":
+                    bool status;
+                    HashTable<string, NotificationVisibility> result =
+                        extract_hashtable<NotificationVisibility>(
                             property_name,
                             property_node,
                             out status);
@@ -411,6 +483,11 @@ namespace SwayNotificationCenter {
                     node = new Json.Node (Json.NodeType.OBJECT);
                     var table = (HashTable<string, Category>) value.get_boxed ();
                     node.set_object (serialize_hashtable<Category>(table));
+                    break;
+                case "notification-visibility":
+                    node = new Json.Node (Json.NodeType.OBJECT);
+                    var table = (HashTable<string, NotificationVisibility>) value.get_boxed ();
+                    node.set_object (serialize_hashtable<NotificationVisibility>(table));
                     break;
 #if WANT_SCRIPTING
                 case "scripts":
@@ -485,10 +562,36 @@ namespace SwayNotificationCenter {
                         if (object == null) break;
 
                         // Creates a new GLib.Object with all of the properties of T
-                        Object obj = Object.new (typeof (T));
+                        Type type = typeof (T);
+                        ObjectClass ocl = (ObjectClass) type.class_ref ();
+                        Object obj = Object.new (type);
                         foreach (var name in object.get_members ()) {
                             Value value = object.get_member (name).get_value ();
-                            obj.set_property (name, value);
+
+                            unowned ParamSpec value_spec = null;
+                            foreach (var spec in ocl.list_properties ()) {
+                                if (spec.name == name) {
+                                    value_spec = spec;
+                                    break;
+                                }
+                            }
+                            if (value_spec == null) continue;
+
+                            unowned Type spec_type = value_spec.value_type;
+                            unowned Type val_type = value.type ();
+                            if (spec_type.is_a (val_type)) {
+                                // Both are the same type
+                                obj.set_property (name, value);
+                            } else if (spec_type.is_a (Type.ENUM)
+                                       && val_type.is_a (Type.STRING)) {
+                                // Set enum from string
+                                EnumClass enumc = (EnumClass) spec_type.class_ref ();
+                                EnumValue ? eval
+                                    = enumc.get_value_by_nick (value.get_string ());
+                                if (eval != null) {
+                                    obj.set_property (name, eval.value);
+                                }
+                            }
                         }
 
                         tmp_table.insert (key, (T) obj);
@@ -511,7 +614,7 @@ namespace SwayNotificationCenter {
 
                 Type generic_type = Functions.get_base_type (typeof (T));
                 switch (generic_type) {
-                    case Type.STRING :
+                    case Type.STRING:
                         string ? casted = (string) item;
                         if (casted != null) {
                             json_object.set_string_member (key, casted);

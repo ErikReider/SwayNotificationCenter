@@ -21,5 +21,12 @@
       "exec": "echo 'Do something...'",
       "urgency": "Normal"
     }
+  },
+  "notification-visibility": {
+    "example-name": {
+      "state": "muted",
+      "urgency": "Low",
+      "app-name": "Spotify"
+    }
   }
 }

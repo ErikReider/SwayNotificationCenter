@@ -7,7 +7,7 @@ _pkgfoldername=SwayNotificationCenter
 url="https://github.com/ErikReider/$_pkgfoldername"
 arch=(x86_64)
 license=(GPL)
-depends=("gtk3>=3.22" "gtk-layer-shell>=0.1" "dbus" "glib2>=2.50" "gobject-introspection>=1.68" "libgee>=0.20" "json-glib>=1.0" "libhandy>=1.4.0")
+depends=("gtk3>=3.22" "gtk-layer-shell>=0.1" "dbus" "glib2>=2.50" "gobject-introspection>=1.68" "libgee>=0.20" "json-glib>=1.0" "libhandy>=1.4.0" "scdoc>=1.9.2")
 conflicts=("swaync" "swaync-client")
 provides=("swaync" "swaync-client")
 makedepends=(vala meson git)

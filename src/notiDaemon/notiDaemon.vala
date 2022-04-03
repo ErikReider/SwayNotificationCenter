@@ -141,6 +141,16 @@ namespace SwayNotificationCenter {
                 hints,
                 expire_timeout);
 
+            // The notification visibility state
+            NotificationStatusEnum state = NotificationStatusEnum.ENABLED;
+            var visibilities = ConfigModel.instance.notification_visibility;
+            foreach (string key in visibilities.get_keys ()) {
+                unowned NotificationVisibility vis = visibilities[key];
+                if (!vis.matches_notification (param)) continue;
+                state = vis.state;
+                break;
+            }
+
             debug ("Notification: %s\n", param.to_string ());
 
             // Replace notification logic
@@ -163,13 +173,18 @@ namespace SwayNotificationCenter {
                 synchronous_ids.set (param.synchronous, id);
             }
 
-            if (!ccDaemon.controlCenter.get_visibility ()) {
+            // Only show popup notification if it is ENABLED
+            if (state == NotificationStatusEnum.ENABLED
+                && !ccDaemon.controlCenter.get_visibility ()) {
                 if (param.urgency == UrgencyLevels.CRITICAL ||
                     (!dnd && param.urgency != UrgencyLevels.CRITICAL)) {
                     notiWindow.add_notification (param, this);
                 }
             }
-            ccDaemon.controlCenter.add_notification (param, this);
+            // Only add notification to CC if it isn't IGNORED
+            if (state != NotificationStatusEnum.IGNORED) {
+                ccDaemon.controlCenter.add_notification (param, this);
+            }
 
 #if WANT_SCRIPTING
             if (param.swaync_no_script) {

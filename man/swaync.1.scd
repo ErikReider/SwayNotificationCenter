@@ -42,6 +42,10 @@ swaync - A simple notification daemon with a GTK gui for notifications and the c
 
 *Buttons 1-9*: Execute alternative actions
 
+*Left click button / actions*: Activate notification action
+
+*Right click notification*: Close notification
+
 # CONFIGURATION
 
 The main config file is located in */etc/xdg/swaync/config.json*. Copy it over

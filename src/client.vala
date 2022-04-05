@@ -11,13 +11,15 @@ interface CcDaemon : GLib.Object {
 
     public abstract bool get_dnd () throws DBusError, IOError;
 
+    public abstract bool get_visibility () throws DBusError, IOError;
+
     public abstract void toggle_visibility () throws DBusError, IOError;
 
     public abstract bool toggle_dnd () throws DBusError, IOError;
 
     public abstract void set_visibility (bool value) throws DBusError, IOError;
 
-    public signal void subscribe (uint count, bool dnd);
+    public signal void subscribe (uint count, bool dnd, bool cc_open);
 }
 
 private CcDaemon cc_daemon = null;
@@ -43,15 +45,47 @@ private void print_help (string[] args) {
     print (@"\t -swb, \t --subscribe-waybar \t Subscribe to notificaion add and close events with waybar support. Read README for example\n");
 }
 
-private void on_subscribe (uint count, bool dnd) {
-    stdout.write (@"{ \"count\": $(count), \"dnd\": $(dnd) }".data);
-    print ("\n");
+private void on_subscribe (uint count, bool dnd, bool cc_open) {
+    stdout.write (
+        @"{ \"count\": $(count), \"dnd\": $(dnd), \"visible\": $(cc_open) }\n".data);
 }
 
-private void on_subscribe_waybar (uint count, bool dnd) {
+private void print_subscribe () {
+    try {
+        on_subscribe (cc_daemon.notification_count (),
+                      cc_daemon.get_dnd (),
+                      cc_daemon.get_visibility ());
+    } catch (Error e) {
+        on_subscribe (0, false, false);
+    }
+}
+
+private void on_subscribe_waybar (uint count, bool dnd, bool cc_open) {
     string state = (dnd ? "dnd-" : "") + (count > 0 ? "notification" : "none");
-    print ("{\"text\": \"\", \"alt\": \"%s\", \"tooltip\": \"\", \"class\": \"%s\"}\n",
-           state, state);
+
+    string tooltip = "";
+    if (count > 0) {
+        tooltip = @"$(count) Notification" + (count > 1 ? "s" : "");
+    }
+
+    string _class = @"\"$(state)\"";
+    if (cc_open) {
+        _class = @"[$(_class), \"cc-open\"]";
+    }
+
+    print (
+        "{\"text\": \"\", \"alt\": \"%s\", \"tooltip\": \"%s\", \"class\": %s}\n",
+        state, tooltip, _class);
+}
+
+private void print_subscribe_waybar () {
+    try {
+        on_subscribe_waybar (cc_daemon.notification_count (),
+                             cc_daemon.get_dnd (),
+                             cc_daemon.get_visibility ());
+    } catch (Error e) {
+        on_subscribe_waybar (0, false, false);
+    }
 }
 
 public int command_line (string[] args) {
@@ -112,16 +146,27 @@ public int command_line (string[] args) {
             case "-s":
                 cc_daemon.subscribe.connect (on_subscribe);
                 on_subscribe (cc_daemon.notification_count (),
-                              cc_daemon.get_dnd ());
+                              cc_daemon.get_dnd (),
+                              cc_daemon.get_visibility ());
                 var loop = new MainLoop ();
+                Bus.watch_name (
+                    BusType.SESSION,
+                    "org.erikreider.swaync.cc",
+                    GLib.BusNameWatcherFlags.NONE,
+                    print_subscribe,
+                    print_subscribe);
                 loop.run ();
                 break;
             case "--subscribe-waybar":
             case "-swb":
                 cc_daemon.subscribe.connect (on_subscribe_waybar);
-                on_subscribe_waybar (cc_daemon.notification_count (),
-                                     cc_daemon.get_dnd ());
                 var loop = new MainLoop ();
+                Bus.watch_name (
+                    BusType.SESSION,
+                    "org.erikreider.swaync.cc",
+                    GLib.BusNameWatcherFlags.NONE,
+                    print_subscribe_waybar,
+                    print_subscribe_waybar);
                 loop.run ();
                 break;
             default:

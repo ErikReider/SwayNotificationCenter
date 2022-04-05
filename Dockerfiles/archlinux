@@ -3,4 +3,4 @@
 FROM archlinux:latest
 
 RUN pacman-key --init
-RUN pacman -Sy --noconfirm meson gtk3 gobject-introspection vala json-glib libhandy gtk-layer-shell
+RUN pacman -Sy --noconfirm meson gtk3 gobject-introspection vala json-glib libhandy gtk-layer-shell scdoc

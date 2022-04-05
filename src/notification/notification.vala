@@ -49,7 +49,7 @@ namespace SwayNotificationCenter {
         private int transition_time;
         private uint timeout_critical_delay;
 
-        private int carpusel_empty_widget_index = 0;
+        private int carousel_empty_widget_index = 0;
 
         public Notification (NotifyParams param,
                              NotiDaemon notiDaemon) {
@@ -67,9 +67,6 @@ namespace SwayNotificationCenter {
             this.timeout_delay = timeout;
             this.timeout_low_delay = timeout_low;
             this.timeout_critical_delay = timeout_critical;
-#if HAVE_LATEST_LIBHANDY
-            this.carousel.allow_scroll_wheel = false;
-#endif
             build_noti (param, notiDaemon);
             add_noti_timeout ();
         }
@@ -81,6 +78,13 @@ namespace SwayNotificationCenter {
             this.param = param;
 
             this.summary.set_text (param.summary ?? param.app_name);
+
+            this.button_press_event.connect ((event) => {
+                if (event.button != Gdk.BUTTON_SECONDARY) return false;
+                // Right click
+                this.close_notification ();
+                return true;
+            });
 
             default_button.clicked.connect (click_default_action);
 
@@ -108,16 +112,16 @@ namespace SwayNotificationCenter {
             switch (ConfigModel.instance.positionX) {
                 case PositionX.LEFT:
                     this.carousel.reorder (event_box, 0);
-                    this.carpusel_empty_widget_index = 1;
+                    this.carousel_empty_widget_index = 1;
                     break;
                 case PositionX.RIGHT:
                 case PositionX.CENTER:
                     this.carousel.scroll_to (event_box);
-                    this.carpusel_empty_widget_index = 0;
+                    this.carousel_empty_widget_index = 0;
                     break;
             }
             this.carousel.page_changed.connect ((_, i) => {
-                if (i != this.carpusel_empty_widget_index) return;
+                if (i != this.carousel_empty_widget_index) return;
                 remove_noti_timeout ();
                 try {
                     notiDaemon.manually_close_notification (
@@ -127,6 +131,9 @@ namespace SwayNotificationCenter {
                     this.destroy ();
                 }
             });
+#if HAVE_LATEST_LIBHANDY
+            this.carousel.allow_scroll_wheel = false;
+#endif
 
             if (this.progress_bar.visible = !(param.value == null)) {
                 this.progress_bar.set_fraction (param.value * 0.01);
@@ -135,6 +142,7 @@ namespace SwayNotificationCenter {
             set_body ();
             set_icon ();
             set_actions ();
+            set_style_urgency ();
 
             this.show ();
 
@@ -242,10 +250,25 @@ namespace SwayNotificationCenter {
             if (!param.resident) close_notification ();
         }
 
+        private void set_style_urgency () {
+            switch (param.urgency) {
+                case UrgencyLevels.LOW :
+                    base_box.get_style_context ().add_class ("low");
+                    break;
+                case UrgencyLevels.NORMAL :
+                default:
+                    base_box.get_style_context ().add_class ("normal");
+                    break;
+                case UrgencyLevels.CRITICAL:
+                    base_box.get_style_context ().add_class ("critical");
+                    break;
+            }
+        }
+
         private void set_actions () {
             if (param.actions.length > 0) {
-                var scroll = new Gtk.ScrolledWindow (null, null);
                 var viewport = new Gtk.Viewport (null, null);
+                var scroll = new Gtk.ScrolledWindow (null, null);
                 alt_actions_box = new Gtk.ButtonBox (Gtk.Orientation.HORIZONTAL);
                 alt_actions_box.set_homogeneous (true);
                 alt_actions_box.set_layout (Gtk.ButtonBoxStyle.EXPAND);
@@ -371,8 +394,8 @@ namespace SwayNotificationCenter {
                 case UrgencyLevels.LOW :
                     timeout = timeout_low_delay * 1000;
                     break;
-                case UrgencyLevels.NORMAL :
-                default :
+                case UrgencyLevels.NORMAL:
+                default:
                     timeout = timeout_delay * 1000;
                     break;
                 case UrgencyLevels.CRITICAL:

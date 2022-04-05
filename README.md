@@ -36,29 +36,26 @@ Fedora:
 An **unofficial** build is available in copr:
 
 ```zsh
-```zsh
 dnf copr enable lexa/SwayNotificationCenter
 dnf install SwayNotificationCenter
-``````
+```
 
 Gentoo:
 An **unofficial** ebuild is available in [GURU](https://github.com/gentoo/guru)
 
-``` zsh
 ```zsh
 eselect repository enable guru
 emaint sync -r guru
 emerge --ask gui-apps/swaync
-``````
+```
 
 Other:
 
 ```zsh
-```zsh
 meson build
 ninja -C build
 meson install -C build
-``````
+```
 
 ## Sway Usage
 

@@ -79,6 +79,13 @@ namespace SwayNotificationCenter {
 
             this.summary.set_text (param.summary ?? param.app_name);
 
+            this.button_press_event.connect ((event) => {
+                if (event.button != Gdk.BUTTON_SECONDARY) return false;
+                // Right click
+                this.close_notification ();
+                return true;
+            });
+
             default_button.clicked.connect (click_default_action);
 
             close_revealer.set_transition_duration (this.transition_time);

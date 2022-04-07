@@ -44,15 +44,19 @@ namespace SwayNotificationCenter {
         public bool closed = false;
 
         public NotificationWindow () {
-            if (!GtkLayerShell.is_supported ()) {
-                stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
-                stderr.printf ("Swaync only works on Wayland!\n");
-                stderr.printf ("If running waylans session, try running:\n");
-                stderr.printf ("\tGDK_BACKEND=wayland swaync\n");
-                Process.exit (1);
+            var type = is_wayland ? Gtk.WindowType.TOPLEVEL : Gtk.WindowType.POPUP;
+            Object (type: type);
+
+            if (is_wayland) {
+                GtkLayerShell.init_for_window (this);
+            } else {
+                // Set transparent window
+                var screen = Gdk.Screen.get_default ();
+                var visual = screen.get_rgba_visual ();
+                if (visual != null && screen.is_composited ()) {
+                    this.set_visual (visual);
+                }
             }
-            GtkLayerShell.init_for_window (this);
-            GtkLayerShell.set_layer (this, GtkLayerShell.Layer.OVERLAY);
             this.set_anchor ();
             viewport.size_allocate.connect (size_alloc);
 
@@ -60,6 +64,15 @@ namespace SwayNotificationCenter {
         }
 
         private void set_anchor () {
+            if (is_wayland) {
+                layer_shell_ ();
+            } else {
+                x11_ ();
+            }
+        }
+
+        private void layer_shell_ () {
+            GtkLayerShell.set_layer (this, GtkLayerShell.Layer.OVERLAY);
             switch (ConfigModel.instance.positionX) {
                 case PositionX.LEFT:
                     GtkLayerShell.set_anchor (
@@ -96,6 +109,33 @@ namespace SwayNotificationCenter {
                         this, GtkLayerShell.Edge.TOP, true);
                     break;
             }
+        }
+
+        private void x11_ () {
+            if (!this.get_realized ()) return;
+            var display = Gdk.Display.get_default ();
+            var primary_monitor = display.get_primary_monitor ();
+            var work_area = primary_monitor.get_workarea ();
+            Gdk.Window win = this.get_window ();
+
+            int x = work_area.x;
+            int y = work_area.y;
+
+            switch (ConfigModel.instance.positionX) {
+                case PositionX.LEFT:
+                    break;
+                case PositionX.CENTER:
+                    x += (work_area.width - this.get_allocated_width ()) / 2;
+                    break;
+                case PositionX.RIGHT:
+                default:
+                    x += work_area.width - this.get_allocated_width ();
+                    break;
+            }
+
+            win.move (x, y);
+            win.stick ();
+            win.set_keep_above (true);
         }
 
         private void size_alloc () {
@@ -157,6 +197,7 @@ namespace SwayNotificationCenter {
             }
             this.grab_focus ();
             this.show ();
+            this.set_anchor ();
             scroll_to_start (list_reverse);
         }
 

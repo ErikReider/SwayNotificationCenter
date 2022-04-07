@@ -4,15 +4,13 @@
   <requires lib="gtk+" version="3.24"/>
   <template class="SwayNotificationCenterNotificationWindow" parent="GtkApplicationWindow">
     <property name="can-focus">False</property>
-    <property name="role">NotificationWindow</property>
+    <property name="role">SwayncNotificaion</property>
     <property name="resizable">False</property>
     <property name="type-hint">notification</property>
     <property name="skip-taskbar-hint">True</property>
     <property name="skip-pager-hint">True</property>
-    <property name="urgency-hint">True</property>
     <property name="decorated">False</property>
     <property name="deletable">False</property>
-    <property name="gravity">north-east</property>
     <property name="show-menubar">False</property>
     <child>
       <object class="GtkScrolledWindow" id="scrolled_window">

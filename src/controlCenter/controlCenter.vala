@@ -201,9 +201,9 @@ namespace SwayNotificationCenter {
                 var b = (Notification) w2;
                 if (a == null || b == null) return 0;
                 // Sort the list in reverse if needed
-                int val1 = list_reverse ? 1 : -1;
-                int val2 = list_reverse ? -1 : 1;
-                return a.param.time > b.param.time ? val1 : val2;
+                if (a.param.time == b.param.time) return 0;
+                int val = list_reverse ? 1 : -1;
+                return a.param.time > b.param.time ? val : val * -1;
             });
         }
 

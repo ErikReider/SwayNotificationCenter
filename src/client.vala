@@ -5,6 +5,8 @@ interface CcDaemon : GLib.Object {
 
     public abstract void reload_config () throws Error;
 
+    public abstract void hide_latest_notifications (bool close) throws DBusError, IOError;
+
     public abstract void close_all_notifications () throws DBusError, IOError;
 
     public abstract uint notification_count () throws DBusError, IOError;
@@ -39,6 +41,8 @@ private void print_help (string[] args) {
     print (@"\t -d, \t --toggle-dnd \t\t Toggle and print the current dnd state\n");
     print (@"\t -D, \t --get-dnd \t\t Print the current dnd state\n");
     print (@"\t -c, \t --count \t\t Print the current notificaion count\n");
+    print (@"\t     \t --hide-latest \t\t Hides latest notification. Still shown in Control Center\n");
+    print (@"\t     \t --close-latest \t Closes latest notification\n");
     print (@"\t -C, \t --close-all \t\t Closes all notifications\n");
     print (@"\t -sw, \t --skip-wait \t\t Doesn't wait when swaync hasn't been started\n");
     print (@"\t -s, \t --subscribe \t\t Subscribe to notificaion add and close events\n");
@@ -117,6 +121,12 @@ public int command_line (string[] args) {
             case "--count":
             case "-c":
                 print (cc_daemon.notification_count ().to_string ());
+                break;
+            case "--close-latest":
+                cc_daemon.hide_latest_notifications (true);
+                break;
+            case "--hide-latest":
+                cc_daemon.hide_latest_notifications (false);
                 break;
             case "--close-all":
             case "-C":

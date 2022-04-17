@@ -78,6 +78,14 @@ namespace SwayNotificationCenter {
             ccDaemon.controlCenter.close_all_notifications ();
         }
 
+        /** Closes latest popup notification */
+        public void hide_latest_notification (bool close)
+        throws DBusError, IOError {
+            uint32 ? id = notiWindow.get_latest_notification ();
+            if (id == null) return;
+            manually_close_notification (id, !close);
+        }
+
         /*
          * D-Bus Specification
          * https://specifications.freedesktop.org/notification-spec/latest/ar01s09.html

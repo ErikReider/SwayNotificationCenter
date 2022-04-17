@@ -27,6 +27,11 @@ namespace SwayNotificationCenter {
         public void close_notification (uint32 id) {
             notificationWindow.close_notification (id);
         }
+
+        public uint32 ? get_latest_notification () {
+            if (!notis.get_realized () || notis.closed) return null;
+            return notificationWindow.get_latest_notification ();
+        }
     }
 
     [GtkTemplate (ui = "/org/erikreider/sway-notification-center/notiWindow/notiWindow.ui")]
@@ -168,6 +173,22 @@ namespace SwayNotificationCenter {
                     break;
                 }
             }
+        }
+
+        public uint32 ? get_latest_notification () {
+            List<weak Gtk.Widget> children = box.get_children ();
+            if (children.is_empty ()) return null;
+
+            Gtk.Widget ? child = null;
+            if (list_reverse) {
+                child = children.last ().data;
+            } else {
+                child = children.first ().data;
+            }
+
+            if (child == null || !(child is Notification)) return null;
+            Notification noti = (Notification) child;
+            return noti.param.applied_id;
         }
     }
 }

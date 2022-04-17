@@ -30,6 +30,8 @@ _swaync-client() {
         --toggle-dnd
         --get-dnd
         --count
+        --hide-latest
+        --close-latest
         --close-all
         --skip-wait
         --subscribe

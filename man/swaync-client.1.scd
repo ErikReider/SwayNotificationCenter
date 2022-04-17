@@ -40,6 +40,12 @@ swaync-client - Client executable
 *-c, --count*
 	Print the current notificaion count
 
+*--hide-latest*
+	Hides latest notification. Still shown in Control Center
+
+*--close-latest*
+	Closes latest notification
+
 *-C, --close-all*
 	Closes all notifications
 

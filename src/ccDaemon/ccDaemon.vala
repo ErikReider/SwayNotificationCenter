@@ -70,6 +70,12 @@ namespace SwayNotificationCenter {
             return controlCenter.get_visibility ();
         }
 
+        /** Closes latest popup notification */
+        public void hide_latest_notifications (bool close)
+        throws DBusError, IOError {
+            notiDaemon.hide_latest_notification (close);
+        }
+
         /** Closes all popup and controlcenter notifications */
         public void close_all_notifications () throws DBusError, IOError {
             notiDaemon.close_all_notifications ();

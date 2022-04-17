@@ -11,7 +11,7 @@
       "type": "string",
       "description": "Horizontal position of control center and notification window",
       "default": "right",
-      "enum": ["right", "left"]
+      "enum": ["right", "left", "center"]
     },
     "positionY": {
       "type": "string",
@@ -58,6 +58,23 @@
       "type": "integer",
       "description": "Width of the notification in pixels",
       "default": 500
+    },
+    "fit-to-screen": {
+      "type": "boolean",
+      "description": "If the control center should expand to both edges of the screen",
+      "default": true
+    },
+    "control-center-height": {
+      "type": "integer",
+      "description": "Height of the control center in pixels. Ignored when 'fit-to-screen' is set to 'true'",
+      "default": 600,
+      "minimum": 300
+    },
+    "control-center-width": {
+      "type": "integer",
+      "description": "Width of the control center in pixels",
+      "default": 500,
+      "minimum": 300
     },
     "keyboard-shortcuts": {
       "type": "boolean",

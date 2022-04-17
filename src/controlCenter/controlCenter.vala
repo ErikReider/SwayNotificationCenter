@@ -36,6 +36,7 @@ namespace SwayNotificationCenter {
             this.set_anchor ();
 
             viewport.size_allocate.connect (size_alloc);
+            this.map.connect (set_anchor);
 
             // Only use release for closing notifications due to Escape key
             // sometimes being passed through to unfucused application
@@ -147,39 +148,37 @@ namespace SwayNotificationCenter {
 #endif
             GtkLayerShell.set_layer (this, GtkLayerShell.Layer.TOP);
 
-            GtkLayerShell.set_margin (this, GtkLayerShell.Edge.TOP, ConfigModel.instance.control_center_margin_top);
-            GtkLayerShell.set_margin (this, GtkLayerShell.Edge.BOTTOM, ConfigModel.instance.control_center_margin_bottom);
-            GtkLayerShell.set_margin (this, GtkLayerShell.Edge.RIGHT, ConfigModel.instance.control_center_margin_right);
-            GtkLayerShell.set_margin (this, GtkLayerShell.Edge.LEFT, ConfigModel.instance.control_center_margin_left);
+            GtkLayerShell.set_margin (this,
+                                      GtkLayerShell.Edge.TOP,
+                                      ConfigModel.instance.control_center_margin_top);
+            GtkLayerShell.set_margin (this,
+                                      GtkLayerShell.Edge.BOTTOM,
+                                      ConfigModel.instance.control_center_margin_bottom);
+            GtkLayerShell.set_margin (this,
+                                      GtkLayerShell.Edge.RIGHT,
+                                      ConfigModel.instance.control_center_margin_right);
+            GtkLayerShell.set_margin (this,
+                                      GtkLayerShell.Edge.LEFT,
+                                      ConfigModel.instance.control_center_margin_left);
 
-            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
-            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
-            switch (ConfigModel.instance.positionX) {
-                case PositionX.LEFT:
-                    GtkLayerShell.set_anchor (this,
-                                              GtkLayerShell.Edge.RIGHT,
-                                              false);
-                    GtkLayerShell.set_anchor (this,
-                                              GtkLayerShell.Edge.LEFT,
-                                              true);
-                    break;
-                case PositionX.CENTER:
-                    GtkLayerShell.set_anchor (this,
-                                              GtkLayerShell.Edge.RIGHT,
-                                              false);
-                    GtkLayerShell.set_anchor (this,
-                                              GtkLayerShell.Edge.LEFT,
-                                              false);
-                    break;
-                default:
-                    GtkLayerShell.set_anchor (this,
-                                              GtkLayerShell.Edge.LEFT,
-                                              false);
-                    GtkLayerShell.set_anchor (this,
-                                              GtkLayerShell.Edge.RIGHT,
-                                              true);
-                    break;
-            }
+            // Anchor to north/south edges as needed
+            bool anchorTop = ConfigModel.instance.positionY == PositionY.TOP;
+            GtkLayerShell.set_anchor (this,
+                                      GtkLayerShell.Edge.TOP,
+                                      ConfigModel.instance.fit_to_screen || anchorTop);
+            GtkLayerShell.set_anchor (this,
+                                      GtkLayerShell.Edge.BOTTOM,
+                                      ConfigModel.instance.fit_to_screen || !anchorTop);
+
+            bool anchorLeft = ConfigModel.instance.positionX == PositionX.LEFT;
+            bool anchorRight = ConfigModel.instance.positionX == PositionX.RIGHT;
+            GtkLayerShell.set_anchor (this,
+                                      GtkLayerShell.Edge.RIGHT,
+                                      anchorRight);
+            GtkLayerShell.set_anchor (this,
+                                      GtkLayerShell.Edge.LEFT,
+                                      anchorLeft);
+
             switch (ConfigModel.instance.positionY) {
                 case PositionY.BOTTOM:
                     list_reverse = true;
@@ -205,6 +204,11 @@ namespace SwayNotificationCenter {
                 int val = list_reverse ? 1 : -1;
                 return a.param.time > b.param.time ? val : val * -1;
             });
+
+            // Always set the size request in all events.
+            int configuredWidth = ConfigModel.instance.control_center_width;
+            int configuredHeight = ConfigModel.instance.control_center_height;
+            this.set_size_request (configuredWidth, configuredHeight);
         }
 
         private void size_alloc () {

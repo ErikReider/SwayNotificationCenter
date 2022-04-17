@@ -413,6 +413,38 @@ namespace SwayNotificationCenter {
         public bool script_fail_notify { get; set; default = true; }
 #endif
 
+        /** Whether to expand the notification center across both edges of the screen */
+        public bool fit_to_screen { get; set; default = true; }
+
+        /**
+         * Notification center's height, in pixels.
+         * Set `fit_to_screen` to true to ignore the height setting.
+         */
+        private const int control_center_minimum_height = 300;
+        private int _control_center_height = control_center_minimum_height;
+        public int control_center_height {
+            get {
+                return _control_center_height;
+            }
+            set {
+                _control_center_height = value > control_center_minimum_height ? value : control_center_minimum_height;
+            }
+        }
+
+        /**
+         * Notification center's width, in pixels.
+         */
+        private const int control_center_minimum_width = 300;
+        private int _control_center_width = control_center_minimum_width;
+        public int control_center_width {
+            get {
+                return _control_center_width;
+            }
+            set {
+                _control_center_width = value > control_center_minimum_width ? value : control_center_minimum_width;
+            }
+        }
+
         /* Methods */
 
         /**

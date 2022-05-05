@@ -20,8 +20,8 @@ namespace SwayNotificationCenter {
         }
 
         public void add_notification (NotifyParams param,
-                                      NotiDaemon notiDaemon) {
-            notificationWindow.add_notification (param, notiDaemon);
+                                      NotiDaemon noti_daemon) {
+            notificationWindow.add_notification (param, noti_daemon);
         }
 
         public void close_notification (uint32 id) {
@@ -65,7 +65,7 @@ namespace SwayNotificationCenter {
         }
 
         private void set_anchor () {
-            switch (ConfigModel.instance.positionX) {
+            switch (ConfigModel.instance.position_x) {
                 case PositionX.LEFT:
                     GtkLayerShell.set_anchor (
                         this, GtkLayerShell.Edge.RIGHT, false);
@@ -85,7 +85,7 @@ namespace SwayNotificationCenter {
                         this, GtkLayerShell.Edge.RIGHT, true);
                     break;
             }
-            switch (ConfigModel.instance.positionY) {
+            switch (ConfigModel.instance.position_y) {
                 case PositionY.BOTTOM:
                     GtkLayerShell.set_anchor (
                         this, GtkLayerShell.Edge.TOP, false);
@@ -148,9 +148,9 @@ namespace SwayNotificationCenter {
         }
 
         public void add_notification (NotifyParams param,
-                                      NotiDaemon notiDaemon) {
+                                      NotiDaemon noti_daemon) {
             var noti = new Notification.timed (param,
-                                               notiDaemon,
+                                               noti_daemon,
                                                ConfigModel.instance.timeout,
                                                ConfigModel.instance.timeout_low,
                                                ConfigModel.instance.timeout_critical);

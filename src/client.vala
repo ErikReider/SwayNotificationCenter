@@ -27,26 +27,27 @@ interface CcDaemon : GLib.Object {
 private CcDaemon cc_daemon = null;
 
 private void print_help (string[] args) {
-    print (@"Usage:\n");
-    print (@"\t $(args[0]) <OPTION>\n");
-    print (@"Help:\n");
-    print (@"\t -h, \t --help \t\t Show help options\n");
-    print (@"\t -v, \t --version \t\t Prints version\n");
-    print (@"Options:\n");
-    print (@"\t -R, \t --reload-config \t Reload the config file\n");
-    print (@"\t -rs, \t --reload-css \t\t Reload the css file. Location change requires restart\n");
-    print (@"\t -t, \t --toggle-panel \t Toggle the notificaion panel\n");
-    print (@"\t -op, \t --open-panel \t\t Opens the notificaion panel\n");
-    print (@"\t -cp, \t --close-panel \t\t Closes the notificaion panel\n");
-    print (@"\t -d, \t --toggle-dnd \t\t Toggle and print the current dnd state\n");
-    print (@"\t -D, \t --get-dnd \t\t Print the current dnd state\n");
-    print (@"\t -c, \t --count \t\t Print the current notificaion count\n");
-    print (@"\t     \t --hide-latest \t\t Hides latest notification. Still shown in Control Center\n");
-    print (@"\t     \t --close-latest \t Closes latest notification\n");
-    print (@"\t -C, \t --close-all \t\t Closes all notifications\n");
-    print (@"\t -sw, \t --skip-wait \t\t Doesn't wait when swaync hasn't been started\n");
-    print (@"\t -s, \t --subscribe \t\t Subscribe to notificaion add and close events\n");
-    print (@"\t -swb, \t --subscribe-waybar \t Subscribe to notificaion add and close events with waybar support. Read README for example\n");
+    print ("Usage:\n");
+    print ("\t %s <OPTION>\n".printf (args[0]));
+    print ("Help:\n");
+    print ("\t -h, \t --help \t\t Show help options\n");
+    print ("\t -v, \t --version \t\t Prints version\n");
+    print ("Options:\n");
+    print ("\t -R, \t --reload-config \t Reload the config file\n");
+    print ("\t -rs, \t --reload-css \t\t Reload the css file. Location change requires restart\n");
+    print ("\t -t, \t --toggle-panel \t Toggle the notificaion panel\n");
+    print ("\t -op, \t --open-panel \t\t Opens the notificaion panel\n");
+    print ("\t -cp, \t --close-panel \t\t Closes the notificaion panel\n");
+    print ("\t -d, \t --toggle-dnd \t\t Toggle and print the current dnd state\n");
+    print ("\t -D, \t --get-dnd \t\t Print the current dnd state\n");
+    print ("\t -c, \t --count \t\t Print the current notificaion count\n");
+    print ("\t     \t --hide-latest \t\t Hides latest notification. Still shown in Control Center\n");
+    print ("\t     \t --close-latest \t Closes latest notification\n");
+    print ("\t -C, \t --close-all \t\t Closes all notifications\n");
+    print ("\t -sw, \t --skip-wait \t\t Doesn't wait when swaync hasn't been started\n");
+    print ("\t -s, \t --subscribe \t\t Subscribe to notificaion add and close events\n");
+    print ("\t -swb, \t --subscribe-waybar \t Subscribe to notificaion add and close events "
+           + "with waybar support. Read README for example\n");
 }
 
 private void on_subscribe (uint count, bool dnd, bool cc_open) {
@@ -107,7 +108,7 @@ public int command_line (string[] args) {
                 break;
             case "--version":
             case "-v":
-                stdout.printf ("%s\n", Constants.version);
+                stdout.printf ("%s\n", Constants.VERSION);
                 break;
             case "--reload-config":
             case "-R":

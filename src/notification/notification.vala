@@ -43,7 +43,7 @@ namespace SwayNotificationCenter {
 
         public bool is_timed = false;
         public NotifyParams param;
-        private NotiDaemon notiDaemon;
+        private NotiDaemon noti_daemon;
         private uint timeout_delay;
         private uint timeout_low_delay;
         private int transition_time;
@@ -66,14 +66,14 @@ namespace SwayNotificationCenter {
         }
 
         public Notification (NotifyParams param,
-                             NotiDaemon notiDaemon) {
-            build_noti (param, notiDaemon);
+                             NotiDaemon noti_daemon) {
+            build_noti (param, noti_daemon);
             this.body.set_lines (10);
         }
 
         // Called to show a temp notification
         public Notification.timed (NotifyParams param,
-                                   NotiDaemon notiDaemon,
+                                   NotiDaemon noti_daemon,
                                    uint timeout,
                                    uint timeout_low,
                                    uint timeout_critical) {
@@ -81,14 +81,14 @@ namespace SwayNotificationCenter {
             this.timeout_delay = timeout;
             this.timeout_low_delay = timeout_low;
             this.timeout_critical_delay = timeout_critical;
-            build_noti (param, notiDaemon);
+            build_noti (param, noti_daemon);
             add_noti_timeout ();
         }
 
-        private void build_noti (NotifyParams param, NotiDaemon notiDaemon) {
+        private void build_noti (NotifyParams param, NotiDaemon noti_daemon) {
             this.transition_time = ConfigModel.instance.transition_time;
 
-            this.notiDaemon = notiDaemon;
+            this.noti_daemon = noti_daemon;
             this.param = param;
 
             this.summary.set_text (param.summary ?? param.app_name);
@@ -123,7 +123,7 @@ namespace SwayNotificationCenter {
 
             this.carousel.set_animation_duration (this.transition_time);
             // Changes the swipte direction depending on the notifications X position
-            switch (ConfigModel.instance.positionX) {
+            switch (ConfigModel.instance.position_x) {
                 case PositionX.LEFT:
                     this.carousel.reorder (event_box, 0);
                     this.carousel_empty_widget_index = 1;
@@ -138,7 +138,7 @@ namespace SwayNotificationCenter {
                 if (i != this.carousel_empty_widget_index) return;
                 remove_noti_timeout ();
                 try {
-                    notiDaemon.manually_close_notification (
+                    noti_daemon.manually_close_notification (
                         param.applied_id, false);
                 } catch (Error e) {
                     print ("Error: %s\n", e.message);
@@ -272,10 +272,10 @@ namespace SwayNotificationCenter {
 
         private void action_clicked (Action action, bool is_default = false) {
             if (action._identifier != null && action._identifier != "") {
-                notiDaemon.ActionInvoked (param.applied_id, action._identifier);
+                noti_daemon.ActionInvoked (param.applied_id, action._identifier);
                 if (ConfigModel.instance.hide_on_action) {
                     try {
-                        this.notiDaemon.ccDaemon.set_visibility (false);
+                        this.noti_daemon.cc_daemon.set_visibility (false);
                     } catch (Error e) {
                         print ("Error: %s\n", e.message);
                     }
@@ -307,12 +307,12 @@ namespace SwayNotificationCenter {
                 alt_actions_box.set_homogeneous (true);
                 alt_actions_box.set_layout (Gtk.ButtonBoxStyle.EXPAND);
                 foreach (var action in param.actions) {
-                    var actionButton = new Gtk.Button.with_label (action._name);
-                    actionButton.clicked.connect (() => action_clicked (action));
-                    actionButton
+                    var action_button = new Gtk.Button.with_label (action._name);
+                    action_button.clicked.connect (() => action_clicked (action));
+                    action_button
                      .get_style_context ().add_class ("notification-action");
-                    actionButton.set_can_focus (false);
-                    alt_actions_box.add (actionButton);
+                    action_button.set_can_focus (false);
+                    alt_actions_box.add (action_button);
                 }
                 viewport.add (alt_actions_box);
                 scroll.add (viewport);
@@ -361,7 +361,7 @@ namespace SwayNotificationCenter {
             this.revealer.set_reveal_child (false);
             Timeout.add (this.transition_time, () => {
                 try {
-                    notiDaemon.manually_close_notification (param.applied_id,
+                    noti_daemon.manually_close_notification (param.applied_id,
                                                             is_timeout);
                 } catch (Error e) {
                     print ("Error: %s\n", e.message);

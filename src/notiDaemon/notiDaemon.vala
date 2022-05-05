@@ -106,7 +106,6 @@ namespace SwayNotificationCenter {
                        "body",
                        "body-markup",
                        "body-images",
-                       "body-hyperlinks",
                        "persistence",
                        "synchronous",
                        "private-synchronous",

@@ -51,13 +51,13 @@ namespace SwayNotificationCenter {
 
         private int carousel_empty_widget_index = 0;
 
-        private Regex tag_regex;
-        private Regex tag_replace_regex;
-        private const string[] tags = { "b", "u", "i" };
+        private static Regex tag_regex;
+        private static Regex tag_replace_regex;
+        private const string[] TAGS = { "b", "u", "i" };
 
         construct {
             try {
-                string joined_tags = string.joinv ("|", tags);
+                string joined_tags = string.joinv ("|", TAGS);
                 tag_regex = new Regex (@"&lt;/?($joined_tags)&gt;");
                 tag_replace_regex = new Regex ("&lt;/?|&gt;");
             } catch (Error e) {
@@ -198,12 +198,12 @@ namespace SwayNotificationCenter {
                         var img = img_paths[0];
                         var file = File.new_for_path (img);
                         if (img.length > 0 && file.query_exists ()) {
-                            const int max_width = 200;
-                            const int max_height = 100;
+                            const int MAX_WIDTH = 200;
+                            const int MAX_HEIGHT = 100;
                             var buf = new Gdk.Pixbuf.from_file_at_scale (
                                 file.get_path (),
-                                max_width,
-                                max_height,
+                                MAX_WIDTH,
+                                MAX_HEIGHT,
                                 true);
                             this.body_image.set_from_pixbuf (buf);
                             this.body_image.show ();
@@ -216,19 +216,21 @@ namespace SwayNotificationCenter {
 
             // Markup
             try {
-                // Escapes text just incase it's not escaped yet
+                // Escapes all characters
                 string escaped = Markup.escape_text (text);
-                // Replace all valid tags brackets with <,</,>
+                // Replace all valid tags brackets with <,</,> so that the
+                // markup parser only parses valid tags
                 escaped = tag_regex.replace_eval (escaped,
                                                   escaped.length,
                                                   0,
                                                   RegexMatchFlags.NOTEMPTY,
                                                   this.regex_tag_eval_cb);
 
-                // Turns it back to markdown, defaults to escaped if not valid
+                // Turns it back to markdown, defaults to original if not valid
                 Pango.AttrList ? attr = null;
                 string ? buf = null;
                 Pango.parse_markup (escaped, -1, 0, out attr, out buf, null);
+
                 this.body.set_text (buf);
                 if (attr != null) this.body.set_attributes (attr);
             } catch (Error e) {
@@ -240,15 +242,17 @@ namespace SwayNotificationCenter {
         }
 
         /**
-         *
+         * Replaces "&gt;" and "&lt;" with their character counterpart if the
+         * tag is valid.
          */
         private bool regex_tag_eval_cb (MatchInfo match_info,
                                         StringBuilder result) {
             try {
-                string match = match_info.fetch (0);
-                var res = tag_replace_regex.replace (match, match.length, 0, "");
-                if (!(res in tags)) return false;
-                result.append (match.replace ("&lt;", "<").replace ("&gt;", ">"));
+                string tag = match_info.fetch (0);
+                // Removes the tag backets: </b> -> b
+                var res = tag_replace_regex.replace (tag, tag.length, 0, "");
+                if (!(res in TAGS)) return false;
+                result.append (tag.replace ("&lt;", "<").replace ("&gt;", ">"));
             } catch (Error e) {
                 stderr.printf ("Regex eval error: %s\n", e.message);
             }

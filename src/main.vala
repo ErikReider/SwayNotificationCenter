@@ -1,5 +1,5 @@
 namespace SwayNotificationCenter {
-    static NotiDaemon notiDaemon;
+    static NotiDaemon noti_daemon;
     static string ? style_path;
     static string ? config_path;
 
@@ -21,7 +21,7 @@ namespace SwayNotificationCenter {
                         break;
                     case "-v":
                     case "--version":
-                        stdout.printf ("%s\n", Constants.version);
+                        stdout.printf ("%s\n", Constants.VERSION);
                         return;
                     case "-h":
                     case "--help":
@@ -48,7 +48,7 @@ namespace SwayNotificationCenter {
 
         ConfigModel.init (config_path);
 
-        notiDaemon = new NotiDaemon ();
+        noti_daemon = new NotiDaemon ();
 
         Gtk.main ();
     }
@@ -56,7 +56,7 @@ namespace SwayNotificationCenter {
     void on_noti_bus_aquired (DBusConnection conn) {
         try {
             conn.register_object (
-                "/org/freedesktop/Notifications", notiDaemon);
+                "/org/freedesktop/Notifications", noti_daemon);
         } catch (IOError e) {
             stderr.printf ("Could not register notification service\n");
             Process.exit (1);
@@ -64,13 +64,13 @@ namespace SwayNotificationCenter {
     }
 
     private void print_help (string[] args) {
-        print (@"Usage:\n");
-        print (@"\t $(args[0]) <OPTION>\n");
-        print (@"Help:\n");
-        print (@"\t -h, --help \t\t Show help options\n");
-        print (@"\t -v, --version \t\t Prints version\n");
-        print (@"Options:\n");
-        print (@"\t -s, --style \t\t Use a custom Stylesheet file\n");
-        print (@"\t -c, --config \t\t Use a custom config file\n");
+        print ("Usage:\n");
+        print ("\t %s <OPTION>\n".printf (args[0]));
+        print ("Help:\n");
+        print ("\t -h, --help \t\t Show help options\n");
+        print ("\t -v, --version \t\t Prints version\n");
+        print ("Options:\n");
+        print ("\t -s, --style \t\t Use a custom Stylesheet file\n");
+        print ("\t -c, --config \t\t Use a custom config file\n");
     }
 }

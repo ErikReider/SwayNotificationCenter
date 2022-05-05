@@ -271,55 +271,55 @@ namespace SwayNotificationCenter {
         /* Properties */
 
         /** The notifications and controlcenters horizontal alignment */
-        public PositionX positionX { get; set; default = PositionX.RIGHT; }
+        public PositionX position_x { get; set; default = PositionX.RIGHT; }
         /** The notifications and controlcenters vertical alignment */
-        public PositionY positionY { get; set; default = PositionY.TOP; }
+        public PositionY position_y { get; set; default = PositionY.TOP; }
 
         /** The timeout for notifications with NORMAL priority */
-        private const int _timeout_def = 10;
-        private int _timeout = _timeout_def;
+        private const int TIMEOUT_DEFAULT = 10;
+        private int _timeout = TIMEOUT_DEFAULT;
         public int timeout {
             get {
                 return _timeout;
             }
             set {
-                _timeout = value < 1 ? _timeout_def : value;
+                _timeout = value < 1 ? TIMEOUT_DEFAULT : value;
             }
         }
 
         /** The timeout for notifications with LOW priority */
-        private const int _timeout_low_def = 5;
-        private int _timeout_low = _timeout_low_def;
+        private const int TIMEOUT_LOW_DEFAULT = 5;
+        private int _timeout_low = TIMEOUT_LOW_DEFAULT;
         public int timeout_low {
             get {
                 return _timeout_low;
             }
             set {
-                _timeout_low = value < 1 ? _timeout_low_def : value;
+                _timeout_low = value < 1 ? TIMEOUT_LOW_DEFAULT : value;
             }
         }
 
         /** The transition time for all animations */
-        private const int _transition_time_def = 200;
-        private int _transition_time = _transition_time_def;
+        private const int TRANSITION_TIME_DEFAULT = 200;
+        private int _transition_time = TRANSITION_TIME_DEFAULT;
         public int transition_time {
             get {
                 return _transition_time;
             }
             set {
-                _transition_time = value < 0 ? _transition_time_def : value;
+                _transition_time = value < 0 ? TRANSITION_TIME_DEFAULT : value;
             }
         }
 
         /** The timeout for notifications with CRITICAL priority */
-        private const int _timeout_critical_def = 0;
-        private int _timeout_critical = _timeout_critical_def;
+        private const int TIMEOUT_CRITICAL_DEFAULT = 0;
+        private int _timeout_critical = TIMEOUT_CRITICAL_DEFAULT;
         public int timeout_critical {
             get {
                 return _timeout_critical;
             }
             set {
-                _timeout_critical = value < 0 ? _timeout_critical_def : value;
+                _timeout_critical = value < 0 ? TIMEOUT_CRITICAL_DEFAULT : value;
             }
         }
 
@@ -392,14 +392,14 @@ namespace SwayNotificationCenter {
         public HashTable<string, Category> categories_settings {
             get;
             set;
-            default = new HashTable<string, Category>(str_hash, str_equal);
+            default = new HashTable<string, Category> (str_hash, str_equal);
         }
 
         /** Notification Status */
         public HashTable<string, NotificationVisibility> notification_visibility {
             get;
             set;
-            default = new HashTable<string, NotificationVisibility>(str_hash, str_equal);
+            default = new HashTable<string, NotificationVisibility> (str_hash, str_equal);
         }
 
 #if WANT_SCRIPTING
@@ -407,7 +407,7 @@ namespace SwayNotificationCenter {
         public HashTable<string, Script> scripts {
             get;
             set;
-            default = new HashTable<string, Script>(str_hash, str_equal);
+            default = new HashTable<string, Script> (str_hash, str_equal);
         }
         /** Show notification if script fails */
         public bool script_fail_notify { get; set; default = true; }
@@ -420,28 +420,30 @@ namespace SwayNotificationCenter {
          * Notification center's height, in pixels.
          * Set `fit_to_screen` to true to ignore the height setting.
          */
-        private const int control_center_minimum_height = 300;
-        private int _control_center_height = control_center_minimum_height;
+        private const int CONTROL_CENTER_MINIMUM_HEIGHT = 300;
+        private int _control_center_height = CONTROL_CENTER_MINIMUM_HEIGHT;
         public int control_center_height {
             get {
                 return _control_center_height;
             }
             set {
-                _control_center_height = value > control_center_minimum_height ? value : control_center_minimum_height;
+                _control_center_height = value > CONTROL_CENTER_MINIMUM_HEIGHT
+                    ? value : CONTROL_CENTER_MINIMUM_HEIGHT;
             }
         }
 
         /**
          * Notification center's width, in pixels.
          */
-        private const int control_center_minimum_width = 300;
-        private int _control_center_width = control_center_minimum_width;
+        private const int CONTROL_CENTER_MINIMUM_WIDTH = 300;
+        private int _control_center_width = CONTROL_CENTER_MINIMUM_WIDTH;
         public int control_center_width {
             get {
                 return _control_center_width;
             }
             set {
-                _control_center_width = value > control_center_minimum_width ? value : control_center_minimum_width;
+                _control_center_width = value > CONTROL_CENTER_MINIMUM_WIDTH
+                    ? value : CONTROL_CENTER_MINIMUM_WIDTH;
             }
         }
 
@@ -460,7 +462,7 @@ namespace SwayNotificationCenter {
                 case "categories-settings" :
                     bool status;
                     HashTable<string, Category> result =
-                        extract_hashtable<Category>(
+                        extract_hashtable<Category> (
                             property_name,
                             property_node,
                             out status);
@@ -469,7 +471,7 @@ namespace SwayNotificationCenter {
                 case "notification-visibility":
                     bool status;
                     HashTable<string, NotificationVisibility> result =
-                        extract_hashtable<NotificationVisibility>(
+                        extract_hashtable<NotificationVisibility> (
                             property_name,
                             property_node,
                             out status);
@@ -479,7 +481,7 @@ namespace SwayNotificationCenter {
                 case "scripts":
                     bool status;
                     HashTable<string, Script> result =
-                        extract_hashtable<Script>(
+                        extract_hashtable<Script> (
                             property_name,
                             property_node,
                             out status);
@@ -513,21 +515,21 @@ namespace SwayNotificationCenter {
             }
             // All other properties that can't be serialized
             switch (property_name) {
-                case "categories-settings":
+                case "categories-settings" :
                     node = new Json.Node (Json.NodeType.OBJECT);
                     var table = (HashTable<string, Category>) value.get_boxed ();
-                    node.set_object (serialize_hashtable<Category>(table));
+                    node.set_object (serialize_hashtable<Category> (table));
                     break;
                 case "notification-visibility":
                     node = new Json.Node (Json.NodeType.OBJECT);
                     var table = (HashTable<string, NotificationVisibility>) value.get_boxed ();
-                    node.set_object (serialize_hashtable<NotificationVisibility>(table));
+                    node.set_object (serialize_hashtable<NotificationVisibility> (table));
                     break;
 #if WANT_SCRIPTING
                 case "scripts":
                     node = new Json.Node (Json.NodeType.OBJECT);
                     var table = (HashTable<string, Script>) value.get_boxed ();
-                    node.set_object (serialize_hashtable<Script>(table));
+                    node.set_object (serialize_hashtable<Script> (table));
                     break;
 #endif
                 default:
@@ -552,11 +554,11 @@ namespace SwayNotificationCenter {
          * - int64
          * - GLib.Object
          */
-        private HashTable<string, T> extract_hashtable<T>(string property_name,
-                                                          Json.Node node,
-                                                          out bool status) {
+        private HashTable<string, T> extract_hashtable<T> (string property_name,
+                                                           Json.Node node,
+                                                           out bool status) {
             status = false;
-            var tmp_table = new HashTable<string, T>(str_hash, str_equal);
+            var tmp_table = new HashTable<string, T> (str_hash, str_equal);
 
             if (node.get_node_type () != Json.NodeType.OBJECT) {
                 stderr.printf ("Node %s is not a json object!...\n",
@@ -637,7 +639,7 @@ namespace SwayNotificationCenter {
             return tmp_table;
         }
 
-        private Json.Object serialize_hashtable<T>(HashTable<string, T> table) {
+        private Json.Object serialize_hashtable<T> (HashTable<string, T> table) {
             var json_object = new Json.Object ();
 
             if (table == null) return json_object;
@@ -684,11 +686,11 @@ namespace SwayNotificationCenter {
          * - int64
          * - GLib.Object
          */
-        private GenericArray<T> extract_array<T>(string property_name,
-                                                 Json.Node node,
-                                                 out bool status) {
+        private GenericArray<T> extract_array<T> (string property_name,
+                                                  Json.Node node,
+                                                  out bool status) {
             status = false;
-            GenericArray<T> tmp_array = new GenericArray<T>();
+            GenericArray<T> tmp_array = new GenericArray<T> ();
 
             if (node.get_node_type () != Json.NodeType.ARRAY) {
                 stderr.printf ("Node %s is not a json array!...\n",
@@ -739,7 +741,7 @@ namespace SwayNotificationCenter {
             return tmp_array;
         }
 
-        private Json.Array serialize_array<T>(GenericArray<T> array) {
+        private Json.Array serialize_array<T> (GenericArray<T> array) {
             var json_array = new Json.Array ();
 
             if (array == null) return json_array;

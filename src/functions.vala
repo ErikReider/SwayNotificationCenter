@@ -32,7 +32,7 @@ namespace SwayNotificationCenter {
             }
         }
 
-        public static void set_image_data (Image_Data data, Gtk.Image img) {
+        public static void set_image_data (ImageData data, Gtk.Image img) {
             // Rebuild and scale the image
             var pixbuf = new Gdk.Pixbuf.with_unowned_data (data.data,
                                                            Gdk.Colorspace.RGB,

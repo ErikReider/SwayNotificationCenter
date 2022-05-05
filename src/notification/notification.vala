@@ -51,6 +51,20 @@ namespace SwayNotificationCenter {
 
         private int carousel_empty_widget_index = 0;
 
+        private Regex tag_regex;
+        private Regex tag_replace_regex;
+        private const string[] tags = { "b", "u", "i" };
+
+        construct {
+            try {
+                string joined_tags = string.joinv ("|", tags);
+                tag_regex = new Regex (@"&lt;/?($joined_tags)&gt;");
+                tag_replace_regex = new Regex ("&lt;/?|&gt;");
+            } catch (Error e) {
+                stderr.printf ("Invalid regex: %s", e.message);
+            }
+        }
+
         public Notification (NotifyParams param,
                              NotiDaemon notiDaemon) {
             build_noti (param, notiDaemon);
@@ -200,29 +214,45 @@ namespace SwayNotificationCenter {
                 }
             }
 
+            // Markup
             try {
                 // Escapes text just incase it's not escaped yet
-                text = Markup.escape_text (text);
+                string escaped = Markup.escape_text (text);
+                // Replace all valid tags brackets with <,</,>
+                escaped = tag_regex.replace_eval (escaped,
+                                                  escaped.length,
+                                                  0,
+                                                  RegexMatchFlags.NOTEMPTY,
+                                                  this.regex_tag_eval_cb);
 
                 // Turns it back to markdown, defaults to escaped if not valid
                 Pango.AttrList ? attr = null;
                 string ? buf = null;
-                Pango.parse_markup (text, -1, 0, out attr, out buf, null);
-
-                this.body.set_markup (buf);
+                Pango.parse_markup (escaped, -1, 0, out attr, out buf, null);
+                this.body.set_text (buf);
                 if (attr != null) this.body.set_attributes (attr);
-
-                // Something has gone wrong... Use the escaped text instead
-                if (this.body.get_text ().length == 0 && buf.length != 0) {
-                    stderr.printf ("Could for some reason not set markup. Text: %s\n",
-                                   text);
-                    this.body.set_markup (text);
-                }
             } catch (Error e) {
                 stderr.printf ("Could not parse Pango markup %s: %s\n",
                                text, e.message);
-                this.body.set_markup (text);
+                // Sets the original text
+                this.body.set_text (text);
             }
+        }
+
+        /**
+         *
+         */
+        private bool regex_tag_eval_cb (MatchInfo match_info,
+                                        StringBuilder result) {
+            try {
+                string match = match_info.fetch (0);
+                var res = tag_replace_regex.replace (match, match.length, 0, "");
+                if (!(res in tags)) return false;
+                result.append (match.replace ("&lt;", "<").replace ("&gt;", ">"));
+            } catch (Error e) {
+                stderr.printf ("Regex eval error: %s\n", e.message);
+            }
+            return false;
         }
 
         public void click_default_action () {

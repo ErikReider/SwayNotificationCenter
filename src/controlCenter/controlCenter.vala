@@ -162,24 +162,24 @@ namespace SwayNotificationCenter {
                                       ConfigModel.instance.control_center_margin_left);
 
             // Anchor to north/south edges as needed
-            bool anchorTop = ConfigModel.instance.positionY == PositionY.TOP;
+            bool anchor_top = ConfigModel.instance.position_y == PositionY.TOP;
             GtkLayerShell.set_anchor (this,
                                       GtkLayerShell.Edge.TOP,
-                                      ConfigModel.instance.fit_to_screen || anchorTop);
+                                      ConfigModel.instance.fit_to_screen || anchor_top);
             GtkLayerShell.set_anchor (this,
                                       GtkLayerShell.Edge.BOTTOM,
-                                      ConfigModel.instance.fit_to_screen || !anchorTop);
+                                      ConfigModel.instance.fit_to_screen || !anchor_top);
 
-            bool anchorLeft = ConfigModel.instance.positionX == PositionX.LEFT;
-            bool anchorRight = ConfigModel.instance.positionX == PositionX.RIGHT;
+            bool anchor_left = ConfigModel.instance.position_x == PositionX.LEFT;
+            bool anchor_right = ConfigModel.instance.position_x == PositionX.RIGHT;
             GtkLayerShell.set_anchor (this,
                                       GtkLayerShell.Edge.RIGHT,
-                                      anchorRight);
+                                      anchor_right);
             GtkLayerShell.set_anchor (this,
                                       GtkLayerShell.Edge.LEFT,
-                                      anchorLeft);
+                                      anchor_left);
 
-            switch (ConfigModel.instance.positionY) {
+            switch (ConfigModel.instance.position_y) {
                 case PositionY.BOTTOM:
                     list_reverse = true;
                     list_align = Gtk.Align.END;
@@ -206,9 +206,9 @@ namespace SwayNotificationCenter {
             });
 
             // Always set the size request in all events.
-            int configuredWidth = ConfigModel.instance.control_center_width;
-            int configuredHeight = ConfigModel.instance.control_center_height;
-            this.set_size_request (configuredWidth, configuredHeight);
+            int configured_width = ConfigModel.instance.control_center_width;
+            int configured_height = ConfigModel.instance.control_center_height;
+            this.set_size_request (configured_width, configured_height);
         }
 
         private void size_alloc () {
@@ -221,12 +221,11 @@ namespace SwayNotificationCenter {
         }
 
         private void scroll_to_start (bool reverse) {
-            const bool horizontal_scroll = false;
             Gtk.ScrollType scroll_type = Gtk.ScrollType.START;
             if (reverse) {
                 scroll_type = Gtk.ScrollType.END;
             }
-            scrolled_window.scroll_child (scroll_type, horizontal_scroll);
+            scrolled_window.scroll_child (scroll_type, false);
         }
 
         public uint notification_count () {
@@ -321,8 +320,8 @@ namespace SwayNotificationCenter {
         }
 
         public void add_notification (NotifyParams param,
-                                      NotiDaemon notiDaemon) {
-            var noti = new Notification (param, notiDaemon);
+                                      NotiDaemon noti_daemon) {
+            var noti = new Notification (param, noti_daemon);
             noti.grab_focus.connect ((w) => {
                 uint i = list_box.get_children ().index (w);
                 if (list_position != uint.MAX && list_position != i) {

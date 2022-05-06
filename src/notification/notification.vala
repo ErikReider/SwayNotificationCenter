@@ -44,7 +44,7 @@ namespace SwayNotificationCenter {
         private int number_of_body_lines = 10;
         public bool is_timed = false;
         public NotifyParams param;
-        private NotiDaemon notiDaemon;
+        private NotiDaemon noti_daemon;
         private uint timeout_delay;
         private uint timeout_low_delay;
         private int transition_time;
@@ -52,14 +52,29 @@ namespace SwayNotificationCenter {
 
         private int carousel_empty_widget_index = 0;
 
+        private static Regex tag_regex;
+        private static Regex tag_replace_regex;
+        private const string[] TAGS = { "b", "u", "i" };
+
+        construct {
+            try {
+                string joined_tags = string.joinv ("|", TAGS);
+                tag_regex = new Regex (@"&lt;/?($joined_tags)&gt;");
+                tag_replace_regex = new Regex ("&lt;/?|&gt;");
+            } catch (Error e) {
+                stderr.printf ("Invalid regex: %s", e.message);
+            }
+        }
+
         public Notification (NotifyParams param,
-                             NotiDaemon notiDaemon) {
-            build_noti (param, notiDaemon);
+                             NotiDaemon noti_daemon) {
+            build_noti (param, noti_daemon);
+            this.body.set_lines (10);
         }
 
         // Called to show a temp notification
         public Notification.timed (NotifyParams param,
-                                   NotiDaemon notiDaemon,
+                                   NotiDaemon noti_daemon,
                                    uint timeout,
                                    uint timeout_low,
                                    uint timeout_critical) {
@@ -67,9 +82,7 @@ namespace SwayNotificationCenter {
             this.timeout_delay = timeout;
             this.timeout_low_delay = timeout_low;
             this.timeout_critical_delay = timeout_critical;
-            this.number_of_body_lines = 5;
-
-            build_noti (param, notiDaemon);
+            build_noti (param, noti_daemon);
             add_noti_timeout ();
             this.size_allocate.connect (on_size_allocation);
         }
@@ -84,10 +97,10 @@ namespace SwayNotificationCenter {
             }
         }
 
-        private void build_noti (NotifyParams param, NotiDaemon notiDaemon) {
+        private void build_noti (NotifyParams param, NotiDaemon noti_daemon) {
             this.transition_time = ConfigModel.instance.transition_time;
 
-            this.notiDaemon = notiDaemon;
+            this.noti_daemon = noti_daemon;
             this.param = param;
 
             this.body.set_line_wrap (true);
@@ -128,7 +141,7 @@ namespace SwayNotificationCenter {
 
             this.carousel.set_animation_duration (this.transition_time);
             // Changes the swipte direction depending on the notifications X position
-            switch (ConfigModel.instance.positionX) {
+            switch (ConfigModel.instance.position_x) {
                 case PositionX.LEFT:
                     this.carousel.reorder (event_box, 0);
                     this.carousel_empty_widget_index = 1;
@@ -143,7 +156,7 @@ namespace SwayNotificationCenter {
                 if (i != this.carousel_empty_widget_index) return;
                 remove_noti_timeout ();
                 try {
-                    notiDaemon.manually_close_notification (
+                    noti_daemon.manually_close_notification (
                         param.applied_id, false);
                 } catch (Error e) {
                     print ("Error: %s\n", e.message);
@@ -211,12 +224,12 @@ namespace SwayNotificationCenter {
                         var img = img_paths[0];
                         var file = File.new_for_path (img);
                         if (img.length > 0 && file.query_exists ()) {
-                            const int max_width = 200;
-                            const int max_height = 100;
+                            const int MAX_WIDTH = 200;
+                            const int MAX_HEIGHT = 100;
                             var buf = new Gdk.Pixbuf.from_file_at_scale (
                                 file.get_path (),
-                                max_width,
-                                max_height,
+                                MAX_WIDTH,
+                                MAX_HEIGHT,
                                 true);
                             this.body_image.set_from_pixbuf (buf);
                             this.body_image.show ();
@@ -227,29 +240,49 @@ namespace SwayNotificationCenter {
                 }
             }
 
+            // Markup
             try {
-                // Escapes text just incase it's not escaped yet
-                text = Markup.escape_text (text);
+                // Escapes all characters
+                string escaped = Markup.escape_text (text);
+                // Replace all valid tags brackets with <,</,> so that the
+                // markup parser only parses valid tags
+                escaped = tag_regex.replace_eval (escaped,
+                                                  escaped.length,
+                                                  0,
+                                                  RegexMatchFlags.NOTEMPTY,
+                                                  this.regex_tag_eval_cb);
 
-                // Turns it back to markdown, defaults to escaped if not valid
+                // Turns it back to markdown, defaults to original if not valid
                 Pango.AttrList ? attr = null;
                 string ? buf = null;
-                Pango.parse_markup (text, -1, 0, out attr, out buf, null);
+                Pango.parse_markup (escaped, -1, 0, out attr, out buf, null);
 
-                this.body.set_markup (buf);
+                this.body.set_text (buf);
                 if (attr != null) this.body.set_attributes (attr);
-
-                // Something has gone wrong... Use the escaped text instead
-                if (this.body.get_text ().length == 0 && buf.length != 0) {
-                    stderr.printf ("Could for some reason not set markup. Text: %s\n",
-                                   text);
-                    this.body.set_markup (text);
-                }
             } catch (Error e) {
                 stderr.printf ("Could not parse Pango markup %s: %s\n",
                                text, e.message);
-                this.body.set_markup (text);
+                // Sets the original text
+                this.body.set_text (text);
             }
+        }
+
+        /**
+         * Replaces "&gt;" and "&lt;" with their character counterpart if the
+         * tag is valid.
+         */
+        private bool regex_tag_eval_cb (MatchInfo match_info,
+                                        StringBuilder result) {
+            try {
+                string tag = match_info.fetch (0);
+                // Removes the tag backets: </b> -> b
+                var res = tag_replace_regex.replace (tag, tag.length, 0, "");
+                if (!(res in TAGS)) return false;
+                result.append (tag.replace ("&lt;", "<").replace ("&gt;", ">"));
+            } catch (Error e) {
+                stderr.printf ("Regex eval error: %s\n", e.message);
+            }
+            return false;
         }
 
         public void click_default_action () {
@@ -265,10 +298,10 @@ namespace SwayNotificationCenter {
 
         private void action_clicked (Action action, bool is_default = false) {
             if (action._identifier != null && action._identifier != "") {
-                notiDaemon.ActionInvoked (param.applied_id, action._identifier);
+                noti_daemon.ActionInvoked (param.applied_id, action._identifier);
                 if (ConfigModel.instance.hide_on_action) {
                     try {
-                        this.notiDaemon.ccDaemon.set_visibility (false);
+                        this.noti_daemon.cc_daemon.set_visibility (false);
                     } catch (Error e) {
                         print ("Error: %s\n", e.message);
                     }
@@ -300,12 +333,12 @@ namespace SwayNotificationCenter {
                 alt_actions_box.set_homogeneous (true);
                 alt_actions_box.set_layout (Gtk.ButtonBoxStyle.EXPAND);
                 foreach (var action in param.actions) {
-                    var actionButton = new Gtk.Button.with_label (action._name);
-                    actionButton.clicked.connect (() => action_clicked (action));
-                    actionButton
+                    var action_button = new Gtk.Button.with_label (action._name);
+                    action_button.clicked.connect (() => action_clicked (action));
+                    action_button
                      .get_style_context ().add_class ("notification-action");
-                    actionButton.set_can_focus (false);
-                    alt_actions_box.add (actionButton);
+                    action_button.set_can_focus (false);
+                    alt_actions_box.add (action_button);
                 }
                 viewport.add (alt_actions_box);
                 scroll.add (viewport);
@@ -354,7 +387,7 @@ namespace SwayNotificationCenter {
             this.revealer.set_reveal_child (false);
             Timeout.add (this.transition_time, () => {
                 try {
-                    notiDaemon.manually_close_notification (param.applied_id,
+                    noti_daemon.manually_close_notification (param.applied_id,
                                                             is_timeout);
                 } catch (Error e) {
                     print ("Error: %s\n", e.message);

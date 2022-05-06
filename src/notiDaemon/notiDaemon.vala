@@ -4,13 +4,13 @@ namespace SwayNotificationCenter {
         private uint32 noti_id = 0;
         private bool dnd = false;
         private HashTable<string, uint32> synchronous_ids =
-            new HashTable<string, uint32>(str_hash, str_equal);
+            new HashTable<string, uint32> (str_hash, str_equal);
 
-        public CcDaemon ccDaemon;
-        public NotiWindow notiWindow;
+        public CcDaemon cc_daemon;
+        public NotiWindow noti_window;
 
         public NotiDaemon () {
-            this.ccDaemon = new CcDaemon (this);
+            this.cc_daemon = new CcDaemon (this);
             Bus.own_name (BusType.SESSION, "org.erikreider.swaync.cc",
                           BusNameOwnerFlags.NONE,
                           on_cc_bus_aquired,
@@ -21,12 +21,12 @@ namespace SwayNotificationCenter {
                 Process.exit (1);
             });
 
-            this.notiWindow = new NotiWindow ();
+            this.noti_window = new NotiWindow ();
         }
 
         private void on_cc_bus_aquired (DBusConnection conn) {
             try {
-                conn.register_object ("/org/erikreider/swaync/cc", ccDaemon);
+                conn.register_object ("/org/erikreider/swaync/cc", cc_daemon);
             } catch (IOError e) {
                 stderr.printf ("Could not register CC service\n");
                 Process.exit (1);
@@ -39,7 +39,7 @@ namespace SwayNotificationCenter {
          */
         public void set_noti_window_visibility (bool value)
         throws DBusError, IOError {
-            notiWindow.change_visibility (value);
+            noti_window.change_visibility (value);
         }
 
         /** Toggles the current Do Not Disturb state */
@@ -65,23 +65,23 @@ namespace SwayNotificationCenter {
         /** Method to close notification and send DISMISSED signal */
         public void manually_close_notification (uint32 id, bool timeout)
         throws DBusError, IOError {
-            notiWindow.close_notification (id);
+            noti_window.close_notification (id);
             if (!timeout) {
-                ccDaemon.controlCenter.close_notification (id);
+                cc_daemon.control_center.close_notification (id);
                 NotificationClosed (id, ClosedReasons.DISMISSED);
             }
         }
 
         /** Closes all popup and controlcenter notifications */
         public void close_all_notifications () throws DBusError, IOError {
-            notiWindow.close_all_notifications ();
-            ccDaemon.controlCenter.close_all_notifications ();
+            noti_window.close_all_notifications ();
+            cc_daemon.control_center.close_all_notifications ();
         }
 
         /** Closes latest popup notification */
         public void hide_latest_notification (bool close)
         throws DBusError, IOError {
-            uint32 ? id = notiWindow.get_latest_notification ();
+            uint32 ? id = noti_window.get_latest_notification ();
             if (id == null) return;
             manually_close_notification (id, !close);
         }
@@ -100,13 +100,13 @@ namespace SwayNotificationCenter {
          * not contain spaces. They are limited to alpha-numeric characters
          * and dashes ("-").
          */
-        public string[] GetCapabilities () throws DBusError, IOError {
+        [DBus (name = "GetCapabilities")]
+        public string[] get_capabilities () throws DBusError, IOError {
             return {
                        "actions",
                        "body",
                        "body-markup",
                        "body-images",
-                       "body-hyperlinks",
                        "persistence",
                        "synchronous",
                        "private-synchronous",
@@ -127,7 +127,8 @@ namespace SwayNotificationCenter {
          * If replaces_id is not 0, the returned value is the same value
          * as replaces_id.
          */
-        public uint32 Notify (string app_name,
+        [DBus (name = "Notify")]
+        public new uint32 notify (string app_name,
                               uint32 replaces_id,
                               string app_icon,
                               string summary,
@@ -164,8 +165,8 @@ namespace SwayNotificationCenter {
             // Replace notification logic
             if (id == replaces_id) {
                 param.replaces = true;
-                notiWindow.close_notification (id);
-                ccDaemon.controlCenter.close_notification (id, true);
+                noti_window.close_notification (id);
+                cc_daemon.control_center.close_notification (id, true);
             } else if (param.synchronous != null
                        && param.synchronous.length > 0) {
                 // Tries replacing without replaces_id instead
@@ -175,23 +176,23 @@ namespace SwayNotificationCenter {
                         param.synchronous, null, out r_id)) {
                     param.replaces = true;
                     // Close the notification
-                    notiWindow.close_notification (r_id);
-                    ccDaemon.controlCenter.close_notification (r_id, true);
+                    noti_window.close_notification (r_id);
+                    cc_daemon.control_center.close_notification (r_id, true);
                 }
                 synchronous_ids.set (param.synchronous, id);
             }
 
             // Only show popup notification if it is ENABLED
             if (state == NotificationStatusEnum.ENABLED
-                && !ccDaemon.controlCenter.get_visibility ()) {
+                && !cc_daemon.control_center.get_visibility ()) {
                 if (param.urgency == UrgencyLevels.CRITICAL ||
                     (!dnd && param.urgency != UrgencyLevels.CRITICAL)) {
-                    notiWindow.add_notification (param, this);
+                    noti_window.add_notification (param, this);
                 }
             }
             // Only add notification to CC if it isn't IGNORED
             if (state != NotificationStatusEnum.IGNORED) {
-                ccDaemon.controlCenter.add_notification (param, this);
+                cc_daemon.control_center.add_notification (param, this);
             }
 
 #if WANT_SCRIPTING
@@ -218,7 +219,7 @@ namespace SwayNotificationCenter {
                     } else {
                         // Send notification with error message
                         try {
-                            var _hints = new HashTable<string, Variant>(
+                            var _hints = new HashTable<string, Variant> (
                                 str_hash,
                                 str_equal);
                             // Disable scripts for this notification
@@ -228,7 +229,7 @@ namespace SwayNotificationCenter {
 
                             string _summary = @"Failed to run script: $key";
                             string _body = "<b>Output:</b> " + error_msg;
-                            this.Notify ("SwayNotificationCenter",
+                            this.notify ("SwayNotificationCenter",
                                          0,
                                          "dialog-error",
                                          _summary,
@@ -260,9 +261,10 @@ namespace SwayNotificationCenter {
          * If the notification no longer exists, an empty D-BUS Error message
          * is sent back.
          */
-        public void CloseNotification (uint32 id) throws DBusError, IOError {
-            notiWindow.close_notification (id);
-            ccDaemon.controlCenter.close_notification (id);
+        [DBus (name = "CloseNotification")]
+        public void close_notification (uint32 id) throws DBusError, IOError {
+            noti_window.close_notification (id);
+            cc_daemon.control_center.close_notification (id);
             NotificationClosed (id, ClosedReasons.CLOSED_BY_CLOSENOTIFICATION);
         }
 
@@ -270,14 +272,15 @@ namespace SwayNotificationCenter {
          * This message returns the information on the server. Specifically, the
          * server name, vendor, and version number.
          */
-        public void GetServerInformation (out string name,
+        [DBus (name = "GetServerInformation")]
+        public void get_server_information (out string name,
                                           out string vendor,
                                           out string version,
                                           out string spec_version)
         throws DBusError, IOError {
             name = "SwayNotificationCenter";
             vendor = "ErikReider";
-            version = Constants.versionNum;
+            version = Constants.VERSIONNUM;
             spec_version = "1.2";
         }
 

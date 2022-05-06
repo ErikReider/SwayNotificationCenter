@@ -41,7 +41,7 @@ namespace SwayNotificationCenter {
         }
     }
 
-    public struct Image_Data {
+    public struct ImageData {
         int width;
         int height;
         int rowstride;
@@ -77,8 +77,8 @@ namespace SwayNotificationCenter {
 
         // Hints
         public bool action_icons { get; set; }
-        public Image_Data image_data { get; set; }
-        public Image_Data icon_data { get; set; }
+        public ImageData image_data { get; set; }
+        public ImageData icon_data { get; set; }
         public string image_path { get; set; }
         public string desktop_entry { get; set; }
         public string category { get; set; }
@@ -184,7 +184,7 @@ namespace SwayNotificationCenter {
                     case "image_data":
                     case "icon_data":
                         if (image_data.is_initialized) break;
-                        var img_d = Image_Data ();
+                        var img_d = ImageData ();
                         // Read each value
                         // https://specifications.freedesktop.org/notification-spec/latest/ar01s05.html
                         img_d.width = hint_value.get_child_value (0).get_int32 ();
@@ -234,7 +234,7 @@ namespace SwayNotificationCenter {
         }
 
         public string to_string () {
-            var params = new HashTable<string, string ? >(str_hash, str_equal);
+            var params = new HashTable<string, string ? > (str_hash, str_equal);
 
             params.set ("applied_id", applied_id.to_string ());
             params.set ("app_name", app_name);

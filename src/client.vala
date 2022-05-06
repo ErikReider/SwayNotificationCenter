@@ -51,8 +51,9 @@ private void print_help (string[] args) {
 }
 
 private void on_subscribe (uint count, bool dnd, bool cc_open) {
-    stdout.write (
-        @"{ \"count\": $(count), \"dnd\": $(dnd), \"visible\": $(cc_open) }\n".data);
+    stdout.printf (
+        "{ \"count\": %u, \"dnd\": %s, \"visible\": %s }\n"
+         .printf (count, dnd.to_string (), cc_open.to_string ()));
 }
 
 private void print_subscribe () {
@@ -70,12 +71,12 @@ private void on_subscribe_waybar (uint count, bool dnd, bool cc_open) {
 
     string tooltip = "";
     if (count > 0) {
-        tooltip = @"$(count) Notification" + (count > 1 ? "s" : "");
+        tooltip = "%u Notification%s".printf (count, count > 1 ? "s" : "");
     }
 
-    string _class = @"\"$(state)\"";
+    string _class = "\"%s\"".printf (state);
     if (cc_open) {
-        _class = @"[$(_class), \"cc-open\"]";
+        _class = "[%s, \"cc-open\"]".printf (_class);
     }
 
     print (

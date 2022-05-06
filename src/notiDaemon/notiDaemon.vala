@@ -129,13 +129,13 @@ namespace SwayNotificationCenter {
          */
         [DBus (name = "Notify")]
         public new uint32 notify (string app_name,
-                              uint32 replaces_id,
-                              string app_icon,
-                              string summary,
-                              string body,
-                              string[] actions,
-                              HashTable<string, Variant> hints,
-                              int expire_timeout) throws DBusError, IOError {
+                                  uint32 replaces_id,
+                                  string app_icon,
+                                  string summary,
+                                  string body,
+                                  string[] actions,
+                                  HashTable<string, Variant> hints,
+                                  int expire_timeout) throws DBusError, IOError {
             uint32 id = replaces_id;
             if (replaces_id == 0 || replaces_id > noti_id) id = ++noti_id;
 
@@ -227,7 +227,7 @@ namespace SwayNotificationCenter {
                             _hints.insert ("urgency",
                                            UrgencyLevels.CRITICAL.to_byte ());
 
-                            string _summary = @"Failed to run script: $key";
+                            string _summary = "Failed to run script: %s".printf (key);
                             string _body = "<b>Output:</b> " + error_msg;
                             this.notify ("SwayNotificationCenter",
                                          0,
@@ -274,9 +274,9 @@ namespace SwayNotificationCenter {
          */
         [DBus (name = "GetServerInformation")]
         public void get_server_information (out string name,
-                                          out string vendor,
-                                          out string version,
-                                          out string spec_version)
+                                            out string vendor,
+                                            out string version,
+                                            out string spec_version)
         throws DBusError, IOError {
             name = "SwayNotificationCenter";
             vendor = "ErikReider";

@@ -48,8 +48,8 @@ namespace SwayNotificationCenter {
 
         public string to_string () {
             string[] fields = {};
-            if (sound != null) fields += @"sound: $sound";
-            if (icon != null) fields += @"icon: $icon";
+            if (sound != null) fields += "sound: %s".printf (sound);
+            if (icon != null) fields += "icon: %s".printf (icon);
             return string.joinv (", ", fields);
         }
     }
@@ -106,11 +106,11 @@ namespace SwayNotificationCenter {
 
         public string to_string () {
             string[] fields = {};
-            if (app_name != null) fields += @"app-name: $app_name";
-            if (summary != null) fields += @"summary: $summary";
-            if (body != null) fields += @"body: $body";
-            if (urgency != null) fields += @"urgency: $urgency";
-            if (category != null) fields += @"category: $category";
+            if (app_name != null) fields += "app-name: %s".printf (app_name);
+            if (summary != null) fields += "summary: %s".printf (summary);
+            if (body != null) fields += "body: %s".printf (body);
+            if (urgency != null) fields += "urgency: %s".printf (urgency);
+            if (category != null) fields += "category: %s".printf (category);
             return string.joinv (", ", fields);
         }
 
@@ -175,15 +175,15 @@ namespace SwayNotificationCenter {
             try {
                 string[] spawn_env = Environ.get ();
                 // Export env variables
-                spawn_env += @"SWAYNC_APP_NAME=" + param.app_name;
-                spawn_env += @"SWAYNC_SUMMARY=" + param.summary;
-                spawn_env += @"SWAYNC_BODY=" + param.body;
-                spawn_env += @"SWAYNC_URGENCY=" + param.urgency.to_string ();
-                spawn_env += @"SWAYNC_CATEGORY=" + param.category;
-                spawn_env += @"SWAYNC_ID=" + param.applied_id.to_string ();
-                spawn_env += @"SWAYNC_REPLACES_ID=" + param.replaces_id.to_string ();
-                spawn_env += @"SWAYNC_TIME=" + param.time.to_string ();
-                spawn_env += @"SWAYNC_DESKTOP_ENTRY=" + param.desktop_entry ?? "";
+                spawn_env += "SWAYNC_APP_NAME=%s".printf (param.app_name);
+                spawn_env += "SWAYNC_SUMMARY=%s".printf (param.summary);
+                spawn_env += "SWAYNC_BODY=%s".printf (param.body);
+                spawn_env += "SWAYNC_URGENCY=%s".printf (param.urgency.to_string ());
+                spawn_env += "SWAYNC_CATEGORY=%s".printf (param.category);
+                spawn_env += "SWAYNC_ID=%s".printf (param.applied_id.to_string ());
+                spawn_env += "SWAYNC_REPLACES_ID=%s".printf (param.replaces_id.to_string ());
+                spawn_env += "SWAYNC_TIME=%s".printf (param.time.to_string ());
+                spawn_env += "SWAYNC_DESKTOP_ENTRY=%s".printf (param.desktop_entry ?? "");
 
                 Pid child_pid;
                 Process.spawn_async (

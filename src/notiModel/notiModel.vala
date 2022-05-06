@@ -59,7 +59,7 @@ namespace SwayNotificationCenter {
 
         public string to_string () {
             if (identifier == null || name == null) return "None";
-            return @"Name: $name, Id: $identifier";
+            return "Name: %s, Id: %s".printf (name, identifier);
         }
     }
 
@@ -250,7 +250,7 @@ namespace SwayNotificationCenter {
                 if (!key.contains ("image") && !key.contains ("icon")) {
                     data = v.print (true);
                 }
-                _hints += @"\n\t$key: " + data;
+                _hints += "\n\t%s: %s".printf (key, data);
             }
             params.set ("hints", string.joinv ("", _hints));
             params.set ("expire_timeout", expire_timeout.to_string ());
@@ -273,7 +273,7 @@ namespace SwayNotificationCenter {
             string[] result = {};
             foreach (var k in params.get_keys ()) {
                 string ? v = params[k];
-                result += @"$k:\t\t" + v;
+                result += "%s:\t\t %s".printf (k, v);
             }
             return "\n" + string.joinv ("\n", result);
         }

@@ -191,12 +191,6 @@ namespace SwayNotificationCenter {
         private void set_body () {
             string text = param.body ?? "";
 
-            // Clip the text to the number of configured lines
-            string[] text_lines = text.split ("\n");
-            if (text_lines.length > this.number_of_body_lines) {
-                text_lines.resize (this.number_of_body_lines);
-                text = string.joinv ("\n", text_lines) + "...";
-            }
             this.body.set_lines (this.number_of_body_lines);
 
             // Removes all image tags and adds them to an array

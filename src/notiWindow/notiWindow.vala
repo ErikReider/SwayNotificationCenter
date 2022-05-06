@@ -38,6 +38,8 @@ namespace SwayNotificationCenter {
     private class NotificationWindow : Gtk.ApplicationWindow {
 
         [GtkChild]
+        unowned Gtk.ScrolledWindow scrolled_window;
+        [GtkChild]
         unowned Gtk.Viewport viewport;
         [GtkChild]
         unowned Gtk.Box box;
@@ -47,6 +49,8 @@ namespace SwayNotificationCenter {
         private double last_upper = 0;
 
         public bool closed = false;
+
+        private const int MAX_HEIGHT = 600;
 
         public NotificationWindow () {
             if (!GtkLayerShell.is_supported ()) {
@@ -59,6 +63,12 @@ namespace SwayNotificationCenter {
             GtkLayerShell.init_for_window (this);
             GtkLayerShell.set_layer (this, GtkLayerShell.Layer.OVERLAY);
             this.set_anchor ();
+
+            // -1 should set it to the content size unless it exceeds max_height
+            scrolled_window.set_min_content_height (-1);
+            scrolled_window.set_max_content_height (MAX_HEIGHT);
+            scrolled_window.set_propagate_natural_height (true);
+
             viewport.size_allocate.connect (size_alloc);
 
             this.default_width = ConfigModel.instance.notification_window_width;
@@ -162,6 +172,9 @@ namespace SwayNotificationCenter {
             }
             this.grab_focus ();
             this.show ();
+
+            // IMPORTANT: queue a resize event to force the layout to be recomputed
+            noti.queue_resize ();
             scroll_to_start (list_reverse);
         }
 

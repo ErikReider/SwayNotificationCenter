@@ -41,6 +41,7 @@ namespace SwayNotificationCenter {
 
         private uint timeout_id = 0;
 
+        private int number_of_body_lines = 10;
         public bool is_timed = false;
         public NotifyParams param;
         private NotiDaemon noti_daemon;
@@ -81,8 +82,21 @@ namespace SwayNotificationCenter {
             this.timeout_delay = timeout;
             this.timeout_low_delay = timeout_low;
             this.timeout_critical_delay = timeout_critical;
+            this.number_of_body_lines = 5;
+
             build_noti (param, noti_daemon);
             add_noti_timeout ();
+            this.size_allocate.connect (on_size_allocation);
+        }
+
+        private void on_size_allocation (Gtk.Allocation _ignored) {
+            // Force recomputing the allocated size of the wrapped GTK label in the body.
+            // `queue_resize` alone DOES NOT WORK because it does not properly invalidate
+            // the cache, this is a GTK bug!
+            // See https://gitlab.gnome.org/GNOME/gtk/-/issues/2556
+            if (body != null) {
+                body.set_size_request (-1, body.get_allocated_height ());
+            }
         }
 
         private void build_noti (NotifyParams param, NotiDaemon noti_daemon) {
@@ -91,7 +105,13 @@ namespace SwayNotificationCenter {
             this.noti_daemon = noti_daemon;
             this.param = param;
 
+            this.body.set_line_wrap (true);
+            this.body.set_line_wrap_mode (Pango.WrapMode.WORD_CHAR);
+            this.body.set_ellipsize (Pango.EllipsizeMode.END);
+
+            this.summary.set_line_wrap (false);
             this.summary.set_text (param.summary ?? param.app_name);
+            this.summary.set_ellipsize (Pango.EllipsizeMode.END);
 
             this.button_press_event.connect ((event) => {
                 if (event.button != Gdk.BUTTON_SECONDARY) return false;
@@ -172,6 +192,8 @@ namespace SwayNotificationCenter {
 
         private void set_body () {
             string text = param.body ?? "";
+
+            this.body.set_lines (this.number_of_body_lines);
 
             // Removes all image tags and adds them to an array
             if (text.length > 0) {

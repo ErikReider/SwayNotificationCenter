@@ -82,6 +82,8 @@ namespace SwayNotificationCenter {
             this.timeout_delay = timeout;
             this.timeout_low_delay = timeout_low;
             this.timeout_critical_delay = timeout_critical;
+            this.number_of_body_lines = 5;
+
             build_noti (param, noti_daemon);
             add_noti_timeout ();
             this.size_allocate.connect (on_size_allocation);

@@ -321,7 +321,7 @@ namespace SwayNotificationCenter {
 
         public void add_notification (NotifyParams param,
                                       NotiDaemon noti_daemon) {
-            var noti = new Notification (param, noti_daemon);
+            var noti = new Notification.regular (param, noti_daemon);
             noti.grab_focus.connect ((w) => {
                 uint i = list_box.get_children ().index (w);
                 if (list_position != uint.MAX && list_position != i) {

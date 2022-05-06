@@ -41,14 +41,18 @@ namespace SwayNotificationCenter {
 
         private uint timeout_id = 0;
 
-        private int number_of_body_lines = 10;
-        public bool is_timed = false;
-        public NotifyParams param;
-        private NotiDaemon noti_daemon;
-        private uint timeout_delay;
-        private uint timeout_low_delay;
-        private int transition_time;
-        private uint timeout_critical_delay;
+        public bool is_timed { get; construct; default = false; }
+
+        public NotifyParams param { get; construct; }
+        public NotiDaemon noti_daemon { get; construct; }
+
+        public uint timeout_delay { get; construct; }
+        public uint timeout_low_delay { get; construct; }
+        public uint timeout_critical_delay { get; construct; }
+
+        public int transition_time { get; construct; }
+
+        public int number_of_body_lines { get; construct; default = 10; }
 
         private int carousel_empty_widget_index = 0;
 
@@ -56,37 +60,46 @@ namespace SwayNotificationCenter {
         private static Regex tag_replace_regex;
         private const string[] TAGS = { "b", "u", "i" };
 
-        construct {
-            try {
-                string joined_tags = string.joinv ("|", TAGS);
-                tag_regex = new Regex (@"&lt;/?($joined_tags)&gt;");
-                tag_replace_regex = new Regex ("&lt;/?|&gt;");
-            } catch (Error e) {
-                stderr.printf ("Invalid regex: %s", e.message);
-            }
+        private Notification () {}
+
+        /** Show a non-timed notification */
+        public Notification.regular (NotifyParams param,
+                                     NotiDaemon noti_daemon) {
+            Object (noti_daemon: noti_daemon, param: param);
         }
 
-        public Notification (NotifyParams param,
-                             NotiDaemon noti_daemon) {
-            build_noti (param, noti_daemon);
-            this.body.set_lines (10);
-        }
-
-        // Called to show a temp notification
+        /** Show a timed notification */
         public Notification.timed (NotifyParams param,
                                    NotiDaemon noti_daemon,
                                    uint timeout,
                                    uint timeout_low,
                                    uint timeout_critical) {
-            this.is_timed = true;
-            this.timeout_delay = timeout;
-            this.timeout_low_delay = timeout_low;
-            this.timeout_critical_delay = timeout_critical;
-            this.number_of_body_lines = 5;
+            Object (noti_daemon: noti_daemon,
+                    param: param,
+                    is_timed: true,
+                    timeout_delay: timeout,
+                    timeout_low_delay: timeout_low,
+                    timeout_critical_delay: timeout_critical,
+                    number_of_body_lines: 5
+            );
+        }
 
-            build_noti (param, noti_daemon);
-            add_noti_timeout ();
-            this.size_allocate.connect (on_size_allocation);
+        construct {
+            try {
+                string joined_tags = string.joinv ("|", TAGS);
+                tag_regex = new Regex ("&lt;/?(%s)&gt;".printf (joined_tags));
+                tag_replace_regex = new Regex ("&lt;/?|&gt;");
+            } catch (Error e) {
+                stderr.printf ("Invalid regex: %s", e.message);
+            }
+
+            this.transition_time = ConfigModel.instance.transition_time;
+            build_noti ();
+
+            if (is_timed) {
+                add_notification_timeout ();
+                this.size_allocate.connect (on_size_allocation);
+            }
         }
 
         private void on_size_allocation (Gtk.Allocation _ignored) {
@@ -99,12 +112,7 @@ namespace SwayNotificationCenter {
             }
         }
 
-        private void build_noti (NotifyParams param, NotiDaemon noti_daemon) {
-            this.transition_time = ConfigModel.instance.transition_time;
-
-            this.noti_daemon = noti_daemon;
-            this.param = param;
-
+        private void build_noti () {
             this.body.set_line_wrap (true);
             this.body.set_line_wrap_mode (Pango.WrapMode.WORD_CHAR);
             this.body.set_ellipsize (Pango.EllipsizeMode.END);
@@ -135,7 +143,7 @@ namespace SwayNotificationCenter {
             this.event_box.leave_notify_event.connect ((event) => {
                 if (event.detail == Gdk.NotifyType.INFERIOR) return true;
                 close_revealer.set_reveal_child (false);
-                add_noti_timeout ();
+                add_notification_timeout ();
                 return false;
             });
 
@@ -384,7 +392,7 @@ namespace SwayNotificationCenter {
             Timeout.add (this.transition_time, () => {
                 try {
                     noti_daemon.manually_close_notification (param.applied_id,
-                                                            is_timeout);
+                                                             is_timeout);
                 } catch (Error e) {
                     print ("Error: %s\n", e.message);
                     this.destroy ();
@@ -425,7 +433,8 @@ namespace SwayNotificationCenter {
                 if (param.desktop_entry != null) {
                     string entry = param.desktop_entry;
                     entry = entry.replace (".desktop", "");
-                    var entry_info = new DesktopAppInfo (@"$entry.desktop");
+                    var entry_info = new DesktopAppInfo (
+                        "%s.desktop".printf (entry));
                     icon = entry_info.get_icon ();
                 }
                 if (icon != null) {
@@ -439,7 +448,7 @@ namespace SwayNotificationCenter {
             }
         }
 
-        public void add_noti_timeout () {
+        public void add_notification_timeout () {
             if (!this.is_timed) return;
 
             // Removes the previous timeout

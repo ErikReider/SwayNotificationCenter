@@ -6,31 +6,12 @@ namespace SwayNotificationCenter {
         private HashTable<string, uint32> synchronous_ids =
             new HashTable<string, uint32> (str_hash, str_equal);
 
-        public CcDaemon cc_daemon;
+        public ControlCenter control_center;
         public NotiWindow noti_window;
 
-        public NotiDaemon () {
-            this.cc_daemon = new CcDaemon (this);
-            Bus.own_name (BusType.SESSION, "org.erikreider.swaync.cc",
-                          BusNameOwnerFlags.NONE,
-                          on_cc_bus_aquired,
-                          () => {},
-                          () => {
-                stderr.printf (
-                    "Could not aquire control center name\n");
-                Process.exit (1);
-            });
-
+        public NotiDaemon (SwayncDaemon swaync_daemon) {
             this.noti_window = new NotiWindow ();
-        }
-
-        private void on_cc_bus_aquired (DBusConnection conn) {
-            try {
-                conn.register_object ("/org/erikreider/swaync/cc", cc_daemon);
-            } catch (IOError e) {
-                stderr.printf ("Could not register CC service\n");
-                Process.exit (1);
-            }
+            this.control_center = new ControlCenter (swaync_daemon);
         }
 
         /**
@@ -67,7 +48,7 @@ namespace SwayNotificationCenter {
         throws DBusError, IOError {
             noti_window.close_notification (id);
             if (!timeout) {
-                cc_daemon.control_center.close_notification (id);
+                control_center.close_notification (id);
                 NotificationClosed (id, ClosedReasons.DISMISSED);
             }
         }
@@ -75,7 +56,7 @@ namespace SwayNotificationCenter {
         /** Closes all popup and controlcenter notifications */
         public void close_all_notifications () throws DBusError, IOError {
             noti_window.close_all_notifications ();
-            cc_daemon.control_center.close_all_notifications ();
+            control_center.close_all_notifications ();
         }
 
         /** Closes latest popup notification */
@@ -139,7 +120,7 @@ namespace SwayNotificationCenter {
             uint32 id = replaces_id;
             if (replaces_id == 0 || replaces_id > noti_id) id = ++noti_id;
 
-            var param = NotifyParams (
+            var param = new NotifyParams (
                 id,
                 app_name,
                 replaces_id,
@@ -166,7 +147,7 @@ namespace SwayNotificationCenter {
             if (id == replaces_id) {
                 param.replaces = true;
                 noti_window.close_notification (id);
-                cc_daemon.control_center.close_notification (id, true);
+                control_center.close_notification (id, true);
             } else if (param.synchronous != null
                        && param.synchronous.length > 0) {
                 // Tries replacing without replaces_id instead
@@ -177,14 +158,14 @@ namespace SwayNotificationCenter {
                     param.replaces = true;
                     // Close the notification
                     noti_window.close_notification (r_id);
-                    cc_daemon.control_center.close_notification (r_id, true);
+                    control_center.close_notification (r_id, true);
                 }
                 synchronous_ids.set (param.synchronous, id);
             }
 
             // Only show popup notification if it is ENABLED
             if (state == NotificationStatusEnum.ENABLED
-                && !cc_daemon.control_center.get_visibility ()) {
+                && !control_center.get_visibility ()) {
                 if (param.urgency == UrgencyLevels.CRITICAL ||
                     (!dnd && param.urgency != UrgencyLevels.CRITICAL)) {
                     noti_window.add_notification (param, this);
@@ -192,7 +173,7 @@ namespace SwayNotificationCenter {
             }
             // Only add notification to CC if it isn't IGNORED
             if (state != NotificationStatusEnum.IGNORED) {
-                cc_daemon.control_center.add_notification (param, this);
+                control_center.add_notification (param, this);
             }
 
 #if WANT_SCRIPTING
@@ -264,7 +245,7 @@ namespace SwayNotificationCenter {
         [DBus (name = "CloseNotification")]
         public void close_notification (uint32 id) throws DBusError, IOError {
             noti_window.close_notification (id);
-            cc_daemon.control_center.close_notification (id);
+            control_center.close_notification (id);
             NotificationClosed (id, ClosedReasons.CLOSED_BY_CLOSENOTIFICATION);
         }
 

@@ -14,7 +14,7 @@ namespace SwayNotificationCenter {
         private Gtk.Switch dnd_button;
         private Gtk.Button clear_all_button;
 
-        private CcDaemon cc_daemon;
+        private SwayncDaemon swaync_daemon;
 
         private uint list_position = 0;
 
@@ -22,8 +22,8 @@ namespace SwayNotificationCenter {
         private bool list_reverse = false;
         private Gtk.Align list_align = Gtk.Align.START;
 
-        public ControlCenter (CcDaemon cc_daemon) {
-            this.cc_daemon = cc_daemon;
+        public ControlCenter (SwayncDaemon swaync_daemon) {
+            this.swaync_daemon = swaync_daemon;
 
             if (!GtkLayerShell.is_supported ()) {
                 stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
@@ -125,7 +125,7 @@ namespace SwayNotificationCenter {
             dnd_button.get_style_context ().add_class ("control-center-dnd");
             dnd_button.state_set.connect ((widget, state) => {
                 try {
-                    this.cc_daemon.set_dnd (state);
+                    this.swaync_daemon.set_dnd (state);
                 } catch (Error e) {
                     stderr.printf (e.message + "\n");
                 }
@@ -239,8 +239,8 @@ namespace SwayNotificationCenter {
             }
 
             try {
-                cc_daemon.subscribe (notification_count (),
-                                     cc_daemon.get_dnd (),
+                swaync_daemon.subscribe (notification_count (),
+                                     swaync_daemon.get_dnd (),
                                      get_visibility ());
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
@@ -311,8 +311,8 @@ namespace SwayNotificationCenter {
                 }
             }
             try {
-                cc_daemon.subscribe (notification_count (),
-                                     cc_daemon.get_dnd (),
+                swaync_daemon.subscribe (notification_count (),
+                                     swaync_daemon.get_dnd (),
                                      get_visibility ());
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
@@ -332,8 +332,8 @@ namespace SwayNotificationCenter {
             list_box.add (noti);
             scroll_to_start (list_reverse);
             try {
-                cc_daemon.subscribe (notification_count (),
-                                     cc_daemon.get_dnd (),
+                swaync_daemon.subscribe (notification_count (),
+                                     swaync_daemon.get_dnd (),
                                      get_visibility ());
             } catch (Error e) {
                 stderr.printf (e.message + "\n");

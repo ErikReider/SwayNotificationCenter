@@ -1,5 +1,5 @@
 namespace SwayNotificationCenter {
-    static NotiDaemon noti_daemon;
+    static SwayncDaemon swaync_daemon;
     static string ? style_path;
     static string ? config_path;
 
@@ -32,33 +32,28 @@ namespace SwayNotificationCenter {
             }
         }
 
-        Bus.own_name (BusType.SESSION, "org.freedesktop.Notifications",
+        Functions.load_css (style_path);
+        ConfigModel.init (config_path);
+
+        swaync_daemon = new SwayncDaemon ();
+        Bus.own_name (BusType.SESSION, "org.erikreider.swaync.cc",
                       BusNameOwnerFlags.NONE,
-                      on_noti_bus_aquired,
+                      on_cc_bus_aquired,
                       () => {},
                       () => {
             stderr.printf (
-                "Could not aquire notification name. " +
-                "Please close any other notification daemon " +
-                "like mako or dunst\n");
+                "Could not aquire swaync name!...\n");
             Process.exit (1);
         });
-
-        Functions.load_css (style_path);
-
-        ConfigModel.init (config_path);
-
-        noti_daemon = new NotiDaemon ();
 
         Gtk.main ();
     }
 
-    void on_noti_bus_aquired (DBusConnection conn) {
+    void on_cc_bus_aquired (DBusConnection conn) {
         try {
-            conn.register_object (
-                "/org/freedesktop/Notifications", noti_daemon);
+            conn.register_object ("/org/erikreider/swaync/cc", swaync_daemon);
         } catch (IOError e) {
-            stderr.printf ("Could not register notification service\n");
+            stderr.printf ("Could not register CC service\n");
             Process.exit (1);
         }
     }

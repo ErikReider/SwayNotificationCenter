@@ -53,9 +53,9 @@ namespace SwayNotificationCenter {
         bool is_initialized;
     }
 
-    public struct Action {
-        string identifier { get; set; }
-        string name { get; set; }
+    public class Action : Object {
+        public string identifier { get; set; }
+        public string name { get; set; }
 
         public string to_string () {
             if (identifier == null || name == null) return "None";
@@ -63,12 +63,12 @@ namespace SwayNotificationCenter {
         }
     }
 
-    public struct NotifyParams {
+    public class NotifyParams : Object {
         public uint32 applied_id { get; set; }
         public string app_name { get; set; }
         public uint32 replaces_id { get; set; }
         public string app_icon { get; set; }
-        public Action default_action { get; set; }
+        public Action? default_action { get; set; }
         public string summary { get; set; }
         public string body { get; set; }
         public HashTable<string, Variant> hints { get; set; }
@@ -90,15 +90,16 @@ namespace SwayNotificationCenter {
          */
         public string ? synchronous { get; set; }
         /** Used for notification progress bar (0->100) */
-        public int ? value {
+        public int value {
             get {
-                return _value;
+                return priv_value;
             }
             set {
-                _value = value == null ? value : value.clamp (0, 100);
+                priv_value = value.clamp (0, 100);
             }
         }
-        private int ? _value { private get; private set; }
+        private int ? priv_value { private get; private set; }
+        public bool has_synch { public get; private set; }
 
         // Custom hints
         /** Disables scripting for notification */
@@ -129,20 +130,20 @@ namespace SwayNotificationCenter {
             this.time = (int64) (GLib.get_real_time () * 0.000001);
 
             this.replaces = false;
-            this.value = null;
+            this.has_synch = false;
 
             s_hints ();
 
             Action[] ac_array = {};
             if (actions.length > 1 && actions.length % 2 == 0) {
                 for (int i = 0; i < actions.length; i++) {
-                    var action = Action ();
-                    action._identifier = actions[i];
-                    action._name = actions[i + 1];
-                    if (action._name != null && action._identifier != null
-                        && action._name != "" && action._identifier != "") {
+                    var action = new Action ();
+                    action.identifier = actions[i];
+                    action.name = actions[i + 1];
+                    if (action.name != null && action.identifier != null
+                        && action.name != "" && action.identifier != "") {
 
-                        if (action._identifier.down () == "default") {
+                        if (action.identifier.down () == "default") {
                             default_action = action;
                         } else {
                             ac_array += action;
@@ -165,6 +166,7 @@ namespace SwayNotificationCenter {
                         break;
                     case "value":
                         if (hint_value.is_of_type (GLib.VariantType.INT32)) {
+                            this.has_synch = true;
                             value = hint_value.get_int32 ();
                         }
                         break;
@@ -240,7 +242,7 @@ namespace SwayNotificationCenter {
             params.set ("app_name", app_name);
             params.set ("replaces_id", replaces_id.to_string ());
             params.set ("app_icon", app_icon);
-            params.set ("default_action", default_action.to_string ());
+            params.set ("default_action", default_action?.to_string ());
             params.set ("summary", summary);
             params.set ("body", "\t" + body);
             string[] _hints = {};

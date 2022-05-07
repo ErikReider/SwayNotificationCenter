@@ -1,17 +1,27 @@
 namespace SwayNotificationCenter {
     [DBus (name = "org.erikreider.swaync.cc")]
-    public class CcDaemon : Object {
-        public ControlCenter control_center;
+    public class SwayncDaemon : Object {
         public NotiDaemon noti_daemon;
 
-        public CcDaemon (NotiDaemon noti_daemon) {
-            this.noti_daemon = noti_daemon;
-            this.control_center = new ControlCenter (this);
+        public SwayncDaemon () {
+            // Init noti_daemon
+            this.noti_daemon = new NotiDaemon (this);
+            Bus.own_name (BusType.SESSION, "org.freedesktop.Notifications",
+                          BusNameOwnerFlags.NONE,
+                          on_noti_bus_aquired,
+                          () => {},
+                          () => {
+                stderr.printf (
+                    "Could not aquire notification name. " +
+                    "Please close any other notification daemon " +
+                    "like mako or dunst\n");
+                Process.exit (1);
+            });
 
             noti_daemon.on_dnd_toggle.connect ((dnd) => {
-                this.control_center.set_switch_dnd_state (dnd);
+                noti_daemon.control_center.set_switch_dnd_state (dnd);
                 try {
-                    subscribe (control_center.notification_count (),
+                    subscribe (noti_daemon.control_center.notification_count (),
                                dnd,
                                get_visibility ());
                 } catch (Error e) {
@@ -29,6 +39,16 @@ namespace SwayNotificationCenter {
             }
         }
 
+        private void on_noti_bus_aquired (DBusConnection conn) {
+            try {
+                conn.register_object (
+                    "/org/freedesktop/Notifications", noti_daemon);
+            } catch (IOError e) {
+                stderr.printf ("Could not register notification service\n");
+                Process.exit (1);
+            }
+        }
+
         /**
          * Called when Dot Not Disturb state changes and when
          * notification gets added/removed
@@ -38,7 +58,7 @@ namespace SwayNotificationCenter {
         /** Reloads the CSS file */
         public bool reload_css () throws Error {
             bool result = Functions.load_css (style_path);
-            if (result) control_center.reload_notifications_style ();
+            if (result) noti_daemon.control_center.reload_notifications_style ();
             return result;
         }
 
@@ -67,7 +87,7 @@ namespace SwayNotificationCenter {
 
         /** Gets the controlcenter visibility */
         public bool get_visibility () throws DBusError, IOError {
-            return control_center.get_visibility ();
+            return noti_daemon.control_center.get_visibility ();
         }
 
         /** Closes latest popup notification */
@@ -83,16 +103,16 @@ namespace SwayNotificationCenter {
 
         /** Gets the current controlcenter notification count */
         public uint notification_count () throws DBusError, IOError {
-            return control_center.notification_count ();
+            return noti_daemon.control_center.notification_count ();
         }
 
         /** Toggles the visibility of the controlcenter */
         public void toggle_visibility () throws DBusError, IOError {
-            if (control_center.toggle_visibility ()) {
+            if (noti_daemon.control_center.toggle_visibility ()) {
                 noti_daemon.set_noti_window_visibility (false);
             }
             try {
-                subscribe (control_center.notification_count (),
+                subscribe (noti_daemon.control_center.notification_count (),
                            get_dnd (),
                            get_visibility ());
             } catch (Error e) {
@@ -102,10 +122,10 @@ namespace SwayNotificationCenter {
 
         /** Sets the visibility of the controlcenter */
         public void set_visibility (bool visibility) throws DBusError, IOError {
-            control_center.set_visibility (visibility);
+            noti_daemon.control_center.set_visibility (visibility);
             if (visibility) noti_daemon.set_noti_window_visibility (false);
             try {
-                subscribe (control_center.notification_count (),
+                subscribe (noti_daemon.control_center.notification_count (),
                            get_dnd (),
                            visibility);
             } catch (Error e) {
@@ -128,15 +148,9 @@ namespace SwayNotificationCenter {
             return noti_daemon.get_dnd ();
         }
 
-        /** Adds a new notification */
-        public void add_notification (NotifyParams param)
-        throws DBusError, IOError {
-            control_center.add_notification (param, noti_daemon);
-        }
-
         /** Closes a specific notification with the `id` */
         public void close_notification (uint32 id) throws DBusError, IOError {
-            control_center.close_notification (id);
+            noti_daemon.control_center.close_notification (id);
         }
     }
 }

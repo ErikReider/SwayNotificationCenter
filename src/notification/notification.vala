@@ -177,7 +177,7 @@ namespace SwayNotificationCenter {
             this.carousel.allow_scroll_wheel = false;
 #endif
 
-            if (this.progress_bar.visible = !(param.value == null)) {
+            if (this.progress_bar.visible = param.has_synch) {
                 this.progress_bar.set_fraction (param.value * 0.01);
             }
 
@@ -301,11 +301,11 @@ namespace SwayNotificationCenter {
         }
 
         private void action_clicked (Action action, bool is_default = false) {
-            if (action._identifier != null && action._identifier != "") {
-                noti_daemon.ActionInvoked (param.applied_id, action._identifier);
+            if (action.identifier != null && action.identifier != "") {
+                noti_daemon.ActionInvoked (param.applied_id, action.identifier);
                 if (ConfigModel.instance.hide_on_action) {
                     try {
-                        this.noti_daemon.cc_daemon.set_visibility (false);
+                        swaync_daemon.set_visibility (false);
                     } catch (Error e) {
                         print ("Error: %s\n", e.message);
                     }
@@ -337,7 +337,7 @@ namespace SwayNotificationCenter {
                 alt_actions_box.set_homogeneous (true);
                 alt_actions_box.set_layout (Gtk.ButtonBoxStyle.EXPAND);
                 foreach (var action in param.actions) {
-                    var action_button = new Gtk.Button.with_label (action._name);
+                    var action_button = new Gtk.Button.with_label (action.name);
                     action_button.clicked.connect (() => action_clicked (action));
                     action_button
                      .get_style_context ().add_class ("notification-action");

@@ -25,11 +25,11 @@ constants = configure_file(
 app_sources = [
   'main.vala',
   'configModel/configModel.vala',
+  'swayncDaemon/swayncDaemon.vala',
   'notiDaemon/notiDaemon.vala',
   'notiModel/notiModel.vala',
   'notiWindow/notiWindow.vala',
   'notification/notification.vala',
-  'ccDaemon/ccDaemon.vala',
   'controlCenter/controlCenter.vala',
   'controlCenter/topAction/topAction.vala',
   'functions.vala',

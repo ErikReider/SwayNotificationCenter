@@ -1,9 +1,17 @@
 namespace SwayNotificationCenter {
     [DBus (name = "org.erikreider.swaync.cc")]
     public class SwayncDaemon : Object {
+        public StateCache cache_state;
+
         public NotiDaemon noti_daemon;
 
         public SwayncDaemon () {
+            this.cache_state = Cacher.instance.get_state_cache ();
+            this.cache_state.notify.connect ((x, r) => {
+                debug ("State changed: %s\n", r.name);
+                Cacher.instance.cache_state (cache_state);
+            });
+
             // Init noti_daemon
             this.noti_daemon = new NotiDaemon (this);
             Bus.own_name (BusType.SESSION, "org.freedesktop.Notifications",
@@ -140,12 +148,12 @@ namespace SwayNotificationCenter {
 
         /** Sets the current Do Not Disturb state */
         public void set_dnd (bool state) throws DBusError, IOError {
-            noti_daemon.set_dnd (state);
+            noti_daemon.set_do_not_disturb (state);
         }
 
         /** Gets the current Do Not Disturb state */
         public bool get_dnd () throws DBusError, IOError {
-            return noti_daemon.get_dnd ();
+            return noti_daemon.get_do_not_disturb ();
         }
 
         /** Closes a specific notification with the `id` */

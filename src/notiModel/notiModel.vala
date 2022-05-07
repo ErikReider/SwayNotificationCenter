@@ -68,7 +68,7 @@ namespace SwayNotificationCenter {
         public string app_name { get; set; }
         public uint32 replaces_id { get; set; }
         public string app_icon { get; set; }
-        public Action? default_action { get; set; }
+        public Action ? default_action { get; set; }
         public string summary { get; set; }
         public string body { get; set; }
         public HashTable<string, Variant> hints { get; set; }
@@ -134,7 +134,7 @@ namespace SwayNotificationCenter {
 
             s_hints ();
 
-            Array<Action> ac_array = new Array<Action>();
+            Array<Action> ac_array = new Array<Action> ();
             if (actions.length > 1 && actions.length % 2 == 0) {
                 for (int i = 0; i < actions.length; i++) {
                     var action = new Action ();
@@ -242,7 +242,7 @@ namespace SwayNotificationCenter {
             params.set ("app_name", app_name);
             params.set ("replaces_id", replaces_id.to_string ());
             params.set ("app_icon", app_icon);
-            params.set ("default_action", default_action?.to_string ());
+            params.set ("default_action", default_action ? .to_string ());
             params.set ("summary", summary);
             params.set ("body", "\t" + body);
             string[] _hints = {};

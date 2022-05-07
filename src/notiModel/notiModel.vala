@@ -242,7 +242,8 @@ namespace SwayNotificationCenter {
             params.set ("app_name", app_name);
             params.set ("replaces_id", replaces_id.to_string ());
             params.set ("app_icon", app_icon);
-            params.set ("default_action", default_action ? .to_string ());
+            params.set ("default_action", default_action == null
+                        ? null : default_action.to_string ());
             params.set ("summary", summary);
             params.set ("body", "\t" + body);
             string[] _hints = {};
@@ -267,7 +268,7 @@ namespace SwayNotificationCenter {
             params.set ("resident", resident.to_string ());
             params.set ("urgency", urgency.to_string ());
             string[] _actions = {};
-            foreach (var _action in actions) {
+            foreach (var _action in actions.data) {
                 _actions += "\n\t" + _action.to_string ();
             }
             params.set ("actions", string.joinv ("", _actions));

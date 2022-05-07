@@ -336,7 +336,7 @@ namespace SwayNotificationCenter {
                 alt_actions_box = new Gtk.ButtonBox (Gtk.Orientation.HORIZONTAL);
                 alt_actions_box.set_homogeneous (true);
                 alt_actions_box.set_layout (Gtk.ButtonBoxStyle.EXPAND);
-                foreach (var action in param.actions) {
+                foreach (var action in param.actions.data) {
                     var action_button = new Gtk.Button.with_label (action.name);
                     action_button.clicked.connect (() => action_clicked (action));
                     action_button

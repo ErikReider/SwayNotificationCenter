@@ -10,27 +10,13 @@ namespace SwayNotificationCenter {
             }
         }
 
-        private enum CacheType {
-            NOTIFICATIONS, WIDGET_STATE;
-        }
-
         private const string CACHE_FILE_STATE = "swaync-state.cache";
-        private const string CACHE_FILE_NOTIFICAIONS = "swaync-notifications.cache";
         private const FileCreateFlags FILE_FLAGS = FileCreateFlags.PRIVATE
                                                    | FileCreateFlags.REPLACE_DESTINATION;
 
-        private string get_cache_path (CacheType type) {
-            string cache_type;
-            switch (type) {
-                case CacheType.WIDGET_STATE:
-                    cache_type = CACHE_FILE_STATE;
-                    break;
-                default:
-                case CacheType.NOTIFICATIONS:
-                    cache_type = CACHE_FILE_NOTIFICAIONS;
-                    break;
-            }
-            string path = Path.build_filename (Environment.get_user_cache_dir (), cache_type);
+        private string get_cache_path () {
+            string path = Path.build_filename (Environment.get_user_cache_dir (),
+                                               CACHE_FILE_STATE);
 
             File file = File.new_for_path (path);
             if (!file.query_exists ()) {
@@ -43,14 +29,8 @@ namespace SwayNotificationCenter {
             return path;
         }
 
-        public void cache_notification (NotifyParams param) {
-            string path = get_cache_path (CacheType.NOTIFICATIONS);
-        }
-
-        public void get_notification_cache () {}
-
         public bool cache_state (StateCache state) {
-            string path = get_cache_path (CacheType.WIDGET_STATE);
+            string path = get_cache_path ();
             Json.Node json = Json.gobject_serialize (state);
             string data = Json.to_string (json, true);
 
@@ -70,7 +50,7 @@ namespace SwayNotificationCenter {
         }
 
         public StateCache get_state_cache () {
-            string path = get_cache_path (CacheType.WIDGET_STATE);
+            string path = get_cache_path ();
             StateCache s = null;
             try {
                 Json.Parser parser = new Json.Parser ();
@@ -80,12 +60,12 @@ namespace SwayNotificationCenter {
                     throw new Json.ParserError.PARSE ("Node is null!");
                 }
 
-                StateCache state = Json.gobject_deserialize (
+                StateCache model = Json.gobject_deserialize (
                     typeof (StateCache), node) as StateCache;
-                if (state == null) {
+                if (model == null) {
                     throw new Json.ParserError.UNKNOWN ("Json model is null!");
                 }
-                s = state;
+                s = model;
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }

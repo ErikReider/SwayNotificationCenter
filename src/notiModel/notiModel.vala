@@ -98,14 +98,14 @@ namespace SwayNotificationCenter {
                 priv_value = value.clamp (0, 100);
             }
         }
-        private int ? priv_value { private get; private set; }
+        private int priv_value { private get; private set; }
         public bool has_synch { public get; private set; }
 
         // Custom hints
         /** Disables scripting for notification */
         public bool swaync_no_script { get; set; }
 
-        public Action[] actions { get; set; }
+        public Array<Action> actions { get; set; }
 
         /** If the notification replaces another */
         public bool replaces { get; set; }
@@ -134,7 +134,7 @@ namespace SwayNotificationCenter {
 
             s_hints ();
 
-            Action[] ac_array = {};
+            Array<Action> ac_array = new Array<Action>();
             if (actions.length > 1 && actions.length % 2 == 0) {
                 for (int i = 0; i < actions.length; i++) {
                     var action = new Action ();
@@ -146,7 +146,7 @@ namespace SwayNotificationCenter {
                         if (action.identifier.down () == "default") {
                             default_action = action;
                         } else {
-                            ac_array += action;
+                            ac_array.append_val (action);
                         }
                     }
                     i++;

@@ -297,7 +297,7 @@ namespace SwayNotificationCenter {
             if (param.actions.length == 0 || index >= param.actions.length) {
                 return;
             }
-            action_clicked (param.actions[index]);
+            action_clicked (param.actions.index (index));
         }
 
         private void action_clicked (Action action, bool is_default = false) {

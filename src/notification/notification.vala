@@ -57,7 +57,6 @@ namespace SwayNotificationCenter {
         private int carousel_empty_widget_index = 0;
 
         private static Regex tag_regex;
-        private static Regex tag_replace_regex;
         private static Regex tag_unescape_regex;
         private const string[] TAGS = { "b", "u", "i" };
         private const string[] UNESCAPE_CHARS = {
@@ -95,8 +94,7 @@ namespace SwayNotificationCenter {
         construct {
             try {
                 string joined_tags = string.joinv ("|", TAGS);
-                tag_regex = new Regex ("&lt;/?(%s)&gt;".printf (joined_tags));
-                tag_replace_regex = new Regex ("&lt;/?|&gt;");
+                tag_regex = new Regex ("&lt;(/?(?:%s))&gt;".printf (joined_tags));
                 string unescaped = string.joinv ("|", UNESCAPE_CHARS);
                 tag_unescape_regex = new Regex ("&amp;(?=%s)".printf (unescaped));
             } catch (Error e) {
@@ -260,11 +258,9 @@ namespace SwayNotificationCenter {
                 string escaped = Markup.escape_text (text);
                 // Replace all valid tags brackets with <,</,> so that the
                 // markup parser only parses valid tags
-                escaped = tag_regex.replace_eval (escaped,
-                                                  escaped.length,
-                                                  0,
-                                                  RegexMatchFlags.NOTEMPTY,
-                                                  this.regex_tag_eval_cb);
+                // Ex: &lt;b&gt;BOLD&lt;/b&gt; -> <b>BOLD</b>
+                escaped = tag_regex.replace (escaped, escaped.length, 0, "<\\1>");
+
                 // Unescape a few characters that may have been double escaped
                 // Sending "<" in Discord would result in "&amp;lt;" without this
                 // &amp;lt; -> &lt;
@@ -283,24 +279,6 @@ namespace SwayNotificationCenter {
                 // Sets the original text
                 this.body.set_text (text);
             }
-        }
-
-        /**
-         * Replaces "&gt;" and "&lt;" with their character counterpart if the
-         * tag is valid.
-         */
-        private bool regex_tag_eval_cb (MatchInfo match_info,
-                                        StringBuilder result) {
-            try {
-                string tag = match_info.fetch (0);
-                // Removes the tag backets: </b> -> b
-                var res = tag_replace_regex.replace (tag, tag.length, 0, "");
-                if (!(res in TAGS)) return false;
-                result.append (tag.replace ("&lt;", "<").replace ("&gt;", ">"));
-            } catch (Error e) {
-                stderr.printf ("Regex eval error: %s\n", e.message);
-            }
-            return false;
         }
 
         public void click_default_action () {

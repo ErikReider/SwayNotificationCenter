@@ -58,7 +58,15 @@ namespace SwayNotificationCenter {
 
         private static Regex tag_regex;
         private static Regex tag_replace_regex;
+        private static Regex tag_unescape_regex;
         private const string[] TAGS = { "b", "u", "i" };
+        private const string[] UNESCAPE_CHARS = {
+            "lt;", "#60;", "#x3C;", "#x3c;", // <
+            "gt;", "#62;", "#x3E;", "#x3e;", // >
+            "apos;", "#39;", // '
+            "quot;", "#34;", // "
+            "amp;" // &
+        };
 
         private Notification () {}
 
@@ -89,6 +97,8 @@ namespace SwayNotificationCenter {
                 string joined_tags = string.joinv ("|", TAGS);
                 tag_regex = new Regex ("&lt;/?(%s)&gt;".printf (joined_tags));
                 tag_replace_regex = new Regex ("&lt;/?|&gt;");
+                string unescaped = string.joinv ("|", UNESCAPE_CHARS);
+                tag_unescape_regex = new Regex ("&amp;(?=%s)".printf (unescaped));
             } catch (Error e) {
                 stderr.printf ("Invalid regex: %s", e.message);
             }
@@ -255,6 +265,10 @@ namespace SwayNotificationCenter {
                                                   0,
                                                   RegexMatchFlags.NOTEMPTY,
                                                   this.regex_tag_eval_cb);
+                // Unescape a few characters that may have been double escaped
+                // Sending "<" in Discord would result in "&amp;lt;" without this
+                // &amp;lt; -> &lt;
+                escaped = tag_unescape_regex.replace_literal (escaped, escaped.length, 0, "&");
 
                 // Turns it back to markdown, defaults to original if not valid
                 Pango.AttrList ? attr = null;
@@ -316,10 +330,10 @@ namespace SwayNotificationCenter {
 
         private void set_style_urgency () {
             switch (param.urgency) {
-                case UrgencyLevels.LOW :
+                case UrgencyLevels.LOW:
                     base_box.get_style_context ().add_class ("low");
                     break;
-                case UrgencyLevels.NORMAL :
+                case UrgencyLevels.NORMAL:
                 default:
                     base_box.get_style_context ().add_class ("normal");
                     break;

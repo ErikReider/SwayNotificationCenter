@@ -15,6 +15,7 @@ namespace SwayNotificationCenter {
         private Gtk.Button clear_all_button;
 
         private SwayncDaemon swaync_daemon;
+        private NotiDaemon noti_daemon;
 
         private uint list_position = 0;
 
@@ -22,8 +23,9 @@ namespace SwayNotificationCenter {
         private bool list_reverse = false;
         private Gtk.Align list_align = Gtk.Align.START;
 
-        public ControlCenter (SwayncDaemon swaync_daemon) {
+        public ControlCenter (SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             this.swaync_daemon = swaync_daemon;
+            this.noti_daemon = noti_daemon;
 
             if (!GtkLayerShell.is_supported ()) {
                 stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
@@ -121,14 +123,12 @@ namespace SwayNotificationCenter {
                                          clear_all_button,
                                          true));
 
-            dnd_button = new Gtk.Switch ();
+            dnd_button = new Gtk.Switch () {
+                state = noti_daemon.dnd,
+            };
             dnd_button.get_style_context ().add_class ("control-center-dnd");
             dnd_button.state_set.connect ((widget, state) => {
-                try {
-                    this.swaync_daemon.set_dnd (state);
-                } catch (Error e) {
-                    stderr.printf (e.message + "\n");
-                }
+                noti_daemon.dnd = state;
                 return false;
             });
             this.box.add (new TopAction ("Do Not Disturb", dnd_button, false));
@@ -240,8 +240,8 @@ namespace SwayNotificationCenter {
 
             try {
                 swaync_daemon.subscribe (notification_count (),
-                                     swaync_daemon.get_dnd (),
-                                     get_visibility ());
+                                         swaync_daemon.get_dnd (),
+                                         get_visibility ());
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }
@@ -312,8 +312,8 @@ namespace SwayNotificationCenter {
             }
             try {
                 swaync_daemon.subscribe (notification_count (),
-                                     swaync_daemon.get_dnd (),
-                                     get_visibility ());
+                                         swaync_daemon.get_dnd (),
+                                         get_visibility ());
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }
@@ -333,8 +333,8 @@ namespace SwayNotificationCenter {
             scroll_to_start (list_reverse);
             try {
                 swaync_daemon.subscribe (notification_count (),
-                                     swaync_daemon.get_dnd (),
-                                     get_visibility ());
+                                         swaync_daemon.get_dnd (),
+                                         get_visibility ());
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }

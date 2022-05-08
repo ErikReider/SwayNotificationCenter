@@ -13,6 +13,7 @@ A simple notification daemon with a GTK gui for notifications and the control ce
 - A panel to view previous notifications
 - Show album art for notifications like Spotify
 - Do not disturb
+- Restores previous Do not disturb value after restart
 - Click notification to execute default action
 - Show alternative notification actions
 - Customization through a CSS file

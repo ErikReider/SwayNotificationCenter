@@ -32,6 +32,7 @@ app_sources = [
   'notification/notification.vala',
   'controlCenter/controlCenter.vala',
   'controlCenter/topAction/topAction.vala',
+  'cacher/cacher.vala',
   'functions.vala',
   constants,
 ]

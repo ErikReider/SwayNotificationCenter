@@ -2,7 +2,7 @@ namespace SwayNotificationCenter {
     [DBus (name = "org.freedesktop.Notifications")]
     public class NotiDaemon : Object {
         private uint32 noti_id = 0;
-        private bool dnd = false;
+        public bool dnd { get; set; default = false; }
         private HashTable<string, uint32> synchronous_ids =
             new HashTable<string, uint32> (str_hash, str_equal);
 
@@ -10,8 +10,17 @@ namespace SwayNotificationCenter {
         public NotiWindow noti_window;
 
         public NotiDaemon (SwayncDaemon swaync_daemon) {
+            this.notify["dnd"].connect (() => on_dnd_toggle (dnd));
+
+            // Init from state cache
+            swaync_daemon.cache_state.bind_property ("dnd-state",
+                                                     this,
+                                                     "dnd",
+                                                     BindingFlags.BIDIRECTIONAL
+                                                     | BindingFlags.SYNC_CREATE);
+
             this.noti_window = new NotiWindow ();
-            this.control_center = new ControlCenter (swaync_daemon);
+            this.control_center = new ControlCenter (swaync_daemon, this);
         }
 
         /**
@@ -30,13 +39,15 @@ namespace SwayNotificationCenter {
         }
 
         /** Sets the current Do Not Disturb state */
-        public void set_dnd (bool state) throws DBusError, IOError {
+        [DBus (name = "SetDnd")]
+        public void set_do_not_disturb (bool state) throws DBusError, IOError {
             on_dnd_toggle (state);
             dnd = state;
         }
 
         /** Gets the current Do Not Disturb state */
-        public bool get_dnd () throws DBusError, IOError {
+        [DBus (name = "GetDnd")]
+        public bool get_do_not_disturb () throws DBusError, IOError {
             return dnd;
         }
 
@@ -109,7 +120,7 @@ namespace SwayNotificationCenter {
          * as replaces_id.
          */
         [DBus (name = "Notify")]
-        public new uint32 notify (string app_name,
+        public uint32 new_notification (string app_name,
                                   uint32 replaces_id,
                                   string app_icon,
                                   string summary,
@@ -210,7 +221,7 @@ namespace SwayNotificationCenter {
 
                             string _summary = "Failed to run script: %s".printf (key);
                             string _body = "<b>Output:</b> " + error_msg;
-                            this.notify ("SwayNotificationCenter",
+                            this.new_notification ("SwayNotificationCenter",
                                          0,
                                          "dialog-error",
                                          _summary,

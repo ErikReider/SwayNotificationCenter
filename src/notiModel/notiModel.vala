@@ -83,6 +83,7 @@ namespace SwayNotificationCenter {
         public string desktop_entry { get; set; }
         public string category { get; set; }
         public bool resident { get; set; }
+        public bool transient { get; set; }
         public UrgencyLevels urgency { get; set; }
         /** Replaces the old notification with the same value of:
          * - x-canonical-private-synchronous
@@ -224,6 +225,13 @@ namespace SwayNotificationCenter {
                     case "resident":
                         if (hint_value.is_of_type (GLib.VariantType.BOOLEAN)) {
                             resident = hint_value.get_boolean ();
+                        }
+                        break;
+                    case "transient":
+                        if (hint_value.is_of_type (GLib.VariantType.BOOLEAN)) {
+                            transient = hint_value.get_boolean ();
+                        } else if (hint_value.is_of_type (GLib.VariantType.INT32)) {
+                            transient = hint_value.get_int32 () == 1;
                         }
                         break;
                     case "urgency":

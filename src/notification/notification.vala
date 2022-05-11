@@ -292,8 +292,10 @@ namespace SwayNotificationCenter {
             action_clicked (param.actions.index (index));
         }
 
-        private void action_clicked (Action action, bool is_default = false) {
-            if (action.identifier != null && action.identifier != "") {
+        private void action_clicked (Action ? action, bool is_default = false) {
+            if (action != null
+                && action.identifier != null
+                && action.identifier != "") {
                 noti_daemon.ActionInvoked (param.applied_id, action.identifier);
                 if (ConfigModel.instance.hide_on_action) {
                     try {

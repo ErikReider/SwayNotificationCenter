@@ -2,24 +2,32 @@
  * vim: ft=less
  */
 
-@define-color border-color rgb(7, 7, 7);
-@define-color bg rgb(58, 58, 58);
-@define-color bg-hover rgb(68, 68, 68);
-@define-color bg-focus rgba(68, 68, 68, 0.6);
+@define-color cc-bg rgba(0, 0, 0, 0.7);
+
+@define-color noti-border-color rgba(255, 255, 255, 0.15);
+@define-color noti-bg rgb(48, 48, 48);
+@define-color noti-bg-hover rgb(56, 56, 56);
+@define-color noti-bg-focus rgba(68, 68, 68, 0.6);
+@define-color noti-close-bg rgba(255, 255, 255, 0.1);
+@define-color noti-close-bg-hover rgba(255, 255, 255, 0.15);
+
 @define-color bg-selected rgb(0, 128, 255);
 
 .notification-row {
   outline: none;
 }
+
 .notification-row:focus,
 .notification-row:hover {
-  background: @bg-focus;
+  background: @noti-bg-focus;
 }
 
 .notification {
   border-radius: 10px;
   margin: 6px 12px;
-  box-shadow: 0px 2px 4px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
+    0 1px 3px 1px rgba(0, 0, 0, 0.7),
+    0 2px 6px 2px rgba(0, 0, 0, 0.3);
   padding: 0;
 }
 
@@ -50,15 +58,19 @@
 }
 
 .close-button {
-  background: black;
+  background: @noti-close-bg;
   color: white;
   text-shadow: none;
-  padding: 0 2px;
-  box-shadow: 0px 2px 4px 2px rgba(0, 0, 0, 0.3);
+  padding: 0 4px;
   border-radius: 100%;
+  margin-top: 10px;
+  margin-right: 16px;
+  box-shadow: none;
 }
+
 .close-button:hover {
-  background: rgb(30, 30, 30);
+  box-shadow: none;
+  background: @noti-close-bg-hover;
   transition: all 0.15s ease-in-out;
 }
 
@@ -67,13 +79,15 @@
   padding: 4px;
   margin: 0;
   box-shadow: none;
-  background: @bg;
-  border: 1px solid @border-color;
+  background: @noti-bg;
+  border: 1px solid @noti-border-color;
+  color: white;
 }
 
 .notification-default-action:hover,
 .notification-action:hover {
-  background: @bg-hover;
+  -gtk-icon-effect: none;
+  background: @noti-bg-hover;
 }
 
 .notification-default-action {
@@ -96,13 +110,13 @@
 .notification-action:first-child {
   border-bottom-left-radius: 10px;
 }
+
 .notification-action:last-child {
   border-bottom-right-radius: 10px;
-  border-right: 1px solid @border-color;
+  border-right: 1px solid @noti-border-color;
 }
 
-.image {
-}
+.image {}
 
 .body-image {
   margin-top: 6px;
@@ -118,6 +132,7 @@
 .time {
   color: white;
   text-shadow: none;
+  margin-right: 18px;
 }
 
 .body {
@@ -134,32 +149,35 @@
 .control-center-clear-all {
   color: white;
   text-shadow: none;
-  background: @bg;
-  border: 1px solid @border-color;
+  background: @noti-bg;
+  border: 1px solid @noti-border-color;
   box-shadow: none;
   border-radius: 10px;
 }
+
 .control-center-clear-all:hover {
-  background: @bg-hover;
+  background: @noti-bg-hover;
 }
 
 .control-center-dnd {
   border-radius: 10px;
-  background: @bg;
-  border: 1px solid @border-color;
+  background: @noti-bg;
+  border: 1px solid @noti-border-color;
   box-shadow: none;
 }
 
 .control-center-dnd:checked {
   background: @bg-selected;
 }
+
 .control-center-dnd slider {
-  background: @bg-hover;
+  background: @noti-bg-hover;
 }
 
 .control-center {
-  background: rgba(0, 0, 0, 0.7);
+  background: @cc-bg;
 }
+
 .control-center-list {
   background: transparent;
 }

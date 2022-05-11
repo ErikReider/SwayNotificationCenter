@@ -231,30 +231,21 @@
                                 <property name="receives-default">False</property>
                                 <property name="halign">center</property>
                                 <property name="valign">center</property>
-                                <property name="margin-left">4</property>
-                                <property name="margin-right">4</property>
                                 <property name="margin-start">4</property>
                                 <property name="margin-end">4</property>
                                 <property name="margin-top">2</property>
                                 <property name="margin-bottom">2</property>
                                 <property name="relief">none</property>
                                 <child>
-                                  <object class="GtkLabel">
+                                  <object class="GtkImage">
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
-                                    <property name="halign">center</property>
-                                    <property name="valign">center</property>
-                                    <property name="xpad">7</property>
-                                    <property name="label" translatable="yes">×</property>
-                                    <property name="justify">center</property>
-                                    <attributes>
-                                      <attribute name="size" value="16384"/>
-                                    </attributes>
+                                    <property name="icon-name">window-close-symbolic</property>
                                   </object>
                                 </child>
                                 <style>
-                                  <class name="circular"/>
                                   <class name="close-button"/>
+                                  <class name="circular"/>
                                 </style>
                               </object>
                             </child>

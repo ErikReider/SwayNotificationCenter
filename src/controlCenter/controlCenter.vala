@@ -313,13 +313,6 @@ namespace SwayNotificationCenter {
                     break;
                 }
             }
-            try {
-                swaync_daemon.subscribe (notification_count (),
-                                         swaync_daemon.get_dnd (),
-                                         get_visibility ());
-            } catch (Error e) {
-                stderr.printf (e.message + "\n");
-            }
         }
 
         public void add_notification (NotifyParams param,

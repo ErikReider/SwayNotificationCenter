@@ -61,6 +61,10 @@ namespace SwayNotificationCenter {
             if (!timeout) {
                 control_center.close_notification (id);
                 NotificationClosed (id, ClosedReasons.DISMISSED);
+
+                swaync_daemon.subscribe (control_center.notification_count (),
+                                         dnd,
+                                         control_center.get_visibility ());
             }
         }
 

@@ -275,6 +275,9 @@ namespace SwayNotificationCenter {
                     if (noti != null) noti.set_time ();
                 }
             }
+            swaync_daemon.subscribe (notification_count (),
+                                     noti_daemon.dnd,
+                                     this.visible);
         }
 
         public void set_switch_dnd_state (bool state) {

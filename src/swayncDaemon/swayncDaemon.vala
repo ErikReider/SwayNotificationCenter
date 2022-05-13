@@ -119,26 +119,12 @@ namespace SwayNotificationCenter {
             if (noti_daemon.control_center.toggle_visibility ()) {
                 noti_daemon.set_noti_window_visibility (false);
             }
-            try {
-                subscribe (noti_daemon.control_center.notification_count (),
-                           get_dnd (),
-                           get_visibility ());
-            } catch (Error e) {
-                stderr.printf (e.message + "\n");
-            }
         }
 
         /** Sets the visibility of the controlcenter */
         public void set_visibility (bool visibility) throws DBusError, IOError {
             noti_daemon.control_center.set_visibility (visibility);
             if (visibility) noti_daemon.set_noti_window_visibility (false);
-            try {
-                subscribe (noti_daemon.control_center.notification_count (),
-                           get_dnd (),
-                           visibility);
-            } catch (Error e) {
-                stderr.printf (e.message + "\n");
-            }
         }
 
         /** Toggles the current Do Not Disturb state */

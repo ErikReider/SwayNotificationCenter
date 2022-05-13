@@ -186,8 +186,8 @@ namespace SwayNotificationCenter {
                     noti_window.add_notification (param, this);
                 }
             }
-            // Only add notification to CC if it isn't IGNORED
-            if (state != NotificationStatusEnum.IGNORED) {
+            // Only add notification to CC if it isn't IGNORED and not transient
+            if (state != NotificationStatusEnum.IGNORED && !param.transient) {
                 control_center.add_notification (param, this);
             }
 

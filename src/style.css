@@ -23,7 +23,7 @@
 }
 
 .notification {
-  border-radius: 10px;
+  border-radius: 12px;
   margin: 6px 12px;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
     0 1px 3px 1px rgba(0, 0, 0, 0.7),
@@ -35,26 +35,26 @@
 .low {
   background: yellow;
   padding: 6px;
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
 .normal {
   background: green;
   padding: 6px;
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
 .critical {
   background: red;
   padding: 6px;
-  border-radius: 10px;
+  border-radius: 12px;
 }
 */
 
 .notification-content {
   background: transparent;
   padding: 6px;
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
 .close-button {
@@ -91,7 +91,7 @@
 }
 
 .notification-default-action {
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
 /* When alternative actions are visible */
@@ -121,7 +121,7 @@
 .body-image {
   margin-top: 6px;
   background-color: white;
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
 .summary {
@@ -152,7 +152,7 @@
   background: @noti-bg;
   border: 1px solid @noti-border-color;
   box-shadow: none;
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
 .control-center-clear-all:hover {
@@ -160,7 +160,7 @@
 }
 
 .control-center-dnd {
-  border-radius: 10px;
+  border-radius: 12px;
   background: @noti-bg;
   border: 1px solid @noti-border-color;
   box-shadow: none;

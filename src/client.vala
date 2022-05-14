@@ -1,3 +1,9 @@
+public struct SwayncDaemonData {
+    public bool dnd;
+    public bool cc_open;
+    public uint count;
+}
+
 [DBus (name = "org.erikreider.swaync.cc")]
 interface CcDaemon : GLib.Object {
 
@@ -20,6 +26,9 @@ interface CcDaemon : GLib.Object {
     public abstract bool toggle_dnd () throws DBusError, IOError;
 
     public abstract void set_visibility (bool value) throws DBusError, IOError;
+
+    [DBus (name = "GetSubscribeData")]
+    public abstract SwayncDaemonData get_subscribe_data () throws Error;
 
     public signal void subscribe (uint count, bool dnd, bool cc_open);
 }
@@ -58,9 +67,8 @@ private void on_subscribe (uint count, bool dnd, bool cc_open) {
 
 private void print_subscribe () {
     try {
-        on_subscribe (cc_daemon.notification_count (),
-                      cc_daemon.get_dnd (),
-                      cc_daemon.get_visibility ());
+        SwayncDaemonData data = cc_daemon.get_subscribe_data ();
+        on_subscribe (data.count, data.dnd, data.cc_open);
     } catch (Error e) {
         on_subscribe (0, false, false);
     }
@@ -86,9 +94,8 @@ private void on_subscribe_waybar (uint count, bool dnd, bool cc_open) {
 
 private void print_subscribe_waybar () {
     try {
-        on_subscribe_waybar (cc_daemon.notification_count (),
-                             cc_daemon.get_dnd (),
-                             cc_daemon.get_visibility ());
+        SwayncDaemonData data = cc_daemon.get_subscribe_data ();
+        on_subscribe_waybar (data.count, data.dnd, data.cc_open);
     } catch (Error e) {
         on_subscribe_waybar (0, false, false);
     }

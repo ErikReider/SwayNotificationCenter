@@ -4,6 +4,9 @@ project('sway-notificaton-center', ['c', 'vala'],
   default_options: [ 'warning_level=2' ],
 )
 
+add_project_arguments(['--enable-gobject-tracing'], language: 'vala')
+add_project_arguments(['--enable-checking'], language: 'vala')
+
 subdir('src')
 
 datadir = get_option('datadir')

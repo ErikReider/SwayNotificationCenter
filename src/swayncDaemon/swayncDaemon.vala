@@ -1,4 +1,10 @@
 namespace SwayNotificationCenter {
+    public struct Data {
+        public bool dnd;
+        public bool cc_open;
+        public uint count;
+    }
+
     [DBus (name = "org.erikreider.swaync.cc")]
     public class SwayncDaemon : Object {
         public StateCache cache_state;
@@ -55,6 +61,16 @@ namespace SwayNotificationCenter {
                 stderr.printf ("Could not register notification service\n");
                 Process.exit (1);
             }
+        }
+
+        /** Gets subscribe data but in one call */
+        [DBus (name = "GetSubscribeData")]
+        public Data get_subscribe_data () throws Error {
+            return Data () {
+                       dnd = get_dnd (),
+                       cc_open = get_visibility (),
+                       count = notification_count (),
+            };
         }
 
         /**

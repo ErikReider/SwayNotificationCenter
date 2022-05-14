@@ -271,9 +271,13 @@ namespace SwayNotificationCenter {
         /* Properties */
 
         /** The notifications and controlcenters horizontal alignment */
-        public PositionX position_x { get; set; default = PositionX.RIGHT; }
+        public PositionX positionX { // vala-lint=naming-convention
+            get; set; default = PositionX.RIGHT;
+        }
         /** The notifications and controlcenters vertical alignment */
-        public PositionY position_y { get; set; default = PositionY.TOP; }
+        public PositionY positionY { // vala-lint=naming-convention
+            get; set; default = PositionY.TOP;
+        }
 
         /** The timeout for notifications with NORMAL priority */
         private const int TIMEOUT_DEFAULT = 10;

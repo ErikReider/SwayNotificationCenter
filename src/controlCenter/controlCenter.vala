@@ -162,7 +162,7 @@ namespace SwayNotificationCenter {
                                       ConfigModel.instance.control_center_margin_left);
 
             // Anchor to north/south edges as needed
-            bool anchor_top = ConfigModel.instance.position_y == PositionY.TOP;
+            bool anchor_top = ConfigModel.instance.positionY == PositionY.TOP;
             GtkLayerShell.set_anchor (this,
                                       GtkLayerShell.Edge.TOP,
                                       ConfigModel.instance.fit_to_screen || anchor_top);
@@ -170,8 +170,8 @@ namespace SwayNotificationCenter {
                                       GtkLayerShell.Edge.BOTTOM,
                                       ConfigModel.instance.fit_to_screen || !anchor_top);
 
-            bool anchor_left = ConfigModel.instance.position_x == PositionX.LEFT;
-            bool anchor_right = ConfigModel.instance.position_x == PositionX.RIGHT;
+            bool anchor_left = ConfigModel.instance.positionX == PositionX.LEFT;
+            bool anchor_right = ConfigModel.instance.positionX == PositionX.RIGHT;
             GtkLayerShell.set_anchor (this,
                                       GtkLayerShell.Edge.RIGHT,
                                       anchor_right);
@@ -179,7 +179,7 @@ namespace SwayNotificationCenter {
                                       GtkLayerShell.Edge.LEFT,
                                       anchor_left);
 
-            switch (ConfigModel.instance.position_y) {
+            switch (ConfigModel.instance.positionY) {
                 case PositionY.BOTTOM:
                     list_reverse = true;
                     list_align = Gtk.Align.END;

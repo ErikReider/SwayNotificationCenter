@@ -75,7 +75,7 @@ namespace SwayNotificationCenter {
         }
 
         private void set_anchor () {
-            switch (ConfigModel.instance.position_x) {
+            switch (ConfigModel.instance.positionX) {
                 case PositionX.LEFT:
                     GtkLayerShell.set_anchor (
                         this, GtkLayerShell.Edge.RIGHT, false);
@@ -95,7 +95,7 @@ namespace SwayNotificationCenter {
                         this, GtkLayerShell.Edge.RIGHT, true);
                     break;
             }
-            switch (ConfigModel.instance.position_y) {
+            switch (ConfigModel.instance.positionY) {
                 case PositionY.BOTTOM:
                     GtkLayerShell.set_anchor (
                         this, GtkLayerShell.Edge.TOP, false);

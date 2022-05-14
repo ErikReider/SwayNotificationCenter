@@ -159,7 +159,7 @@ namespace SwayNotificationCenter {
 
             this.carousel.set_animation_duration (this.transition_time);
             // Changes the swipte direction depending on the notifications X position
-            switch (ConfigModel.instance.position_x) {
+            switch (ConfigModel.instance.positionX) {
                 case PositionX.LEFT:
                     this.carousel.reorder (event_box, 0);
                     this.carousel_empty_widget_index = 1;

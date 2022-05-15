@@ -425,7 +425,8 @@ namespace SwayNotificationCenter {
          * Set `fit_to_screen` to true to ignore the height setting.
          */
         private const int CONTROL_CENTER_MINIMUM_HEIGHT = 300;
-        private int _control_center_height = CONTROL_CENTER_MINIMUM_HEIGHT;
+        private const int CONTROL_CENTER_DEFAULT_HEIGHT = 300;
+        private int _control_center_height = CONTROL_CENTER_DEFAULT_HEIGHT;
         public int control_center_height {
             get {
                 return _control_center_height;
@@ -440,7 +441,8 @@ namespace SwayNotificationCenter {
          * Notification center's width, in pixels.
          */
         private const int CONTROL_CENTER_MINIMUM_WIDTH = 300;
-        private int _control_center_width = CONTROL_CENTER_MINIMUM_WIDTH;
+        private const int CONTROL_CENTER_DEFAULT_WIDTH = 500;
+        private int _control_center_width = CONTROL_CENTER_DEFAULT_WIDTH;
         public int control_center_width {
             get {
                 return _control_center_width;

@@ -80,6 +80,7 @@
                                           <object class="GtkBox">
                                             <property name="visible">True</property>
                                             <property name="can-focus">False</property>
+                                            <property name="valign">center</property>
                                             <property name="margin-end">14</property>
                                             <property name="hexpand">True</property>
                                             <property name="vexpand">True</property>
@@ -88,6 +89,7 @@
                                               <object class="GtkBox">
                                                 <property name="visible">True</property>
                                                 <property name="can-focus">False</property>
+                                                <property name="valign">center</property>
                                                 <child>
                                                   <object class="GtkLabel" id="summary">
                                                     <property name="visible">True</property>
@@ -113,6 +115,7 @@
                                                   <object class="GtkLabel" id="time">
                                                     <property name="visible">True</property>
                                                     <property name="can-focus">False</property>
+                                                    <property name="valign">start</property>
                                                     <property name="margin-start">6</property>
                                                     <property name="track-visited-links">False</property>
                                                     <style>
@@ -129,7 +132,7 @@
                                               </object>
                                               <packing>
                                                 <property name="expand">False</property>
-                                                <property name="fill">True</property>
+                                                <property name="fill">False</property>
                                                 <property name="position">0</property>
                                               </packing>
                                             </child>
@@ -138,7 +141,6 @@
                                                 <property name="visible">True</property>
                                                 <property name="can-focus">False</property>
                                                 <property name="hexpand">True</property>
-                                                <property name="vexpand">True</property>
                                                 <property name="wrap">True</property>
                                                 <property name="wrap-mode">word-char</property>
                                                 <property name="ellipsize">end</property>
@@ -150,8 +152,8 @@
                                                 </style>
                                               </object>
                                               <packing>
-                                                <property name="expand">True</property>
-                                                <property name="fill">True</property>
+                                                <property name="expand">False</property>
+                                                <property name="fill">False</property>
                                                 <property name="position">1</property>
                                               </packing>
                                             </child>

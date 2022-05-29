@@ -337,7 +337,7 @@ namespace SwayNotificationCenter {
         public ImageVisibility image_visibility {
             get;
             set;
-            default = ImageVisibility.ALWAYS;
+            default = ImageVisibility.WHEN_AVAILABLE;
         }
 
         /**

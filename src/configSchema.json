@@ -84,7 +84,7 @@
     "image-visibility": {
       "type": "string",
       "description": "An explanation about the purpose of this instance.",
-      "default": "always",
+      "default": "when-available",
       "enum": ["always", "when-available", "never"]
     },
     "transition-time": {

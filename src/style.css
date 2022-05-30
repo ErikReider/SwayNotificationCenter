@@ -61,17 +61,21 @@
   background: @noti-close-bg;
   color: white;
   text-shadow: none;
-  padding: 0 4px;
+  padding: 0;
   border-radius: 100%;
   margin-top: 10px;
   margin-right: 16px;
   box-shadow: none;
+  border: none;
+  min-width: 24px;
+  min-height: 24px;
 }
 
 .close-button:hover {
   box-shadow: none;
   background: @noti-close-bg-hover;
   transition: all 0.15s ease-in-out;
+  border: none;
 }
 
 .notification-default-action,
@@ -173,6 +177,7 @@
 
 .control-center-dnd slider {
   background: @noti-bg-hover;
+  border-radius: 12px;
 }
 
 .control-center {

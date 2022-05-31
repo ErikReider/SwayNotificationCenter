@@ -63,7 +63,7 @@
                                           <object class="GtkImage" id="img">
                                             <property name="visible">True</property>
                                             <property name="can-focus">False</property>
-                                            <property name="valign">start</property>
+                                            <property name="valign">center</property>
                                             <property name="margin-end">12</property>
                                             <property name="icon_size">6</property>
                                             <style>

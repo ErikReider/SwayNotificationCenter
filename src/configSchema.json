@@ -39,6 +39,12 @@
       "description": "The margin (in pixels) at the left of the notification center. 0 to disable",
       "default": 0
     },
+    "notification-icon-size": {
+      "type": "integer",
+      "description": "The notification icon size (in pixels)",
+      "default": 64,
+      "minimum": 16
+    },
     "timeout": {
       "type": "integer",
       "description": "The notification timeout for notifications with normal priority",

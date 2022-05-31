@@ -37,7 +37,7 @@ namespace SwayNotificationCenter {
         unowned Gtk.Image body_image;
 
         public static Gtk.IconSize icon_size = Gtk.IconSize.INVALID;
-        public static int icon_image_size = 64;
+        private int notification_icon_size { get; default = ConfigModel.instance.notification_icon_size; }
 
         private uint timeout_id = 0;
 
@@ -402,9 +402,9 @@ namespace SwayNotificationCenter {
                 return;
             }
 
-            img.set_pixel_size (Notification.icon_image_size);
-            img.height_request = Notification.icon_image_size;
-            img.width_request = Notification.icon_image_size;
+            img.set_pixel_size (notification_icon_size);
+            img.height_request = notification_icon_size;
+            img.width_request = notification_icon_size;
 
             var img_path_exists = File.new_for_path (
                 param.image_path ?? "").query_exists ();
@@ -412,15 +412,21 @@ namespace SwayNotificationCenter {
                 param.app_icon ?? "").query_exists ();
 
             if (param.image_data.is_initialized) {
-                Functions.set_image_data (param.image_data, img);
+                Functions.set_image_data (param.image_data, img,
+                                          notification_icon_size);
             } else if (param.image_path != null &&
                        param.image_path != "" &&
                        img_path_exists) {
-                Functions.set_image_path (param.image_path, img, img_path_exists);
+                Functions.set_image_path (param.image_path, img,
+                                          notification_icon_size,
+                                          img_path_exists);
             } else if (param.app_icon != null && param.app_icon != "") {
-                Functions.set_image_path (param.app_icon, img, app_icon_exists);
+                Functions.set_image_path (param.app_icon, img,
+                                          notification_icon_size,
+                                          app_icon_exists);
             } else if (param.icon_data.is_initialized) {
-                Functions.set_image_data (param.icon_data, img);
+                Functions.set_image_data (param.icon_data, img,
+                                          notification_icon_size);
             } else {
                 // Get the app icon
                 GLib.Icon ? icon = null;

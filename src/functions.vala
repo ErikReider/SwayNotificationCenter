@@ -2,6 +2,7 @@ namespace SwayNotificationCenter {
     public class Functions {
         public static void set_image_path (owned string path,
                                            Gtk.Image img,
+                                           int icon_size,
                                            bool file_exists) {
             if ((path.length > 6 && path.slice (0, 7) == "file://") || file_exists) {
                 // Try as a URI (file:// is the only URI schema supported right now)
@@ -10,8 +11,8 @@ namespace SwayNotificationCenter {
 
                     var pixbuf = new Gdk.Pixbuf.from_file_at_scale (
                         path,
-                        Notification.icon_image_size * img.scale_factor,
-                        Notification.icon_image_size * img.scale_factor,
+                        icon_size * img.scale_factor,
+                        icon_size * img.scale_factor,
                         true);
                     var surface = Gdk.cairo_surface_create_from_pixbuf (
                         pixbuf,
@@ -32,7 +33,7 @@ namespace SwayNotificationCenter {
             }
         }
 
-        public static void set_image_data (ImageData data, Gtk.Image img) {
+        public static void set_image_data (ImageData data, Gtk.Image img, int icon_size) {
             // Rebuild and scale the image
             var pixbuf = new Gdk.Pixbuf.with_unowned_data (data.data,
                                                            Gdk.Colorspace.RGB,
@@ -44,8 +45,8 @@ namespace SwayNotificationCenter {
                                                            null);
 
             pixbuf = pixbuf.scale_simple (
-                Notification.icon_image_size * img.scale_factor,
-                Notification.icon_image_size * img.scale_factor,
+                icon_size * img.scale_factor,
+                icon_size * img.scale_factor,
                 Gdk.InterpType.BILINEAR);
             var surface = Gdk.cairo_surface_create_from_pixbuf (
                 pixbuf,

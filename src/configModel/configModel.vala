@@ -453,6 +453,22 @@ namespace SwayNotificationCenter {
             }
         }
 
+        /**
+         * Notification icon size, in pixels.
+         */
+        private const int NOTIFICATION_ICON_MINIMUM_SIZE = 16;
+        private const int NOTIFICATION_ICON_DEFAULT_SIZE = 64;
+        private int _notification_icon_size = NOTIFICATION_ICON_DEFAULT_SIZE;
+        public int notification_icon_size {
+            get {
+                return _notification_icon_size;
+            }
+            set {
+                _notification_icon_size = value > NOTIFICATION_ICON_MINIMUM_SIZE
+                    ? value : NOTIFICATION_ICON_MINIMUM_SIZE;
+            }
+        }
+
         /* Methods */
 
         /**

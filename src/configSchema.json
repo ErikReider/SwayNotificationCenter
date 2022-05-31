@@ -45,6 +45,18 @@
       "default": 64,
       "minimum": 16
     },
+    "notification-body-image-height": {
+      "type": "integer",
+      "description": "The notification body image height (in pixels)",
+      "default": 100,
+      "minimum": 100
+    },
+    "notification-body-image-width": {
+      "type": "integer",
+      "description": "The notification body image width (in pixels)",
+      "default": 200,
+      "minimum": 200
+    },
     "timeout": {
       "type": "integer",
       "description": "The notification timeout for notifications with normal priority",

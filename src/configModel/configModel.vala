@@ -469,6 +469,40 @@ namespace SwayNotificationCenter {
             }
         }
 
+        /**
+         * Notification body image height, in pixels.
+         */
+        private const int NOTIFICATION_BODY_IMAGE_MINIMUM_HEIGHT = 100;
+        private const int NOTIFICATION_BODY_IMAGE_DEFAULT_HEIGHT = 100;
+        private int _notification_body_image_height = NOTIFICATION_BODY_IMAGE_DEFAULT_HEIGHT;
+        public int notification_body_image_height {
+            get {
+                return _notification_body_image_height;
+            }
+            set {
+                _notification_body_image_height =
+                    value > NOTIFICATION_BODY_IMAGE_MINIMUM_HEIGHT
+                    ? value : NOTIFICATION_BODY_IMAGE_MINIMUM_HEIGHT;
+            }
+        }
+
+        /**
+         * Notification body image width, in pixels.
+         */
+        private const int NOTIFICATION_BODY_IMAGE_MINIMUM_WIDTH = 200;
+        private const int NOTIFICATION_BODY_IMAGE_DEFAULT_WIDTH = 200;
+        private int _notification_body_image_width = NOTIFICATION_BODY_IMAGE_DEFAULT_WIDTH;
+        public int notification_body_image_width {
+            get {
+                return _notification_body_image_width;
+            }
+            set {
+                _notification_body_image_width =
+                    value > NOTIFICATION_BODY_IMAGE_MINIMUM_WIDTH
+                    ? value : NOTIFICATION_BODY_IMAGE_MINIMUM_WIDTH;
+            }
+        }
+
         /* Methods */
 
         /**

@@ -39,6 +39,15 @@ namespace SwayNotificationCenter {
         public static Gtk.IconSize icon_size = Gtk.IconSize.INVALID;
         private int notification_icon_size { get; default = ConfigModel.instance.notification_icon_size; }
 
+        private int notification_body_image_height {
+            get;
+            default = ConfigModel.instance.notification_body_image_height;
+        }
+        private int notification_body_image_width {
+            get;
+            default = ConfigModel.instance.notification_body_image_width;
+        }
+
         private uint timeout_id = 0;
 
         public bool is_timed { get; construct; default = false; }
@@ -236,12 +245,10 @@ namespace SwayNotificationCenter {
                         var img = img_paths[0];
                         var file = File.new_for_path (img);
                         if (img.length > 0 && file.query_exists ()) {
-                            const int MAX_WIDTH = 200;
-                            const int MAX_HEIGHT = 100;
                             var buf = new Gdk.Pixbuf.from_file_at_scale (
                                 file.get_path (),
-                                MAX_WIDTH,
-                                MAX_HEIGHT,
+                                notification_body_image_width,
+                                notification_body_image_height,
                                 true);
                             this.body_image.set_from_pixbuf (buf);
                             this.body_image.show ();

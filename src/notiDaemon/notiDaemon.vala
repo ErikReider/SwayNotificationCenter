@@ -7,7 +7,7 @@ namespace SwayNotificationCenter {
             new HashTable<string, uint32> (str_hash, str_equal);
 
         public ControlCenter control_center;
-        public NotiWindow noti_window;
+        public NotificationWindow noti_window;
 
         public NotiDaemon (SwayncDaemon swaync_daemon) {
             this.notify["dnd"].connect (() => on_dnd_toggle (dnd));
@@ -19,7 +19,7 @@ namespace SwayNotificationCenter {
                                                      BindingFlags.BIDIRECTIONAL
                                                      | BindingFlags.SYNC_CREATE);
 
-            this.noti_window = new NotiWindow ();
+            this.noti_window = new NotificationWindow ();
             this.control_center = new ControlCenter (swaync_daemon, this);
         }
 

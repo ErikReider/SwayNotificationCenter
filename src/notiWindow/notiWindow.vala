@@ -1,41 +1,6 @@
 namespace SwayNotificationCenter {
-    public class NotiWindow {
-        private NotificationWindow notis = new NotificationWindow ();
-
-        private unowned NotificationWindow notificationWindow {
-            get {
-                if (!notis.get_realized () || notis.closed) {
-                    notis = new NotificationWindow ();
-                }
-                return notis;
-            }
-        }
-
-        public void change_visibility (bool value) {
-            notificationWindow.change_visibility (value);
-        }
-
-        public void close_all_notifications () {
-            notificationWindow.close_all_notifications ();
-        }
-
-        public void add_notification (NotifyParams param,
-                                      NotiDaemon noti_daemon) {
-            notificationWindow.add_notification (param, noti_daemon);
-        }
-
-        public void close_notification (uint32 id) {
-            notificationWindow.close_notification (id);
-        }
-
-        public uint32 ? get_latest_notification () {
-            if (!notis.get_realized () || notis.closed) return null;
-            return notificationWindow.get_latest_notification ();
-        }
-    }
-
     [GtkTemplate (ui = "/org/erikreider/sway-notification-center/notiWindow/notiWindow.ui")]
-    private class NotificationWindow : Gtk.ApplicationWindow {
+    public class NotificationWindow : Gtk.ApplicationWindow {
 
         [GtkChild]
         unowned Gtk.ScrolledWindow scrolled_window;
@@ -47,8 +12,6 @@ namespace SwayNotificationCenter {
         private bool list_reverse = false;
 
         private double last_upper = 0;
-
-        public bool closed = false;
 
         private const int MAX_HEIGHT = 600;
 
@@ -151,10 +114,7 @@ namespace SwayNotificationCenter {
             }
 
             if (!this.get_realized ()) return;
-            if (box.get_children ().length () == 0) {
-                this.closed = true;
-                this.close ();
-            }
+            if (box.get_children ().length () == 0) this.hide ();
         }
 
         public void add_notification (NotifyParams param,
@@ -171,7 +131,10 @@ namespace SwayNotificationCenter {
                 box.pack_end (noti);
             }
             this.grab_focus ();
-            this.show ();
+            if (!this.get_mapped () || !this.get_realized ()) {
+                this.set_anchor ();
+                this.show ();
+            }
 
             // IMPORTANT: queue a resize event to force the layout to be recomputed
             noti.queue_resize ();

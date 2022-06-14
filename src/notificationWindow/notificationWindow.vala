@@ -1,5 +1,5 @@
 namespace SwayNotificationCenter {
-    [GtkTemplate (ui = "/org/erikreider/sway-notification-center/notiWindow/notiWindow.ui")]
+    [GtkTemplate (ui = "/org/erikreider/sway-notification-center/notificationWindow/notificationWindow.ui")]
     public class NotificationWindow : Gtk.ApplicationWindow {
 
         [GtkChild]

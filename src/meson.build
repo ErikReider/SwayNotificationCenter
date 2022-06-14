@@ -28,7 +28,7 @@ app_sources = [
   'swayncDaemon/swayncDaemon.vala',
   'notiDaemon/notiDaemon.vala',
   'notiModel/notiModel.vala',
-  'notiWindow/notiWindow.vala',
+  'notificationWindow/notificationWindow.vala',
   'notification/notification.vala',
   'controlCenter/controlCenter.vala',
   'controlCenter/topAction/topAction.vala',

@@ -191,3 +191,7 @@
 .floating-notifications {
   background: transparent;
 }
+
+.blank-window {
+  background: alpha(black, 0.25);
+}

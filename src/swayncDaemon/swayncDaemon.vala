@@ -11,7 +11,7 @@ namespace SwayNotificationCenter {
 
         public NotiDaemon noti_daemon;
 
-        private Array<BlankWindow> blankWindows = new Array<BlankWindow>();
+        private Array<BlankWindow> blank_windows = new Array<BlankWindow> ();
         private unowned Gdk.Display ? display = Gdk.Display.get_default ();
 
         public SwayncDaemon () {
@@ -96,12 +96,12 @@ namespace SwayNotificationCenter {
                                        bool visible) {
             var win = new BlankWindow (display, monitor, this);
             win.set_visible (visible);
-            blankWindows.append_val (win);
+            blank_windows.append_val (win);
         }
 
         private void init_blank_windows (bool visible) {
             clear_blank_windows ();
-            // Add a window to all displays
+            // Add a window to all monitors
             for (int i = 0; i < display.get_n_monitors (); i++) {
                 unowned Gdk.Monitor ? monitor = display.get_monitor (i);
                 if (monitor == null) continue;
@@ -110,17 +110,17 @@ namespace SwayNotificationCenter {
         }
 
         private void clear_blank_windows () {
-            while (blankWindows.length > 0) {
-                uint i = blankWindows.length - 1;
-                unowned BlankWindow ? win = blankWindows.index (i);
+            while (blank_windows.length > 0) {
+                uint i = blank_windows.length - 1;
+                unowned BlankWindow ? win = blank_windows.index (i);
                 win.close ();
-                blankWindows.remove_index (i);
+                blank_windows.remove_index (i);
             }
         }
 
         [DBus (visible = false)]
         public void set_blank_window_visibility (bool visibility) {
-            foreach (unowned BlankWindow win in blankWindows) {
+            foreach (unowned BlankWindow win in blank_windows) {
                 win.set_visible (visibility);
             }
         }

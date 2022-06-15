@@ -120,7 +120,7 @@ namespace SwayNotificationCenter {
 
         [DBus (visible = false)]
         public void set_blank_window_visibility (bool visibility) {
-            foreach (unowned BlankWindow win in blank_windows) {
+            foreach (unowned BlankWindow win in blank_windows.data) {
                 win.set_visible (visibility);
             }
         }

@@ -6,6 +6,7 @@ namespace SwayNotificationCenter {
     public void main (string[] args) {
         Gtk.init (ref args);
         Hdy.init ();
+        Functions.init ();
 
         if (args.length > 0) {
             for (uint i = 1; i < args.length; i++) {

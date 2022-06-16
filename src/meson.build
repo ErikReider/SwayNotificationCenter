@@ -33,6 +33,7 @@ app_sources = [
   'controlCenter/controlCenter.vala',
   'controlCenter/topAction/topAction.vala',
   'cacher/cacher.vala',
+  'blankWindow/blankWindow.vala',
   'functions.vala',
   constants,
 ]

@@ -11,6 +11,9 @@ namespace SwayNotificationCenter {
 
         public NotiDaemon noti_daemon;
 
+        private Array<BlankWindow> blank_windows = new Array<BlankWindow> ();
+        private unowned Gdk.Display ? display = Gdk.Display.get_default ();
+
         public SwayncDaemon () {
             this.cache_state = Cacher.instance.get_state_cache ();
             this.cache_state.notify.connect ((x, r) => {
@@ -51,6 +54,31 @@ namespace SwayNotificationCenter {
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }
+
+            /// Blank windows
+
+            if (display == null) return;
+            init_blank_windows (false);
+
+            display.closed.connect ((is_error) => {
+                clear_blank_windows ();
+                if (is_error) stderr.printf ("Display closed due to error!\n");
+            });
+
+            display.opened.connect ((d) => {
+                bool visibility = noti_daemon.control_center.get_visibility ();
+                init_blank_windows (visibility);
+            });
+
+            display.monitor_added.connect ((d, m) => {
+                bool visibility = noti_daemon.control_center.get_visibility ();
+                add_blank_window (d, m, visibility);
+            });
+
+            display.monitor_removed.connect ((monitor) => {
+                bool visibility = noti_daemon.control_center.get_visibility ();
+                init_blank_windows (visibility);
+            });
         }
 
         private void on_noti_bus_aquired (DBusConnection conn) {
@@ -62,6 +90,42 @@ namespace SwayNotificationCenter {
                 Process.exit (1);
             }
         }
+
+        private void add_blank_window (Gdk.Display display,
+                                       Gdk.Monitor monitor,
+                                       bool visible) {
+            var win = new BlankWindow (display, monitor, this);
+            win.set_visible (visible);
+            blank_windows.append_val (win);
+        }
+
+        private void init_blank_windows (bool visible) {
+            clear_blank_windows ();
+            // Add a window to all monitors
+            for (int i = 0; i < display.get_n_monitors (); i++) {
+                unowned Gdk.Monitor ? monitor = display.get_monitor (i);
+                if (monitor == null) continue;
+                add_blank_window (display, monitor, visible);
+            }
+        }
+
+        private void clear_blank_windows () {
+            while (blank_windows.length > 0) {
+                uint i = blank_windows.length - 1;
+                unowned BlankWindow ? win = blank_windows.index (i);
+                win.close ();
+                blank_windows.remove_index (i);
+            }
+        }
+
+        [DBus (visible = false)]
+        public void set_blank_window_visibility (bool visibility) {
+            foreach (unowned BlankWindow win in blank_windows.data) {
+                win.set_visible (visibility);
+            }
+        }
+
+        /// DBus
 
         /** Gets subscribe data but in one call */
         [DBus (name = "GetSubscribeData")]

@@ -275,6 +275,7 @@ namespace SwayNotificationCenter {
                     if (noti != null) noti.set_time ();
                 }
             }
+            swaync_daemon.set_blank_window_visibility (this.visible);
             swaync_daemon.subscribe (notification_count (),
                                      noti_daemon.dnd,
                                      this.visible);

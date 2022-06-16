@@ -1,5 +1,15 @@
 namespace SwayNotificationCenter {
     public class Functions {
+        private static Gtk.CssProvider system_css_provider;
+        private static Gtk.CssProvider user_css_provider;
+
+        private Functions () {}
+
+        public static void init () {
+            system_css_provider = new Gtk.CssProvider ();
+            user_css_provider = new Gtk.CssProvider ();
+        }
+
         public static void set_image_path (owned string path,
                                            Gtk.Image img,
                                            int icon_size,
@@ -55,29 +65,45 @@ namespace SwayNotificationCenter {
             img.set_from_surface (surface);
         }
 
+        /** Load the package provided CSS file as a base.
+         * Without this, an empty user CSS file would result in widgets
+         * with default GTK style properties
+         */
         public static bool load_css (string ? style_path) {
             try {
-                Gtk.CssProvider css_provider = new Gtk.CssProvider ();
-                css_provider.load_from_path (get_style_path (style_path));
+                // Load packaged CSS as backup
+                string system_css = get_style_path (null, true);
+                system_css_provider.load_from_path (system_css);
                 Gtk.StyleContext.add_provider_for_screen (
                     Gdk.Screen.get_default (),
-                    css_provider,
+                    system_css_provider,
+                    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+                // Load user CSS
+                string user_css = get_style_path (style_path);
+                user_css_provider.load_from_path (user_css);
+                Gtk.StyleContext.add_provider_for_screen (
+                    Gdk.Screen.get_default (),
+                    user_css_provider,
                     Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
                 return true;
             } catch (Error e) {
-                print ("Error: %s\n", e.message);
+                print ("Load CSS Error: %s\n", e.message);
+                return false;
             }
-            return false;
         }
 
-        public static string get_style_path (string ? custom_path) {
+        public static string get_style_path (string ? custom_path,
+                                             bool only_system = false) {
             string[] paths = {};
             if (custom_path != null && custom_path.length > 0) {
                 paths += custom_path;
             }
-            paths += Path.build_path (Path.DIR_SEPARATOR.to_string (),
-                                      GLib.Environment.get_user_config_dir (),
-                                      "swaync/style.css");
+            if (!only_system) {
+                paths += Path.build_path (Path.DIR_SEPARATOR.to_string (),
+                                          GLib.Environment.get_user_config_dir (),
+                                          "swaync/style.css");
+            }
 
             foreach (var path in GLib.Environment.get_system_config_dirs ()) {
                 paths += Path.build_path (Path.DIR_SEPARATOR.to_string (),

@@ -7,20 +7,12 @@ namespace SwayNotificationCenter {
 
     [DBus (name = "org.erikreider.swaync.cc")]
     public class SwayncDaemon : Object {
-        public StateCache cache_state;
-
         public NotiDaemon noti_daemon;
 
         private Array<BlankWindow> blank_windows = new Array<BlankWindow> ();
         private unowned Gdk.Display ? display = Gdk.Display.get_default ();
 
         public SwayncDaemon () {
-            this.cache_state = Cacher.instance.get_state_cache ();
-            this.cache_state.notify.connect ((x, r) => {
-                debug ("State changed: %s\n", r.name);
-                Cacher.instance.cache_state (cache_state);
-            });
-
             // Init noti_daemon
             this.noti_daemon = new NotiDaemon (this);
             Bus.own_name (BusType.SESSION, "org.freedesktop.Notifications",

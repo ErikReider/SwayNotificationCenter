@@ -7,6 +7,9 @@ project('sway-notificaton-center', ['c', 'vala'],
 add_project_arguments(['--enable-gobject-tracing'], language: 'vala')
 add_project_arguments(['--enable-checking'], language: 'vala')
 
+i18n = import('i18n')
+
+subdir('data')
 subdir('src')
 
 datadir = get_option('datadir')

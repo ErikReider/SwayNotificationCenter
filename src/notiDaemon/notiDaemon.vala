@@ -12,12 +12,8 @@ namespace SwayNotificationCenter {
         public NotiDaemon (SwayncDaemon swaync_daemon) {
             this.notify["dnd"].connect (() => on_dnd_toggle (dnd));
 
-            // Init from state cache
-            swaync_daemon.cache_state.bind_property ("dnd-state",
-                                                     this,
-                                                     "dnd",
-                                                     BindingFlags.BIDIRECTIONAL
-                                                     | BindingFlags.SYNC_CREATE);
+            // Init dnd from gsettings
+            self_settings.bind ("dnd-state", this, "dnd", SettingsBindFlags.DEFAULT);
 
             this.noti_window = new NotificationWindow ();
             this.control_center = new ControlCenter (swaync_daemon, this);

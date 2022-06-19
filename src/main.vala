@@ -3,10 +3,14 @@ namespace SwayNotificationCenter {
     static string ? style_path;
     static string ? config_path;
 
+    static Settings self_settings;
+
     public void main (string[] args) {
         Gtk.init (ref args);
         Hdy.init ();
         Functions.init ();
+
+        self_settings = new Settings ("org.erikreider.swaync");
 
         if (args.length > 0) {
             for (uint i = 1; i < args.length; i++) {

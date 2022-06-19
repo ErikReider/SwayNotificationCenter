@@ -180,8 +180,15 @@
   border-radius: 12px;
 }
 
+/* The .control-center Window.
+ * Can't apply padding and margin so may be easier to use "> box" instead
+ */
 .control-center {
   background: @cc-bg;
+}
+
+/* The first control-center child. May be easier to style this than .control-center */
+.control-center > box {
 }
 
 .control-center-list {

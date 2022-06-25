@@ -1,6 +1,27 @@
 namespace SwayNotificationCenter {
+    public class NotificationWindow : Object {
+        private static NotiWindow ? window = null;
+        // Use a NotiWindow singleton due to a nasty notification
+        // enter_notify_event bug where GTK still thinks that the cursor is at
+        // that location after closing the last notification. The next notification
+        // would sometimes automatically be hovered...
+        public static NotiWindow instance {
+            get {
+                if (window == null) {
+                    window = new NotiWindow ();
+                } else if (!window.get_mapped () ||
+                           !window.get_realized () ||
+                           !(window.get_child () is Gtk.Widget)) {
+                    window.destroy ();
+                    window = new NotiWindow ();
+                }
+                return window;
+            }
+        }
+    }
+
     [GtkTemplate (ui = "/org/erikreider/sway-notification-center/notificationWindow/notificationWindow.ui")]
-    public class NotificationWindow : Gtk.ApplicationWindow {
+    public class NotiWindow : Gtk.ApplicationWindow {
 
         [GtkChild]
         unowned Gtk.ScrolledWindow scrolled_window;
@@ -15,7 +36,7 @@ namespace SwayNotificationCenter {
 
         private const int MAX_HEIGHT = 600;
 
-        public NotificationWindow () {
+        public NotiWindow () {
             if (!GtkLayerShell.is_supported ()) {
                 stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
                 stderr.printf ("Swaync only works on Wayland!\n");
@@ -113,8 +134,13 @@ namespace SwayNotificationCenter {
                 noti.destroy ();
             }
 
-            if (!this.get_realized ()) return;
-            if (box.get_children ().length () == 0) this.hide ();
+            if (!get_realized ()
+                || !get_mapped ()
+                || !(get_child () is Gtk.Widget)
+                || box.get_children ().length () == 0) {
+                close ();
+                return;
+            }
         }
 
         public void add_notification (NotifyParams param,

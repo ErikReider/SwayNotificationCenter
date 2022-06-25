@@ -7,7 +7,6 @@ namespace SwayNotificationCenter {
             new HashTable<string, uint32> (str_hash, str_equal);
 
         public ControlCenter control_center;
-        public NotificationWindow noti_window;
 
         public NotiDaemon (SwayncDaemon swaync_daemon) {
             this.notify["dnd"].connect (() => on_dnd_toggle (dnd));
@@ -15,7 +14,6 @@ namespace SwayNotificationCenter {
             // Init dnd from gsettings
             self_settings.bind ("dnd-state", this, "dnd", SettingsBindFlags.DEFAULT);
 
-            this.noti_window = new NotificationWindow ();
             this.control_center = new ControlCenter (swaync_daemon, this);
         }
 
@@ -25,7 +23,7 @@ namespace SwayNotificationCenter {
          */
         public void set_noti_window_visibility (bool value)
         throws DBusError, IOError {
-            noti_window.change_visibility (value);
+            NotificationWindow.instance.change_visibility (value);
         }
 
         /** Toggles the current Do Not Disturb state */
@@ -53,7 +51,7 @@ namespace SwayNotificationCenter {
         /** Method to close notification and send DISMISSED signal */
         public void manually_close_notification (uint32 id, bool timeout)
         throws DBusError, IOError {
-            noti_window.close_notification (id);
+            NotificationWindow.instance.close_notification (id);
             if (!timeout) {
                 control_center.close_notification (id);
                 NotificationClosed (id, ClosedReasons.DISMISSED);
@@ -66,14 +64,14 @@ namespace SwayNotificationCenter {
 
         /** Closes all popup and controlcenter notifications */
         public void close_all_notifications () throws DBusError, IOError {
-            noti_window.close_all_notifications ();
+            NotificationWindow.instance.close_all_notifications ();
             control_center.close_all_notifications ();
         }
 
         /** Closes latest popup notification */
         public void hide_latest_notification (bool close)
         throws DBusError, IOError {
-            uint32 ? id = noti_window.get_latest_notification ();
+            uint32 ? id = NotificationWindow.instance.get_latest_notification ();
             if (id == null) return;
             manually_close_notification (id, !close);
         }
@@ -157,7 +155,7 @@ namespace SwayNotificationCenter {
             // Replace notification logic
             if (id == replaces_id) {
                 param.replaces = true;
-                noti_window.close_notification (id);
+                NotificationWindow.instance.close_notification (id);
                 control_center.close_notification (id, true);
             } else if (param.synchronous != null
                        && param.synchronous.length > 0) {
@@ -168,7 +166,7 @@ namespace SwayNotificationCenter {
                         param.synchronous, null, out r_id)) {
                     param.replaces = true;
                     // Close the notification
-                    noti_window.close_notification (r_id);
+                    NotificationWindow.instance.close_notification (r_id);
                     control_center.close_notification (r_id, true);
                 }
                 synchronous_ids.set (param.synchronous, id);
@@ -179,7 +177,7 @@ namespace SwayNotificationCenter {
                 && !control_center.get_visibility ()) {
                 if (param.urgency == UrgencyLevels.CRITICAL ||
                     (!dnd && param.urgency != UrgencyLevels.CRITICAL)) {
-                    noti_window.add_notification (param, this);
+                    NotificationWindow.instance.add_notification (param, this);
                 }
             }
             // Only add notification to CC if it isn't IGNORED and not transient
@@ -255,7 +253,7 @@ namespace SwayNotificationCenter {
          */
         [DBus (name = "CloseNotification")]
         public void close_notification (uint32 id) throws DBusError, IOError {
-            noti_window.close_notification (id);
+            NotificationWindow.instance.close_notification (id);
             control_center.close_notification (id);
             NotificationClosed (id, ClosedReasons.CLOSED_BY_CLOSENOTIFICATION);
         }

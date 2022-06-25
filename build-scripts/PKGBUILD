@@ -16,7 +16,7 @@ conflicts=("swaync" "swaync-client")
 provides=("swaync" "swaync-client")
 makedepends=(vala meson git scdoc)
 source=("${_pkgfoldername}-${pkgver}.tar.gz::${url}/archive/v${pkgver}.tar.gz")
-sha256sums=('d762bb4fc723b6efc9f2fe5f1a1eea851fa73a8c5fcac9311fa437809cdf46d4')
+sha256sums=('08cb3e2a0528719973745bbddda9701039c5cda0a48c98f49c5b30b4a0af68d9')
 
 build() {
     arch-meson "${_pkgfoldername}-${pkgver}" build -Dscripting=true

@@ -1,27 +1,27 @@
 namespace SwayNotificationCenter {
-    public class NotificationWindow : Object {
-        private static NotiWindow ? window = null;
-        // Use a NotiWindow singleton due to a nasty notification
-        // enter_notify_event bug where GTK still thinks that the cursor is at
-        // that location after closing the last notification. The next notification
-        // would sometimes automatically be hovered...
-        public static NotiWindow instance {
+    [GtkTemplate (ui = "/org/erikreider/sway-notification-center/notificationWindow/notificationWindow.ui")]
+    public class NotificationWindow : Gtk.ApplicationWindow {
+        private static NotificationWindow ? window = null;
+        /**
+         * A NotificationWindow singleton due to a nasty notification
+         * enter_notify_event bug where GTK still thinks that the cursor is at
+         * that location after closing the last notification. The next notification
+         * would sometimes automatically be hovered...
+         * The only way to "solve" this is to close the window and reopen a new one.
+         */
+        public static NotificationWindow instance {
             get {
                 if (window == null) {
-                    window = new NotiWindow ();
+                    window = new NotificationWindow ();
                 } else if (!window.get_mapped () ||
                            !window.get_realized () ||
                            !(window.get_child () is Gtk.Widget)) {
                     window.destroy ();
-                    window = new NotiWindow ();
+                    window = new NotificationWindow ();
                 }
                 return window;
             }
         }
-    }
-
-    [GtkTemplate (ui = "/org/erikreider/sway-notification-center/notificationWindow/notificationWindow.ui")]
-    public class NotiWindow : Gtk.ApplicationWindow {
 
         [GtkChild]
         unowned Gtk.ScrolledWindow scrolled_window;
@@ -36,7 +36,7 @@ namespace SwayNotificationCenter {
 
         private const int MAX_HEIGHT = 600;
 
-        public NotiWindow () {
+        private NotificationWindow () {
             if (!GtkLayerShell.is_supported ()) {
                 stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
                 stderr.printf ("Swaync only works on Wayland!\n");
@@ -123,21 +123,22 @@ namespace SwayNotificationCenter {
         public void close_all_notifications () {
             if (!this.get_realized ()) return;
             foreach (var w in box.get_children ()) {
-                remove_notification ((Notification) w);
+                remove_notification ((Notification) w, false);
             }
         }
 
-        private void remove_notification (Notification noti) {
+        private void remove_notification (Notification ? noti, bool replaces) {
             // Remove notification and its destruction timeout
             if (noti != null) {
                 noti.remove_noti_timeout ();
                 noti.destroy ();
             }
 
-            if (!get_realized ()
-                || !get_mapped ()
-                || !(get_child () is Gtk.Widget)
-                || box.get_children ().length () == 0) {
+            if (!replaces
+                && (!get_realized ()
+                    || !get_mapped ()
+                    || !(get_child () is Gtk.Widget)
+                    || box.get_children ().length () == 0)) {
                 close ();
                 return;
             }
@@ -167,11 +168,11 @@ namespace SwayNotificationCenter {
             scroll_to_start (list_reverse);
         }
 
-        public void close_notification (uint32 id) {
+        public void close_notification (uint32 id, bool replaces) {
             foreach (var w in box.get_children ()) {
                 var noti = (Notification) w;
                 if (noti != null && noti.param.applied_id == id) {
-                    remove_notification (noti);
+                    remove_notification (noti, replaces);
                     break;
                 }
             }

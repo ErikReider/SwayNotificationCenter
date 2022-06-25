@@ -51,7 +51,7 @@ namespace SwayNotificationCenter {
         /** Method to close notification and send DISMISSED signal */
         public void manually_close_notification (uint32 id, bool timeout)
         throws DBusError, IOError {
-            NotificationWindow.instance.close_notification (id);
+            NotificationWindow.instance.close_notification (id, false);
             if (!timeout) {
                 control_center.close_notification (id);
                 NotificationClosed (id, ClosedReasons.DISMISSED);
@@ -155,7 +155,7 @@ namespace SwayNotificationCenter {
             // Replace notification logic
             if (id == replaces_id) {
                 param.replaces = true;
-                NotificationWindow.instance.close_notification (id);
+                NotificationWindow.instance.close_notification (id, true);
                 control_center.close_notification (id, true);
             } else if (param.synchronous != null
                        && param.synchronous.length > 0) {
@@ -166,7 +166,7 @@ namespace SwayNotificationCenter {
                         param.synchronous, null, out r_id)) {
                     param.replaces = true;
                     // Close the notification
-                    NotificationWindow.instance.close_notification (r_id);
+                    NotificationWindow.instance.close_notification (r_id, true);
                     control_center.close_notification (r_id, true);
                 }
                 synchronous_ids.set (param.synchronous, id);
@@ -253,7 +253,7 @@ namespace SwayNotificationCenter {
          */
         [DBus (name = "CloseNotification")]
         public void close_notification (uint32 id) throws DBusError, IOError {
-            NotificationWindow.instance.close_notification (id);
+            NotificationWindow.instance.close_notification (id, false);
             control_center.close_notification (id);
             NotificationClosed (id, ClosedReasons.CLOSED_BY_CLOSENOTIFICATION);
         }

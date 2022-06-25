@@ -1,6 +1,6 @@
 # vim: syntax=spec
 Name:       {{{ git_dir_name }}}
-Version:    0.6.1
+Version:    0.6.2
 Release:    1%{?dist}
 Summary:    Notification daemon with GTK GUI
 Provides:   desktop-notification-daemon

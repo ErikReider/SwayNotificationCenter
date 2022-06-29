@@ -111,9 +111,16 @@ namespace SwayNotificationCenter {
         }
 
         [DBus (visible = false)]
-        public void set_blank_window_visibility (bool visibility) {
+        public void show_blank_windows (Gdk.Monitor? monitor) {
             foreach (unowned BlankWindow win in blank_windows.data) {
-                win.set_visible (visibility);
+                if (win.monitor != monitor) win.show ();
+            }
+        }
+
+        [DBus (visible = false)]
+        public void hide_blank_windows () {
+            foreach (unowned BlankWindow win in blank_windows.data) {
+                win.hide ();
             }
         }
 

@@ -1,7 +1,7 @@
 namespace SwayNotificationCenter {
     public class BlankWindow : Gtk.Window {
-        unowned Gdk.Display display;
-        unowned Gdk.Monitor monitor;
+        public unowned Gdk.Display display { get; private set; }
+        public unowned Gdk.Monitor monitor { get; private set; }
         unowned SwayncDaemon daemon;
 
         Gtk.Button button;

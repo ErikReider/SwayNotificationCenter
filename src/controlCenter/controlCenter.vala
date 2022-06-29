@@ -35,10 +35,31 @@ namespace SwayNotificationCenter {
                 Process.exit (1);
             }
             GtkLayerShell.init_for_window (this);
-            this.set_anchor ();
+            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
+            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, true);
+            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
+            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
 
             viewport.size_allocate.connect (size_alloc);
-            this.map.connect (set_anchor);
+
+            this.map.connect (() => {
+                set_anchor ();
+                // Wait until the layer has attached
+                ulong id = 0;
+                id = notify["has-toplevel-focus"].connect (() => {
+                    disconnect (id);
+                    unowned Gdk.Monitor monitor = null;
+                    unowned Gdk.Window ? win = get_window ();
+                    if (win != null) {
+                        monitor = get_display ().get_monitor_at_window (win);
+                    }
+                    swaync_daemon.show_blank_windows (monitor);
+                });
+            });
+            this.unmap.connect (swaync_daemon.hide_blank_windows);
+
+            this.button_press_event.connect (blank_window_press);
+            this.touch_event.connect (blank_window_press);
 
             // Only use release for closing notifications due to Escape key
             // sometimes being passed through to unfucused application
@@ -134,6 +155,26 @@ namespace SwayNotificationCenter {
             this.box.add (new TopAction ("Do Not Disturb", dnd_button, false));
         }
 
+        private bool blank_window_press (Gdk.Event event) {
+            // Calculate if the clicked coords intersect the ControlCenter
+            double x, y;
+            event.get_coords (out x, out y);
+            Gdk.Rectangle click_rectangle = Gdk.Rectangle () {
+                width = 1,
+                height = 1,
+                x = (int) x,
+                y = (int) y,
+            };
+            if (box.intersect (click_rectangle, null)) return true;
+            try {
+                swaync_daemon.set_visibility (false);
+            } catch (Error e) {
+                stderr.printf ("ControlCenter BlankWindow Click Error: %s\n",
+                               e.message);
+            }
+            return true;
+        }
+
         /** Resets the UI positions */
         private void set_anchor () {
             // Grabs the keyboard input until closed
@@ -148,51 +189,49 @@ namespace SwayNotificationCenter {
 #endif
             GtkLayerShell.set_layer (this, GtkLayerShell.Layer.TOP);
 
-            GtkLayerShell.set_margin (this,
-                                      GtkLayerShell.Edge.TOP,
-                                      ConfigModel.instance.control_center_margin_top);
-            GtkLayerShell.set_margin (this,
-                                      GtkLayerShell.Edge.BOTTOM,
-                                      ConfigModel.instance.control_center_margin_bottom);
-            GtkLayerShell.set_margin (this,
-                                      GtkLayerShell.Edge.RIGHT,
-                                      ConfigModel.instance.control_center_margin_right);
-            GtkLayerShell.set_margin (this,
-                                      GtkLayerShell.Edge.LEFT,
-                                      ConfigModel.instance.control_center_margin_left);
+            // Set the box margins
+            box.set_margin_top (ConfigModel.instance.control_center_margin_top);
+            box.set_margin_start (ConfigModel.instance.control_center_margin_left);
+            box.set_margin_end (ConfigModel.instance.control_center_margin_right);
+            box.set_margin_bottom (ConfigModel.instance.control_center_margin_bottom);
 
-            // Anchor to north/south edges as needed
-            bool anchor_top = ConfigModel.instance.positionY == PositionY.TOP;
-            GtkLayerShell.set_anchor (this,
-                                      GtkLayerShell.Edge.TOP,
-                                      ConfigModel.instance.fit_to_screen || anchor_top);
-            GtkLayerShell.set_anchor (this,
-                                      GtkLayerShell.Edge.BOTTOM,
-                                      ConfigModel.instance.fit_to_screen || !anchor_top);
-
-            bool anchor_left = ConfigModel.instance.positionX == PositionX.LEFT;
-            bool anchor_right = ConfigModel.instance.positionX == PositionX.RIGHT;
-            GtkLayerShell.set_anchor (this,
-                                      GtkLayerShell.Edge.RIGHT,
-                                      anchor_right);
-            GtkLayerShell.set_anchor (this,
-                                      GtkLayerShell.Edge.LEFT,
-                                      anchor_left);
-
-            switch (ConfigModel.instance.positionY) {
-                case PositionY.BOTTOM:
-                    list_reverse = true;
-                    list_align = Gtk.Align.END;
-                    this.box.set_child_packing (
-                        scrolled_window, true, true, 0, Gtk.PackType.START);
+            // Anchor box to north/south edges as needed
+            Gtk.Align align_x = Gtk.Align.END;
+            switch (ConfigModel.instance.positionX) {
+                case PositionX.LEFT:
+                    align_x = Gtk.Align.START;
                     break;
+                case PositionX.CENTER:
+                    align_x = Gtk.Align.CENTER;
+                    break;
+                case PositionX.RIGHT:
+                    align_x = Gtk.Align.END;
+                    break;
+            }
+            Gtk.Align align_y = Gtk.Align.START;
+            switch (ConfigModel.instance.positionY) {
                 case PositionY.TOP:
+                    align_y = Gtk.Align.START;
+                    // Set cc widget position
                     list_reverse = false;
                     list_align = Gtk.Align.START;
                     this.box.set_child_packing (
                         scrolled_window, true, true, 0, Gtk.PackType.END);
                     break;
+                case PositionY.BOTTOM:
+                    align_y = Gtk.Align.END;
+                    // Set cc widget position
+                    list_reverse = true;
+                    list_align = Gtk.Align.END;
+                    this.box.set_child_packing (
+                        scrolled_window, true, true, 0, Gtk.PackType.START);
+                    break;
             }
+            // Fit the ControlCenter to the monitor height
+            if (ConfigModel.instance.fit_to_screen) align_y = Gtk.Align.FILL;
+            // Set the ControlCenter alignment
+            box.set_halign (align_x);
+            box.set_valign (align_y);
 
             list_box.set_valign (list_align);
             list_box.set_sort_func ((w1, w2) => {
@@ -206,9 +245,8 @@ namespace SwayNotificationCenter {
             });
 
             // Always set the size request in all events.
-            int configured_width = ConfigModel.instance.control_center_width;
-            int configured_height = ConfigModel.instance.control_center_height;
-            this.set_size_request (configured_width, configured_height);
+            box.set_size_request (ConfigModel.instance.control_center_width,
+                                  ConfigModel.instance.control_center_height);
         }
 
         private void size_alloc () {
@@ -261,8 +299,6 @@ namespace SwayNotificationCenter {
 
         private void on_visibility_change () {
             if (this.visible) {
-                // Reload the settings from config
-                this.set_anchor ();
                 // Focus the first notification
                 list_position = list_reverse ?
                                 (list_box.get_children ().length () - 1) : 0;
@@ -275,7 +311,6 @@ namespace SwayNotificationCenter {
                     if (noti != null) noti.set_time ();
                 }
             }
-            swaync_daemon.set_blank_window_visibility (this.visible);
             swaync_daemon.subscribe (notification_count (),
                                      noti_daemon.dnd,
                                      this.visible);

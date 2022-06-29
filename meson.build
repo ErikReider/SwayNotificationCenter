@@ -126,3 +126,6 @@ if get_option('man-pages')
     endforeach
   endif
 endif
+
+# Run the postinstall script when installing
+meson.add_install_script('build-aux/meson/postinstall.py')

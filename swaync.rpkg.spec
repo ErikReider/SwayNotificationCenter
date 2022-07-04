@@ -21,7 +21,6 @@ BuildRequires: libgee-devel >= 0.20
 BuildRequires: json-glib-devel >= 1.0
 BuildRequires: libhandy-devel >= 1.4.0
 BuildRequires: systemd-devel
-BuildRequires: fish
 BuildRequires: scdoc
 %{?systemd_requires}
 

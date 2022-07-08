@@ -87,9 +87,10 @@ private void on_subscribe_waybar (uint count, bool dnd, bool cc_open) {
         _class = "[%s, \"cc-open\"]".printf (_class);
     }
 
+    string total = "%u".printf (count);
     print (
         "{\"text\": \"%s\", \"alt\": \"%s\", \"tooltip\": \"%s\", \"class\": %s}\n",
-        count.to_string(), state, tooltip, _class);
+        total, state, tooltip, _class);
 }
 
 private void print_subscribe_waybar () {

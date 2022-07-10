@@ -215,6 +215,15 @@ Waybar css file
 }
 ```
 
+Alternatively, the number of notifications can be shown by adding `{}` anywhere in the `format` field in the Waybar config
+
+```json
+  "custom/notification": {
+    "format": "{} {icon}",
+    ...
+  },
+```
+
 ## Screenshots
 
 ![Screenshot of desktop notification](./assets/desktop.png)

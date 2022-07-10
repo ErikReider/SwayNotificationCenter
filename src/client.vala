@@ -88,8 +88,8 @@ private void on_subscribe_waybar (uint count, bool dnd, bool cc_open) {
     }
 
     print (
-        "{\"text\": \"\", \"alt\": \"%s\", \"tooltip\": \"%s\", \"class\": %s}\n",
-        state, tooltip, _class);
+        "{\"text\": \"%u\", \"alt\": \"%s\", \"tooltip\": \"%s\", \"class\": %s}\n",
+        count, state, tooltip, _class);
 }
 
 private void print_subscribe_waybar () {

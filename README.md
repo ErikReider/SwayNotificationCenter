@@ -36,7 +36,7 @@ The package is available on the AUR:
 - [swaync-git](https://aur.archlinux.org/packages/swaync-git/)
 
 Fedora:
-The pacakge is available on COPR:
+The package is available on COPR:
 
 ```zsh
 dnf copr enable erikreider/SwayNotificationCenter

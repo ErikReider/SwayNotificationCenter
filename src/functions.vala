@@ -93,10 +93,14 @@ namespace SwayNotificationCenter {
             }
         }
 
-        public static string get_style_path (string ? custom_path,
+        public static string get_style_path (owned string ? custom_path,
                                              bool only_system = false) {
             string[] paths = {};
             if (custom_path != null && custom_path.length > 0) {
+                // Replaces the home directory relative path with a absolute path
+                if (custom_path.get (0) == '~') {
+                    custom_path = Environment.get_home_dir () + custom_path[1:];
+                }
                 paths += custom_path;
             }
             if (!only_system) {
@@ -125,9 +129,13 @@ namespace SwayNotificationCenter {
             return path;
         }
 
-        public static string get_config_path (string ? custom_path) {
+        public static string get_config_path (owned string ? custom_path) {
             string[] paths = {};
             if (custom_path != null && custom_path.length > 0) {
+                // Replaces the home directory relative path with a absolute path
+                if (custom_path.get (0) == '~') {
+                    custom_path = Environment.get_home_dir () + custom_path[1:];
+                }
                 paths += custom_path;
             }
             paths += Path.build_path (Path.DIR_SEPARATOR.to_string (),

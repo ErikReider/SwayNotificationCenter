@@ -218,7 +218,7 @@
       "description": "Which order and which widgets to display. If the \"notifications\" widget isn't specified, it will be placed at the bottom.",
       "items": {
         "type": "string",
-        "enum": ["title", "dnd", "notifications"],
+        "enum": ["title", "dnd", "notifications", "label"],
         "required": ["notifications"]
       }
     },

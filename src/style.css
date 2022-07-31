@@ -213,3 +213,9 @@
   background: @noti-bg-hover;
   border-radius: 12px;
 }
+
+/* Label widget */
+.widget-label {
+  margin: 8px;
+  font-size: 1.1rem;
+}

@@ -7,6 +7,8 @@ namespace SwayNotificationCenter.Widgets {
                 return new Title (swaync_daemon, noti_daemon);
             case "dnd":
                 return new Dnd (swaync_daemon, noti_daemon);
+            case "label":
+                return new Label (swaync_daemon, noti_daemon);
             default: return null;
         }
     }

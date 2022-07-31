@@ -260,6 +260,23 @@
               "default": "Do Not Disturb"
             }
           }
+        },
+        "label": {
+          "type": "object",
+          "description": "A generic widget that allows the user to add custom text",
+          "additionalProperties": false,
+          "properties": {
+            "text": {
+              "type": "string",
+              "description": "The text content of the widget",
+              "default": "Label Text"
+            },
+            "max-lines": {
+              "type": "integer",
+              "description": "The maximum lines",
+              "default": 5
+            }
+          }
         }
       }
     }

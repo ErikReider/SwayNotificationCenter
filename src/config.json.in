@@ -48,6 +48,10 @@
     },
     "dnd": {
       "text": "Do Not Disturb"
+    },
+    "label": {
+      "max-lines": 5,
+      "text": "Label Text"
     }
   }
 }

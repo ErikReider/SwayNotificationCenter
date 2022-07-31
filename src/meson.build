@@ -29,6 +29,7 @@ widget_sources = [
   # Widgets
   'controlCenter/widgets/title/title.vala',
   'controlCenter/widgets/dnd/dnd.vala',
+  'controlCenter/widgets/label/label.vala',
 ]
 
 app_sources = [

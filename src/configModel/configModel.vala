@@ -503,6 +503,20 @@ namespace SwayNotificationCenter {
             }
         }
 
+        /** Widgets to show in ControlCenter */
+        public GenericArray<string> widgets {
+            get;
+            set;
+            default = new GenericArray<string> ();
+        }
+
+        /** Widgets to show in ControlCenter */
+        public HashTable<string, Json.Object> widget_config {
+            get;
+            set;
+            default = new HashTable<string, Json.Object> (str_hash, str_equal);
+        }
+
         /* Methods */
 
         /**
@@ -544,6 +558,34 @@ namespace SwayNotificationCenter {
                     value = result;
                     return status;
 #endif
+                case "widgets":
+                    bool status;
+                    GenericArray<string> result =
+                        extract_array<string> (property_name,
+                                               property_node,
+                                               out status);
+                    value = result;
+                    return status;
+                case "widget-config":
+                    HashTable<string, Json.Object> result
+                        = new HashTable<string, Json.Object> (str_hash, str_equal);
+                    if (property_node.get_value_type ().name () != "JsonObject") {
+                        value = result;
+                        return true;
+                    }
+                    Json.Object obj = property_node.get_object ();
+                    if (obj.get_size () == 0) {
+                        value = result;
+                        return true;
+                    }
+                    foreach (var key in obj.get_members ()) {
+                        Json.Node ? node = obj.get_member (key);
+                        if (node.get_node_type () != Json.NodeType.OBJECT) continue;
+                        Json.Object ? o = node.get_object ();
+                        if (o != null) result.set (key, o);
+                    }
+                    value = result;
+                    return true;
                 default:
                     // Handles all other properties
                     return default_deserialize_property (
@@ -588,6 +630,16 @@ namespace SwayNotificationCenter {
                     node.set_object (serialize_hashtable<Script> (table));
                     break;
 #endif
+                case "widgets":
+                    node = new Json.Node (Json.NodeType.ARRAY);
+                    var table = (GenericArray<string>) value.get_boxed ();
+                    node.set_array (serialize_array<string> (table));
+                    break;
+                case "widget-config":
+                    node = new Json.Node (Json.NodeType.OBJECT);
+                    var table = (HashTable<string, Json.Object>) value.get_boxed ();
+                    node.set_object (serialize_hashtable<Json.Object> (table));
+                    break;
                 default:
                     node.set_value (value);
                     break;
@@ -727,6 +779,14 @@ namespace SwayNotificationCenter {
                     case Type.OBJECT:
                         var node = Json.gobject_serialize (item as Object);
                         json_object.set_member (key, node);
+                        break;
+                    case Type.BOXED:
+                        if (typeof (T).name () == "JsonObject") {
+                            json_object.set_object_member (key, (Json.Object) item);
+                        }
+                        if (typeof (T).name () == "JsonArray") {
+                            json_object.set_array_member (key, (Json.Array) item);
+                        }
                         break;
                 }
             }

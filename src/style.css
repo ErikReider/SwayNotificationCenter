@@ -159,35 +159,6 @@
   text-shadow: none;
 }
 
-.control-center-clear-all {
-  color: white;
-  text-shadow: none;
-  background: @noti-bg;
-  border: 1px solid @noti-border-color;
-  box-shadow: none;
-  border-radius: 12px;
-}
-
-.control-center-clear-all:hover {
-  background: @noti-bg-hover;
-}
-
-.control-center-dnd {
-  border-radius: 12px;
-  background: @noti-bg;
-  border: 1px solid @noti-border-color;
-  box-shadow: none;
-}
-
-.control-center-dnd:checked {
-  background: @bg-selected;
-}
-
-.control-center-dnd slider {
-  background: @noti-bg-hover;
-  border-radius: 12px;
-}
-
 .control-center {
   background: @cc-bg;
 }
@@ -203,4 +174,42 @@
 /* Window behind control center and on all other monitors */
 .blank-window {
   background: alpha(black, 0.25);
+}
+
+/*** Widgets ***/
+
+/* Title widget */
+.widget-title {
+  margin: 8px;
+  font-size: 1.5rem;
+}
+.widget-title-clear-all {
+  color: white;
+  text-shadow: none;
+  background: @noti-bg;
+  border: 1px solid @noti-border-color;
+  box-shadow: none;
+  border-radius: 12px;
+}
+.widget-title-clear-all:hover {
+  background: @noti-bg-hover;
+}
+
+/* DND widget */
+.widget-dnd-title {
+  margin: 8px;
+  font-size: 1.1rem;
+}
+.widget-dnd-clear-all {
+  border-radius: 12px;
+  background: @noti-bg;
+  border: 1px solid @noti-border-color;
+  box-shadow: none;
+}
+.widget-dnd-clear-all:checked {
+  background: @bg-selected;
+}
+.widget-dnd-clear-all slider {
+  background: @noti-bg-hover;
+  border-radius: 12px;
 }

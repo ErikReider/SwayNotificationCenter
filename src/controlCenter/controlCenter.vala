@@ -20,7 +20,7 @@ namespace SwayNotificationCenter {
         private bool list_reverse = false;
         private Gtk.Align list_align = Gtk.Align.START;
 
-        private Array<Gtk.Widget> widgets = new Array<Gtk.Widget>();
+        private Array<Gtk.Widget> widgets = new Array<Gtk.Widget> ();
 
         public ControlCenter (SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             this.swaync_daemon = swaync_daemon;

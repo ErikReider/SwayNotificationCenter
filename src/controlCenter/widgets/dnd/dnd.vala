@@ -50,7 +50,7 @@ namespace SwayNotificationCenter.Widgets {
             show_all ();
         }
 
-        private bool state_set(Gtk.Widget widget, bool state) {
+        private bool state_set (Gtk.Widget widget, bool state) {
             noti_daemon.dnd = state;
             return false;
         }

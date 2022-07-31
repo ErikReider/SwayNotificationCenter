@@ -21,6 +21,7 @@ namespace SwayNotificationCenter {
         private Gtk.Align list_align = Gtk.Align.START;
 
         private Array<Gtk.Widget> widgets = new Array<Gtk.Widget> ();
+        private const string[] DEFAULT_WIDGETS = { "title", "dnd", "notifications" };
 
         public ControlCenter (SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             this.swaync_daemon = swaync_daemon;
@@ -151,8 +152,10 @@ namespace SwayNotificationCenter {
                 widgets.remove_index (i);
             }
 
+            string[] w = ConfigModel.instance.widgets.data;
+            if (w.length == 0) w = DEFAULT_WIDGETS;
             bool has_notification = false;
-            foreach (string key in ConfigModel.instance.widgets) {
+            foreach (string key in w) {
                 // Reposition the scrolled_window
                 if (key == "notifications") {
                     has_notification = true;

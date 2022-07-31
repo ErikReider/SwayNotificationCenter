@@ -216,6 +216,7 @@
     "widgets": {
       "type": "array",
       "description": "Which order and which widgets to display. If the \"notifications\" widget isn't specified, it will be placed at the bottom.",
+      "default": ["title", "dnd", "notifications"],
       "items": {
         "type": "string",
         "enum": ["title", "dnd", "notifications", "label"],

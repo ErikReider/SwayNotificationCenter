@@ -156,6 +156,99 @@ config file to be able to detect config errors
 }
 ```
 
+*widgets* ++
+	type: array ++
+	Default values: ["title", "dnd", "notifications"] ++
+	Valid array values (see *widget-config* for more information): ++
+		*notifications*++
+			required: true ++
+			optional: false ++
+		*title*++
+			optional: true ++
+		*dnd*++
+			optional: true ++
+		*label*++
+			optional: true ++
+	description: Which order and which widgets to display. ++
+	If the \"notifications\" widget isn't specified, it ++
+	will be placed at the bottom. ++
+	example:
+```
+{
+	"widgets": [
+		"title",
+		"dnd",
+		"notifications"
+	]
+}
+```
+
+*widget-config* ++
+	type: object ++
+	description: Configure specific widget properties. ++
+	Widgets to customize: ++
+		*title*++
+			type: object ++
+			properties: ++
+				text: ++
+					type: string ++
+					optional: true ++
+					default: "Do Not Disturb" ++
+					description: The title of the widget ++
+				clear-all-button: ++
+					type: bool ++
+					optional: true ++
+					default: true ++
+					description: Wether to display a "Clear All" button ++
+				button-text: ++
+					type: string ++
+					optional: true ++
+					default: "Clear All" ++
+					description: "Clear All" button text ++
+			description: The notification visibility state. ++
+		*dnd*++
+			type: object ++
+			properties: ++
+				text: ++
+					type: string ++
+					optional: true ++
+					default: "Do Not Disturb" ++
+					description: The title of the widget ++
+			description: Control Center Do Not Disturb Widget. ++
+		*label*++
+			type: object ++
+			properties: ++
+				text: ++
+					type: string ++
+					optional: true ++
+					default: "Label Text" ++
+					description: The text content of the widget ++
+				clear-all-button: ++
+					type: integer ++
+					optional: true ++
+					default: 5 ++
+					description: The maximum lines ++
+			description: A generic widget that allows the user to add custom text. ++
+	example:
+```
+{
+	"widget-config": {
+		"title": {
+			"text": "Notifications",
+			"clear-all-button": true,
+			"button-text": "Clear All"
+		},
+		"dnd": {
+			"text": "Do Not Disturb"
+		},
+		"label": {
+			"max-lines": 5,
+			"text": "Label Text"
+		}
+	}
+}
+```
+
 # IF BUILT WITH SCRIPTING
 
 *script-fail-notify* ++

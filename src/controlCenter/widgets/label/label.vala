@@ -13,7 +13,7 @@ namespace SwayNotificationCenter.Widgets {
         int max_lines = 5;
 
         public Label (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
-            base(suffix, swaync_daemon, noti_daemon);
+            base (suffix, swaync_daemon, noti_daemon);
 
             Json.Object ? config = get_config (this);
             if (config != null) {

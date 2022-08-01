@@ -13,7 +13,7 @@ namespace SwayNotificationCenter.Widgets {
         string title = "Do Not Disturb";
 
         public Dnd (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
-            base(suffix, swaync_daemon, noti_daemon);
+            base (suffix, swaync_daemon, noti_daemon);
 
             Json.Object ? config = get_config (this);
             if (config != null) {
@@ -38,6 +38,7 @@ namespace SwayNotificationCenter.Widgets {
 
             dnd_button.set_can_focus (false);
             dnd_button.valign = Gtk.Align.CENTER;
+            // Backwards compatible torwards older CSS stylesheets
             dnd_button.get_style_context ().add_class ("control-center-dnd");
             pack_end (dnd_button, false);
 

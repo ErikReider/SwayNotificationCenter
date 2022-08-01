@@ -1,5 +1,5 @@
 namespace SwayNotificationCenter.Widgets {
-    public class Title :  BaseWidget {
+    public class Title : BaseWidget {
         public override string widget_name {
             get {
                 return "title";
@@ -15,7 +15,7 @@ namespace SwayNotificationCenter.Widgets {
         string button_text = "Clear All";
 
         public Title (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
-            base(suffix, swaync_daemon, noti_daemon);
+            base (suffix, swaync_daemon, noti_daemon);
 
             Json.Object ? config = get_config (this);
             if (config != null) {
@@ -40,6 +40,7 @@ namespace SwayNotificationCenter.Widgets {
                 });
                 clear_all_button.set_can_focus (false);
                 clear_all_button.valign = Gtk.Align.CENTER;
+                // Backwards compatible torwards older CSS stylesheets
                 clear_all_button.get_style_context ().add_class ("control-center-clear-all");
                 pack_end (clear_all_button, false);
             }

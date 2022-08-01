@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Building
+name: Check build for Arch.
 
 # Controls when the workflow will run
 on:
@@ -15,15 +15,9 @@ on:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        distro:
-          - archlinux
-          - ubuntu
-
     runs-on: ubuntu-latest
     container:
-      image: erikreider/swaync:${{ matrix.distro }}
+      image: erikreider/swaync:archlinux
     steps:
       - uses: actions/checkout@v2
       - name: Meson configure

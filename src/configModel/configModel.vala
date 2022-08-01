@@ -781,11 +781,15 @@ namespace SwayNotificationCenter {
                         json_object.set_member (key, node);
                         break;
                     case Type.BOXED:
-                        if (typeof (T).name () == "JsonObject") {
-                            json_object.set_object_member (key, (Json.Object) item);
-                        }
-                        if (typeof (T).name () == "JsonArray") {
-                            json_object.set_array_member (key, (Json.Array) item);
+                        switch (typeof (T).name ()) {
+                            case "JsonObject":
+                                json_object.set_object_member (key,
+                                                               (Json.Object) item);
+                                break;
+                            case "JsonArray":
+                                json_object.set_array_member (key,
+                                                              (Json.Array) item);
+                                break;
                         }
                         break;
                 }

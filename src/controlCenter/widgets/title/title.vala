@@ -1,13 +1,10 @@
 namespace SwayNotificationCenter.Widgets {
-    public class Title : Gtk.Box, BaseWidget {
-        public string key {
+    public class Title :  BaseWidget {
+        public override string widget_name {
             get {
                 return "title";
             }
         }
-
-        private unowned SwayncDaemon swaync_daemon;
-        private unowned NotiDaemon noti_daemon;
 
         Gtk.Label title_widget;
         Gtk.Button clear_all_button;
@@ -17,9 +14,8 @@ namespace SwayNotificationCenter.Widgets {
         bool has_clear_all_button = true;
         string button_text = "Clear All";
 
-        public Title (SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
-            this.swaync_daemon = swaync_daemon;
-            this.noti_daemon = noti_daemon;
+        public Title (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
+            base(suffix, swaync_daemon, noti_daemon);
 
             Json.Object ? config = get_config (this);
             if (config != null) {

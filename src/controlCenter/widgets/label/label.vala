@@ -1,13 +1,10 @@
 namespace SwayNotificationCenter.Widgets {
-    public class Label : Gtk.Box, BaseWidget {
-        public string key {
+    public class Label : BaseWidget {
+        public override string widget_name {
             get {
                 return "label";
             }
         }
-
-        private unowned SwayncDaemon swaync_daemon;
-        private unowned NotiDaemon noti_daemon;
 
         Gtk.Label label_widget;
 
@@ -15,9 +12,8 @@ namespace SwayNotificationCenter.Widgets {
         string text = "Label Text";
         int max_lines = 5;
 
-        public Label (SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
-            this.swaync_daemon = swaync_daemon;
-            this.noti_daemon = noti_daemon;
+        public Label (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
+            base(suffix, swaync_daemon, noti_daemon);
 
             Json.Object ? config = get_config (this);
             if (config != null) {

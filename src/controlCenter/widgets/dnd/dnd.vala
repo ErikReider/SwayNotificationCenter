@@ -1,13 +1,10 @@
 namespace SwayNotificationCenter.Widgets {
-    public class Dnd : Gtk.Box, BaseWidget {
-        public string key {
+    public class Dnd : BaseWidget {
+        public override string widget_name {
             get {
                 return "dnd";
             }
         }
-
-        private unowned SwayncDaemon swaync_daemon;
-        private unowned NotiDaemon noti_daemon;
 
         Gtk.Label title_widget;
         Gtk.Switch dnd_button;
@@ -15,9 +12,8 @@ namespace SwayNotificationCenter.Widgets {
         // Default config values
         string title = "Do Not Disturb";
 
-        public Dnd (SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
-            this.swaync_daemon = swaync_daemon;
-            this.noti_daemon = noti_daemon;
+        public Dnd (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
+            base(suffix, swaync_daemon, noti_daemon);
 
             Json.Object ? config = get_config (this);
             if (config != null) {

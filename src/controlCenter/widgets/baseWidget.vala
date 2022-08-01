@@ -1,6 +1,19 @@
 namespace SwayNotificationCenter.Widgets {
-    public interface BaseWidget {
-        public abstract string key { get; }
+    public abstract class BaseWidget : Gtk.Box {
+        public abstract string widget_name { get; }
+
+        public string key { get; private set; }
+        public string suffix { get; private set; }
+
+        public unowned SwayncDaemon swaync_daemon;
+        public unowned NotiDaemon noti_daemon;
+
+        protected BaseWidget (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
+            this.suffix = suffix;
+            this.key = widget_name + (suffix.length > 0 ? "#%s".printf (suffix) : "");
+            this.swaync_daemon = swaync_daemon;
+            this.noti_daemon = noti_daemon;
+        }
 
         protected Json.Object ? get_config (Gtk.Widget widget) {
             unowned HashTable<string, Json.Object> config
@@ -9,7 +22,7 @@ namespace SwayNotificationCenter.Widgets {
             Json.Object ? props = null;
             bool result = config.lookup_extended (key, out orig_key, out props);
             if (!result || orig_key == null || props == null) {
-                critical ("%s: Config not found!\n", key.up ());
+                critical ("%s: Config not found! Using default config...\n", key);
                 return null;
             }
             return props;
@@ -17,7 +30,7 @@ namespace SwayNotificationCenter.Widgets {
 
         protected void get_prop<T> (Json.Object config, string value_key, ref T value) {
             if (!config.has_member (value_key)) {
-                warning ("%s: Config doesn't have key: %s!\n", key.up (), value_key);
+                warning ("%s: Config doesn't have key: %s!\n", key, value_key);
                 return;
             }
             var member = config.get_member (value_key);
@@ -30,7 +43,7 @@ namespace SwayNotificationCenter.Widgets {
 
             if (!base_type.is_a (generic_base_type)) {
                 warning ("%s: Config type %s doesn't match: %s!\n",
-                         key.up (),
+                         key,
                          typeof (T).name (),
                          member.get_value_type ().name ());
                 return;

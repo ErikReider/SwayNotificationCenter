@@ -13,6 +13,9 @@ namespace SwayNotificationCenter.Widgets {
             this.key = widget_name + (suffix.length > 0 ? "#%s".printf (suffix) : "");
             this.swaync_daemon = swaync_daemon;
             this.noti_daemon = noti_daemon;
+
+            get_style_context ().add_class ("widget-%s".printf (widget_name));
+            if (suffix.length > 0) get_style_context ().add_class (suffix);
         }
 
         protected Json.Object ? get_config (Gtk.Widget widget) {

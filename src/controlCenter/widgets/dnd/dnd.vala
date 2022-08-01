@@ -23,7 +23,6 @@ namespace SwayNotificationCenter.Widgets {
 
             // Title
             title_widget = new Gtk.Label (title);
-            title_widget.get_style_context ().add_class ("widget-dnd-title");
             add (title_widget);
 
             // Dnd button
@@ -39,7 +38,6 @@ namespace SwayNotificationCenter.Widgets {
 
             dnd_button.set_can_focus (false);
             dnd_button.valign = Gtk.Align.CENTER;
-            dnd_button.get_style_context ().add_class ("widget-dnd-clear-all");
             dnd_button.get_style_context ().add_class ("control-center-dnd");
             pack_end (dnd_button, false);
 

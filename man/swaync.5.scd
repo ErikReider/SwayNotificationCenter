@@ -189,6 +189,7 @@ config file to be able to detect config errors
 	Widgets to customize: ++
 		*title*++
 			type: object ++
+			css class: widget-title ++
 			properties: ++
 				text: ++
 					type: string ++
@@ -208,6 +209,7 @@ config file to be able to detect config errors
 			description: The notification visibility state. ++
 		*dnd*++
 			type: object ++
+			css class: widget-dnd ++
 			properties: ++
 				text: ++
 					type: string ++
@@ -217,6 +219,7 @@ config file to be able to detect config errors
 			description: Control Center Do Not Disturb Widget. ++
 		*label*++
 			type: object ++
+			css class: widget-label ++
 			properties: ++
 				text: ++
 					type: string ++

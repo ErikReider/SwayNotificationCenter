@@ -28,7 +28,6 @@ namespace SwayNotificationCenter {
             });
 
             noti_daemon.on_dnd_toggle.connect ((dnd) => {
-                noti_daemon.control_center.set_switch_dnd_state (dnd);
                 try {
                     subscribe (noti_daemon.control_center.notification_count (),
                                dnd,
@@ -152,6 +151,7 @@ namespace SwayNotificationCenter {
         /** Reloads the config file */
         public void reload_config () throws Error {
             ConfigModel.reload_config ();
+            noti_daemon.control_center.add_widgets ();
         }
 
         /**

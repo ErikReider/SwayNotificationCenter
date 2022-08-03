@@ -22,6 +22,16 @@ constants = configure_file(
   configuration : const_config_data
 )
 
+widget_sources = [
+  # Helpers
+  'controlCenter/widgets/baseWidget.vala',
+  'controlCenter/widgets/factory.vala',
+  # Widgets
+  'controlCenter/widgets/title/title.vala',
+  'controlCenter/widgets/dnd/dnd.vala',
+  'controlCenter/widgets/label/label.vala',
+]
+
 app_sources = [
   'main.vala',
   'configModel/configModel.vala',
@@ -31,6 +41,7 @@ app_sources = [
   'notificationWindow/notificationWindow.vala',
   'notification/notification.vala',
   'controlCenter/controlCenter.vala',
+  widget_sources,
   'controlCenter/topAction/topAction.vala',
   'blankWindow/blankWindow.vala',
   'functions.vala',

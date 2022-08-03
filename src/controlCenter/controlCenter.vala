@@ -11,9 +11,6 @@ namespace SwayNotificationCenter {
         [GtkChild]
         unowned Gtk.Box box;
 
-        private Gtk.Switch dnd_button;
-        private Gtk.Button clear_all_button;
-
         private SwayncDaemon swaync_daemon;
         private NotiDaemon noti_daemon;
 
@@ -22,6 +19,9 @@ namespace SwayNotificationCenter {
         private double last_upper = 0;
         private bool list_reverse = false;
         private Gtk.Align list_align = Gtk.Align.START;
+
+        private Array<Gtk.Widget> widgets = new Array<Gtk.Widget> ();
+        private const string[] DEFAULT_WIDGETS = { "title", "dnd", "notifications" };
 
         public ControlCenter (SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             this.swaync_daemon = swaync_daemon;
@@ -102,7 +102,11 @@ namespace SwayNotificationCenter {
                             close_all_notifications ();
                             break;
                         case "D":
-                            set_switch_dnd_state (!dnd_button.get_state ());
+                            try {
+                                swaync_daemon.toggle_dnd ();
+                            } catch (Error e) {
+                                error ("Error: %s\n", e.message);
+                            }
                             break;
                         case "Down":
                             if (list_position + 1 < children.length ()) {
@@ -136,23 +140,43 @@ namespace SwayNotificationCenter {
                 return true;
             });
 
-            clear_all_button = new Gtk.Button.with_label ("Clear All");
-            clear_all_button.get_style_context ().add_class (
-                "control-center-clear-all");
-            clear_all_button.clicked.connect (close_all_notifications);
-            this.box.add (new TopAction ("Notifications",
-                                         clear_all_button,
-                                         true));
+            add_widgets ();
+        }
 
-            dnd_button = new Gtk.Switch () {
-                state = noti_daemon.dnd,
-            };
-            dnd_button.get_style_context ().add_class ("control-center-dnd");
-            dnd_button.state_set.connect ((widget, state) => {
-                noti_daemon.dnd = state;
-                return false;
-            });
-            this.box.add (new TopAction ("Do Not Disturb", dnd_button, false));
+        /** Adds all custom widgets. Removes previous widgets */
+        public void add_widgets () {
+            // Remove all widgets
+            while (widgets.length > 0) {
+                uint i = widgets.length - 1;
+                widgets.index (i).destroy ();
+                widgets.remove_index (i);
+            }
+
+            string[] w = ConfigModel.instance.widgets.data;
+            if (w.length == 0) w = DEFAULT_WIDGETS;
+            bool has_notification = false;
+            foreach (string key in w) {
+                // Reposition the scrolled_window
+                if (key == "notifications") {
+                    has_notification = true;
+                    uint pos = box.get_children ().length ();
+                    box.reorder_child (scrolled_window, (int) (pos > 0 ? --pos : 0));
+                    continue;
+                }
+                // Add the widget if it is valid
+                Gtk.Widget ? widget = Widgets.get_widget_from_key (key,
+                                                                   swaync_daemon,
+                                                                   noti_daemon);
+                if (widget == null || !(widget is Widgets.BaseWidget)) continue;
+                widgets.append_val (widget);
+                box.pack_start (
+                    widgets.index (widgets.length - 1), false, true, 0);
+            }
+            if (!has_notification) {
+                warning ("Notification widget not included in \"widgets\" config. Using default bottom position");
+                uint pos = box.get_children ().length ();
+                box.reorder_child (scrolled_window, (int) (pos > 0 ? --pos : 0));
+            }
         }
 
         private bool blank_window_press (Gdk.Event event) {
@@ -215,16 +239,12 @@ namespace SwayNotificationCenter {
                     // Set cc widget position
                     list_reverse = false;
                     list_align = Gtk.Align.START;
-                    this.box.set_child_packing (
-                        scrolled_window, true, true, 0, Gtk.PackType.END);
                     break;
                 case PositionY.BOTTOM:
                     align_y = Gtk.Align.END;
                     // Set cc widget position
                     list_reverse = true;
                     list_align = Gtk.Align.END;
-                    this.box.set_child_packing (
-                        scrolled_window, true, true, 0, Gtk.PackType.START);
                     break;
             }
             // Fit the ControlCenter to the monitor height
@@ -314,10 +334,6 @@ namespace SwayNotificationCenter {
             swaync_daemon.subscribe (notification_count (),
                                      noti_daemon.dnd,
                                      this.visible);
-        }
-
-        public void set_switch_dnd_state (bool state) {
-            if (this.dnd_button.state != state) this.dnd_button.state = state;
         }
 
         public bool toggle_visibility () {

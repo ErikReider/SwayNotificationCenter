@@ -21,6 +21,16 @@ A simple notification daemon with a GTK gui for notifications and the control ce
 - The same features as any other basic notification daemon
 - Basic configuration through a JSON config file
 - Hot-reload config through `swaync-client`
+- Customizable widgets
+
+## Available Widgets
+
+These widgets can be customized, added, removed and even reordered
+
+- Title
+- Do Not Disturb
+- Notifications (Will always be visible)
+- Label
 
 ## Planned Features
 

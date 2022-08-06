@@ -182,7 +182,7 @@ namespace SwayNotificationCenter {
         private bool blank_window_press (Gdk.Event event) {
             // Calculate if the clicked coords intersect the ControlCenter
             double x, y;
-            event.get_coords (out x, out y);
+            event.get_root_coords (out x, out y);
             Gdk.Rectangle click_rectangle = Gdk.Rectangle () {
                 width = 1,
                 height = 1,

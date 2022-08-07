@@ -184,5 +184,83 @@ namespace SwayNotificationCenter {
             }
             return type;
         }
+
+        /** Scales the pixbuf to fit the given dimensions */
+        public static Gdk.Pixbuf scale_round_pixbuf (Gdk.Pixbuf pixbuf,
+                                                     int buffer_width,
+                                                     int buffer_height,
+                                                     int img_scale,
+                                                     int radius) {
+            Cairo.Surface surface = new Cairo.ImageSurface (Cairo.Format.ARGB32,
+                                                            buffer_width,
+                                                            buffer_height);
+            var cr = new Cairo.Context (surface);
+
+            // Border radius
+            const double DEGREES = Math.PI / 180.0;
+            cr.new_sub_path ();
+            cr.arc (buffer_width - radius, radius, radius, -90 * DEGREES, 0 * DEGREES);
+            cr.arc (buffer_width - radius, buffer_height - radius, radius, 0 * DEGREES, 90 * DEGREES);
+            cr.arc (radius, buffer_height - radius, radius, 90 * DEGREES, 180 * DEGREES);
+            cr.arc (radius, radius, radius, 180 * DEGREES, 270 * DEGREES);
+            cr.close_path ();
+            cr.set_source_rgb (0, 0, 0);
+            cr.clip ();
+            cr.paint ();
+
+            cr.save ();
+            Cairo.Surface scale_surf = Gdk.cairo_surface_create_from_pixbuf (pixbuf,
+                                                                             img_scale,
+                                                                             null);
+            int width = pixbuf.width;
+            int height = pixbuf.height;
+            double window_ratio = (double) buffer_width / buffer_height;
+            double bg_ratio = width / height;
+            if (window_ratio > bg_ratio) { // Taller wallpaper than monitor
+                double scale = (double) buffer_width / width;
+                if (scale * height < buffer_height) {
+                    draw_scale_wide (buffer_width, width, buffer_height, height, cr, scale_surf);
+                } else {
+                    draw_scale_tall (buffer_width, width, buffer_height, height, cr, scale_surf);
+                }
+            } else { // Wider wallpaper than monitor
+                double scale = (double) buffer_height / height;
+                if (scale * width < buffer_width) {
+                    draw_scale_tall (buffer_width, width, buffer_height, height, cr, scale_surf);
+                } else {
+                    draw_scale_wide (buffer_width, width, buffer_height, height, cr, scale_surf);
+                }
+            }
+            cr.paint ();
+            cr.restore ();
+
+            scale_surf.finish ();
+            return Gdk.pixbuf_get_from_surface (surface, 0, 0, buffer_width, buffer_height);
+        }
+
+        private static void draw_scale_tall (int buffer_width,
+                                             int width,
+                                             int buffer_height,
+                                             int height,
+                                             Cairo.Context cr,
+                                             Cairo.Surface surface) {
+            double scale = (double) buffer_width / width;
+            cr.scale (scale, scale);
+            cr.set_source_surface (surface,
+                                   0, (double) buffer_height / 2 / scale - height / 2);
+        }
+
+        private static void draw_scale_wide (int buffer_width,
+                                             int width,
+                                             int buffer_height,
+                                             int height,
+                                             Cairo.Context cr,
+                                             Cairo.Surface surface) {
+            double scale = (double) buffer_height / height;
+            cr.scale (scale, scale);
+            cr.set_source_surface (
+                surface,
+                (double) buffer_width / 2 / scale - width / 2, 0);
+        }
     }
 }

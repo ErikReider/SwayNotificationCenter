@@ -17,11 +17,14 @@ namespace SwayNotificationCenter.Widgets {
             case "label":
                 widget = new Label (suffix, swaync_daemon, noti_daemon);
                 break;
+            case "mpris":
+                widget = new Mpris.Mpris (suffix, swaync_daemon, noti_daemon);
+                break;
             default:
                 warning ("Could not find widget: \"%s\"!", key);
                 return null;
         }
-        message ("Loading widget: %s", widget.key);
+        message ("Loading widget: %s", widget.widget_name);
         return widget;
     }
 }

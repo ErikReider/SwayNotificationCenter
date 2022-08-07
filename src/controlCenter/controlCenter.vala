@@ -27,6 +27,8 @@ namespace SwayNotificationCenter {
             this.swaync_daemon = swaync_daemon;
             this.noti_daemon = noti_daemon;
 
+            this.swaync_daemon.reloading_css.connect (reload_notifications_style);
+
             if (!GtkLayerShell.is_supported ()) {
                 stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
                 stderr.printf ("Swaync only works on Wayland!\n");
@@ -393,7 +395,7 @@ namespace SwayNotificationCenter {
         }
 
         /** Forces each notification EventBox to reload its style_context #27 */
-        public void reload_notifications_style () {
+        private void reload_notifications_style () {
             foreach (var c in list_box.get_children ()) {
                 Notification noti = (Notification) c;
                 if (noti != null) noti.reload_style_context ();

@@ -223,3 +223,11 @@
 .widget-label > label {
   font-size: 1.1rem;
 }
+
+/* Mpris widget */
+.widget-mpris {
+  margin: 8px;
+}
+.widget-mpris-player {
+  padding: 8px;
+}

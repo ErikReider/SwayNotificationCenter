@@ -26,10 +26,16 @@ widget_sources = [
   # Helpers
   'controlCenter/widgets/baseWidget.vala',
   'controlCenter/widgets/factory.vala',
-  # Widgets
+  # Widget: Title
   'controlCenter/widgets/title/title.vala',
+  # Widget: Dnd
   'controlCenter/widgets/dnd/dnd.vala',
+  # Widget: Label
   'controlCenter/widgets/label/label.vala',
+  # Widget: MPRIS
+  'controlCenter/widgets/mpris/mpris.vala',
+  'controlCenter/widgets/mpris/interfaces.vala',
+  'controlCenter/widgets/mpris/mpris_player.vala',
 ]
 
 app_sources = [

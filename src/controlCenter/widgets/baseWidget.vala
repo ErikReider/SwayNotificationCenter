@@ -2,6 +2,12 @@ namespace SwayNotificationCenter.Widgets {
     public abstract class BaseWidget : Gtk.Box {
         public abstract string widget_name { get; }
 
+        public weak string css_class_name {
+            owned get {
+                return "widget-%s".printf (widget_name);
+            }
+        }
+
         public string key { get; private set; }
         public string suffix { get; private set; }
 
@@ -14,7 +20,7 @@ namespace SwayNotificationCenter.Widgets {
             this.swaync_daemon = swaync_daemon;
             this.noti_daemon = noti_daemon;
 
-            get_style_context ().add_class ("widget-%s".printf (widget_name));
+            get_style_context ().add_class (css_class_name);
             if (suffix.length > 0) get_style_context ().add_class (suffix);
         }
 

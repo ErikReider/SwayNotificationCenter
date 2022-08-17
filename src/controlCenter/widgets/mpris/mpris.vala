@@ -33,7 +33,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
             carousel = new Hdy.Carousel ();
 #if HAVE_LATEST_LIBHANDY
-            carousel.allow_scroll_wheel = false;
+            carousel.allow_scroll_wheel = true;
 #endif
             add (carousel);
 
@@ -112,7 +112,6 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             MprisPlayer player = new MprisPlayer (source, mpris_config);
             player.get_style_context ().add_class ("%s-player".printf (css_class_name));
             carousel.prepend (player);
-            // this.pack_start (player, false, false, 0);
             players.set (name, player);
 
             if (!visible) show ();

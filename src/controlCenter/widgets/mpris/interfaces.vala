@@ -42,7 +42,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             return null;
         }
 
-        public Variant ? get_mpris_prop (string property_name) throws Error {
+        public Variant ? get_mpris_prop (string property_name) {
             try {
                 return props.get ("org.mpris.MediaPlayer2", property_name);
             } catch (Error e) {}

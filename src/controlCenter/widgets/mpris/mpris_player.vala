@@ -35,6 +35,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
         private Cancellable album_art_cancellable = new Cancellable ();
         private string prev_art_url;
+        private DesktopAppInfo ? desktop_entry = null;
 
         private unowned Config mpris_config;
 
@@ -42,10 +43,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             Object (source: source);
             this.mpris_config = mpris_config;
 
-            // TODO: Only update changed properties widgets!
             source.properties_changed.connect (properties_changed);
-
-            // TODO: Get AppInfo!
 
             // Init content
             update_content ();
@@ -114,6 +112,9 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             var metadata = source.media_player.metadata;
             foreach (string key in changed.get_keys ()) {
                 switch (key) {
+                    case "DesktopEntry":
+                        update_desktop_entry ();
+                        break;
                     case "PlaybackStatus":
                     case "CanPause":
                     case "CanPlay":
@@ -148,6 +149,10 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
         private void update_content () {
             HashTable<string, Variant> metadata = source.media_player.metadata;
+
+            // Desktop Entry
+            update_desktop_entry ();
+
             // Album art
             update_album_art.begin (metadata);
 
@@ -171,6 +176,18 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
             // Repeat check
             update_button_repeat (metadata);
+        }
+
+        private void update_desktop_entry () {
+            Variant ? entry_name = source.get_mpris_prop ("DesktopEntry");
+            if (entry_name == null
+                || !entry_name.is_of_type (VariantType.STRING)
+                || entry_name.get_string () == "") {
+                desktop_entry = null;
+                return;
+            }
+            string name = "%s.desktop".printf (entry_name.get_string ());
+            desktop_entry = new DesktopAppInfo (name);
         }
 
         private void update_title (HashTable<string, Variant> metadata) {
@@ -198,40 +215,51 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         }
 
         private async void update_album_art (HashTable<string, Variant> metadata) {
-            if (!("mpris:artUrl" in metadata)) return;
-            string url = metadata["mpris:artUrl"].get_string ();
-            if (url == prev_art_url) return;
-            prev_art_url = url;
+            if ("mpris:artUrl" in metadata) {
+                string url = metadata["mpris:artUrl"].get_string ();
+                if (url == prev_art_url) return;
+                prev_art_url = url;
 
-            int scale = get_style_context ().get_scale ();
-            // TODO: Set app .desktop icon as image as fallback
+                int scale = get_style_context ().get_scale ();
 
-            Gdk.Pixbuf ? pixbuf = null;
-            // Cancel previous download, reset the state and download again
-            album_art_cancellable.cancel ();
-            album_art_cancellable.reset ();
-            try {
-                File file = File.new_for_uri (url);
-                InputStream stream = yield file.read_async (Priority.DEFAULT,
-                                                            album_art_cancellable);
+                Gdk.Pixbuf ? pixbuf = null;
+                // Cancel previous download, reset the state and download again
+                album_art_cancellable.cancel ();
+                album_art_cancellable.reset ();
+                try {
+                    File file = File.new_for_uri (url);
+                    InputStream stream = yield file.read_async (Priority.DEFAULT,
+                                                                album_art_cancellable);
 
-                pixbuf = yield new Gdk.Pixbuf.from_stream_async (
-                    stream, album_art_cancellable);
-            } catch (Error e) {
-                warning ("Could not download album art for %s. Using fallback...",
-                         source.media_player.identity);
+                    pixbuf = yield new Gdk.Pixbuf.from_stream_async (
+                        stream, album_art_cancellable);
+                } catch (Error e) {
+                    warning ("Could not download album art for %s. Using fallback...",
+                             source.media_player.identity);
+                }
+                if (pixbuf != null) {
+                    pixbuf = Functions.scale_round_pixbuf (pixbuf,
+                                                           mpris_config.image_size,
+                                                           mpris_config.image_size,
+                                                           scale,
+                                                           mpris_config.image_radius);
+                    album_art.set_from_pixbuf (pixbuf);
+                    album_art.get_style_context ().set_scale (1);
+                    return;
+                }
             }
-            if (pixbuf != null) {
-                pixbuf = Functions.scale_round_pixbuf (pixbuf,
-                                                       mpris_config.image_size,
-                                                       mpris_config.image_size,
-                                                       scale,
-                                                       mpris_config.image_radius);
-                album_art.set_from_pixbuf (pixbuf);
-                album_art.get_style_context ().set_scale (1);
-                return;
+            // Get the app icon
+            GLib.Icon ? icon = null;
+            if (desktop_entry is DesktopAppInfo) {
+                icon = desktop_entry.get_icon ();
             }
-            // TODO: SET FALLBACK!
+            if (icon != null) {
+                album_art.set_from_gicon (icon, mpris_config.image_size);
+            } else {
+                // Default icon
+                album_art.set_from_icon_name ("audio-x-generic-symbolic",
+                                              mpris_config.image_size);
+            }
         }
 
         private void update_button_shuffle (HashTable<string, Variant> metadata) {

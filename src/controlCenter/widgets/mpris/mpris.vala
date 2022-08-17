@@ -59,7 +59,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             try {
                 setup_mpris ();
             } catch (Error e) {
-                error (e.message);
+                error ("MPRIS Widget error: %s", e.message);
             }
         }
 

@@ -246,6 +246,8 @@ config file to be able to detect config errors
 			css classes: ++
 				widget-mpris ++
 				widget-mpris-player ++
+				widget-mpris-title ++
+				widget-mpris-subtitle ++
 			properties: ++
 				image-size: ++
 					type: integer ++

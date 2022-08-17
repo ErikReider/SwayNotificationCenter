@@ -95,7 +95,7 @@
         <property name="spacing">6</property>
         <property name="homogeneous">True</property>
         <child>
-          <object class="GtkToggleButton" id="button_shuffle">
+          <object class="GtkButton" id="button_shuffle">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="receives-default">True</property>

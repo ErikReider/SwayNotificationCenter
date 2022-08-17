@@ -10,7 +10,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         unowned Gtk.Image album_art;
 
         [GtkChild]
-        unowned Gtk.ToggleButton button_shuffle;
+        unowned Gtk.Button button_shuffle;
         [GtkChild]
         unowned Gtk.Button button_prev;
         [GtkChild]
@@ -25,6 +25,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         unowned Gtk.Image button_repeat_img;
 
         public MprisSource source { construct; get; }
+
+        private const double UNSELECTED_OPACITY = 0.5;
 
         public const string ICON_REPEAT = "media-playlist-repeat-symbolic";
         public const string ICON_REPEAT_SONG = "media-playlist-repeat-song-symbolic";
@@ -52,7 +54,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
             // Shuffle
             button_shuffle.clicked.connect (() => {
-                source.media_player.shuffle = button_shuffle.active;
+                source.media_player.shuffle = !source.media_player.shuffle;
                 // Wait until dbus value has updated
                 button_shuffle.sensitive = false;
             });
@@ -265,7 +267,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                         stream, album_art_cancellable);
                 } catch (Error e) {
                     debug ("Could not download album art for %s. Using fallback...",
-                             source.media_player.identity);
+                           source.media_player.identity);
                 }
                 if (pixbuf != null) {
                     pixbuf = Functions.scale_round_pixbuf (pixbuf,
@@ -297,12 +299,12 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 // Shuffle check
                 Variant ? shuffle = source.get_mpris_player_prop ("Shuffle");
                 if (shuffle == null || !shuffle.is_of_type (VariantType.BOOLEAN)) {
-                    button_shuffle.active = false;
                     button_shuffle.sensitive = false;
+                    button_shuffle.get_child ().opacity = 1;
                     button_shuffle.hide ();
                 } else {
-                    button_shuffle.active = source.media_player.shuffle;
                     button_shuffle.sensitive = true;
+                    button_shuffle.get_child ().opacity = source.media_player.shuffle ? 1 : UNSELECTED_OPACITY;
                     button_shuffle.show ();
                 }
             } else {
@@ -358,7 +360,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                         default:
                         case "None":
                             icon_name = ICON_REPEAT;
-                            opacity = 0.5;
+                            opacity = UNSELECTED_OPACITY;
                             remove_flat_css_class = false;
                             break;
                         case "Playlist":
@@ -371,7 +373,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                     unowned Gtk.StyleContext ctx = button_repeat.get_style_context ();
                     if (remove_flat_css_class) ctx.remove_class ("flat");
                     else ctx.add_class ("flat");
-                    button_repeat.opacity = opacity;
+                    button_repeat.get_child ().opacity = opacity;
                     button_repeat.sensitive = true;
                     button_repeat_img.icon_name = icon_name;
                     button_repeat.show ();

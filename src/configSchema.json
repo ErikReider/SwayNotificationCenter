@@ -239,6 +239,9 @@
         },
         "^label(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
           "$ref": "#/widgets/label"
+        },
+        "^mpris(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
+          "$ref": "#/widgets/mpris"
         }
       }
     }
@@ -293,6 +296,23 @@
           "type": "integer",
           "description": "The maximum lines",
           "default": 5
+        }
+      }
+    },
+    "mpris": {
+      "type": "object",
+      "description": "A widget that displays multiple music players",
+      "additionalProperties": false,
+      "properties": {
+        "image-size": {
+          "type": "integer",
+          "description": "The size of the album art",
+          "default": 96
+        },
+        "image-radius": {
+          "type": "integer",
+          "description": "The border radius of the album art",
+          "default": 12
         }
       }
     }

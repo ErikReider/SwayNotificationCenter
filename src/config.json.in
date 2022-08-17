@@ -52,6 +52,10 @@
     "label": {
       "max-lines": 5,
       "text": "Label Text"
+    },
+    "mpris": {
+      "image-size": 96,
+      "image-radius": 12
     }
   }
 }

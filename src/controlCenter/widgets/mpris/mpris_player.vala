@@ -207,16 +207,41 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         }
 
         private void update_sub_title (HashTable<string, Variant> metadata) {
-            // TODO: Also show artists!
+            // Get album
+            string ? album = null;
             if ("xesam:album" in metadata
                 && metadata["xesam:album"].get_string () != "") {
-                string str = metadata["xesam:album"].get_string ();
-                sub_title.set_text (str);
-                sub_title.show ();
-            } else {
-                sub_title.set_text ("");
-                sub_title.hide ();
+                album = metadata["xesam:album"].get_string ();
             }
+
+            // Get first artist
+            string ? artist = null;
+            // Try to get either "artist" or "albumArtist"
+            const string[] types = { "xesam:artist", "xesam:albumArtist" };
+            foreach (unowned string type in types) {
+                if (artist != null && artist.length > 0) break;
+                if (type in metadata
+                    && metadata[type].get_type_string () == "as") {
+                    VariantIter iter = new VariantIter (metadata[type]);
+                    Variant ? value = null;
+                    while ((value = iter.next_value ()) != null) {
+                        artist = value.get_string ();
+                        break;
+                    }
+                }
+            }
+
+            string result = "";
+            if (album != null) {
+                if (artist != null && artist.length > 0) {
+                    result = string.joinv (" - ", { artist, album });
+                } else {
+                    result = album;
+                }
+            }
+            sub_title.set_text (result);
+            // Hide if no album or artist
+            sub_title.set_visible (result.length > 0);
         }
 
         private async void update_album_art (HashTable<string, Variant> metadata) {

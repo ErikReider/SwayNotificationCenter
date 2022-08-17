@@ -31,9 +31,6 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             set_valign (Gtk.Align.START);
             set_vexpand (false);
 
-            swaync_daemon.reloading_css.connect (reload_carousel_style);
-
-            // TODO: Fix carousel items not redrawing when window isn't visible
             carousel = new Hdy.Carousel ();
 #if HAVE_LATEST_LIBHANDY
             carousel.allow_scroll_wheel = false;
@@ -63,8 +60,15 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             }
         }
 
-        ~Mpris() {
-            swaync_daemon.reloading_css.disconnect (reload_carousel_style);
+        /**
+         * Forces the carousel to reload its style_context.
+         * Fixes carousel items not redrawing when window isn't visible
+         */
+        public override void on_cc_visibility_change (bool value) {
+            carousel.get_style_context ().changed ();
+            foreach (var child in carousel.get_children ()) {
+                child.get_style_context ().changed ();
+            }
         }
 
         private void setup_mpris () throws Error {
@@ -122,14 +126,6 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             players.remove (name);
 
             if (carousel.get_children ().length () == 0) hide ();
-        }
-
-        /** Forces the carousel to reload its style_context #27 */
-        private void reload_carousel_style () {
-            carousel.get_style_context ().changed ();
-            foreach (var c in carousel.get_children ()) {
-                c.get_style_context().changed();
-            }
         }
     }
 }

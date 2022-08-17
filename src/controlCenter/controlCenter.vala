@@ -20,7 +20,7 @@ namespace SwayNotificationCenter {
         private bool list_reverse = false;
         private Gtk.Align list_align = Gtk.Align.START;
 
-        private Array<Gtk.Widget> widgets = new Array<Gtk.Widget> ();
+        private Array<Widgets.BaseWidget> widgets = new Array<Widgets.BaseWidget> ();
         private const string[] DEFAULT_WIDGETS = { "title", "dnd", "notifications" };
 
         public ControlCenter (SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
@@ -166,13 +166,12 @@ namespace SwayNotificationCenter {
                     continue;
                 }
                 // Add the widget if it is valid
-                Gtk.Widget ? widget = Widgets.get_widget_from_key (key,
-                                                                   swaync_daemon,
-                                                                   noti_daemon);
-                if (widget == null || !(widget is Widgets.BaseWidget)) continue;
+                Widgets.BaseWidget ? widget = Widgets.get_widget_from_key (
+                    key, swaync_daemon, noti_daemon);
+                if (widget == null) continue;
                 widgets.append_val (widget);
-                box.pack_start (
-                    widgets.index (widgets.length - 1), false, true, 0);
+                box.pack_start (widgets.index (widgets.length - 1),
+                                false, true, 0);
             }
             if (!has_notification) {
                 warning ("Notification widget not included in \"widgets\" config. Using default bottom position");
@@ -320,6 +319,11 @@ namespace SwayNotificationCenter {
         }
 
         private void on_visibility_change () {
+            // Updates all widgets on visibility change
+            foreach (var widget in widgets) {
+                widget.on_cc_visibility_change(visible);
+            }
+
             if (this.visible) {
                 // Focus the first notification
                 list_position = list_reverse ?

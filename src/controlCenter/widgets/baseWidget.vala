@@ -37,6 +37,8 @@ namespace SwayNotificationCenter.Widgets {
             return props;
         }
 
+        public virtual void on_cc_visibility_change (bool value) {}
+
         protected void get_prop<T> (Json.Object config, string value_key, ref T value) {
             if (!config.has_member (value_key)) {
                 warning ("%s: Config doesn't have key: %s!\n", key, value_key);

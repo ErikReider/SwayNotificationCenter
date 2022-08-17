@@ -1,5 +1,5 @@
 namespace SwayNotificationCenter.Widgets {
-    public static Gtk.Widget ? get_widget_from_key (owned string key,
+    public static BaseWidget ? get_widget_from_key (owned string key,
                                                     SwayncDaemon swaync_daemon,
                                                     NotiDaemon noti_daemon) {
         string[] key_seperated = key.split ("#");

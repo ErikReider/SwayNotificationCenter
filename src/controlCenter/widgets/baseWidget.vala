@@ -59,19 +59,17 @@ namespace SwayNotificationCenter.Widgets {
                          member.get_value_type ().name ());
                 return;
             }
-            switch (typeof (T)) {
+            switch (generic_base_type) {
                 case Type.STRING:
                     value = member.get_string ();
-                    break;
-                case Type.INT:
+                    return;
                 case Type.INT64:
                     value = member.get_int ();
-                    break;
+                    return;
                 case Type.BOOLEAN:
                     value = member.get_boolean ();
-                    break;
+                    return;
             }
-            return;
         }
     }
 }

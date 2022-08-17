@@ -12,6 +12,9 @@ namespace SwayNotificationCenter {
         private Array<BlankWindow> blank_windows = new Array<BlankWindow> ();
         private unowned Gdk.Display ? display = Gdk.Display.get_default ();
 
+        [DBus (visible = false)]
+        public signal void reloading_css ();
+
         public SwayncDaemon () {
             // Init noti_daemon
             this.noti_daemon = new NotiDaemon (this);
@@ -110,7 +113,7 @@ namespace SwayNotificationCenter {
         }
 
         [DBus (visible = false)]
-        public void show_blank_windows (Gdk.Monitor? monitor) {
+        public void show_blank_windows (Gdk.Monitor ? monitor) {
             foreach (unowned BlankWindow win in blank_windows.data) {
                 if (win.monitor != monitor) win.show ();
             }
@@ -144,7 +147,7 @@ namespace SwayNotificationCenter {
         /** Reloads the CSS file */
         public bool reload_css () throws Error {
             bool result = Functions.load_css (style_path);
-            if (result) noti_daemon.control_center.reload_notifications_style ();
+            if (result) reloading_css ();
             return result;
         }
 

@@ -2,6 +2,12 @@ namespace SwayNotificationCenter.Widgets {
     public abstract class BaseWidget : Gtk.Box {
         public abstract string widget_name { get; }
 
+        public weak string css_class_name {
+            owned get {
+                return "widget-%s".printf (widget_name);
+            }
+        }
+
         public string key { get; private set; }
         public string suffix { get; private set; }
 
@@ -14,7 +20,7 @@ namespace SwayNotificationCenter.Widgets {
             this.swaync_daemon = swaync_daemon;
             this.noti_daemon = noti_daemon;
 
-            get_style_context ().add_class ("widget-%s".printf (widget_name));
+            get_style_context ().add_class (css_class_name);
             if (suffix.length > 0) get_style_context ().add_class (suffix);
         }
 
@@ -30,6 +36,8 @@ namespace SwayNotificationCenter.Widgets {
             }
             return props;
         }
+
+        public virtual void on_cc_visibility_change (bool value) {}
 
         protected void get_prop<T> (Json.Object config, string value_key, ref T value) {
             if (!config.has_member (value_key)) {
@@ -51,19 +59,17 @@ namespace SwayNotificationCenter.Widgets {
                          member.get_value_type ().name ());
                 return;
             }
-            switch (typeof (T)) {
+            switch (generic_base_type) {
                 case Type.STRING:
                     value = member.get_string ();
-                    break;
-                case Type.INT:
+                    return;
                 case Type.INT64:
                     value = member.get_int ();
-                    break;
+                    return;
                 case Type.BOOLEAN:
                     value = member.get_boolean ();
-                    break;
+                    return;
             }
-            return;
         }
     }
 }

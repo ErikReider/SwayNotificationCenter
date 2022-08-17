@@ -34,6 +34,7 @@ These widgets can be customized, added, removed and even reordered
 - Do Not Disturb
 - Notifications (Will always be visible)
 - Label
+- Mpris
 
 ## Planned Features
 

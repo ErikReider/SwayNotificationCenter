@@ -1,5 +1,5 @@
 namespace SwayNotificationCenter.Widgets {
-    public static Gtk.Widget ? get_widget_from_key (owned string key,
+    public static BaseWidget ? get_widget_from_key (owned string key,
                                                     SwayncDaemon swaync_daemon,
                                                     NotiDaemon noti_daemon) {
         string[] key_seperated = key.split ("#");
@@ -17,11 +17,14 @@ namespace SwayNotificationCenter.Widgets {
             case "label":
                 widget = new Label (suffix, swaync_daemon, noti_daemon);
                 break;
+            case "mpris":
+                widget = new Mpris.Mpris (suffix, swaync_daemon, noti_daemon);
+                break;
             default:
                 warning ("Could not find widget: \"%s\"!", key);
                 return null;
         }
-        message ("Loading widget: %s", widget.key);
+        message ("Loading widget: %s", widget.widget_name);
         return widget;
     }
 }

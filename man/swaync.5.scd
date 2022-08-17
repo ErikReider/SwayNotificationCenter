@@ -169,9 +169,15 @@ config file to be able to detect config errors
 			optional: true ++
 		*label*++
 			optional: true ++
-	description: Which order and which widgets to display. ++
-	If the \"notifications\" widget isn't specified, it ++
-	will be placed at the bottom. ++
+		*mpris*++
+			optional: true ++
+	description: ++
+		Which order and which widgets to display. ++
+		If the \"notifications\" widget isn't specified, it ++
+		will be placed at the bottom. ++
+	multiple of same widget: ++
+		Append a # with any value to the end of the widget name. ++
+		Example: "title#TheMainTitle" ++
 	example:
 ```
 {
@@ -186,6 +192,9 @@ config file to be able to detect config errors
 *widget-config* ++
 	type: object ++
 	description: Configure specific widget properties. ++
+	multiple of same widget: ++
+		Append a # with any value to the end of the widget name. ++
+		Example: "title#TheMainTitle" ++
 	Widgets to customize: ++
 		*title*++
 			type: object ++
@@ -232,6 +241,23 @@ config file to be able to detect config errors
 					default: 5 ++
 					description: The maximum lines ++
 			description: A generic widget that allows the user to add custom text. ++
+		*mpris*++
+			type: object ++
+			css classes: ++
+				widget-mpris ++
+				widget-mpris-player ++
+			properties: ++
+				image-size: ++
+					type: integer ++
+					optional: true ++
+					default: 96 ++
+					description: The size of the album art. ++
+				image-radius: ++
+					type: integer ++
+					optional: true ++
+					default: 12 ++
+					description: The border radius of the album art. ++
+			description: A widget that displays multiple music players. ++
 	example:
 ```
 {
@@ -247,6 +273,10 @@ config file to be able to detect config errors
 		"label": {
 			"max-lines": 5,
 			"text": "Label Text"
+		},
+		"mpris": {
+			"image-size": 96,
+			"image-radius": 12
 		}
 	}
 }

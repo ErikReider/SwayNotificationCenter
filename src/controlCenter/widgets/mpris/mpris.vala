@@ -62,9 +62,11 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
         /**
          * Forces the carousel to reload its style_context.
-         * Fixes carousel items not redrawing when window isn't visible
+         * Fixes carousel items not redrawing when window isn't visible.
+         * Probably related to: https://gitlab.gnome.org/GNOME/libhandy/-/issues/363
          */
         public override void on_cc_visibility_change (bool value) {
+            if (!value) return;
             carousel.get_style_context ().changed ();
             foreach (var child in carousel.get_children ()) {
                 child.get_style_context ().changed ();
@@ -114,6 +116,9 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             players.set (name, player);
 
             if (!visible) show ();
+
+            // Scroll to the new player
+            carousel.scroll_to (player);
         }
 
         private void remove_player (string name) {

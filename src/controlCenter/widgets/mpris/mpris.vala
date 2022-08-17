@@ -50,6 +50,9 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
                 // Get image-border-radius
                 get_prop<int> (config, "image-radius", ref mpris_config.image_radius);
+                // Clamp the radius
+                mpris_config.image_radius = mpris_config.image_radius.clamp (
+                    0, (int) (mpris_config.image_size * 0.5));
             }
 
             hide ();

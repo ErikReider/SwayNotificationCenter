@@ -6,6 +6,9 @@
 
 A simple notification daemon with a GTK gui for notifications and the control center
 
+*Note: Only supports Desktops / Window Managers that support 
+`wlr_layer_shell_unstable_v1` like Sway or anything wlroots based*
+
 ## Features
 
 - Keyboard shortcuts

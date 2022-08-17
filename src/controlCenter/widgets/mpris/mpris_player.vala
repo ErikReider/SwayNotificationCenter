@@ -33,7 +33,6 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
         public const string ICON_PLAY = "media-playback-start-symbolic";
         public const string ICON_PAUSE = "media-playback-pause-symbolic";
-        public const string ICON_STOPPED = "media-playback-stop-symbolic";
 
         private Cancellable album_art_cancellable = new Cancellable ();
         private string prev_art_url;
@@ -318,7 +317,6 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         }
 
         private void update_button_play_pause (HashTable<string, Variant> metadata) {
-            // TODO: Stopped
             string icon_name;
             bool check;
             switch (source.media_player.playback_status) {
@@ -327,12 +325,9 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                     check = source.media_player.can_pause;
                     break;
                 case "Paused":
+                case "Stopped":
                 default:
                     icon_name = ICON_PLAY;
-                    check = source.media_player.can_play;
-                    break;
-                case "Stopped":
-                    icon_name = ICON_STOPPED;
                     check = source.media_player.can_play;
                     break;
             }

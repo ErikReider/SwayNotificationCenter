@@ -226,8 +226,9 @@
 
 /* Mpris widget */
 .widget-mpris {
-  margin: 8px;
+  /* The parent to all players */
 }
 .widget-mpris-player {
   padding: 8px;
+  margin: 8px;
 }

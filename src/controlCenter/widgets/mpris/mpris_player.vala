@@ -196,8 +196,13 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 string str = metadata["xesam:title"].get_string ();
                 title.set_text (str);
             } else {
-                // TODO: Use AppInfo to get display name or regular name
-                title.set_text ("Media Player");
+                string ? name = null;
+                if (desktop_entry is DesktopAppInfo) {
+                    name = desktop_entry.get_display_name ();
+                    if (name == "") name = desktop_entry.get_name ();
+                }
+                if (name == null) name = "Media Player";
+                title.set_text (name);
             }
         }
 
@@ -234,7 +239,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                     pixbuf = yield new Gdk.Pixbuf.from_stream_async (
                         stream, album_art_cancellable);
                 } catch (Error e) {
-                    warning ("Could not download album art for %s. Using fallback...",
+                    debug ("Could not download album art for %s. Using fallback...",
                              source.media_player.identity);
                 }
                 if (pixbuf != null) {

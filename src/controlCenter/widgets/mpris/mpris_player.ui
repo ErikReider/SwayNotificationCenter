@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.2 -->
+<!-- Generated with glade 3.40.0 -->
 <interface>
   <requires lib="gtk+" version="3.24"/>
   <template class="SwayNotificationCenterWidgetsMprisMprisPlayer" parent="GtkBox">
@@ -19,7 +19,8 @@
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="pixel-size">96</property>
-            <property name="icon-name">image-missing-symbolic</property>
+            <property name="icon-name">audio-x-generic-symbolic</property>
+            <property name="use-fallback">True</property>
             <property name="icon_size">0</property>
           </object>
           <packing>

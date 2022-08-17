@@ -218,8 +218,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             // Get first artist
             string ? artist = null;
             // Try to get either "artist" or "albumArtist"
-            const string[] types = { "xesam:artist", "xesam:albumArtist" };
-            foreach (unowned string type in types) {
+            const string[] TYPES = { "xesam:artist", "xesam:albumArtist" };
+            foreach (unowned string type in TYPES) {
                 if (artist != null && artist.length > 0) break;
                 if (type in metadata
                     && metadata[type].get_type_string () == "as") {

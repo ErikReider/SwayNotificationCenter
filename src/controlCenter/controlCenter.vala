@@ -321,7 +321,7 @@ namespace SwayNotificationCenter {
         private void on_visibility_change () {
             // Updates all widgets on visibility change
             foreach (var widget in widgets) {
-                widget.on_cc_visibility_change(visible);
+                widget.on_cc_visibility_change (visible);
             }
 
             if (this.visible) {

@@ -83,12 +83,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             string[] names = dbus_iface.list_names ();
             foreach (string name in names) {
                 if (!name.has_prefix (MPRIS_PREFIX)) continue;
-                bool exists = false;
-                foreach (string name_check in players.get_keys ()) {
-                    if (name_check.has_prefix (name)
-                        || name.has_prefix (name_check)) exists = true;
-                }
-                if (exists) continue;
+                if (check_player_exists (name)) return;
                 MprisSource ? source = MprisSource.get_player (name);
                 if (source != null) add_player (name, source);
             }
@@ -99,16 +94,18 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                     remove_player (name);
                     return;
                 }
-                // TODO: WAIT UNTIL DBUS PROPS HAVE LOADED!
-                bool exists = false;
-                foreach (string name_check in players.get_keys_as_array ()) {
-                    if (name_check.has_prefix (name)
-                        || name.has_prefix (name_check)) exists = true;
-                }
-                if (exists) return;
+                if (check_player_exists (name)) return;
                 MprisSource ? source = MprisSource.get_player (name);
                 if (source != null) add_player (name, source);
             });
+        }
+
+        private bool check_player_exists (string name) {
+            foreach (string name_check in players.get_keys_as_array ()) {
+                if (name_check.has_prefix (name)
+                    || name.has_prefix (name_check)) return true;
+            }
+            return false;
         }
 
         private void add_player (string name, MprisSource source) {

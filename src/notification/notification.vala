@@ -210,7 +210,7 @@ namespace SwayNotificationCenter {
             } else {
                 Timeout.add (0, () => {
                     this.revealer.set_reveal_child (true);
-                    return GLib.Source.REMOVE;
+                    return Source.REMOVE;
                 });
             }
         }
@@ -223,7 +223,7 @@ namespace SwayNotificationCenter {
             // Removes all image tags and adds them to an array
             if (text.length > 0) {
                 try {
-                    GLib.Regex img_exp = new Regex (
+                    Regex img_exp = new Regex (
                         """<img[^>]* src=\"([^\"]*)\"[^>]*>""",
                         RegexCompileFlags.JAVASCRIPT_COMPAT);
 
@@ -359,7 +359,7 @@ namespace SwayNotificationCenter {
         private string get_readable_time () {
             string value = "";
 
-            double diff = (GLib.get_real_time () * 0.000001) - param.time;
+            double diff = (get_real_time () * 0.000001) - param.time;
             double secs = diff / 60;
             double hours = secs / 60;
             double days = hours / 24;
@@ -398,7 +398,7 @@ namespace SwayNotificationCenter {
                     print ("Error: %s\n", e.message);
                     this.destroy ();
                 }
-                return GLib.Source.REMOVE;
+                return Source.REMOVE;
             });
         }
 
@@ -436,7 +436,7 @@ namespace SwayNotificationCenter {
                                           notification_icon_size);
             } else {
                 // Get the app icon
-                GLib.Icon ? icon = null;
+                Icon ? icon = null;
                 if (param.desktop_entry != null) {
                     string entry = param.desktop_entry;
                     entry = entry.replace (".desktop", "");
@@ -484,7 +484,7 @@ namespace SwayNotificationCenter {
             if (ms <= 0) return;
             timeout_id = Timeout.add (ms, () => {
                 close_notification (true);
-                return GLib.Source.REMOVE;
+                return Source.REMOVE;
             });
         }
 

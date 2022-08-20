@@ -105,11 +105,11 @@ namespace SwayNotificationCenter {
             }
             if (!only_system) {
                 paths += Path.build_path (Path.DIR_SEPARATOR.to_string (),
-                                          GLib.Environment.get_user_config_dir (),
+                                          Environment.get_user_config_dir (),
                                           "swaync/style.css");
             }
 
-            foreach (var path in GLib.Environment.get_system_config_dirs ()) {
+            foreach (var path in Environment.get_system_config_dirs ()) {
                 paths += Path.build_path (Path.DIR_SEPARATOR.to_string (),
                                           path, "swaync/style.css");
             }
@@ -139,9 +139,9 @@ namespace SwayNotificationCenter {
                 paths += custom_path;
             }
             paths += Path.build_path (Path.DIR_SEPARATOR.to_string (),
-                                      GLib.Environment.get_user_config_dir (),
+                                      Environment.get_user_config_dir (),
                                       "swaync/config.json");
-            foreach (var path in GLib.Environment.get_system_config_dirs ()) {
+            foreach (var path in Environment.get_system_config_dirs ()) {
                 paths += Path.build_path (Path.DIR_SEPARATOR.to_string (),
                                           path, "swaync/config.json");
             }
@@ -167,7 +167,7 @@ namespace SwayNotificationCenter {
                 string img = all[1];
                 // Replaces "~/" with $HOME
                 if (img.index_of ("~/", 0) == 0) {
-                    img = GLib.Environment.get_home_dir () +
+                    img = Environment.get_home_dir () +
                           img.slice (1, img.length);
                 }
                 return img;

@@ -280,7 +280,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 }
             }
             // Get the app icon
-            GLib.Icon ? icon = null;
+            Icon ? icon = null;
             if (desktop_entry is DesktopAppInfo) {
                 icon = desktop_entry.get_icon ();
             }

@@ -128,7 +128,7 @@ namespace SwayNotificationCenter {
             this.body = body;
             this.hints = hints;
             this.expire_timeout = expire_timeout;
-            this.time = (int64) (GLib.get_real_time () * 0.000001);
+            this.time = (int64) (get_real_time () * 0.000001);
 
             this.replaces = false;
             this.has_synch = false;
@@ -161,12 +161,12 @@ namespace SwayNotificationCenter {
                 Variant hint_value = hints[hint];
                 switch (hint) {
                     case "SWAYNC_NO_SCRIPT":
-                        if (hint_value.is_of_type (GLib.VariantType.BOOLEAN)) {
+                        if (hint_value.is_of_type (VariantType.BOOLEAN)) {
                             swaync_no_script = hint_value.get_boolean ();
                         }
                         break;
                     case "value":
-                        if (hint_value.is_of_type (GLib.VariantType.INT32)) {
+                        if (hint_value.is_of_type (VariantType.INT32)) {
                             this.has_synch = true;
                             value = hint_value.get_int32 ();
                         }
@@ -174,12 +174,12 @@ namespace SwayNotificationCenter {
                     case "synchronous":
                     case "private-synchronous":
                     case "x-canonical-private-synchronous":
-                        if (hint_value.is_of_type (GLib.VariantType.STRING)) {
+                        if (hint_value.is_of_type (VariantType.STRING)) {
                             synchronous = hint_value.get_string ();
                         }
                         break;
                     case "action-icons":
-                        if (hint_value.is_of_type (GLib.VariantType.BOOLEAN)) {
+                        if (hint_value.is_of_type (VariantType.BOOLEAN)) {
                             action_icons = hint_value.get_boolean ();
                         }
                         break;
@@ -208,34 +208,34 @@ namespace SwayNotificationCenter {
                         break;
                     case "image-path":
                     case "image_path":
-                        if (hint_value.is_of_type (GLib.VariantType.STRING)) {
+                        if (hint_value.is_of_type (VariantType.STRING)) {
                             image_path = hint_value.get_string ();
                         }
                         break;
                     case "desktop-entry":
-                        if (hint_value.is_of_type (GLib.VariantType.STRING)) {
+                        if (hint_value.is_of_type (VariantType.STRING)) {
                             desktop_entry = hint_value.get_string ();
                         }
                         break;
                     case "category":
-                        if (hint_value.is_of_type (GLib.VariantType.STRING)) {
+                        if (hint_value.is_of_type (VariantType.STRING)) {
                             category = hint_value.get_string ();
                         }
                         break;
                     case "resident":
-                        if (hint_value.is_of_type (GLib.VariantType.BOOLEAN)) {
+                        if (hint_value.is_of_type (VariantType.BOOLEAN)) {
                             resident = hint_value.get_boolean ();
                         }
                         break;
                     case "transient":
-                        if (hint_value.is_of_type (GLib.VariantType.BOOLEAN)) {
+                        if (hint_value.is_of_type (VariantType.BOOLEAN)) {
                             transient = hint_value.get_boolean ();
-                        } else if (hint_value.is_of_type (GLib.VariantType.INT32)) {
+                        } else if (hint_value.is_of_type (VariantType.INT32)) {
                             transient = hint_value.get_int32 () == 1;
                         }
                         break;
                     case "urgency":
-                        if (hint_value.is_of_type (GLib.VariantType.BYTE)) {
+                        if (hint_value.is_of_type (VariantType.BYTE)) {
                             urgency = UrgencyLevels.from_value (hint_value.get_byte ());
                         }
                         break;

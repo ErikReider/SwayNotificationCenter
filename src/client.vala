@@ -5,7 +5,7 @@ public struct SwayncDaemonData {
 }
 
 [DBus (name = "org.erikreider.swaync.cc")]
-interface CcDaemon : GLib.Object {
+interface CcDaemon : Object {
 
     public abstract bool reload_css () throws Error;
 
@@ -171,7 +171,7 @@ public int command_line (string[] args) {
                 Bus.watch_name (
                     BusType.SESSION,
                     "org.erikreider.swaync.cc",
-                    GLib.BusNameWatcherFlags.NONE,
+                    BusNameWatcherFlags.NONE,
                     print_subscribe,
                     print_subscribe);
                 loop.run ();
@@ -183,7 +183,7 @@ public int command_line (string[] args) {
                 Bus.watch_name (
                     BusType.SESSION,
                     "org.erikreider.swaync.cc",
-                    GLib.BusNameWatcherFlags.NONE,
+                    BusNameWatcherFlags.NONE,
                     print_subscribe_waybar,
                     print_subscribe_waybar);
                 loop.run ();
@@ -228,7 +228,7 @@ public int main (string[] args) {
         Bus.watch_name (
             BusType.SESSION,
             "org.erikreider.swaync.cc",
-            GLib.BusNameWatcherFlags.NONE,
+            BusNameWatcherFlags.NONE,
             (conn, name, name_owner) => {
             if (try_connect (args) == 0) loop.quit ();
         },

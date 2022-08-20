@@ -90,7 +90,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
     [DBus (name = "org.freedesktop.DBus")]
     public interface DBusInterface : Object {
-        public abstract string[] list_names () throws GLib.Error;
+        public abstract string[] list_names () throws Error;
         public signal void name_owner_changed (string name,
                                                string old_owner,
                                                string new_owner);

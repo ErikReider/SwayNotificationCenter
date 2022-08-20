@@ -474,19 +474,18 @@ namespace SwayNotificationCenter {
                     timeout = timeout_delay * 1000;
                     break;
                 case UrgencyLevels.CRITICAL:
-                    if (timeout_critical_delay == 0) {
-                        return;
-                    }
+                    // Critical notifications should not automatically expire.
+                    // Ignores the notifications expire_timeout.
+                    if (timeout_critical_delay == 0) return;
                     timeout = timeout_critical_delay * 1000;
                     break;
             }
             uint ms = param.expire_timeout > 0 ? param.expire_timeout : timeout;
-            if (ms != 0) {
-                timeout_id = Timeout.add (ms, () => {
-                    close_notification (true);
-                    return GLib.Source.REMOVE;
-                });
-            }
+            if (ms <= 0) return;
+            timeout_id = Timeout.add (ms, () => {
+                close_notification (true);
+                return GLib.Source.REMOVE;
+            });
         }
 
         public void remove_noti_timeout () {

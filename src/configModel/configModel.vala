@@ -287,7 +287,7 @@ namespace SwayNotificationCenter {
                 return _timeout;
             }
             set {
-                _timeout = value < 1 ? TIMEOUT_DEFAULT : value;
+                _timeout = value < 0 ? TIMEOUT_DEFAULT : value;
             }
         }
 
@@ -299,19 +299,7 @@ namespace SwayNotificationCenter {
                 return _timeout_low;
             }
             set {
-                _timeout_low = value < 1 ? TIMEOUT_LOW_DEFAULT : value;
-            }
-        }
-
-        /** The transition time for all animations */
-        private const int TRANSITION_TIME_DEFAULT = 200;
-        private int _transition_time = TRANSITION_TIME_DEFAULT;
-        public int transition_time {
-            get {
-                return _transition_time;
-            }
-            set {
-                _transition_time = value < 0 ? TRANSITION_TIME_DEFAULT : value;
+                _timeout_low = value < 0 ? TIMEOUT_LOW_DEFAULT : value;
             }
         }
 
@@ -324,6 +312,18 @@ namespace SwayNotificationCenter {
             }
             set {
                 _timeout_critical = value < 0 ? TIMEOUT_CRITICAL_DEFAULT : value;
+            }
+        }
+
+        /** The transition time for all animations */
+        private const int TRANSITION_TIME_DEFAULT = 200;
+        private int _transition_time = TRANSITION_TIME_DEFAULT;
+        public int transition_time {
+            get {
+                return _transition_time;
+            }
+            set {
+                _transition_time = value < 0 ? TRANSITION_TIME_DEFAULT : value;
             }
         }
 

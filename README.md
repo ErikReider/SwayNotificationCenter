@@ -57,6 +57,13 @@ dnf copr enable erikreider/SwayNotificationCenter
 dnf install SwayNotificationCenter
 ```
 
+Fedora Silverblue (and other rpm-ostree variants):
+The package can be downloaded from COPR after manually adding the repo file, and installed as a overlayed package:
+```zsh
+wget -O /etc/yum.repos.d/erikreider-SwayNotificationCenter.repo https://copr.fedorainfracloud.org/coprs/erikreider/SwayNotificationCenter/repo/fedora-rawhide/erikreider-SwayNotificationCenter-fedora-rawhide.repo
+rpm-ostree install SwayNotificationCenter
+```
+
 Gentoo:
 An **unofficial** ebuild is available in [GURU](https://github.com/gentoo/guru)
 

@@ -1,6 +1,6 @@
 # vim: syntax=spec
 Name:       {{{ git_dir_name }}}
-Version:    0.6.3
+Version:    0.7.1
 Release:    1%{?dist}
 Summary:    Notification daemon with GTK GUI
 Provides:   desktop-notification-daemon
@@ -21,6 +21,7 @@ BuildRequires: libgee-devel >= 0.20
 BuildRequires: json-glib-devel >= 1.0
 BuildRequires: libhandy-devel >= 1.4.0
 BuildRequires: systemd-devel
+BuildRequires: systemd
 BuildRequires: scdoc
 %{?systemd_requires}
 
@@ -51,7 +52,6 @@ A simple notification daemon with a GTK gui for notifications and the control ce
 %{_sysconfdir}/xdg/swaync/configSchema.json
 %{_sysconfdir}/xdg/swaync/config.json
 %{_sysconfdir}/xdg/swaync/style.css
-%{_sysconfdir}/xdg/swaync/configSchema.json
 %{_userunitdir}/swaync.service
 %dir %{_datadir}/bash-completion
 %dir %{_datadir}/bash-completion/completions

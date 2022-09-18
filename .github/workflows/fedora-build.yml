@@ -11,7 +11,7 @@ on:
 
 jobs:
   package:
-    container: fedora:latest
+    container: fedora:rawhide
     runs-on: ubuntu-latest
 
     steps:
@@ -45,8 +45,8 @@ jobs:
           mkdir -p out
           rpkg local --out `pwd`/out
 
-      - name: Store RPMs
-        uses: actions/upload-artifact@v3
-        with:
-          name: rpms
-          path: swaync/out/
+      # - name: Store RPMs
+        # uses: actions/upload-artifact@v3
+        # with:
+          # name: rpms
+          # path: swaync/out/

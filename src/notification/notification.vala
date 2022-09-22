@@ -67,6 +67,7 @@ namespace SwayNotificationCenter {
 
         private static Regex tag_regex;
         private static Regex tag_unescape_regex;
+        private static Regex img_tag_regex;
         private const string[] TAGS = { "b", "u", "i" };
         private const string[] UNESCAPE_CHARS = {
             "lt;", "#60;", "#x3C;", "#x3c;", // <
@@ -106,6 +107,7 @@ namespace SwayNotificationCenter {
                 tag_regex = new Regex ("&lt;(/?(?:%s))&gt;".printf (joined_tags));
                 string unescaped = string.joinv ("|", UNESCAPE_CHARS);
                 tag_unescape_regex = new Regex ("&amp;(?=%s)".printf (unescaped));
+                img_tag_regex = new Regex ("""<img[^>]* src=\"([^\"]*)\"[^>]*>""");
             } catch (Error e) {
                 stderr.printf ("Invalid regex: %s", e.message);
             }
@@ -223,14 +225,10 @@ namespace SwayNotificationCenter {
             // Removes all image tags and adds them to an array
             if (text.length > 0) {
                 try {
-                    Regex img_exp = new Regex (
-                        """<img[^>]* src=\"([^\"]*)\"[^>]*>""",
-                        RegexCompileFlags.JAVASCRIPT_COMPAT);
-
                     // Get src paths from images
                     string[] img_paths = {};
                     MatchInfo info;
-                    if (img_exp.match (text, 0, out info)) {
+                    if (img_tag_regex.match (text, 0, out info)) {
                         img_paths += Functions.get_match_from_info (info);
                         while (info.next ()) {
                             img_paths += Functions.get_match_from_info (info);
@@ -238,7 +236,7 @@ namespace SwayNotificationCenter {
                     }
 
                     // Remove all images
-                    text = img_exp.replace (text, text.length, 0, "");
+                    text = img_tag_regex.replace (text, text.length, 0, "");
 
                     // Set the image if exists and is valid
                     if (img_paths.length > 0) {

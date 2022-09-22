@@ -1,7 +1,7 @@
 # Maintainer: Erik Reider <erik.reider@protonmail.com>
 pkgname=swaync-git
 _pkgname=swaync
-pkgver=v0.7.1.r1.g06593e7
+pkgver=v0.7.2.r1.g06593e7
 pkgrel=1
 pkgdesc="A simple notificaion daemon with a GTK panel for checking previous notifications like other DEs"
 url="https://github.com/ErikReider/SwayNotificationCenter"

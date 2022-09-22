@@ -203,7 +203,7 @@ config file to be able to detect config errors
 				text: ++
 					type: string ++
 					optional: true ++
-					default: "Do Not Disturb" ++
+					default: "Notifications" ++
 					description: The title of the widget ++
 				clear-all-button: ++
 					type: bool ++

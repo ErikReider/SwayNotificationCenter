@@ -66,7 +66,7 @@ namespace SwayNotificationCenter {
                 if (param.app_name == null) return false;
                 bool result = Regex.match_simple (
                     app_name, param.app_name,
-                    RegexCompileFlags.JAVASCRIPT_COMPAT,
+                    0,
                     RegexMatchFlags.NOTEMPTY);
                 if (!result) return false;
             }
@@ -74,7 +74,7 @@ namespace SwayNotificationCenter {
                 if (param.summary == null) return false;
                 bool result = Regex.match_simple (
                     summary, param.summary,
-                    RegexCompileFlags.JAVASCRIPT_COMPAT,
+                    0,
                     RegexMatchFlags.NOTEMPTY);
                 if (!result) return false;
             }
@@ -82,14 +82,14 @@ namespace SwayNotificationCenter {
                 if (param.body == null) return false;
                 bool result = Regex.match_simple (
                     body, param.body,
-                    RegexCompileFlags.JAVASCRIPT_COMPAT,
+                    0,
                     RegexMatchFlags.NOTEMPTY);
                 if (!result) return false;
             }
             if (urgency != null) {
                 bool result = Regex.match_simple (
                     urgency, param.urgency.to_string (),
-                    RegexCompileFlags.JAVASCRIPT_COMPAT,
+                    0,
                     RegexMatchFlags.NOTEMPTY);
                 if (!result) return false;
             }
@@ -97,7 +97,7 @@ namespace SwayNotificationCenter {
                 if (param.category == null) return false;
                 bool result = Regex.match_simple (
                     category, param.category,
-                    RegexCompileFlags.JAVASCRIPT_COMPAT,
+                    0,
                     RegexMatchFlags.NOTEMPTY);
                 if (!result) return false;
             }

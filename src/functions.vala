@@ -96,6 +96,7 @@ namespace SwayNotificationCenter {
         public static string get_style_path (owned string ? custom_path,
                                              bool only_system = false) {
             string[] paths = {
+                // Fallback location. Specified in postinstall.py
                 "/usr/local/etc/xdg/swaync/style.css"
             };
             if (custom_path != null && custom_path.length > 0) {
@@ -133,6 +134,7 @@ namespace SwayNotificationCenter {
 
         public static string get_config_path (owned string ? custom_path) {
             string[] paths = {
+                // Fallback location. Specified in postinstall.py
                 "/usr/local/etc/xdg/swaync/config.json"
             };
             if (custom_path != null && custom_path.length > 0) {

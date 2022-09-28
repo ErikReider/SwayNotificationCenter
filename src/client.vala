@@ -19,6 +19,8 @@ interface CcDaemon : Object {
 
     public abstract bool get_dnd () throws DBusError, IOError;
 
+    public abstract void set_dnd (bool state) throws DBusError, IOError;
+
     public abstract bool get_visibility () throws DBusError, IOError;
 
     public abstract void toggle_visibility () throws DBusError, IOError;
@@ -49,6 +51,8 @@ private void print_help (string[] args) {
     print ("\t -cp, \t --close-panel \t\t Closes the notificaion panel\n");
     print ("\t -d, \t --toggle-dnd \t\t Toggle and print the current dnd state\n");
     print ("\t -D, \t --get-dnd \t\t Print the current dnd state\n");
+    print ("\t -dn, \t --dnd-on \t\t Turn dnd on and print the new dnd state\n");
+    print ("\t -df, \t --dnd-off \t\t Turn dnd off and print the new dnd state\n");
     print ("\t -c, \t --count \t\t Print the current notificaion count\n");
     print ("\t     \t --hide-latest \t\t Hides latest notification. Still shown in Control Center\n");
     print ("\t     \t --close-latest \t Closes latest notification\n");
@@ -159,6 +163,16 @@ public int command_line (string[] args) {
                 break;
             case "--get-dnd":
             case "-D":
+                print (cc_daemon.get_dnd ().to_string ());
+                break;
+            case "--dnd-on":
+            case "-dn":
+                cc_daemon.set_dnd (true);
+                print (cc_daemon.get_dnd ().to_string ());
+                break;
+            case "--dnd-off":
+            case "-df":
+                cc_daemon.set_dnd (false);
                 print (cc_daemon.get_dnd ().to_string ());
                 break;
             case "--subscribe":

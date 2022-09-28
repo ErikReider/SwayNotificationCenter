@@ -12,6 +12,8 @@ _swaync-client() {
         -cp
         -d
         -D
+        -dn
+        -df
         -c
         -C
         -sw
@@ -29,6 +31,8 @@ _swaync-client() {
         --close-panel
         --toggle-dnd
         --get-dnd
+        --dnd-on
+        --dnd-off
         --count
         --hide-latest
         --close-latest

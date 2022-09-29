@@ -8,6 +8,8 @@ complete -c swaync-client -s op -l open-panel --description "Opens the notificai
 complete -c swaync-client -s cp -l close-panel --description "Closes the notificaion panel" -r
 complete -c swaync-client -s d -l toggle-dnd --description "Toggle and print the current dnd state" -r
 complete -c swaync-client -s D -l get-dnd --description "Print the current dnd state" -r
+complete -c swaync-client -s dn -l dnd-on --description "Turn dnd on and print the new dnd state" -r
+complete -c swaync-client -s df -l dnd-off --description "Turn dnd off and print the new dnd state" -r
 complete -c swaync-client -s c -l count --description "Print the current notificaion count" -r
 complete -c swaync-client      -l hide-latest --description "Hides latest notification. Still shown in Control Center" -r
 complete -c swaync-client      -l close-latest --description "Closes latest notification" -r

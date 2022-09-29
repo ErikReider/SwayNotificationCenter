@@ -37,6 +37,12 @@ swaync-client - Client executable
 *-D, --get-dnd*
 	Print the current dnd state
 
+*-dn, --dnd-on*
+	Turn dnd on and print the new dnd state
+
+*-df, --dnd-off*
+	Turn dnd off and print the new dnd state
+
 *-c, --count*
 	Print the current notificaion count
 

@@ -110,7 +110,7 @@ config file to be able to detect config errors
 			type: string ++
 			optional: false ++
 			default: enabled ++
-			values: ignored, muted, enabled ++
+			values: ignored, muted, transient, enabled ++
 			description: The notification visibility state. ++
 		*app-name*++
 			type: string ++

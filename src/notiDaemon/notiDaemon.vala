@@ -172,16 +172,18 @@ namespace SwayNotificationCenter {
                 synchronous_ids.set (param.synchronous, id);
             }
 
-            // Only show popup notification if it is ENABLED
-            if (state == NotificationStatusEnum.ENABLED
+            // Only show popup notification if it is ENABLED or TRANSIENT
+            if ((state == NotificationStatusEnum.ENABLED || state == NotificationStatusEnum.TRANSIENT)
                 && !control_center.get_visibility ()) {
                 if (param.urgency == UrgencyLevels.CRITICAL ||
                     (!dnd && param.urgency != UrgencyLevels.CRITICAL)) {
                     NotificationWindow.instance.add_notification (param, this);
                 }
             }
-            // Only add notification to CC if it isn't IGNORED and not transient
-            if (state != NotificationStatusEnum.IGNORED && !param.transient) {
+            // Only add notification to CC if it isn't IGNORED and not transient/TRANSIENT
+            if (state != NotificationStatusEnum.IGNORED
+                  && state != NotificationStatusEnum.TRANSIENT
+                  && !param.transient) {
                 control_center.add_notification (param, this);
             }
 

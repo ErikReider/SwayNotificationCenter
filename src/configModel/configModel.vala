@@ -137,7 +137,8 @@ namespace SwayNotificationCenter {
     public enum NotificationStatusEnum {
         ENABLED,
         MUTED,
-        IGNORED;
+        IGNORED,
+        TRANSIENT;
 
         public string to_string () {
             switch (this) {
@@ -147,6 +148,8 @@ namespace SwayNotificationCenter {
                     return "muted";
                 case IGNORED:
                     return "ignored";
+                case TRANSIENT:
+                    return "transient";
             }
         }
 
@@ -158,6 +161,8 @@ namespace SwayNotificationCenter {
                     return MUTED;
                 case "ignored":
                     return IGNORED;
+                case "transient":
+                    return TRANSIENT;
             }
         }
     }

@@ -186,7 +186,7 @@
               "type": "string",
               "description": "The notification visibility state.",
               "default": "enabled",
-              "enum": ["ignored", "muted", "enabled"]
+              "enum": ["ignored", "muted", "enabled", "transient"]
             },
             "app-name": {
               "type": "string",

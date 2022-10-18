@@ -212,7 +212,24 @@ namespace SwayNotificationCenter {
 #else
             GtkLayerShell.set_keyboard_interactivity (this, keyboard_shortcuts);
 #endif
-            GtkLayerShell.set_layer (this, GtkLayerShell.Layer.TOP);
+
+            // Set layer
+            GtkLayerShell.Layer layer = GtkLayerShell.Layer.TOP;
+            switch (ConfigModel.instance.layer) {
+                case Layer.BACKGROUND:
+                    layer = GtkLayerShell.Layer.BACKGROUND;
+                    break;
+                case Layer.BOTTOM:
+                    layer = GtkLayerShell.Layer.BOTTOM;
+                    break;
+                case Layer.TOP:
+                    layer = GtkLayerShell.Layer.TOP;
+                    break;
+                case Layer.OVERLAY:
+                    layer = GtkLayerShell.Layer.OVERLAY;
+                    break;
+            }
+            GtkLayerShell.set_layer (this, layer);
 
             // Set the box margins
             box.set_margin_top (ConfigModel.instance.control_center_margin_top);

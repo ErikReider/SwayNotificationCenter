@@ -21,6 +21,12 @@ config file to be able to detect config errors
 	values: top, bottom ++
 	description: Vertical position of control center and notification window
 
+*layer* ++
+	type: string ++
+	default: top ++
+	values: background, bottom, top, overlay ++
+	description: Layer of control center window relative to normal windows. background is below all windows, overlay is above all windows.
+
 *control-center-margin-top* ++
 	type: integer ++
 	default: 0 ++

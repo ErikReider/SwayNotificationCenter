@@ -2,6 +2,7 @@
   "$schema": @JSONPATH@,
   "positionX": "right",
   "positionY": "top",
+  "layer": "top",
   "control-center-margin-top": 0,
   "control-center-margin-bottom": 0,
   "control-center-margin-right": 0,

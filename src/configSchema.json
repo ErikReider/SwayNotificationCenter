@@ -14,6 +14,12 @@
       "default": "right",
       "enum": ["right", "left", "center"]
     },
+    "layer": {
+      "type": "string",
+      "description": "Layer of control center window",
+      "default": "top",
+      "enum": ["background", "bottom", "top", "overlay"]
+    },
     "positionY": {
       "type": "string",
       "description": "Vertical position of control center and notification window",

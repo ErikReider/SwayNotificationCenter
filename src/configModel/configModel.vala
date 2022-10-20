@@ -42,6 +42,25 @@ namespace SwayNotificationCenter {
         }
     }
 
+    public enum Layer {
+        BACKGROUND, BOTTOM, TOP, OVERLAY;
+
+        public string parse () {
+            switch (this) {
+                default:
+                    return "top";
+                case BACKGROUND:
+                    return "background";
+                case BOTTOM:
+                    return "bottom";
+                case TOP:
+                    return "top";
+                case OVERLAY:
+                    return "overlay";
+            }
+        }
+    }
+
     public class Category : Object {
         public string ? sound { get; set; default = null; }
         public string ? icon { get; set; default = null; }
@@ -282,6 +301,11 @@ namespace SwayNotificationCenter {
         /** The notifications and controlcenters vertical alignment */
         public PositionY positionY { // vala-lint=naming-convention
             get; set; default = PositionY.TOP;
+        }
+
+        /** Layer of control center */
+        public Layer layer {
+            get; set; default = Layer.TOP;
         }
 
         /** The timeout for notifications with NORMAL priority */

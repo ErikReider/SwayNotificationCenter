@@ -27,6 +27,13 @@ config file to be able to detect config errors
 	values: background, bottom, top, overlay ++
 	description: Layer of control center window relative to normal windows. background is below all windows, overlay is above all windows.
 
+*cssPriority* ++
+	type: string ++
+	default: application ++
+	values: application, user ++
+	description: Which GTK priority to use when loading the default and user ++
+		CSS files. Pick "user" to override *XDG_CONFIG_HOME/gtk-3.0/gtk.css*
+
 *control-center-margin-top* ++
 	type: integer ++
 	default: 0 ++

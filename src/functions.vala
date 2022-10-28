@@ -70,6 +70,8 @@ namespace SwayNotificationCenter {
          * with default GTK style properties
          */
         public static bool load_css (string ? style_path) {
+            int css_priority = ConfigModel.instance.cssPriority.get_priority();
+
             try {
                 // Load packaged CSS as backup
                 string system_css = get_style_path (null, true);
@@ -77,18 +79,23 @@ namespace SwayNotificationCenter {
                 Gtk.StyleContext.add_provider_for_screen (
                     Gdk.Screen.get_default (),
                     system_css_provider,
-                    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+                    css_priority);
+            } catch (Error e) {
+                print ("Load packaged CSS Error: %s\n", e.message);
+                return false;
+            }
 
+            try {
                 // Load user CSS
                 string user_css = get_style_path (style_path);
                 user_css_provider.load_from_path (user_css);
                 Gtk.StyleContext.add_provider_for_screen (
                     Gdk.Screen.get_default (),
                     user_css_provider,
-                    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+                    css_priority);
                 return true;
             } catch (Error e) {
-                print ("Load CSS Error: %s\n", e.message);
+                print ("Load user CSS Error: %s\n", e.message);
                 return false;
             }
         }

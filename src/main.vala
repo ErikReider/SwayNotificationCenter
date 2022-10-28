@@ -37,8 +37,8 @@ namespace SwayNotificationCenter {
             }
         }
 
-        Functions.load_css (style_path);
         ConfigModel.init (config_path);
+        Functions.load_css (style_path);
 
         swaync_daemon = new SwayncDaemon ();
         Bus.own_name (BusType.SESSION, "org.erikreider.swaync.cc",

@@ -20,6 +20,12 @@
       "default": "top",
       "enum": ["background", "bottom", "top", "overlay"]
     },
+    "cssPriority": {
+      "type": "string",
+      "description": "Which GTK priority to use when loading the default and user CSS files. Pick \"user\" to override XDG_CONFIG_HOME/gtk-3.0/gtk.css",
+      "default": "application",
+      "enum": ["application", "user"]
+    },
     "positionY": {
       "type": "string",
       "description": "Vertical position of control center and notification window",

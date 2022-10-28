@@ -61,6 +61,20 @@ namespace SwayNotificationCenter {
         }
     }
 
+    public enum CssPriority {
+        APPLICATION, USER;
+
+        public int get_priority () {
+            switch (this) {
+                case APPLICATION:
+                default:
+                    return Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION;
+                case USER:
+                    return Gtk.STYLE_PROVIDER_PRIORITY_USER;
+            }
+        }
+    }
+
     public class Category : Object {
         public string ? sound { get; set; default = null; }
         public string ? icon { get; set; default = null; }
@@ -306,6 +320,11 @@ namespace SwayNotificationCenter {
         /** Layer of control center */
         public Layer layer {
             get; set; default = Layer.TOP;
+        }
+
+        /** The CSS loading priority */
+        public CssPriority cssPriority { // vala-lint=naming-convention
+            get; set; default = CssPriority.APPLICATION;
         }
 
         /** The timeout for notifications with NORMAL priority */

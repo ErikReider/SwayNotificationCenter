@@ -64,7 +64,7 @@ namespace SwayNotificationCenter {
     public enum CssPriority {
         APPLICATION, USER;
 
-        public int get_priority() {
+        public int get_priority () {
             switch (this) {
                 case APPLICATION:
                 default:

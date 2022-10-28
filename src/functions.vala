@@ -70,7 +70,7 @@ namespace SwayNotificationCenter {
          * with default GTK style properties
          */
         public static bool load_css (string ? style_path) {
-            int css_priority = ConfigModel.instance.cssPriority.get_priority();
+            int css_priority = ConfigModel.instance.cssPriority.get_priority ();
 
             try {
                 // Load packaged CSS as backup

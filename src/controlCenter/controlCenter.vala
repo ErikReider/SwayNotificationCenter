@@ -60,7 +60,7 @@ namespace SwayNotificationCenter {
             });
             this.unmap.connect (swaync_daemon.hide_blank_windows);
 
-            this.button_press_event.connect (blank_window_press);
+            this.button_release_event.connect (blank_window_press);
             this.touch_event.connect (blank_window_press);
 
             // Only use release for closing notifications due to Escape key

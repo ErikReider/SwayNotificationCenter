@@ -16,6 +16,9 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
         DBusInterface dbus_iface;
 
+        Gtk.Button button_prev;
+        Gtk.Button button_next;
+        Gtk.Box carousel_box;
         Hdy.Carousel carousel;
         Hdy.CarouselIndicatorDots carousel_dots;
 
@@ -31,11 +34,44 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             set_valign (Gtk.Align.START);
             set_vexpand (false);
 
-            carousel = new Hdy.Carousel ();
+            carousel_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0) {
+                visible = true,
+            };
+
+            button_prev = new Gtk.Button.from_icon_name ("go-previous", Gtk.IconSize.BUTTON) {
+                relief = Gtk.ReliefStyle.NONE,
+                visible = false,
+            };
+            button_prev.clicked.connect (() => change_carousel_position (-1));
+
+            button_next = new Gtk.Button.from_icon_name ("go-next", Gtk.IconSize.BUTTON) {
+                relief = Gtk.ReliefStyle.NONE,
+                visible = false,
+            };
+            button_next.clicked.connect (() => change_carousel_position (1));
+
+            carousel = new Hdy.Carousel () {
+                visible = true,
+            };
 #if HAVE_LATEST_LIBHANDY
             carousel.allow_scroll_wheel = true;
 #endif
-            add (carousel);
+            carousel.page_changed.connect ((index) => {
+                GLib.List<weak Gtk.Widget> children = carousel.get_children ();
+                int children_length = (int) children.length ();
+                if (children_length <= 1) {
+                    button_prev.sensitive = false;
+                    button_next.sensitive = false;
+                    return;
+                }
+                button_prev.sensitive = index > 0;
+                button_next.sensitive = index < children_length - 1;
+            });
+
+            carousel_box.add (button_prev);
+            carousel_box.add (carousel);
+            carousel_box.add (button_next);
+            add (carousel_box);
 
             carousel_dots = new Hdy.CarouselIndicatorDots ();
             carousel_dots.set_carousel (carousel);
@@ -118,6 +154,11 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
             // Scroll to the new player
             carousel.scroll_to (player);
+            uint children_length = carousel.get_children ().length ();
+            if (children_length > 1) {
+                button_prev.show ();
+                button_next.show ();
+            }
         }
 
         private void remove_player (string name) {
@@ -129,7 +170,23 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             player.destroy ();
             players.remove (name);
 
-            if (carousel.get_children ().length () == 0) hide ();
+            uint children_length = carousel.get_children ().length ();
+            if (children_length == 0) {
+                hide ();
+            }
+            if (children_length <= 1) {
+                button_prev.hide ();
+                button_next.hide ();
+            }
+        }
+
+        private void change_carousel_position (int delta) {
+            GLib.List<weak Gtk.Widget> children = carousel.get_children ();
+            int children_length = (int) children.length ();
+            if (children_length == 0) return;
+            int position = ((int) carousel.position + delta).clamp (
+                0, children_length - 1);
+            carousel.scroll_to (children.nth_data (position));
         }
     }
 }

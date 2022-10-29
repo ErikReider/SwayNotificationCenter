@@ -225,8 +225,8 @@ namespace SwayNotificationCenter {
             Cairo.Surface scale_surf = Gdk.cairo_surface_create_from_pixbuf (pixbuf,
                                                                              img_scale,
                                                                              null);
-            int width = pixbuf.width;
-            int height = pixbuf.height;
+            int width = pixbuf.width / img_scale;
+            int height = pixbuf.height / img_scale;
             double window_ratio = (double) buffer_width / buffer_height;
             double bg_ratio = width / height;
             if (window_ratio > bg_ratio) { // Taller wallpaper than monitor

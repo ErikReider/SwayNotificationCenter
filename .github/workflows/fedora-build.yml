@@ -28,6 +28,11 @@ jobs:
           fetch-depth: 0
           path: swaync
 
+      - name: Copy spec into root dir
+        run: |
+          cd swaync
+          cp ./build-scripts/swaync.rpkg.spec ./
+
       - name: Generate spec
         run: |
           cd swaync
@@ -44,9 +49,3 @@ jobs:
           cd swaync
           mkdir -p out
           rpkg local --out `pwd`/out
-
-      # - name: Store RPMs
-        # uses: actions/upload-artifact@v3
-        # with:
-          # name: rpms
-          # path: swaync/out/

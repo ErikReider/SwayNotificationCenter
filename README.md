@@ -38,7 +38,7 @@ These widgets can be customized, added, removed and even reordered
 - Do Not Disturb
 - Notifications (Will always be visible)
 - Label
-- Mpris
+- Mpris (Media player controls for Spotify, Firefox, Chrome, etc...)
 
 ## Planned Features
 

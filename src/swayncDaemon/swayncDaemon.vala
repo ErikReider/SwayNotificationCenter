@@ -153,8 +153,8 @@ namespace SwayNotificationCenter {
 
         /** Reloads the config file */
         public void reload_config () throws Error {
-            print("\n");
-            message("Reloading config\n");
+            print ("\n");
+            message ("Reloading config\n");
             ConfigModel.reload_config ();
             noti_daemon.control_center.add_widgets ();
         }

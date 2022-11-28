@@ -149,7 +149,7 @@ namespace SwayNotificationCenter {
         public void add_widgets () {
             // Remove all widgets
             foreach (var widget in widgets.data) {
-                box.remove(widget);
+                box.remove (widget);
             }
             widgets.remove_range (0, widgets.length);
 

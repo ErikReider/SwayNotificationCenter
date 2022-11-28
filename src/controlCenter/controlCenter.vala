@@ -148,11 +148,10 @@ namespace SwayNotificationCenter {
         /** Adds all custom widgets. Removes previous widgets */
         public void add_widgets () {
             // Remove all widgets
-            while (widgets.length > 0) {
-                uint i = widgets.length - 1;
-                widgets.index (i).destroy ();
-                widgets.remove_index (i);
+            foreach (var widget in widgets.data) {
+                box.remove(widget);
             }
+            widgets.remove_range (0, widgets.length);
 
             string[] w = ConfigModel.instance.widgets.data;
             if (w.length == 0) w = DEFAULT_WIDGETS;

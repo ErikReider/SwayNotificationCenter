@@ -39,10 +39,10 @@ namespace SwayNotificationCenter.Widgets {
 
         public virtual void on_cc_visibility_change (bool value) {}
 
-        protected void get_prop<T> (Json.Object config, string value_key, ref T value) {
+        protected T? get_prop<T> (Json.Object config, string value_key) {
             if (!config.has_member (value_key)) {
-                warning ("%s: Config doesn't have key: %s!\n", key, value_key);
-                return;
+                debug ("%s: Config doesn't have key: %s!\n", key, value_key);
+                return null;
             }
             var member = config.get_member (value_key);
 
@@ -57,18 +57,17 @@ namespace SwayNotificationCenter.Widgets {
                          key,
                          typeof (T).name (),
                          member.get_value_type ().name ());
-                return;
+                return null;
             }
             switch (generic_base_type) {
                 case Type.STRING:
-                    value = member.get_string ();
-                    return;
+                    return member.get_string ();
                 case Type.INT64:
-                    value = member.get_int ();
-                    return;
+                    return (int) member.get_int ();
                 case Type.BOOLEAN:
-                    value = member.get_boolean ();
-                    return;
+                    return member.get_boolean ();
+                default:
+                    return null;
             }
         }
     }

@@ -20,10 +20,14 @@ namespace SwayNotificationCenter.Widgets {
             Json.Object ? config = get_config (this);
             if (config != null) {
                 // Get title
-                get_prop<string> (config, "text", ref title);
+                string? title = get_prop<string> (config, "text");
+                if (title != null) this.title = title;
                 // Get has clear-all-button
-                get_prop<bool> (config, "clear-all-button", ref has_clear_all_button);
-                get_prop<string> (config, "button-text", ref button_text);
+                bool? has_clear_all_button = get_prop<bool> (config, "clear-all-button");
+                if (has_clear_all_button != null) this.has_clear_all_button = has_clear_all_button;
+                // Get button text
+                string? button_text = get_prop<string> (config, "button-text");
+                if (button_text != null) this.button_text = button_text;
             }
 
             title_widget = new Gtk.Label (title);

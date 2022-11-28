@@ -82,10 +82,12 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             Json.Object ? config = get_config (this);
             if (config != null) {
                 // Get image-size
-                get_prop<int> (config, "image-size", ref mpris_config.image_size);
+                int? image_size = get_prop<int> (config, "image-size");
+                if (image_size != null) mpris_config.image_size = image_size;
 
                 // Get image-border-radius
-                get_prop<int> (config, "image-radius", ref mpris_config.image_radius);
+                int? image_radius = get_prop<int> (config, "image-radius");
+                if (image_radius != null) mpris_config.image_radius = image_radius;
                 // Clamp the radius
                 mpris_config.image_radius = mpris_config.image_radius.clamp (
                     0, (int) (mpris_config.image_size * 0.5));

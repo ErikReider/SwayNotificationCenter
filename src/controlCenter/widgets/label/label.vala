@@ -18,9 +18,11 @@ namespace SwayNotificationCenter.Widgets {
             Json.Object ? config = get_config (this);
             if (config != null) {
                 // Get text
-                get_prop<string> (config, "text", ref text);
+                string? text = get_prop<string> (config, "text");
+                if (text != null) this.text = text;
                 // Get max lines
-                get_prop<int> (config, "max-lines", ref max_lines);
+                int? max_lines = get_prop<int> (config, "max-lines");
+                if (max_lines != null) this.max_lines = max_lines;
             }
 
             label_widget = new Gtk.Label (null);

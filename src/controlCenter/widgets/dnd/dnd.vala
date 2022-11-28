@@ -18,7 +18,8 @@ namespace SwayNotificationCenter.Widgets {
             Json.Object ? config = get_config (this);
             if (config != null) {
                 // Get title
-                get_prop<string> (config, "text", ref title);
+                string? title = get_prop<string> (config, "text");
+                if (title != null) this.title = title;
             }
 
             // Title

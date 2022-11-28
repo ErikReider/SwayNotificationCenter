@@ -13,10 +13,6 @@ A simple notification daemon with a GTK gui for notifications and the control ce
 *Note: Only supports Desktops / Window Managers that support 
 `wlr_layer_shell_unstable_v1` like Sway or anything wlroots based*
 
-## Small note:
-
-I'll be taking a few weeks of needed vacation (due to personal health issues) so I won't be very active in new and existing issues. PRs are very appreciated :)
-
 ## Want to show off your sick config?
 
 Post your setup here: [Config flex 💪](https://github.com/ErikReider/SwayNotificationCenter/discussions/183)

@@ -20,6 +20,12 @@ namespace SwayNotificationCenter.Widgets {
             case "mpris":
                 widget = new Mpris.Mpris (suffix, swaync_daemon, noti_daemon);
                 break;
+            case "volume":
+                widget = new Volume (suffix, swaync_daemon, noti_daemon);
+                break;
+            case "brightness":
+                widget = new Brightness (suffix, swaync_daemon, noti_daemon);
+                break;
             default:
                 warning ("Could not find widget: \"%s\"!", key);
                 return null;

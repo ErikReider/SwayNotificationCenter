@@ -47,7 +47,7 @@ namespace SwayNotificationCenter {
                       () => {},
                       () => {
             stderr.printf (
-                "Could not aquire swaync name!...\n");
+                "Could not acquire swaync name!...\n");
             Process.exit (1);
         });
 

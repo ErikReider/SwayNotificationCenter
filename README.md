@@ -66,7 +66,7 @@ dnf install SwayNotificationCenter
 ```
 
 Fedora Silverblue (and other rpm-ostree variants):
-The package can be downloaded from COPR after adding the COPR repo as a ostree repo, and installed as a overlayed package:
+The package can be downloaded from COPR after adding the COPR repo as a ostree repo, and installed as a overlaid package:
 ```zsh
 ostree remote add SwayNotificationCenter https://download.copr.fedorainfracloud.org/results/erikreider/SwayNotificationCenter/fedora-$releasever-$basearch/
 rpm-ostree install SwayNotificationCenter
@@ -156,7 +156,7 @@ Scripting rules and logic:
 . <b>Only one</b> script can be fired per notification
 . Each script requires `exec` and at least one of the other properties
 . All listed properties must match the notification for the script to be ran
-. If any of the propeties doesn't match, the script will be skipped
+. If any of the properties doesn't match, the script will be skipped
 . If a notification doesn't include one of the properties, that property will
 be skipped
 

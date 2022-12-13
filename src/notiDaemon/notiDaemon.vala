@@ -87,7 +87,7 @@ namespace SwayNotificationCenter {
          *
          * New vendor-specific caps may be specified as long as they start with
          * "x-vendor". For instance, "x-gnome-foo-cap". Capability names must
-         * not contain spaces. They are limited to alpha-numeric characters
+         * not contain spaces. They are limited to alphanumeric characters
          * and dashes ("-").
          */
         [DBus (name = "GetCapabilities")]

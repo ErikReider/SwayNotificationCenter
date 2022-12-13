@@ -148,7 +148,7 @@ config file to be able to detect config errors
 			optional: true ++
 			description: Which category the notification belongs to. Uses Regex.++
 	description: Set the visibility of each incoming notification. ++
-		If the notification doesn't include one of the properites, that ++
+		If the notification doesn't include one of the properties, that ++
 		property will be ignored. All properties (except for state) use ++
 		regex. If all properties match the given notification, the ++
 		notification will be follow the provided state. ++
@@ -222,7 +222,7 @@ config file to be able to detect config errors
 					type: bool ++
 					optional: true ++
 					default: true ++
-					description: Wether to display a "Clear All" button ++
+					description: Whether to display a "Clear All" button ++
 				button-text: ++
 					type: string ++
 					optional: true ++
@@ -334,7 +334,7 @@ config file to be able to detect config errors
 			optional: true ++
 			description: Which category the notification belongs to. Uses Regex.++
 	description: Which scripts to check and potentially run for every ++
-		notification. If the notification doesn't include one of the properites, ++
+		notification. If the notification doesn't include one of the properties, ++
 		that property will be ignored. All properties (except for exec) use regex. ++
 		If all properties match the given notification, the script will be run. ++
 		Only the first matching script will be run. ++

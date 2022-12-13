@@ -44,7 +44,7 @@ namespace SwayNotificationCenter.Widgets {
                 });
                 clear_all_button.set_can_focus (false);
                 clear_all_button.valign = Gtk.Align.CENTER;
-                // Backwards compatible torwards older CSS stylesheets
+                // Backwards compatible towards older CSS stylesheets
                 clear_all_button.get_style_context ().add_class ("control-center-clear-all");
                 pack_end (clear_all_button, false);
             }

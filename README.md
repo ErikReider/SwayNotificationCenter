@@ -51,13 +51,15 @@ These widgets can be customized, added, removed and even reordered
 
 ## Install
 
-Arch:
+### Arch:
+
 The package is available on the AUR:
 
 - [swaync](https://aur.archlinux.org/packages/swaync/)
 - [swaync-git](https://aur.archlinux.org/packages/swaync-git/)
 
-Fedora:
+### Fedora:
+
 The package is available on COPR:
 
 ```zsh
@@ -65,14 +67,17 @@ dnf copr enable erikreider/SwayNotificationCenter
 dnf install SwayNotificationCenter
 ```
 
-Fedora Silverblue (and other rpm-ostree variants):
+### Fedora Silverblue (and other rpm-ostree variants):
+
 The package can be downloaded from COPR after adding the COPR repo as a ostree repo, and installed as a overlaid package:
+
 ```zsh
 ostree remote add SwayNotificationCenter https://download.copr.fedorainfracloud.org/results/erikreider/SwayNotificationCenter/fedora-$releasever-$basearch/
 rpm-ostree install SwayNotificationCenter
 ```
 
-Gentoo:
+### Gentoo:
+
 An **unofficial** ebuild is available in [GURU](https://github.com/gentoo/guru)
 
 ```zsh
@@ -81,7 +86,17 @@ emaint sync -r guru
 emerge --ask gui-apps/swaync
 ```
 
-Other:
+### Ubuntu:
+
+Will be included in the official repos in the
+[Lunar](https://packages.ubuntu.com/lunar/sway-notification-center) release.
+
+### Debian:
+
+Will be included in the official repos in the
+[Bookworm](https://packages.debian.org/source/sid/sway-notification-center) release.
+
+### Other:
 
 ```zsh
 meson build

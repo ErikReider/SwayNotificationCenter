@@ -86,6 +86,12 @@ emaint sync -r guru
 emerge --ask gui-apps/swaync
 ```
 
+### OpenSUSE Tumbleweed
+
+```zsh
+sudo zypper install SwayNotificationCenter
+```
+
 ### Ubuntu:
 
 Will be included in the official repos in the

@@ -164,7 +164,7 @@ To reload css after changes
 
 The main config file is located in `/etc/xdg/swaync/config.json`. Copy it over
 to your `.config/swaync/` folder to customize without needing root access.
-See `swaync(1)` man page for more information
+See `swaync(5)` man page for more information
 
 To reload the config, you'll need to run `swaync-client --reload-config`
 

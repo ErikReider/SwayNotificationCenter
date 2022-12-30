@@ -1,3 +1,5 @@
+using Posix;
+
 namespace SwayNotificationCenter.Widgets {
     public abstract class BaseWidget : Gtk.Box {
         public abstract string widget_name { get; }
@@ -69,6 +71,30 @@ namespace SwayNotificationCenter.Widgets {
                 default:
                     return null;
             }
+        }
+
+        protected Json.Array? get_prop_array (Json.Object config, string value_key){
+            if(!config.has_member (value_key)){
+                debug ("%s: Config doesn't have key: %s!\n", key, value_key);
+                return null;
+            }
+
+            return config.get_array_member (value_key);
+        }
+
+        protected void execute_command (string cmd){
+            pid_t pid;
+            int status;
+
+            if((pid = fork())<0){
+                perror ("fork()");
+            }
+
+            if(pid==0){ // Child process
+                execl ("/bin/sh", "sh", "-c", cmd);
+            }
+
+            waitpid (pid, out status, 1);
         }
     }
 }

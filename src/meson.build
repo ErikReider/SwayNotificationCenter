@@ -38,6 +38,7 @@ widget_sources = [
   'controlCenter/widgets/mpris/mpris_player.vala',
   'controlCenter/widgets/brightness/brightness.vala',
   'controlCenter/widgets/volume/volume.vala',
+  'controlCenter/widgets/powermenu/powermenu.vala',
 ]
 
 app_sources = [
@@ -64,6 +65,7 @@ app_deps = [
   dependency('libhandy-1', version: '>= 1.2.3'),
   meson.get_compiler('c').find_library('gtk-layer-shell'),
   meson.get_compiler('c').find_library('m', required : true),
+  meson.get_compiler('vala').find_library('posix'),
 ]
 
 # Checks if the user wants scripting enabled

@@ -24,20 +24,20 @@ namespace SwayNotificationCenter.Widgets {
 
 
             slider.adjustment.value_changed.connect (()=>{
-                string set_stdout;
-                string set_stderr;
-                int set_status;
-
+                int val = (int)slider.adjustment.value;
+                
                 try{
-                    Process.spawn_command_line_sync("pamixer --set-volume "+slider.adjustment.value.to_string(), out set_stdout, out set_stderr, out set_status);
+                    Process.spawn_command_line_async("pamixer --set-volume "+val.to_string());
+                    this.tooltip_text = val.to_string();
                 } catch(SpawnError e){
                     print ("Error: %s\n", e.message);
                 }
 
             });
 
-            label_widget.set_justify (Gtk.Justification.LEFT);
-            label_widget.set_alignment (0, 0);
+
+            slider.draw_value = false;
+            this.tooltip_text = slider.adjustment.value.to_string();
 
             add (label_widget);
             pack_start (slider, true, true, 0);

@@ -353,3 +353,16 @@ config file to be able to detect config errors
 	}
 }
 ```
+
+	You can also use these environment variable in your script:
+```
+SWAYNC_BODY=
+SWAYNC_DESKTOP_ENTRY=
+SWAYNC_URGENCY=Normal
+SWAYNC_TIME=1672513657
+SWAYNC_APP_NAME=notify-send
+SWAYNC_CATEGORY=(null)
+SWAYNC_REPLACES_ID=0
+SWAYNC_ID=1
+SWAYNC_SUMMARY=test
+```

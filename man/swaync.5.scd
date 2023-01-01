@@ -353,3 +353,16 @@ config file to be able to detect config errors
 	}
 }
 ```
+
+	You can also use these environment variables in your script:
+```
+SWAYNC_BODY="Notification body content"
+SWAYNC_DESKTOP_ENTRY="Desktop entry"
+SWAYNC_URGENCY="Notification urgency"
+SWAYNC_TIME="Notification time"
+SWAYNC_APP_NAME="Notification app name"
+SWAYNC_CATEGORY="SwayNC notification category"
+SWAYNC_REPLACES_ID="ID of notification to replace"
+SWAYNC_ID="SwayNC notification ID"
+SWAYNC_SUMMARY="Notification summary"
+```

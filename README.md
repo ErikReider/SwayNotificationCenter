@@ -212,7 +212,7 @@ Config properties:
     // This script will only run when Spotify sends a notification containing
     // that exact summary and body
     "example-script": {
-      "exec": "~/.config/swaync/myRickRollScript.sh",
+      "exec": "/path/to/myRickRollScript.sh",
       "app-name": "Spotify"
       "summary": "Never Gonna Give You Up",
       "body": "Rick Astley - Whenever You Need Somebody"

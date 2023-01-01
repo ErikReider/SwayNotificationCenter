@@ -176,6 +176,12 @@
             "category": {
               "type": "string",
               "description": "Which category the notification belongs to. Uses Regex."
+            },
+            "run-on": {
+              "type": "string",
+              "description": "Whether to run the script on an action being activated, or when the notification is received.",
+              "enum": ["action", "receive"],
+              "default": "receive"
             }
           }
         }

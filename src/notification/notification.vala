@@ -287,12 +287,43 @@ namespace SwayNotificationCenter {
         }
 
         public void click_default_action () {
+            try {
+                noti_daemon.run_action_scripts(
+                    param.applied_id,
+                    param.app_name,
+                    param.replaces_id,
+                    param.app_icon,
+                    param.summary,
+                    param.body,
+                    new string[0],
+                    param.hints,
+                    param.expire_timeout
+                );
+            } catch (Error e) {
+                print ("Error: %s\n", e.message);
+            }
+            
             action_clicked (param.default_action, true);
         }
 
         public void click_alt_action (uint index) {
             if (param.actions.length == 0 || index >= param.actions.length) {
                 return;
+            }
+            try {
+                noti_daemon.run_action_scripts(
+                    param.applied_id,
+                    param.app_name,
+                    param.replaces_id,
+                    param.app_icon,
+                    param.summary,
+                    param.body,
+                    new string[0],
+                    param.hints,
+                    param.expire_timeout
+                );
+            } catch (Error e) {
+                print ("Error: %s\n", e.message);
             }
             action_clicked (param.actions.index (index));
         }

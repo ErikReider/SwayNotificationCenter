@@ -195,78 +195,16 @@ namespace SwayNotificationCenter {
             // Run the first script if notification meets requirements
             HashTable<string, Script> scripts = ConfigModel.instance.scripts;
             if (scripts.length == 0) return id;
-            foreach (string key in scripts.get_keys ()) {
-                unowned Script script = scripts[key];
-                if (!script.matches_notification (param)) continue;
-                if (script.run_on != "receive") continue;
-
-                script.run_script.begin (param, (obj, res) => {
-                    // Gets the end status
-                    string error_msg;
-                    if (script.run_script.end (res, out error_msg)) return;
-
-                    if (!ConfigModel.instance.script_fail_notify) {
-                        stderr.printf (
-                            "Failed to run script: \"%s\" with exec: \"%s\"\n",
-                            key, script.exec);
-                    } else {
-                        // Send notification with error message
-                        try {
-                            var _hints = new HashTable<string, Variant> (
-                                str_hash,
-                                str_equal);
-                            // Disable scripts for this notification
-                            _hints.insert ("SWAYNC_NO_SCRIPT", true);
-                            _hints.insert ("urgency",
-                                           UrgencyLevels.CRITICAL.to_byte ());
-
-                            string _summary = "Failed to run script: %s".printf (key);
-                            string _body = "<b>Output:</b> " + error_msg;
-                            this.new_notification ("SwayNotificationCenter",
-                                         0,
-                                         "dialog-error",
-                                         _summary,
-                                         _body,
-                                         {},
-                                         _hints,
-                                         -1);
-                        } catch (Error e) {
-                            stderr.printf ("NOTIFING SCRIPT-FAIL ERROR: %s\n",
-                                           e.message);
-                        }
-                    }
-                });
-                break;
-            }
-#endif
+            this.run_scripts (param, "receive");
 
             return id;
         }
 
-        // TODO: Having to reconstruct these params, and the duplication of the above code, is really bad.
-        // Trying to just pass the NotifyParams results in a compilation error, though :-(
-        public void run_action_scripts(
-            uint32 id,
-            string app_name,
-            uint32 replaces_id,
-            string app_icon,
-            string summary,
-            string body,
-            string[] actions,
-            HashTable<string, Variant> hints,
-            int expire_timeout) throws DBusError, IOError {
-
-            var param = new NotifyParams (
-                id,
-                app_name,
-                replaces_id,
-                app_icon,
-                summary,
-                body,
-                actions,
-                hints,
-                expire_timeout);
-
+        /**
+         * Runs scripts that meet the requirements of the given `param`.
+         */
+        [DBus (visible = false)]
+        private void run_scripts (NotifyParams param, string run_on) {
 #if WANT_SCRIPTING
             if (param.swaync_no_script) {
                 debug ("Skipped action scripts for this notification\n");
@@ -278,7 +216,7 @@ namespace SwayNotificationCenter {
             foreach (string key in scripts.get_keys ()) {
                 unowned Script script = scripts[key];
                 if (!script.matches_notification (param)) continue;
-                if (script.run_on != "action") continue;
+                if (script.run_on != run_on) continue;
 
                 script.run_script.begin (param, (obj, res) => {
                     // Gets the end status
@@ -319,6 +257,14 @@ namespace SwayNotificationCenter {
                 break;
             }
 #endif
+        }
+
+        /**
+         * Runs scripts that are set to run on action.
+         */
+        [DBus (visible = false)]
+        public void run_action_scripts (NotifyParams param) throws DBusError, IOError {
+            this.run_scripts (param, "action");
         }
 
 

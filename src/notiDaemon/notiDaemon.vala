@@ -196,7 +196,7 @@ namespace SwayNotificationCenter {
             HashTable<string, Script> scripts = ConfigModel.instance.scripts;
             if (scripts.length == 0) return id;
             this.run_scripts (param, ScriptRunOnType.RECEIVE);
-
+#endif
             return id;
         }
 

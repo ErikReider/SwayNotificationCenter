@@ -212,9 +212,7 @@ namespace SwayNotificationCenter {
 
     public class Script : NotificationMatching {
         public string ? exec { get; set; default = null; }
-        public string ? run_on { get; set; default = "receive"; }
-        // TODO: this should be an enum instead!
-        //public ScriptRunOnType ? run_on { get; set; default = ScriptRunOnType.RECEIVE; }
+        public ScriptRunOnType run_on { get; set; default = ScriptRunOnType.RECEIVE; }
 
         public async bool run_script (NotifyParams param, out string msg) {
             msg = "";

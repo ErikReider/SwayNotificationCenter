@@ -298,11 +298,7 @@ namespace SwayNotificationCenter {
         }
 
         private void action_clicked (Action ? action, bool is_default = false) {
-            try {
-                noti_daemon.run_action_scripts (param);
-            } catch (Error e) {
-                print ("Error: %s\n", e.message);
-            }
+            noti_daemon.run_scripts (param, ScriptRunOnType.ACTION);
             if (action != null
                 && action.identifier != null
                 && action.identifier != "") {

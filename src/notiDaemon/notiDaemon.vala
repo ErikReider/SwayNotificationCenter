@@ -195,7 +195,7 @@ namespace SwayNotificationCenter {
             // Run the first script if notification meets requirements
             HashTable<string, Script> scripts = ConfigModel.instance.scripts;
             if (scripts.length == 0) return id;
-            this.run_scripts (param, "receive");
+            this.run_scripts (param, ScriptRunOnType.RECEIVE);
 
             return id;
         }
@@ -204,7 +204,7 @@ namespace SwayNotificationCenter {
          * Runs scripts that meet the requirements of the given `param`.
          */
         [DBus (visible = false)]
-        private void run_scripts (NotifyParams param, string run_on) {
+        public void run_scripts (NotifyParams param, ScriptRunOnType run_on) {
 #if WANT_SCRIPTING
             if (param.swaync_no_script) {
                 debug ("Skipped action scripts for this notification\n");
@@ -258,15 +258,6 @@ namespace SwayNotificationCenter {
             }
 #endif
         }
-
-        /**
-         * Runs scripts that are set to run on action.
-         */
-        [DBus (visible = false)]
-        public void run_action_scripts (NotifyParams param) throws DBusError, IOError {
-            this.run_scripts (param, "action");
-        }
-
 
         /**
          * Causes a notification to be forcefully closed and removed from the

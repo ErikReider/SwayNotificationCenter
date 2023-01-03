@@ -195,9 +195,28 @@ namespace SwayNotificationCenter {
             // Run the first script if notification meets requirements
             HashTable<string, Script> scripts = ConfigModel.instance.scripts;
             if (scripts.length == 0) return id;
+            this.run_scripts (param, ScriptRunOnType.RECEIVE);
+#endif
+            return id;
+        }
+
+        /**
+         * Runs scripts that meet the requirements of the given `param`.
+         */
+        [DBus (visible = false)]
+        public void run_scripts (NotifyParams param, ScriptRunOnType run_on) {
+#if WANT_SCRIPTING
+            if (param.swaync_no_script) {
+                debug ("Skipped action scripts for this notification\n");
+                return;
+            }
+            // Run the first script if notification meets requirements
+            HashTable<string, Script> scripts = ConfigModel.instance.scripts;
+            if (scripts.length == 0) return;
             foreach (string key in scripts.get_keys ()) {
                 unowned Script script = scripts[key];
                 if (!script.matches_notification (param)) continue;
+                if (script.run_on != run_on) continue;
 
                 script.run_script.begin (param, (obj, res) => {
                     // Gets the end status
@@ -238,8 +257,6 @@ namespace SwayNotificationCenter {
                 break;
             }
 #endif
-
-            return id;
         }
 
         /**

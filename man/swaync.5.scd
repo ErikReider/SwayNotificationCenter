@@ -333,6 +333,13 @@ config file to be able to detect config errors
 			type: string ++
 			optional: true ++
 			description: Which category the notification belongs to. Uses Regex.++
+		*run-on*++
+			type: string ++
+			optional: true ++
+			values: action, receive ++
+			default: receive ++
+			description: Whether to run this action when the notification is ++
+						 received, or when an action is taken on it. ++
 	description: Which scripts to check and potentially run for every ++
 		notification. If the notification doesn't include one of the properties, ++
 		that property will be ignored. All properties (except for exec) use regex. ++

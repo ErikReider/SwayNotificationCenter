@@ -180,6 +180,8 @@ Scripting rules and logic:
 . If any of the properties doesn't match, the script will be skipped
 . If a notification doesn't include one of the properties, that property will
 be skipped
+· If a script has `run-on` set to `action`, the script will only run when an
+action is taken on the notification
 
 More information can be found in the `swaync(5)` man page
 

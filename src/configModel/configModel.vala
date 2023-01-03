@@ -204,9 +204,15 @@ namespace SwayNotificationCenter {
         public NotificationStatusEnum state { get; set; }
     }
 
+    public enum ScriptRunOnType {
+        ACTION,
+        RECEIVE;
+    }
+
 #if WANT_SCRIPTING
     public class Script : NotificationMatching {
         public string ? exec { get; set; default = null; }
+        public ScriptRunOnType run_on { get; set; default = ScriptRunOnType.RECEIVE; }
 
         public async bool run_script (NotifyParams param, out string msg) {
             msg = "";

@@ -13,6 +13,12 @@ A simple notification daemon with a GTK gui for notifications and the control ce
 *Note: Only supports Desktops / Window Managers that support 
 `wlr_layer_shell_unstable_v1` like Sway or anything wlroots based*
 
+## Screenshots
+
+![Screenshot of desktop notification](./assets/desktop.png)
+
+![Screenshot of panel](./assets/panel.png)
+
 ## Want to show off your sick config?
 
 Post your setup here: [Config flex 💪](https://github.com/ErikReider/SwayNotificationCenter/discussions/183)
@@ -275,11 +281,3 @@ Alternatively, the number of notifications can be shown by adding `{}` anywhere 
     ...
   },
 ```
-
-## Screenshots
-
-![Screenshot of desktop notification](./assets/desktop.png)
-
-![Screenshot of panel](./assets/panel.png)
-
-I wonder how this would look with some blur 🤔

@@ -43,6 +43,72 @@ These widgets can be customized, added, removed and even reordered
 - Notifications (Will always be visible)
 - Label
 - Mpris (Media player controls for Spotify, Firefox, Chrome, etc...)
+- Volume Controll (using pamixer)
+- Brightness Controll (using brightnessctl)
+- Controllcenter with Powermenu, Powermode-Menu and additional buttons
+
+Example Config: 
+```json
+{
+  ...
+  "brightness": {
+    "label": "",
+    "device": "intel_backlight"
+  },
+  "volume": {
+    "label": ""
+  },
+  "controlls": {
+    "screenshot-label": "",
+    "screenshot-command": "",
+    "powermenu-label": "",
+    "power-buttons": [
+      {
+        "label": " Reboot",
+        "command": "systemctl reboot"
+      },
+      {
+        "label": " Lock",
+        "command": "swaylock -f --image ~/.config/wallpapers/snow_woods.jpg"
+      },
+      {
+        "label": " Logout",
+        "command": "swaymsg exit"
+      },
+      {
+        "label": " Shut down",
+        "command": "systemctl poweroff"
+      }
+    ],
+    "powermode-label": " ",
+    "powermode-buttons": [
+      {
+        "label": "Performance",
+        "command": "powerprofilesctl set performance"
+      },
+      {
+        "label": "Balanced",
+        "command": "powerprofilesctl set balanced"
+      },
+      {
+        "label": "Power-saver",
+        "command": "powerprofilesctl set power-saver"
+      }
+    ],
+    "controll-buttons": [
+      {
+        "label": "直",
+        "command": "~/.config/rofi/rofi-wifi-menu.sh"
+      },
+      {
+        "label": "",
+        "command": "~/.config/rofi/rofi-bluetooth"
+      }
+    ]
+  }
+  ...
+}
+```
 
 ## Planned Features
 

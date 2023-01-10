@@ -11,12 +11,21 @@ namespace SwayNotificationCenter.Widgets {
         Gtk.Label label_widget;
         Gtk.Scale slider;
 
-        string text = "";
+        string label = "Brightness";
+        string device;
 
         public Brightness (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             base (suffix, swaync_daemon, noti_daemon);
 
-            label_widget = new Gtk.Label (text);
+            Json.Object ? config = get_config(this);
+            if(config != null){
+                string? l = get_prop<string> (config, "label");
+                if(l!=null) this.label = l;
+                string? d = get_prop<string> (config, "device");
+                if(d!=null) this.device = d;
+            }
+
+            label_widget = new Gtk.Label (label);
             slider = new Gtk.Scale.with_range(Gtk.Orientation.HORIZONTAL,5,100,1);
 
             int brightness = get_current_brightness();
@@ -24,19 +33,12 @@ namespace SwayNotificationCenter.Widgets {
 
 
             slider.adjustment.value_changed.connect (()=>{
-                string set_stdout;
-                string set_stderr;
-                int set_status;
-
                 int val = (int) slider.adjustment.value;
 
-                try{
-                    Process.spawn_command_line_sync("brightnessctl s "+val.to_string()+"%", out set_stdout, out set_stderr, out set_status);
-                    this.tooltip_text = val.to_string();
-                } catch(SpawnError e){
-                    print ("Error: %s\n", e.message);
-                }
+                string command = device!=null ? "brightnessctl -d " + device + " s "+val.to_string()+"% --quiet" : "brightnessctl s "+val.to_string()+"% --quiet";
 
+                execute_command(command);
+                this.tooltip_text = val.to_string();
             });
 
             slider.draw_value = false;
@@ -50,8 +52,8 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         private int get_current_brightness(){
-            string max_value_command = "brightnessctl -d intel_backlight m" ;
-            string current_value_command = "brightnessctl -d intel_backlight g" ;
+            string max_value_command = device!=null ? "brightnessctl -d " + device + " m" : "brightnessctl m";
+            string current_value_command = device!=null ? "brightnessctl -d " + device + " g" : "brightnessctl g" ;
 
             string max_stdout;
             string max_stderr;

@@ -92,6 +92,7 @@ namespace SwayNotificationCenter.Widgets {
 
             if(pid==0){ // Child process
                 execl ("/bin/sh", "sh", "-c", cmd);
+                exit(EXIT_FAILURE); // should not return from execl
             }
 
             waitpid (pid, out status, 1);

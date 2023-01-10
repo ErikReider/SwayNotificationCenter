@@ -7,17 +7,17 @@ namespace SwayNotificationCenter.Widgets {
         string command;
     }
 
-    public class Powermenu : BaseWidget {
+    public class ControllsWidget : BaseWidget {
         public override string widget_name {
             get {
-                return "powermenu";
+                return "controlls";
             }
         }
 
         //  Gtk.Expander expander;
-        Gtk.Button show_menu;
+        Gtk.Button show_power_menu;
         Gtk.Button screenshot_btn;
-        Gtk.Button show_powermode;
+        Gtk.Button show_powermode_menu;
         Gtk.Box syscontrolls_container;
         Gtk.Box topbar_container;
         Gtk.Box powerbtn_container;
@@ -43,7 +43,7 @@ namespace SwayNotificationCenter.Widgets {
         Config[] powermode_buttons;
 
 
-        public Powermenu (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
+        public ControllsWidget (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             base (suffix, swaync_daemon, noti_daemon);
 
             Json.Object ? config = get_config(this);
@@ -136,8 +136,8 @@ namespace SwayNotificationCenter.Widgets {
             powerbtn_container = new Gtk.Box(Gtk.Orientation.VERTICAL, 2);
             powerbtn_container.get_style_context().add_class("power-buttons");
 
-            show_menu = new Gtk.Button.with_label(powermenu_lbl);
-            show_menu.clicked.connect(()=>{
+            show_power_menu = new Gtk.Button.with_label(powermenu_lbl);
+            show_power_menu.clicked.connect(()=>{
                 if(power_menu_hidden) {
                     powerbtn_container.show();
                     if(powermode_menu) powermode_container.hide();
@@ -156,7 +156,7 @@ namespace SwayNotificationCenter.Widgets {
                 powerbtn_container.pack_start (button, true, true, 0);
             }
 
-            topbar_container.pack_end(show_menu, false, false, 0);
+            topbar_container.pack_end(show_power_menu, false, false, 0);
 
             syscontrolls_container.add(powerbtn_container);
         }
@@ -165,8 +165,8 @@ namespace SwayNotificationCenter.Widgets {
             powermode_container = new Gtk.Box(Gtk.Orientation.VERTICAL, 2);
             powermode_container.get_style_context().add_class("powermode-buttons");
 
-            show_powermode = new Gtk.Button.with_label(powermode_lbl);
-            show_powermode.clicked.connect(() => {
+            show_powermode_menu = new Gtk.Button.with_label(powermode_lbl);
+            show_powermode_menu.clicked.connect(() => {
                 if(powermode_menu_hidden){
                     powermode_container.show();
                     if(power_menu) powerbtn_container.hide();
@@ -188,7 +188,7 @@ namespace SwayNotificationCenter.Widgets {
                 i++;
             }
 
-            topbar_container.pack_start(show_powermode, false, false, 0);
+            topbar_container.pack_start(show_powermode_menu, false, false, 0);
 
             syscontrolls_container.add(powermode_container);
         }

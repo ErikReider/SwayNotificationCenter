@@ -298,6 +298,7 @@ namespace SwayNotificationCenter {
         }
 
         private void action_clicked (Action ? action, bool is_default = false) {
+            noti_daemon.run_scripts (param, ScriptRunOnType.ACTION);
             if (action != null
                 && action.identifier != null
                 && action.identifier != "") {

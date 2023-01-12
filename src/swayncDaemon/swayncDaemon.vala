@@ -24,7 +24,7 @@ namespace SwayNotificationCenter {
                           () => {},
                           () => {
                 stderr.printf (
-                    "Could not aquire notification name. " +
+                    "Could not acquire notification name. " +
                     "Please close any other notification daemon " +
                     "like mako or dunst\n");
                 Process.exit (1);

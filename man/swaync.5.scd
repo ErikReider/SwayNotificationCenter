@@ -148,7 +148,7 @@ config file to be able to detect config errors
 			optional: true ++
 			description: Which category the notification belongs to. Uses Regex.++
 	description: Set the visibility of each incoming notification. ++
-		If the notification doesn't include one of the properites, that ++
+		If the notification doesn't include one of the properties, that ++
 		property will be ignored. All properties (except for state) use ++
 		regex. If all properties match the given notification, the ++
 		notification will be follow the provided state. ++
@@ -222,7 +222,7 @@ config file to be able to detect config errors
 					type: bool ++
 					optional: true ++
 					default: true ++
-					description: Wether to display a "Clear All" button ++
+					description: Whether to display a "Clear All" button ++
 				button-text: ++
 					type: string ++
 					optional: true ++
@@ -333,8 +333,15 @@ config file to be able to detect config errors
 			type: string ++
 			optional: true ++
 			description: Which category the notification belongs to. Uses Regex.++
+		*run-on*++
+			type: string ++
+			optional: true ++
+			values: action, receive ++
+			default: receive ++
+			description: Whether to run this action when the notification is ++
+						 received, or when an action is taken on it. ++
 	description: Which scripts to check and potentially run for every ++
-		notification. If the notification doesn't include one of the properites, ++
+		notification. If the notification doesn't include one of the properties, ++
 		that property will be ignored. All properties (except for exec) use regex. ++
 		If all properties match the given notification, the script will be run. ++
 		Only the first matching script will be run. ++
@@ -352,4 +359,17 @@ config file to be able to detect config errors
 		}
 	}
 }
+```
+
+	You can also use these environment variables in your script:
+```
+SWAYNC_BODY="Notification body content"
+SWAYNC_DESKTOP_ENTRY="Desktop entry"
+SWAYNC_URGENCY="Notification urgency"
+SWAYNC_TIME="Notification time"
+SWAYNC_APP_NAME="Notification app name"
+SWAYNC_CATEGORY="SwayNC notification category"
+SWAYNC_REPLACES_ID="ID of notification to replace"
+SWAYNC_ID="SwayNC notification ID"
+SWAYNC_SUMMARY="Notification summary"
 ```

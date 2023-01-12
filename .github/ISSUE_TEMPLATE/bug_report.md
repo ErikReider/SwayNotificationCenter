@@ -23,7 +23,7 @@ Steps to reproduce the behavior:
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
-**Please provide logs if you're experiencing notifiation errors / bugs**
+**Please provide logs if you're experiencing notification errors / bugs**
 Attach Gists for swaync logs by running `G_MESSAGES_DEBUG=all swaync` and (if applicable) application logs.
 
 **Screenshots**

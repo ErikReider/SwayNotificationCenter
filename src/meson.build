@@ -1,4 +1,4 @@
-# Sets the version to a vala variable in Contants.vala
+# Sets the version to a vala variable in Constants.vala
 version = '@0@'.format(meson.project_version())
 git = find_program('git', native: true, required: false)
 if git.found()

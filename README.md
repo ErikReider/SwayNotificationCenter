@@ -13,6 +13,12 @@ A simple notification daemon with a GTK gui for notifications and the control ce
 *Note: Only supports Desktops / Window Managers that support 
 `wlr_layer_shell_unstable_v1` like Sway or anything wlroots based*
 
+## Screenshots
+
+![Screenshot of desktop notification](./assets/desktop.png)
+
+![Screenshot of panel](./assets/panel.png)
+
 ## Want to show off your sick config?
 
 Post your setup here: [Config flex 💪](https://github.com/ErikReider/SwayNotificationCenter/discussions/183)
@@ -117,13 +123,15 @@ Example Config:
 
 ## Install
 
-Arch:
+### Arch:
+
 The package is available on the AUR:
 
 - [swaync](https://aur.archlinux.org/packages/swaync/)
 - [swaync-git](https://aur.archlinux.org/packages/swaync-git/)
 
-Fedora:
+### Fedora:
+
 The package is available on COPR:
 
 ```zsh
@@ -131,14 +139,17 @@ dnf copr enable erikreider/SwayNotificationCenter
 dnf install SwayNotificationCenter
 ```
 
-Fedora Silverblue (and other rpm-ostree variants):
-The package can be downloaded from COPR after adding the COPR repo as a ostree repo, and installed as a overlayed package:
+### Fedora Silverblue (and other rpm-ostree variants):
+
+The package can be downloaded from COPR after adding the COPR repo as a ostree repo, and installed as a overlaid package:
+
 ```zsh
 ostree remote add SwayNotificationCenter https://download.copr.fedorainfracloud.org/results/erikreider/SwayNotificationCenter/fedora-$releasever-$basearch/
 rpm-ostree install SwayNotificationCenter
 ```
 
-Gentoo:
+### Gentoo:
+
 An **unofficial** ebuild is available in [GURU](https://github.com/gentoo/guru)
 
 ```zsh
@@ -147,7 +158,23 @@ emaint sync -r guru
 emerge --ask gui-apps/swaync
 ```
 
-Other:
+### OpenSUSE Tumbleweed
+
+```zsh
+sudo zypper install SwayNotificationCenter
+```
+
+### Ubuntu:
+
+Will be included in the official repos in the
+[Lunar](https://packages.ubuntu.com/lunar/sway-notification-center) release.
+
+### Debian:
+
+Will be included in the official repos in the
+[Bookworm](https://packages.debian.org/source/sid/sway-notification-center) release.
+
+### Other:
 
 ```zsh
 meson build
@@ -209,7 +236,7 @@ To reload css after changes
 
 The main config file is located in `/etc/xdg/swaync/config.json`. Copy it over
 to your `.config/swaync/` folder to customize without needing root access.
-See `swaync(1)` man page for more information
+See `swaync(5)` man page for more information
 
 To reload the config, you'll need to run `swaync-client --reload-config`
 
@@ -222,9 +249,11 @@ Scripting rules and logic:
 . <b>Only one</b> script can be fired per notification
 . Each script requires `exec` and at least one of the other properties
 . All listed properties must match the notification for the script to be ran
-. If any of the propeties doesn't match, the script will be skipped
+. If any of the properties doesn't match, the script will be skipped
 . If a notification doesn't include one of the properties, that property will
 be skipped
+· If a script has `run-on` set to `action`, the script will only run when an
+action is taken on the notification
 
 More information can be found in the `swaync(5)` man page
 
@@ -257,7 +286,7 @@ Config properties:
     // This script will only run when Spotify sends a notification containing
     // that exact summary and body
     "example-script": {
-      "exec": "~/.config/swaync/myRickRollScript.sh",
+      "exec": "/path/to/myRickRollScript.sh",
       "app-name": "Spotify"
       "summary": "Never Gonna Give You Up",
       "body": "Rick Astley - Whenever You Need Somebody"
@@ -318,11 +347,3 @@ Alternatively, the number of notifications can be shown by adding `{}` anywhere 
     ...
   },
 ```
-
-## Screenshots
-
-![Screenshot of desktop notification](./assets/desktop.png)
-
-![Screenshot of panel](./assets/panel.png)
-
-I wonder how this would look with some blur 🤔

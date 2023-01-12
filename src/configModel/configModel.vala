@@ -204,9 +204,15 @@ namespace SwayNotificationCenter {
         public NotificationStatusEnum state { get; set; }
     }
 
+    public enum ScriptRunOnType {
+        ACTION,
+        RECEIVE;
+    }
+
 #if WANT_SCRIPTING
     public class Script : NotificationMatching {
         public string ? exec { get; set; default = null; }
+        public ScriptRunOnType run_on { get; set; default = ScriptRunOnType.RECEIVE; }
 
         public async bool run_script (NotifyParams param, out string msg) {
             msg = "";
@@ -989,13 +995,13 @@ namespace SwayNotificationCenter {
 
         /**
          * Writes and replaces settings with the new settings in `path`. If
-         * `path` is "null", the default user accessable config will be used
+         * `path` is "null", the default user accessible config will be used
          * ("~/.config/swaync/config.json")
          */
         private bool write_to_file (owned string ? path = null) {
             try {
                 if (path == null) {
-                    // Use the default user accessable config
+                    // Use the default user accessible config
                     string dir_path = Path.build_path (
                         Path.DIR_SEPARATOR.to_string (),
                         Environment.get_user_config_dir (),

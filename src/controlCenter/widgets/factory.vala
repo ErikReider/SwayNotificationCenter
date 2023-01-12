@@ -26,8 +26,8 @@ namespace SwayNotificationCenter.Widgets {
             case "brightness":
                 widget = new Brightness (suffix, swaync_daemon, noti_daemon);
                 break;
-            case "powermenu":
-                widget = new Powermenu (suffix, swaync_daemon, noti_daemon);
+            case "controlls":
+                widget = new ControllsWidget (suffix, swaync_daemon, noti_daemon);
                 break;
             default:
                 warning ("Could not find widget: \"%s\"!", key);

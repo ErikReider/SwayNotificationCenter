@@ -38,7 +38,7 @@ widget_sources = [
   'controlCenter/widgets/mpris/mpris_player.vala',
   'controlCenter/widgets/brightness/brightness.vala',
   'controlCenter/widgets/volume/volume.vala',
-  'controlCenter/widgets/powermenu/powermenu.vala',
+  'controlCenter/widgets/controllsWidget/controllsWidget.vala',
 ]
 
 app_sources = [

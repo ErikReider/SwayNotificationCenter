@@ -38,5 +38,7 @@ build() {
 }
 
 package() {
-    DESTDIR="$pkgdir" meson install -C build
+    DESTDIR="$pkgdir/" ninja -C build install
+    install -Dm644 "$_pkgfoldername-$pkgver/COPYING" -t "$pkgdir/usr/share/licenses/$pkgname"
+    install -Dm644 "$_pkgfoldername-$pkgver/README.md" -t "$pkgdir/usr/share/doc/$pkgname"
 }

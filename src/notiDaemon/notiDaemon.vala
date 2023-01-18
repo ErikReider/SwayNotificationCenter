@@ -147,6 +147,10 @@ namespace SwayNotificationCenter {
                 unowned NotificationVisibility vis = visibilities[key];
                 if (!vis.matches_notification (param)) continue;
                 state = vis.state;
+                if (vis.override_urgency != UNSET) {
+                    debug ("override urgency to %s\n", vis.override_urgency.to_string ());
+                    param.urgency = UrgencyLevels.from_value (vis.override_urgency.to_byte ());
+                }
                 break;
             }
 

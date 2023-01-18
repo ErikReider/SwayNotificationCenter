@@ -224,6 +224,12 @@
               "default": "Normal",
               "enum": ["Low", "Normal", "Critical"]
             },
+            "override-urgency": {
+              "type": "string",
+              "description": "The new urgency of the notification (optional)",
+              "default": "unset",
+              "enum": ["unset", "low", "normal", "critical"]
+            },
             "category": {
               "type": "string",
               "description": "Which category the notification belongs to. Uses Regex."

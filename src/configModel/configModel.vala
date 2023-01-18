@@ -200,8 +200,35 @@ namespace SwayNotificationCenter {
         }
     }
 
+    public enum NotificationUrgencyEnum {
+        UNSET = -1,
+        LOW = UrgencyLevels.LOW,
+        NORMAL = UrgencyLevels.NORMAL,
+        CRITICAL = UrgencyLevels.CRITICAL;
+
+        public uint8 to_byte () {
+            return this;
+        }
+
+        public string to_string () {
+            switch (this) {
+                case LOW:
+                    return "Low";
+                case NORMAL:
+                    return "Normal";
+                case CRITICAL:
+                    return "Critical";
+                default:
+                    return "Unset";
+            }
+        }
+    }
+
     public class NotificationVisibility : NotificationMatching {
         public NotificationStatusEnum state { get; set; }
+        public NotificationUrgencyEnum override_urgency {
+            get; set; default = NotificationUrgencyEnum.UNSET;
+        }
     }
 
     public enum ScriptRunOnType {

@@ -125,6 +125,12 @@ config file to be able to detect config errors
 			default: enabled ++
 			values: ignored, muted, transient, enabled ++
 			description: The notification visibility state. ++
+		*override-urgency*++
+			type: string ++
+			optional: true ++
+			default: unset ++
+			values: unset, low, normal, critical ++
+			description: The new urgency for the notification if set.++
 		*app-name*++
 			type: string ++
 			optional: true ++
@@ -147,7 +153,8 @@ config file to be able to detect config errors
 			type: string ++
 			optional: true ++
 			description: Which category the notification belongs to. Uses Regex.++
-	description: Set the visibility of each incoming notification. ++
+	description: Set the visibility or override urgency of each incoming ++
+		notification. ++
 		If the notification doesn't include one of the properties, that ++
 		property will be ignored. All properties (except for state) use ++
 		regex. If all properties match the given notification, the ++

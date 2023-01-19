@@ -240,6 +240,25 @@ ninja -C build
 meson install -C build
 ```
 
+## i3status-rs Example
+
+> **Note** Ths requires i3status-rs version 0.30.0+
+
+i3status-rs config
+
+```toml
+[[block]]
+block = "notify"
+format = " $icon {($notification_count.eng(1)) |}"
+driver = "swaync"
+[[block.click]]
+button = "left"
+action = "show"
+[[block.click]]
+button = "right"
+action = "toggle_paused"
+```
+
 ## Waybar Example
 
 This example requires `NotoSansMono Nerd Font` to get the icons looking right

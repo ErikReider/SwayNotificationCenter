@@ -119,6 +119,16 @@ Example Config:
           "command": "~/.config/rofi/rofi-bluetooth"
         }
       ]
+    },
+    "topbar-buttons": {
+      "type": "buttons",
+      "position": "topbar-right",
+      "actions": [
+        {
+          "label": "",
+          "command": "...",
+        }
+      ]
     }
   }
   ...

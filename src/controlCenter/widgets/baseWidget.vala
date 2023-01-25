@@ -41,7 +41,7 @@ namespace SwayNotificationCenter.Widgets {
 
         public virtual void on_cc_visibility_change (bool value) {}
 
-        protected T? get_prop<T> (Json.Object config, string value_key) {
+        protected T ? get_prop<T> (Json.Object config, string value_key) {
             if (!config.has_member (value_key)) {
                 debug ("%s: Config doesn't have key: %s!\n", key, value_key);
                 return null;
@@ -73,8 +73,8 @@ namespace SwayNotificationCenter.Widgets {
             }
         }
 
-        protected Json.Array? get_prop_array (Json.Object config, string value_key){
-            if(!config.has_member (value_key)){
+        protected Json.Array ? get_prop_array (Json.Object config, string value_key) {
+            if (!config.has_member (value_key)) {
                 debug ("%s: Config doesn't have key: %s!\n", key, value_key);
                 return null;
             }
@@ -82,17 +82,32 @@ namespace SwayNotificationCenter.Widgets {
             return config.get_array_member (value_key);
         }
 
-        protected void execute_command (string cmd){
+        protected Action[] parse_actions (Json.Array actions) {
+            Action[] res = new Action[actions.get_length ()];
+            for (int i = 0; i < actions.get_length (); i++) {
+                string ? label = actions.get_object_element (i).get_member ("label").get_string ();
+                if (label == null) debug ("Error parsing actions-array");
+                string ? command = actions.get_object_element (i).get_member ("command").get_string ();
+                if (command == null) debug ("Error parsing actions-array");
+                res[i] = Action () {
+                    label = label,
+                    command = command
+                };
+            }
+            return res;
+        }
+
+        protected void execute_command (string cmd) {
             pid_t pid;
             int status;
 
-            if((pid = fork())<0){
+            if ((pid = fork ()) < 0) {
                 perror ("fork()");
             }
 
-            if(pid==0){ // Child process
+            if (pid == 0) { // Child process
                 execl ("/bin/sh", "sh", "-c", cmd);
-                exit(EXIT_FAILURE); // should not return from execl
+                exit (EXIT_FAILURE); // should not return from execl
             }
 
             waitpid (pid, out status, 1);

@@ -49,87 +49,70 @@ These widgets can be customized, added, removed and even reordered
 - Notifications (Will always be visible)
 - Label
 - Mpris (Media player controls for Spotify, Firefox, Chrome, etc...)
-Volume Controll (using pamixer)
-- Brightness Controll (using brightnessctl)
-- Controllcenter with Powermenu, Powermode-Menu and additional buttons
+- Menubar with dropdown and buttons
+- Button grid
 
 Example Config: 
 ```json
 {
   ...
-  "brightness": {
-    "label": "",
-    "device": "intel_backlight"
-  },
-  "volume": {
-    "label": ""
-  },
-  "controlls": {
+  "menubar#label": {
     "power-buttons": {
-      "type": "menu",
-      "label": "right", 
-      "position": "topbar-right",
+      "label": "", 
+      "position": "right",
       "actions": [ 
         {
           "label": " Reboot",
           "command": "systemctl reboot"
         },
         {
-          "label": " Lock",
-          "command": "swaylock -f --image ~/.config/wallpapers/snow_woods.jpg"
-        },
-        {
-          "label": " Logout",
-          "command": "swaymsg exit"
-        },
-        {
           "label": " Shut down",
           "command": "systemctl poweroff"
-        }
+        },
+        ...
       ]
     },
     "powermode-buttons": {
-      "type": "menu",
-      "label": "left", 
-      "position": "topbar-left",
+      "label": "", 
+      "position": "left",
       "actions": [ 
         {
           "label": "Performance",
           "command": "powerprofilesctl set performance"
         },
-        {
-          "label": "Balanced",
-          "command": "powerprofilesctl set balanced"
-        },
-        {
-          "label": "Power-saver",
-          "command": "powerprofilesctl set power-saver"
-        }
+        ...
       ]
     },
-    "controll-buttons": {
+    "topbar-buttons": {
       "type": "buttons",
+      "position": "right",
       "actions": [
         {
           "label": "直",
           "command": "~/.config/rofi/rofi-wifi-menu.sh"
         },
-        {
-          "label": "",
-          "command": "~/.config/rofi/rofi-bluetooth"
-        }
-      ]
-    },
-    "topbar-buttons": {
-      "type": "buttons",
-      "position": "topbar-right",
-      "actions": [
-        {
-          "label": "",
-          "command": "...",
-        }
       ]
     }
+  },
+  "buttons": {
+    "actions": [
+      {
+        "label": "直",
+        "command": "~/.config/rofi/rofi-wifi-menu.sh"
+      },
+      {
+        "label": "",
+        "command": "~/.config/rofi/rofi-bluetooth"
+      }
+    ]
+  },
+  "buttons#Another": {
+    "actions": [
+      {
+        "label": "直",
+        "command": "~/.config/rofi/rofi-wifi-menu.sh"
+      }
+    ]
   }
   ...
 }

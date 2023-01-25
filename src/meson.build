@@ -36,8 +36,10 @@ widget_sources = [
   'controlCenter/widgets/mpris/mpris.vala',
   'controlCenter/widgets/mpris/interfaces.vala',
   'controlCenter/widgets/mpris/mpris_player.vala',
-  # Widget: Controlls
-  'controlCenter/widgets/controllsWidget/controllsWidget.vala',
+  # Widget: Menubar
+  'controlCenter/widgets/menubar/menubar.vala',
+  # Widget: Buttons
+  'controlCenter/widgets/buttons/buttons.vala',
 ]
 
 app_sources = [

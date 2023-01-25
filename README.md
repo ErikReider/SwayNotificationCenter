@@ -88,8 +88,8 @@ Example Config:
       "position": "right",
       "actions": [
         {
-          "label": "直",
-          "command": "~/.config/rofi/rofi-wifi-menu.sh"
+          "label": "",
+          "command": "grim"
         },
       ]
     }
@@ -103,15 +103,13 @@ Example Config:
       {
         "label": "",
         "command": "~/.config/rofi/rofi-bluetooth"
-      }
+      },
+      ...
     ]
   },
   "buttons#Another": {
     "actions": [
-      {
-        "label": "直",
-        "command": "~/.config/rofi/rofi-wifi-menu.sh"
-      }
+      ...
     ]
   }
   ...

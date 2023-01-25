@@ -85,14 +85,19 @@ namespace SwayNotificationCenter.Widgets {
         protected Action[] parse_actions (Json.Array actions) {
             Action[] res = new Action[actions.get_length ()];
             for (int i = 0; i < actions.get_length (); i++) {
+
                 string ? label = actions.get_object_element (i).get_member ("label").get_string ();
-                if (label == null) debug ("Error parsing actions-array");
+
                 string ? command = actions.get_object_element (i).get_member ("command").get_string ();
-                if (command == null) debug ("Error parsing actions-array");
-                res[i] = Action () {
-                    label = label,
-                    command = command
-                };
+
+                if (command != null && label != null) {
+                    res[i] = Action () {
+                        label = label,
+                        command = command
+                    };
+                } else {
+                    debug ("Error parsing actions object number %d", i);
+                }
             }
             return res;
         }

@@ -68,12 +68,14 @@ namespace SwayNotificationCenter.Widgets {
 
                     container.add (b);
                 }
-                if (o.position == "topbar-left") {
+                if (o.position == "left") {
                     topbar_container.pack_start (container, false, false, 0);
-                } else {
+                } else if (o.position == "right") {
                     topbar_container.pack_end (container, false, false, 0);
+                } else {
+                    debug ("Invalid position for menu item in config");
                 }
-            } else {
+            } else if (o.type == "menu") {
 
                 Gtk.Button show_button = new Gtk.Button.with_label (o.label);
 
@@ -110,38 +112,53 @@ namespace SwayNotificationCenter.Widgets {
                 }
 
                 menus_container.add (menu);
+            } else {
+                debug ("Invalid type for menu-object");
             }
         }
 
         protected void parse_config_objects (Json.Object config) {
             var el = config.get_members ();
-            // track size of menu_objects
 
             menu_objects = new ConfigObject[el.length ()];
             for (int i = 0; i < el.length (); i++) {
                 string e = el.nth_data (i);
                 Json.Object ? o = config.get_object_member (e);
+                if (o != null) {
 
-                string ? type = get_prop<string> (o, "type");
-                if (type == null)
-                    debug ("Invalid config for controls: Position needed");
-                string ? pos = get_prop<string> (o, "position");
-                if (pos == null)
-                    debug ("Invalid config for controls: Position needed");
-                Json.Array ? actions = get_prop_array (o, "actions");
+                    string ? type = get_prop<string> (o, "type");
+                    if (type == null) {
+                        type = "menu";
+                        debug ("No type for menu-object given using default");
+                    }
 
-                string ? label = get_prop<string> (o, "label");
-                if (label == null)
-                    debug ("Invalid config for controls: label needed for type of 'menu'");
-                Action[] actionsList = parse_actions (actions);
-                menu_objects[i] = ConfigObject () {
-                    name = e,
-                    type = type,
-                    label = label,
-                    position = pos,
-                    actions = actionsList,
-                    hidden = true
-                };
+                    string ? pos = get_prop<string> (o, "position");
+                    if (pos == null) {
+                        pos = "right";
+                        debug ("No type for menu-object given using default");
+                    }
+
+                    Json.Array ? actions = get_prop_array (o, "actions");
+                    if (actions == null) {
+                        debug ("Error parsing actions for menu-object");
+                    }
+
+                    string ? label = get_prop<string> (o, "label");
+                    if (label == null) {
+                        label = "Menu";
+                        debug ("No label for menu-object given using default");
+                    }
+
+                    Action[] actions_list = parse_actions (actions);
+                    menu_objects[i] = ConfigObject () {
+                        name = e,
+                        type = type,
+                        label = label,
+                        position = pos,
+                        actions = actions_list,
+                        hidden = true
+                    };
+                }
             }
         }
     }

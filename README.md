@@ -52,69 +52,79 @@ These widgets can be customized, added, removed and even reordered
 - Menubar with dropdown and buttons
 - Button grid
 
-Example Config: 
+<details>
+  <summary>Example config</summary>
+
 ```json
 {
   ...
-  "menubar#label": {
-    "power-buttons": {
-      "label": "", 
-      "position": "right",
-      "actions": [ 
-        {
-          "label": " Reboot",
-          "command": "systemctl reboot"
-        },
-        {
-          "label": " Shut down",
-          "command": "systemctl poweroff"
-        },
-        ...
-      ]
+  "widgets": [
+    "menubar",
+    "buttons",
+    "buttons#Another",
+    ...
+  ],
+  "widget-config": {
+    "menubar": {
+      "menu#AnyName": { // the name is used to make the menu accessible in the style.css
+        "label": "", 
+        "position": "right",
+        "actions": [ 
+          {
+            "label": " Reboot",
+            "command": "systemctl reboot"
+          },
+          {
+            "label": " Shut down",
+            "command": "systemctl poweroff"
+          },
+          ...
+        ]
+      },
+      "menu#powermode-buttons": {
+        "label": "", 
+        "position": "left",
+        "actions": [ 
+          {
+            "label": "Performance",
+            "command": "powerprofilesctl set performance"
+          },
+          ...
+        ]
+      },
+      "buttons#topbar-buttons": {
+        "position": "right",
+        "actions": [
+          {
+            "label": "",
+            "command": "grim"
+          },
+        ]
+      }
     },
-    "powermode-buttons": {
-      "label": "", 
-      "position": "left",
-      "actions": [ 
-        {
-          "label": "Performance",
-          "command": "powerprofilesctl set performance"
-        },
-        ...
-      ]
-    },
-    "topbar-buttons": {
-      "type": "buttons",
-      "position": "right",
+    "buttons": {
       "actions": [
         {
-          "label": "",
-          "command": "grim"
+          "label": "直",
+          "command": "~/.config/rofi/rofi-wifi-menu.sh"
         },
+        {
+          "label": "",
+          "command": "~/.config/rofi/rofi-bluetooth"
+        },
+        ...
+      ]
+    },
+    "buttons#Another": {
+      "actions": [
+        ...
       ]
     }
-  },
-  "buttons": {
-    "actions": [
-      {
-        "label": "直",
-        "command": "~/.config/rofi/rofi-wifi-menu.sh"
-      },
-      {
-        "label": "",
-        "command": "~/.config/rofi/rofi-bluetooth"
-      },
-      ...
-    ]
-  },
-  "buttons#Another": {
-    "actions": [
-      ...
-    ]
+    ...
   }
-  ...
 }
 ```
+</details>
 
 ## Planned Features
 

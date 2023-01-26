@@ -78,26 +78,22 @@ namespace SwayNotificationCenter.Widgets {
                 debug ("%s: Config doesn't have key: %s!\n", key, value_key);
                 return null;
             }
-
+            var member = config.get_member (value_key);
+            if (member.get_node_type () != Json.NodeType.ARRAY) {
+                debug ("Unable to find Json Array for member %s", value_key);
+            }
             return config.get_array_member (value_key);
         }
 
         protected Action[] parse_actions (Json.Array actions) {
             Action[] res = new Action[actions.get_length ()];
             for (int i = 0; i < actions.get_length (); i++) {
-
-                string ? label = actions.get_object_element (i).get_member ("label").get_string ();
-
-                string ? command = actions.get_object_element (i).get_member ("command").get_string ();
-
-                if (command != null && label != null) {
-                    res[i] = Action () {
-                        label = label,
-                        command = command
-                    };
-                } else {
-                    debug ("Error parsing actions object number %d", i);
-                }
+                string label = actions.get_object_element (i).get_string_member_with_default ("label", "label");
+                string command = actions.get_object_element (i).get_string_member_with_default ("command", "");
+                res[i] = Action () {
+                    label = label,
+                    command = command
+                };
             }
             return res;
         }
@@ -105,16 +101,13 @@ namespace SwayNotificationCenter.Widgets {
         protected void execute_command (string cmd) {
             pid_t pid;
             int status;
-
             if ((pid = fork ()) < 0) {
                 perror ("fork()");
             }
-
             if (pid == 0) { // Child process
                 execl ("/bin/sh", "sh", "-c", cmd);
                 exit (EXIT_FAILURE); // should not return from execl
             }
-
             waitpid (pid, out status, 1);
         }
     }

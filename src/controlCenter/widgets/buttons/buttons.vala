@@ -9,8 +9,6 @@ namespace SwayNotificationCenter.Widgets {
             }
         }
 
-
-        Gtk.FlowBox container;
         Action[] actions;
 
         public Buttons (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
@@ -22,7 +20,8 @@ namespace SwayNotificationCenter.Widgets {
                 if (a != null) actions = parse_actions (a);
             }
 
-            container = new Gtk.FlowBox ();
+            Gtk.FlowBox container = new Gtk.FlowBox ();
+            pack_start (container, true, true, 0);
 
             // add action to container
             foreach (var act in actions) {
@@ -34,8 +33,6 @@ namespace SwayNotificationCenter.Widgets {
 
                 container.insert (b, -1);
             }
-
-            pack_start (container, true, true, 0);
 
             show_all ();
         }

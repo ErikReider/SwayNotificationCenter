@@ -54,12 +54,12 @@ namespace SwayNotificationCenter.Widgets {
             menus.foreach (m => m.hide ());
         }
 
-        void add_menu (ConfigObject o) {
-            if (o.type == "buttons") {
+        void add_menu (ConfigObject obj) {
+            if (obj.type == "buttons") {
                 Gtk.Box container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
-                container.get_style_context ().add_class (o.name);
+                container.get_style_context ().add_class (obj.name);
 
-                foreach (Action a in o.actions) {
+                foreach (Action a in obj.actions) {
                     Gtk.Button b = new Gtk.Button.with_label (a.label);
 
                     b.clicked.connect (() => {
@@ -68,34 +68,34 @@ namespace SwayNotificationCenter.Widgets {
 
                     container.add (b);
                 }
-                if (o.position == "left") {
+                if (obj.position == "left") {
                     topbar_container.pack_start (container, false, false, 0);
-                } else if (o.position == "right") {
+                } else if (obj.position == "right") {
                     topbar_container.pack_end (container, false, false, 0);
                 } else {
                     debug ("Invalid position for menu item in config");
                 }
-            } else if (o.type == "menu") {
+            } else if (obj.type == "menu") {
 
-                Gtk.Button show_button = new Gtk.Button.with_label (o.label);
+                Gtk.Button show_button = new Gtk.Button.with_label (obj.label);
 
                 Gtk.Box menu = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
-                menu.get_style_context ().add_class (o.name);
+                menu.get_style_context ().add_class (obj.name);
                 menus.append (menu);
-                o.hidden = true;
+                obj.hidden = true;
 
                 show_button.clicked.connect (() => {
-                    if (o.hidden) {
+                    if (obj.hidden) {
                         menus.foreach (m => m.hide ());
                         menu.show ();
-                        o.hidden = !o.hidden;
+                        obj.hidden = !obj.hidden;
                     } else {
                         menu.hide ();
-                        o.hidden = !o.hidden;
+                        obj.hidden = !obj.hidden;
                     }
                 });
 
-                foreach (var a in o.actions) {
+                foreach (var a in obj.actions) {
                     Gtk.Button b = new Gtk.Button.with_label (a.label);
                     b.clicked.connect (() => {
                         execute_command (a.command);
@@ -103,9 +103,9 @@ namespace SwayNotificationCenter.Widgets {
                     menu.pack_start (b, true, true, 0);
                 }
 
-                if (o.position == "right") {
+                if (obj.position == "right") {
                     topbar_container.pack_end (show_button, false, false, 0);
-                } else if (o.position == "left") {
+                } else if (obj.position == "left") {
                     topbar_container.pack_start (show_button, false, false, 0);
                 } else {
                     debug ("Invalid position for menu item in config");
@@ -118,32 +118,30 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         protected void parse_config_objects (Json.Object config) {
-            var el = config.get_members ();
+            var elements = config.get_members ();
 
-            menu_objects = new ConfigObject[el.length ()];
-            for (int i = 0; i < el.length (); i++) {
-                string e = el.nth_data (i);
-                Json.Object ? o = config.get_object_member (e);
-                if (o != null) {
+            menu_objects = new ConfigObject[elements.length ()];
+            for (int i = 0; i < elements.length (); i++) {
+                string e = elements.nth_data (i);
+                Json.Object ? obj = config.get_object_member (e);
+                if (obj != null) {
+                    string[] key = e.split ("#");
 
-                    string ? type = get_prop<string> (o, "type");
-                    if (type == null) {
-                        type = "menu";
-                        debug ("No type for menu-object given using default");
-                    }
+                    string type = key[0];
+                    string name = key[1];
 
-                    string ? pos = get_prop<string> (o, "position");
+                    string ? pos = get_prop<string> (obj, "position");
                     if (pos == null) {
                         pos = "right";
                         debug ("No type for menu-object given using default");
                     }
 
-                    Json.Array ? actions = get_prop_array (o, "actions");
+                    Json.Array ? actions = get_prop_array (obj, "actions");
                     if (actions == null) {
                         debug ("Error parsing actions for menu-object");
                     }
 
-                    string ? label = get_prop<string> (o, "label");
+                    string ? label = get_prop<string> (obj, "label");
                     if (label == null) {
                         label = "Menu";
                         debug ("No label for menu-object given using default");
@@ -151,7 +149,7 @@ namespace SwayNotificationCenter.Widgets {
 
                     Action[] actions_list = parse_actions (actions);
                     menu_objects[i] = ConfigObject () {
-                        name = e,
+                        name = name,
                         type = type,
                         label = label,
                         position = pos,

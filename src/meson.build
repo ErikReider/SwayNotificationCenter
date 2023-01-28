@@ -40,6 +40,9 @@ widget_sources = [
   'controlCenter/widgets/menubar/menubar.vala',
   # Widget: Buttons Grid
   'controlCenter/widgets/buttonsGrid/buttonsGrid.vala',
+  'controlCenter/widgets/pulseVolume/pulseVolume.vala',
+  'controlCenter/widgets/pulseVolume/pulseDaemon.vala',
+  'controlCenter/widgets/pulseVolume/pulseDevice.vala',
 ]
 
 app_sources = [
@@ -67,6 +70,9 @@ app_deps = [
   meson.get_compiler('c').find_library('gtk-layer-shell'),
   meson.get_compiler('c').find_library('m', required : true),
   meson.get_compiler('vala').find_library('posix'),
+  dependency('gee-0.8'),
+  dependency('libpulse'),
+  dependency('libpulse-mainloop-glib'),
 ]
 
 # Checks if the user wants scripting enabled

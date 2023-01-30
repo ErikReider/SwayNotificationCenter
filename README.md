@@ -1,8 +1,27 @@
 # SwayNotificationCenter
 
-[![Building](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/building.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/building.yml)
+[![Check build for Arch.](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/arch-build.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/arch-build.yml)
+
+[![Check build for Fedora.](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/fedora-build.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/fedora-build.yml)
+
+[![Check build for latest Ubuntu LTS.](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/ubuntu-build.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/ubuntu-build.yml)
+
+[![Linting](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/linting.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/linting.yml)
 
 A simple notification daemon with a GTK gui for notifications and the control center
+
+*Note: Only supports Desktops / Window Managers that support 
+`wlr_layer_shell_unstable_v1` like Sway or anything wlroots based*
+
+## Screenshots
+
+![Screenshot of desktop notification](./assets/desktop.png)
+
+![Screenshot of panel](./assets/panel.png)
+
+## Want to show off your sick config?
+
+Post your setup here: [Config flex 💪](https://github.com/ErikReider/SwayNotificationCenter/discussions/183)
 
 ## Features
 
@@ -11,6 +30,7 @@ A simple notification daemon with a GTK gui for notifications and the control ce
 - A panel to view previous notifications
 - Show album art for notifications like Spotify
 - Do not disturb
+- Restores previous Do not disturb value after restart
 - Click notification to execute default action
 - Show alternative notification actions
 - Customization through a CSS file
@@ -18,6 +38,17 @@ A simple notification daemon with a GTK gui for notifications and the control ce
 - The same features as any other basic notification daemon
 - Basic configuration through a JSON config file
 - Hot-reload config through `swaync-client`
+- Customizable widgets
+
+## Available Widgets
+
+These widgets can be customized, added, removed and even reordered
+
+- Title
+- Do Not Disturb
+- Notifications (Will always be visible)
+- Label
+- Mpris (Media player controls for Spotify, Firefox, Chrome, etc...)
 
 ## Planned Features
 
@@ -26,21 +57,33 @@ A simple notification daemon with a GTK gui for notifications and the control ce
 
 ## Install
 
-Arch:
+### Arch:
+
 The package is available on the AUR:
 
 - [swaync](https://aur.archlinux.org/packages/swaync/)
 - [swaync-git](https://aur.archlinux.org/packages/swaync-git/)
 
-Fedora:
-An **unofficial** build is available in copr:
+### Fedora:
+
+The package is available on COPR:
 
 ```zsh
-dnf copr enable lexa/SwayNotificationCenter
+dnf copr enable erikreider/SwayNotificationCenter
 dnf install SwayNotificationCenter
 ```
 
-Gentoo:
+### Fedora Silverblue (and other rpm-ostree variants):
+
+The package can be downloaded from COPR after adding the COPR repo as a ostree repo, and installed as a overlaid package:
+
+```zsh
+ostree remote add SwayNotificationCenter https://download.copr.fedorainfracloud.org/results/erikreider/SwayNotificationCenter/fedora-$releasever-$basearch/
+rpm-ostree install SwayNotificationCenter
+```
+
+### Gentoo:
+
 An **unofficial** ebuild is available in [GURU](https://github.com/gentoo/guru)
 
 ```zsh
@@ -49,7 +92,23 @@ emaint sync -r guru
 emerge --ask gui-apps/swaync
 ```
 
-Other:
+### OpenSUSE Tumbleweed
+
+```zsh
+sudo zypper install SwayNotificationCenter
+```
+
+### Ubuntu:
+
+Will be included in the official repos in the
+[Lunar](https://packages.ubuntu.com/lunar/sway-notification-center) release.
+
+### Debian:
+
+Will be included in the official repos in the
+[Bookworm](https://packages.debian.org/source/sid/sway-notification-center) release.
+
+### Other:
 
 ```zsh
 meson build
@@ -111,7 +170,7 @@ To reload css after changes
 
 The main config file is located in `/etc/xdg/swaync/config.json`. Copy it over
 to your `.config/swaync/` folder to customize without needing root access.
-See `swaync(1)` man page for more information
+See `swaync(5)` man page for more information
 
 To reload the config, you'll need to run `swaync-client --reload-config`
 
@@ -124,9 +183,11 @@ Scripting rules and logic:
 . <b>Only one</b> script can be fired per notification
 . Each script requires `exec` and at least one of the other properties
 . All listed properties must match the notification for the script to be ran
-. If any of the propeties doesn't match, the script will be skipped
+. If any of the properties doesn't match, the script will be skipped
 . If a notification doesn't include one of the properties, that property will
 be skipped
+· If a script has `run-on` set to `action`, the script will only run when an
+action is taken on the notification
 
 More information can be found in the `swaync(5)` man page
 
@@ -159,7 +220,7 @@ Config properties:
     // This script will only run when Spotify sends a notification containing
     // that exact summary and body
     "example-script": {
-      "exec": "~/.config/swaync/myRickRollScript.sh",
+      "exec": "/path/to/myRickRollScript.sh",
       "app-name": "Spotify"
       "summary": "Never Gonna Give You Up",
       "body": "Rick Astley - Whenever You Need Somebody"
@@ -177,6 +238,25 @@ To completely disable scripting, the project needs to be built like so:
 meson build -Dscripting=false
 ninja -C build
 meson install -C build
+```
+
+## i3status-rs Example
+
+> **Note** Ths requires i3status-rs version 0.30.0+
+
+i3status-rs config
+
+```toml
+[[block]]
+block = "notify"
+format = " $icon {($notification_count.eng(1)) |}"
+driver = "swaync"
+[[block.click]]
+button = "left"
+action = "show"
+[[block.click]]
+button = "right"
+action = "toggle_paused"
 ```
 
 ## Waybar Example
@@ -212,10 +292,11 @@ Waybar css file
 }
 ```
 
-## Screenshots
+Alternatively, the number of notifications can be shown by adding `{}` anywhere in the `format` field in the Waybar config
 
-![Screenshot of desktop notification](./assets/desktop.png)
-
-![Screenshot of panel](./assets/panel.png)
-
-I wonder how this would look with some blur 🤔
+```json
+  "custom/notification": {
+    "format": "{} {icon}",
+    ...
+  },
+```

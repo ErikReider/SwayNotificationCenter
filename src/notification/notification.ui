@@ -37,7 +37,6 @@
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkOverlay" id="overlay">
-                        <property name="width-request">500</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <child>
@@ -64,8 +63,7 @@
                                           <object class="GtkImage" id="img">
                                             <property name="visible">True</property>
                                             <property name="can-focus">False</property>
-                                            <property name="valign">start</property>
-                                            <property name="margin-right">12</property>
+                                            <property name="valign">center</property>
                                             <property name="margin-end">12</property>
                                             <property name="icon_size">6</property>
                                             <style>
@@ -82,7 +80,8 @@
                                           <object class="GtkBox">
                                             <property name="visible">True</property>
                                             <property name="can-focus">False</property>
-                                            <property name="margin-right">14</property>
+                                            <property name="valign">center</property>
+                                            <property name="margin-end">14</property>
                                             <property name="hexpand">True</property>
                                             <property name="vexpand">True</property>
                                             <property name="orientation">vertical</property>
@@ -90,6 +89,7 @@
                                               <object class="GtkBox">
                                                 <property name="visible">True</property>
                                                 <property name="can-focus">False</property>
+                                                <property name="valign">center</property>
                                                 <child>
                                                   <object class="GtkLabel" id="summary">
                                                     <property name="visible">True</property>
@@ -97,10 +97,6 @@
                                                     <property name="ellipsize">end</property>
                                                     <property name="max-width-chars">0</property>
                                                     <property name="xalign">0</property>
-                                                    <attributes>
-                                                      <attribute name="weight" value="bold"/>
-                                                      <attribute name="size" value="12288"/>
-                                                    </attributes>
                                                     <style>
                                                       <class name="summary"/>
                                                     </style>
@@ -115,7 +111,7 @@
                                                   <object class="GtkLabel" id="time">
                                                     <property name="visible">True</property>
                                                     <property name="can-focus">False</property>
-                                                    <property name="margin-left">6</property>
+                                                    <property name="valign">start</property>
                                                     <property name="margin-start">6</property>
                                                     <property name="track-visited-links">False</property>
                                                     <style>
@@ -132,7 +128,7 @@
                                               </object>
                                               <packing>
                                                 <property name="expand">False</property>
-                                                <property name="fill">True</property>
+                                                <property name="fill">False</property>
                                                 <property name="position">0</property>
                                               </packing>
                                             </child>
@@ -141,7 +137,6 @@
                                                 <property name="visible">True</property>
                                                 <property name="can-focus">False</property>
                                                 <property name="hexpand">True</property>
-                                                <property name="vexpand">True</property>
                                                 <property name="wrap">True</property>
                                                 <property name="wrap-mode">word-char</property>
                                                 <property name="ellipsize">end</property>
@@ -153,8 +148,8 @@
                                                 </style>
                                               </object>
                                               <packing>
-                                                <property name="expand">True</property>
-                                                <property name="fill">True</property>
+                                                <property name="expand">False</property>
+                                                <property name="fill">False</property>
                                                 <property name="position">1</property>
                                               </packing>
                                             </child>
@@ -234,30 +229,21 @@
                                 <property name="receives-default">False</property>
                                 <property name="halign">center</property>
                                 <property name="valign">center</property>
-                                <property name="margin-left">4</property>
-                                <property name="margin-right">4</property>
                                 <property name="margin-start">4</property>
                                 <property name="margin-end">4</property>
                                 <property name="margin-top">2</property>
                                 <property name="margin-bottom">2</property>
                                 <property name="relief">none</property>
                                 <child>
-                                  <object class="GtkLabel">
+                                  <object class="GtkImage">
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
-                                    <property name="halign">center</property>
-                                    <property name="valign">center</property>
-                                    <property name="xpad">7</property>
-                                    <property name="label" translatable="yes">×</property>
-                                    <property name="justify">center</property>
-                                    <attributes>
-                                      <attribute name="size" value="16384"/>
-                                    </attributes>
+                                    <property name="icon-name">window-close-symbolic</property>
                                   </object>
                                 </child>
                                 <style>
-                                  <class name="circular"/>
                                   <class name="close-button"/>
+                                  <class name="circular"/>
                                 </style>
                               </object>
                             </child>

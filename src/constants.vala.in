@@ -1,4 +1,4 @@
 public class Constants {
-    public const string version = @VERSION@;
-    public const string versionNum = @VERSION_NUM@;
+    public const string VERSION = @VERSION@;
+    public const string VERSIONNUM = @VERSION_NUM@;
 }

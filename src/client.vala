@@ -1,15 +1,25 @@
+public struct SwayncDaemonData {
+    public bool dnd;
+    public bool cc_open;
+    public uint count;
+}
+
 [DBus (name = "org.erikreider.swaync.cc")]
-interface CcDaemon : GLib.Object {
+interface CcDaemon : Object {
 
     public abstract bool reload_css () throws Error;
 
     public abstract void reload_config () throws Error;
+
+    public abstract void hide_latest_notifications (bool close) throws DBusError, IOError;
 
     public abstract void close_all_notifications () throws DBusError, IOError;
 
     public abstract uint notification_count () throws DBusError, IOError;
 
     public abstract bool get_dnd () throws DBusError, IOError;
+
+    public abstract void set_dnd (bool state) throws DBusError, IOError;
 
     public abstract bool get_visibility () throws DBusError, IOError;
 
@@ -19,42 +29,50 @@ interface CcDaemon : GLib.Object {
 
     public abstract void set_visibility (bool value) throws DBusError, IOError;
 
+    [DBus (name = "GetSubscribeData")]
+    public abstract SwayncDaemonData get_subscribe_data () throws Error;
+
     public signal void subscribe (uint count, bool dnd, bool cc_open);
 }
 
 private CcDaemon cc_daemon = null;
 
 private void print_help (string[] args) {
-    print (@"Usage:\n");
-    print (@"\t $(args[0]) <OPTION>\n");
-    print (@"Help:\n");
-    print (@"\t -h, \t --help \t\t Show help options\n");
-    print (@"\t -v, \t --version \t\t Prints version\n");
-    print (@"Options:\n");
-    print (@"\t -R, \t --reload-config \t Reload the config file\n");
-    print (@"\t -rs, \t --reload-css \t\t Reload the css file. Location change requires restart\n");
-    print (@"\t -t, \t --toggle-panel \t Toggle the notificaion panel\n");
-    print (@"\t -op, \t --open-panel \t\t Opens the notificaion panel\n");
-    print (@"\t -cp, \t --close-panel \t\t Closes the notificaion panel\n");
-    print (@"\t -d, \t --toggle-dnd \t\t Toggle and print the current dnd state\n");
-    print (@"\t -D, \t --get-dnd \t\t Print the current dnd state\n");
-    print (@"\t -c, \t --count \t\t Print the current notificaion count\n");
-    print (@"\t -C, \t --close-all \t\t Closes all notifications\n");
-    print (@"\t -sw, \t --skip-wait \t\t Doesn't wait when swaync hasn't been started\n");
-    print (@"\t -s, \t --subscribe \t\t Subscribe to notificaion add and close events\n");
-    print (@"\t -swb, \t --subscribe-waybar \t Subscribe to notificaion add and close events with waybar support. Read README for example\n");
+    print ("Usage:\n");
+    print ("\t %s <OPTION>\n".printf (args[0]));
+    print ("Help:\n");
+    print ("\t -h, \t --help \t\t Show help options\n");
+    print ("\t -v, \t --version \t\t Prints version\n");
+    print ("Options:\n");
+    print ("\t -R, \t --reload-config \t Reload the config file\n");
+    print ("\t -rs, \t --reload-css \t\t Reload the css file. Location change requires restart\n");
+    print ("\t -t, \t --toggle-panel \t Toggle the notificaion panel\n");
+    print ("\t -op, \t --open-panel \t\t Opens the notificaion panel\n");
+    print ("\t -cp, \t --close-panel \t\t Closes the notificaion panel\n");
+    print ("\t -d, \t --toggle-dnd \t\t Toggle and print the current dnd state\n");
+    print ("\t -D, \t --get-dnd \t\t Print the current dnd state\n");
+    print ("\t -dn, \t --dnd-on \t\t Turn dnd on and print the new dnd state\n");
+    print ("\t -df, \t --dnd-off \t\t Turn dnd off and print the new dnd state\n");
+    print ("\t -c, \t --count \t\t Print the current notificaion count\n");
+    print ("\t     \t --hide-latest \t\t Hides latest notification. Still shown in Control Center\n");
+    print ("\t     \t --close-latest \t Closes latest notification\n");
+    print ("\t -C, \t --close-all \t\t Closes all notifications\n");
+    print ("\t -sw, \t --skip-wait \t\t Doesn't wait when swaync hasn't been started\n");
+    print ("\t -s, \t --subscribe \t\t Subscribe to notificaion add and close events\n");
+    print ("\t -swb, \t --subscribe-waybar \t Subscribe to notificaion add and close events "
+           + "with waybar support. Read README for example\n");
 }
 
 private void on_subscribe (uint count, bool dnd, bool cc_open) {
-    stdout.write (
-        @"{ \"count\": $(count), \"dnd\": $(dnd), \"visible\": $(cc_open) }\n".data);
+    stdout.printf (
+        "{ \"count\": %u, \"dnd\": %s, \"visible\": %s }\n"
+         .printf (count, dnd.to_string (), cc_open.to_string ()));
 }
 
 private void print_subscribe () {
     try {
-        on_subscribe (cc_daemon.notification_count (),
-                      cc_daemon.get_dnd (),
-                      cc_daemon.get_visibility ());
+        SwayncDaemonData data = cc_daemon.get_subscribe_data ();
+        on_subscribe (data.count, data.dnd, data.cc_open);
     } catch (Error e) {
         on_subscribe (0, false, false);
     }
@@ -65,24 +83,23 @@ private void on_subscribe_waybar (uint count, bool dnd, bool cc_open) {
 
     string tooltip = "";
     if (count > 0) {
-        tooltip = @"$(count) Notification" + (count > 1 ? "s" : "");
+        tooltip = "%u Notification%s".printf (count, count > 1 ? "s" : "");
     }
 
-    string _class = @"\"$(state)\"";
+    string _class = "\"%s\"".printf (state);
     if (cc_open) {
-        _class = @"[$(_class), \"cc-open\"]";
+        _class = "[%s, \"cc-open\"]".printf (_class);
     }
 
     print (
-        "{\"text\": \"\", \"alt\": \"%s\", \"tooltip\": \"%s\", \"class\": %s}\n",
-        state, tooltip, _class);
+        "{\"text\": \"%u\", \"alt\": \"%s\", \"tooltip\": \"%s\", \"class\": %s}\n",
+        count, state, tooltip, _class);
 }
 
 private void print_subscribe_waybar () {
     try {
-        on_subscribe_waybar (cc_daemon.notification_count (),
-                             cc_daemon.get_dnd (),
-                             cc_daemon.get_visibility ());
+        SwayncDaemonData data = cc_daemon.get_subscribe_data ();
+        on_subscribe_waybar (data.count, data.dnd, data.cc_open);
     } catch (Error e) {
         on_subscribe_waybar (0, false, false);
     }
@@ -103,7 +120,7 @@ public int command_line (string[] args) {
                 break;
             case "--version":
             case "-v":
-                stdout.printf ("%s\n", Constants.version);
+                stdout.printf ("%s\n", Constants.VERSION);
                 break;
             case "--reload-config":
             case "-R":
@@ -117,6 +134,12 @@ public int command_line (string[] args) {
             case "--count":
             case "-c":
                 print (cc_daemon.notification_count ().to_string ());
+                break;
+            case "--close-latest":
+                cc_daemon.hide_latest_notifications (true);
+                break;
+            case "--hide-latest":
+                cc_daemon.hide_latest_notifications (false);
                 break;
             case "--close-all":
             case "-C":
@@ -142,6 +165,16 @@ public int command_line (string[] args) {
             case "-D":
                 print (cc_daemon.get_dnd ().to_string ());
                 break;
+            case "--dnd-on":
+            case "-dn":
+                cc_daemon.set_dnd (true);
+                print (cc_daemon.get_dnd ().to_string ());
+                break;
+            case "--dnd-off":
+            case "-df":
+                cc_daemon.set_dnd (false);
+                print (cc_daemon.get_dnd ().to_string ());
+                break;
             case "--subscribe":
             case "-s":
                 cc_daemon.subscribe.connect (on_subscribe);
@@ -152,7 +185,7 @@ public int command_line (string[] args) {
                 Bus.watch_name (
                     BusType.SESSION,
                     "org.erikreider.swaync.cc",
-                    GLib.BusNameWatcherFlags.NONE,
+                    BusNameWatcherFlags.NONE,
                     print_subscribe,
                     print_subscribe);
                 loop.run ();
@@ -164,7 +197,7 @@ public int command_line (string[] args) {
                 Bus.watch_name (
                     BusType.SESSION,
                     "org.erikreider.swaync.cc",
-                    GLib.BusNameWatcherFlags.NONE,
+                    BusNameWatcherFlags.NONE,
                     print_subscribe_waybar,
                     print_subscribe_waybar);
                 loop.run ();
@@ -209,7 +242,7 @@ public int main (string[] args) {
         Bus.watch_name (
             BusType.SESSION,
             "org.erikreider.swaync.cc",
-            GLib.BusNameWatcherFlags.NONE,
+            BusNameWatcherFlags.NONE,
             (conn, name, name_owner) => {
             if (try_connect (args) == 0) loop.quit ();
         },

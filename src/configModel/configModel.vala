@@ -42,14 +42,47 @@ namespace SwayNotificationCenter {
         }
     }
 
+    public enum Layer {
+        BACKGROUND, BOTTOM, TOP, OVERLAY;
+
+        public string parse () {
+            switch (this) {
+                default:
+                    return "top";
+                case BACKGROUND:
+                    return "background";
+                case BOTTOM:
+                    return "bottom";
+                case TOP:
+                    return "top";
+                case OVERLAY:
+                    return "overlay";
+            }
+        }
+    }
+
+    public enum CssPriority {
+        APPLICATION, USER;
+
+        public int get_priority () {
+            switch (this) {
+                case APPLICATION:
+                default:
+                    return Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION;
+                case USER:
+                    return Gtk.STYLE_PROVIDER_PRIORITY_USER;
+            }
+        }
+    }
+
     public class Category : Object {
         public string ? sound { get; set; default = null; }
         public string ? icon { get; set; default = null; }
 
         public string to_string () {
             string[] fields = {};
-            if (sound != null) fields += @"sound: $sound";
-            if (icon != null) fields += @"icon: $icon";
+            if (sound != null) fields += "sound: %s".printf (sound);
+            if (icon != null) fields += "icon: %s".printf (icon);
             return string.joinv (", ", fields);
         }
     }
@@ -66,7 +99,7 @@ namespace SwayNotificationCenter {
                 if (param.app_name == null) return false;
                 bool result = Regex.match_simple (
                     app_name, param.app_name,
-                    RegexCompileFlags.JAVASCRIPT_COMPAT,
+                    0,
                     RegexMatchFlags.NOTEMPTY);
                 if (!result) return false;
             }
@@ -74,7 +107,7 @@ namespace SwayNotificationCenter {
                 if (param.summary == null) return false;
                 bool result = Regex.match_simple (
                     summary, param.summary,
-                    RegexCompileFlags.JAVASCRIPT_COMPAT,
+                    0,
                     RegexMatchFlags.NOTEMPTY);
                 if (!result) return false;
             }
@@ -82,14 +115,14 @@ namespace SwayNotificationCenter {
                 if (param.body == null) return false;
                 bool result = Regex.match_simple (
                     body, param.body,
-                    RegexCompileFlags.JAVASCRIPT_COMPAT,
+                    0,
                     RegexMatchFlags.NOTEMPTY);
                 if (!result) return false;
             }
             if (urgency != null) {
                 bool result = Regex.match_simple (
                     urgency, param.urgency.to_string (),
-                    RegexCompileFlags.JAVASCRIPT_COMPAT,
+                    0,
                     RegexMatchFlags.NOTEMPTY);
                 if (!result) return false;
             }
@@ -97,7 +130,7 @@ namespace SwayNotificationCenter {
                 if (param.category == null) return false;
                 bool result = Regex.match_simple (
                     category, param.category,
-                    RegexCompileFlags.JAVASCRIPT_COMPAT,
+                    0,
                     RegexMatchFlags.NOTEMPTY);
                 if (!result) return false;
             }
@@ -106,11 +139,11 @@ namespace SwayNotificationCenter {
 
         public string to_string () {
             string[] fields = {};
-            if (app_name != null) fields += @"app-name: $app_name";
-            if (summary != null) fields += @"summary: $summary";
-            if (body != null) fields += @"body: $body";
-            if (urgency != null) fields += @"urgency: $urgency";
-            if (category != null) fields += @"category: $category";
+            if (app_name != null) fields += "app-name: %s".printf (app_name);
+            if (summary != null) fields += "summary: %s".printf (summary);
+            if (body != null) fields += "body: %s".printf (body);
+            if (urgency != null) fields += "urgency: %s".printf (urgency);
+            if (category != null) fields += "category: %s".printf (category);
             return string.joinv (", ", fields);
         }
 
@@ -137,7 +170,8 @@ namespace SwayNotificationCenter {
     public enum NotificationStatusEnum {
         ENABLED,
         MUTED,
-        IGNORED;
+        IGNORED,
+        TRANSIENT;
 
         public string to_string () {
             switch (this) {
@@ -147,6 +181,8 @@ namespace SwayNotificationCenter {
                     return "muted";
                 case IGNORED:
                     return "ignored";
+                case TRANSIENT:
+                    return "transient";
             }
         }
 
@@ -158,32 +194,67 @@ namespace SwayNotificationCenter {
                     return MUTED;
                 case "ignored":
                     return IGNORED;
+                case "transient":
+                    return TRANSIENT;
+            }
+        }
+    }
+
+    public enum NotificationUrgencyEnum {
+        UNSET = -1,
+        LOW = UrgencyLevels.LOW,
+        NORMAL = UrgencyLevels.NORMAL,
+        CRITICAL = UrgencyLevels.CRITICAL;
+
+        public uint8 to_byte () {
+            return this;
+        }
+
+        public string to_string () {
+            switch (this) {
+                case LOW:
+                    return "Low";
+                case NORMAL:
+                    return "Normal";
+                case CRITICAL:
+                    return "Critical";
+                default:
+                    return "Unset";
             }
         }
     }
 
     public class NotificationVisibility : NotificationMatching {
         public NotificationStatusEnum state { get; set; }
+        public NotificationUrgencyEnum override_urgency {
+            get; set; default = NotificationUrgencyEnum.UNSET;
+        }
+    }
+
+    public enum ScriptRunOnType {
+        ACTION,
+        RECEIVE;
     }
 
 #if WANT_SCRIPTING
     public class Script : NotificationMatching {
         public string ? exec { get; set; default = null; }
+        public ScriptRunOnType run_on { get; set; default = ScriptRunOnType.RECEIVE; }
 
         public async bool run_script (NotifyParams param, out string msg) {
             msg = "";
             try {
                 string[] spawn_env = Environ.get ();
                 // Export env variables
-                spawn_env += @"SWAYNC_APP_NAME=" + param.app_name;
-                spawn_env += @"SWAYNC_SUMMARY=" + param.summary;
-                spawn_env += @"SWAYNC_BODY=" + param.body;
-                spawn_env += @"SWAYNC_URGENCY=" + param.urgency.to_string ();
-                spawn_env += @"SWAYNC_CATEGORY=" + param.category;
-                spawn_env += @"SWAYNC_ID=" + param.applied_id.to_string ();
-                spawn_env += @"SWAYNC_REPLACES_ID=" + param.replaces_id.to_string ();
-                spawn_env += @"SWAYNC_TIME=" + param.time.to_string ();
-                spawn_env += @"SWAYNC_DESKTOP_ENTRY=" + param.desktop_entry ?? "";
+                spawn_env += "SWAYNC_APP_NAME=%s".printf (param.app_name);
+                spawn_env += "SWAYNC_SUMMARY=%s".printf (param.summary);
+                spawn_env += "SWAYNC_BODY=%s".printf (param.body);
+                spawn_env += "SWAYNC_URGENCY=%s".printf (param.urgency.to_string ());
+                spawn_env += "SWAYNC_CATEGORY=%s".printf (param.category);
+                spawn_env += "SWAYNC_ID=%s".printf (param.applied_id.to_string ());
+                spawn_env += "SWAYNC_REPLACES_ID=%s".printf (param.replaces_id.to_string ());
+                spawn_env += "SWAYNC_TIME=%s".printf (param.time.to_string ());
+                spawn_env += "SWAYNC_DESKTOP_ENTRY=%s".printf (param.desktop_entry ?? "");
 
                 Pid child_pid;
                 Process.spawn_async (
@@ -271,55 +342,69 @@ namespace SwayNotificationCenter {
         /* Properties */
 
         /** The notifications and controlcenters horizontal alignment */
-        public PositionX positionX { get; set; default = PositionX.RIGHT; }
+        public PositionX positionX { // vala-lint=naming-convention
+            get; set; default = PositionX.RIGHT;
+        }
         /** The notifications and controlcenters vertical alignment */
-        public PositionY positionY { get; set; default = PositionY.TOP; }
+        public PositionY positionY { // vala-lint=naming-convention
+            get; set; default = PositionY.TOP;
+        }
+
+        /** Layer of control center */
+        public Layer layer {
+            get; set; default = Layer.TOP;
+        }
+
+        /** The CSS loading priority */
+        public CssPriority cssPriority { // vala-lint=naming-convention
+            get; set; default = CssPriority.APPLICATION;
+        }
 
         /** The timeout for notifications with NORMAL priority */
-        private const int _timeout_def = 10;
-        private int _timeout = _timeout_def;
+        private const int TIMEOUT_DEFAULT = 10;
+        private int _timeout = TIMEOUT_DEFAULT;
         public int timeout {
             get {
                 return _timeout;
             }
             set {
-                _timeout = value < 1 ? _timeout_def : value;
+                _timeout = value < 0 ? TIMEOUT_DEFAULT : value;
             }
         }
 
         /** The timeout for notifications with LOW priority */
-        private const int _timeout_low_def = 5;
-        private int _timeout_low = _timeout_low_def;
+        private const int TIMEOUT_LOW_DEFAULT = 5;
+        private int _timeout_low = TIMEOUT_LOW_DEFAULT;
         public int timeout_low {
             get {
                 return _timeout_low;
             }
             set {
-                _timeout_low = value < 1 ? _timeout_low_def : value;
-            }
-        }
-
-        /** The transition time for all animations */
-        private const int _transition_time_def = 200;
-        private int _transition_time = _transition_time_def;
-        public int transition_time {
-            get {
-                return _transition_time;
-            }
-            set {
-                _transition_time = value < 0 ? _transition_time_def : value;
+                _timeout_low = value < 0 ? TIMEOUT_LOW_DEFAULT : value;
             }
         }
 
         /** The timeout for notifications with CRITICAL priority */
-        private const int _timeout_critical_def = 0;
-        private int _timeout_critical = _timeout_critical_def;
+        private const int TIMEOUT_CRITICAL_DEFAULT = 0;
+        private int _timeout_critical = TIMEOUT_CRITICAL_DEFAULT;
         public int timeout_critical {
             get {
                 return _timeout_critical;
             }
             set {
-                _timeout_critical = value < 0 ? _timeout_critical_def : value;
+                _timeout_critical = value < 0 ? TIMEOUT_CRITICAL_DEFAULT : value;
+            }
+        }
+
+        /** The transition time for all animations */
+        private const int TRANSITION_TIME_DEFAULT = 200;
+        private int _transition_time = TRANSITION_TIME_DEFAULT;
+        public int transition_time {
+            get {
+                return _transition_time;
+            }
+            set {
+                _transition_time = value < 0 ? TRANSITION_TIME_DEFAULT : value;
             }
         }
 
@@ -333,7 +418,7 @@ namespace SwayNotificationCenter {
         public ImageVisibility image_visibility {
             get;
             set;
-            default = ImageVisibility.ALWAYS;
+            default = ImageVisibility.WHEN_AVAILABLE;
         }
 
         /**
@@ -392,14 +477,14 @@ namespace SwayNotificationCenter {
         public HashTable<string, Category> categories_settings {
             get;
             set;
-            default = new HashTable<string, Category>(str_hash, str_equal);
+            default = new HashTable<string, Category> (str_hash, str_equal);
         }
 
         /** Notification Status */
         public HashTable<string, NotificationVisibility> notification_visibility {
             get;
             set;
-            default = new HashTable<string, NotificationVisibility>(str_hash, str_equal);
+            default = new HashTable<string, NotificationVisibility> (str_hash, str_equal);
         }
 
 #if WANT_SCRIPTING
@@ -407,11 +492,111 @@ namespace SwayNotificationCenter {
         public HashTable<string, Script> scripts {
             get;
             set;
-            default = new HashTable<string, Script>(str_hash, str_equal);
+            default = new HashTable<string, Script> (str_hash, str_equal);
         }
         /** Show notification if script fails */
         public bool script_fail_notify { get; set; default = true; }
 #endif
+
+        /** Whether to expand the notification center across both edges of the screen */
+        public bool fit_to_screen { get; set; default = true; }
+
+        /**
+         * Notification center's height, in pixels.
+         * Set `fit_to_screen` to true to ignore the height setting.
+         */
+        private const int CONTROL_CENTER_MINIMUM_HEIGHT = 300;
+        private const int CONTROL_CENTER_DEFAULT_HEIGHT = 300;
+        private int _control_center_height = CONTROL_CENTER_DEFAULT_HEIGHT;
+        public int control_center_height {
+            get {
+                return _control_center_height;
+            }
+            set {
+                _control_center_height = value > CONTROL_CENTER_MINIMUM_HEIGHT
+                    ? value : CONTROL_CENTER_MINIMUM_HEIGHT;
+            }
+        }
+
+        /**
+         * Notification center's width, in pixels.
+         */
+        private const int CONTROL_CENTER_MINIMUM_WIDTH = 300;
+        private const int CONTROL_CENTER_DEFAULT_WIDTH = 500;
+        private int _control_center_width = CONTROL_CENTER_DEFAULT_WIDTH;
+        public int control_center_width {
+            get {
+                return _control_center_width;
+            }
+            set {
+                _control_center_width = value > CONTROL_CENTER_MINIMUM_WIDTH
+                    ? value : CONTROL_CENTER_MINIMUM_WIDTH;
+            }
+        }
+
+        /**
+         * Notification icon size, in pixels.
+         */
+        private const int NOTIFICATION_ICON_MINIMUM_SIZE = 16;
+        private const int NOTIFICATION_ICON_DEFAULT_SIZE = 64;
+        private int _notification_icon_size = NOTIFICATION_ICON_DEFAULT_SIZE;
+        public int notification_icon_size {
+            get {
+                return _notification_icon_size;
+            }
+            set {
+                _notification_icon_size = value > NOTIFICATION_ICON_MINIMUM_SIZE
+                    ? value : NOTIFICATION_ICON_MINIMUM_SIZE;
+            }
+        }
+
+        /**
+         * Notification body image height, in pixels.
+         */
+        private const int NOTIFICATION_BODY_IMAGE_MINIMUM_HEIGHT = 100;
+        private const int NOTIFICATION_BODY_IMAGE_DEFAULT_HEIGHT = 100;
+        private int _notification_body_image_height = NOTIFICATION_BODY_IMAGE_DEFAULT_HEIGHT;
+        public int notification_body_image_height {
+            get {
+                return _notification_body_image_height;
+            }
+            set {
+                _notification_body_image_height =
+                    value > NOTIFICATION_BODY_IMAGE_MINIMUM_HEIGHT
+                    ? value : NOTIFICATION_BODY_IMAGE_MINIMUM_HEIGHT;
+            }
+        }
+
+        /**
+         * Notification body image width, in pixels.
+         */
+        private const int NOTIFICATION_BODY_IMAGE_MINIMUM_WIDTH = 200;
+        private const int NOTIFICATION_BODY_IMAGE_DEFAULT_WIDTH = 200;
+        private int _notification_body_image_width = NOTIFICATION_BODY_IMAGE_DEFAULT_WIDTH;
+        public int notification_body_image_width {
+            get {
+                return _notification_body_image_width;
+            }
+            set {
+                _notification_body_image_width =
+                    value > NOTIFICATION_BODY_IMAGE_MINIMUM_WIDTH
+                    ? value : NOTIFICATION_BODY_IMAGE_MINIMUM_WIDTH;
+            }
+        }
+
+        /** Widgets to show in ControlCenter */
+        public GenericArray<string> widgets {
+            get;
+            set;
+            default = new GenericArray<string> ();
+        }
+
+        /** Widgets to show in ControlCenter */
+        public HashTable<string, Json.Object> widget_config {
+            get;
+            set;
+            default = new HashTable<string, Json.Object> (str_hash, str_equal);
+        }
 
         /* Methods */
 
@@ -428,7 +613,7 @@ namespace SwayNotificationCenter {
                 case "categories-settings" :
                     bool status;
                     HashTable<string, Category> result =
-                        extract_hashtable<Category>(
+                        extract_hashtable<Category> (
                             property_name,
                             property_node,
                             out status);
@@ -437,7 +622,7 @@ namespace SwayNotificationCenter {
                 case "notification-visibility":
                     bool status;
                     HashTable<string, NotificationVisibility> result =
-                        extract_hashtable<NotificationVisibility>(
+                        extract_hashtable<NotificationVisibility> (
                             property_name,
                             property_node,
                             out status);
@@ -447,13 +632,41 @@ namespace SwayNotificationCenter {
                 case "scripts":
                     bool status;
                     HashTable<string, Script> result =
-                        extract_hashtable<Script>(
+                        extract_hashtable<Script> (
                             property_name,
                             property_node,
                             out status);
                     value = result;
                     return status;
 #endif
+                case "widgets":
+                    bool status;
+                    GenericArray<string> result =
+                        extract_array<string> (property_name,
+                                               property_node,
+                                               out status);
+                    value = result;
+                    return status;
+                case "widget-config":
+                    HashTable<string, Json.Object> result
+                        = new HashTable<string, Json.Object> (str_hash, str_equal);
+                    if (property_node.get_value_type ().name () != "JsonObject") {
+                        value = result;
+                        return true;
+                    }
+                    Json.Object obj = property_node.get_object ();
+                    if (obj.get_size () == 0) {
+                        value = result;
+                        return true;
+                    }
+                    foreach (var key in obj.get_members ()) {
+                        Json.Node ? node = obj.get_member (key);
+                        if (node.get_node_type () != Json.NodeType.OBJECT) continue;
+                        Json.Object ? o = node.get_object ();
+                        if (o != null) result.set (key, o);
+                    }
+                    value = result;
+                    return true;
                 default:
                     // Handles all other properties
                     return default_deserialize_property (
@@ -481,23 +694,33 @@ namespace SwayNotificationCenter {
             }
             // All other properties that can't be serialized
             switch (property_name) {
-                case "categories-settings":
+                case "categories-settings" :
                     node = new Json.Node (Json.NodeType.OBJECT);
                     var table = (HashTable<string, Category>) value.get_boxed ();
-                    node.set_object (serialize_hashtable<Category>(table));
+                    node.set_object (serialize_hashtable<Category> (table));
                     break;
                 case "notification-visibility":
                     node = new Json.Node (Json.NodeType.OBJECT);
                     var table = (HashTable<string, NotificationVisibility>) value.get_boxed ();
-                    node.set_object (serialize_hashtable<NotificationVisibility>(table));
+                    node.set_object (serialize_hashtable<NotificationVisibility> (table));
                     break;
 #if WANT_SCRIPTING
                 case "scripts":
                     node = new Json.Node (Json.NodeType.OBJECT);
                     var table = (HashTable<string, Script>) value.get_boxed ();
-                    node.set_object (serialize_hashtable<Script>(table));
+                    node.set_object (serialize_hashtable<Script> (table));
                     break;
 #endif
+                case "widgets":
+                    node = new Json.Node (Json.NodeType.ARRAY);
+                    var table = (GenericArray<string>) value.get_boxed ();
+                    node.set_array (serialize_array<string> (table));
+                    break;
+                case "widget-config":
+                    node = new Json.Node (Json.NodeType.OBJECT);
+                    var table = (HashTable<string, Json.Object>) value.get_boxed ();
+                    node.set_object (serialize_hashtable<Json.Object> (table));
+                    break;
                 default:
                     node.set_value (value);
                     break;
@@ -520,11 +743,11 @@ namespace SwayNotificationCenter {
          * - int64
          * - GLib.Object
          */
-        private HashTable<string, T> extract_hashtable<T>(string property_name,
-                                                          Json.Node node,
-                                                          out bool status) {
+        private HashTable<string, T> extract_hashtable<T> (string property_name,
+                                                           Json.Node node,
+                                                           out bool status) {
             status = false;
-            var tmp_table = new HashTable<string, T>(str_hash, str_equal);
+            var tmp_table = new HashTable<string, T> (str_hash, str_equal);
 
             if (node.get_node_type () != Json.NodeType.OBJECT) {
                 stderr.printf ("Node %s is not a json object!...\n",
@@ -605,7 +828,7 @@ namespace SwayNotificationCenter {
             return tmp_table;
         }
 
-        private Json.Object serialize_hashtable<T>(HashTable<string, T> table) {
+        private Json.Object serialize_hashtable<T> (HashTable<string, T> table) {
             var json_object = new Json.Object ();
 
             if (table == null) return json_object;
@@ -638,6 +861,18 @@ namespace SwayNotificationCenter {
                         var node = Json.gobject_serialize (item as Object);
                         json_object.set_member (key, node);
                         break;
+                    case Type.BOXED:
+                        switch (typeof (T).name ()) {
+                            case "JsonObject":
+                                json_object.set_object_member (key,
+                                                               (Json.Object) item);
+                                break;
+                            case "JsonArray":
+                                json_object.set_array_member (key,
+                                                              (Json.Array) item);
+                                break;
+                        }
+                        break;
                 }
             }
             return json_object;
@@ -652,11 +887,11 @@ namespace SwayNotificationCenter {
          * - int64
          * - GLib.Object
          */
-        private GenericArray<T> extract_array<T>(string property_name,
-                                                 Json.Node node,
-                                                 out bool status) {
+        private GenericArray<T> extract_array<T> (string property_name,
+                                                  Json.Node node,
+                                                  out bool status) {
             status = false;
-            GenericArray<T> tmp_array = new GenericArray<T>();
+            GenericArray<T> tmp_array = new GenericArray<T> ();
 
             if (node.get_node_type () != Json.NodeType.ARRAY) {
                 stderr.printf ("Node %s is not a json array!...\n",
@@ -707,7 +942,7 @@ namespace SwayNotificationCenter {
             return tmp_array;
         }
 
-        private Json.Array serialize_array<T>(GenericArray<T> array) {
+        private Json.Array serialize_array<T> (GenericArray<T> array) {
             var json_array = new Json.Array ();
 
             if (array == null) return json_array;
@@ -787,13 +1022,13 @@ namespace SwayNotificationCenter {
 
         /**
          * Writes and replaces settings with the new settings in `path`. If
-         * `path` is "null", the default user accessable config will be used
+         * `path` is "null", the default user accessible config will be used
          * ("~/.config/swaync/config.json")
          */
         private bool write_to_file (owned string ? path = null) {
             try {
                 if (path == null) {
-                    // Use the default user accessable config
+                    // Use the default user accessible config
                     string dir_path = Path.build_path (
                         Path.DIR_SEPARATOR.to_string (),
                         Environment.get_user_config_dir (),

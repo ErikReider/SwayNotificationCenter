@@ -2,24 +2,31 @@
  * vim: ft=less
  */
 
-@define-color border-color rgb(7, 7, 7);
-@define-color bg rgb(58, 58, 58);
-@define-color bg-hover rgb(68, 68, 68);
-@define-color bg-focus rgba(68, 68, 68, 0.6);
+@define-color cc-bg rgba(0, 0, 0, 0.7);
+
+@define-color noti-border-color rgba(255, 255, 255, 0.15);
+@define-color noti-bg rgb(48, 48, 48);
+@define-color noti-bg-hover rgb(56, 56, 56);
+@define-color noti-bg-focus rgba(68, 68, 68, 0.6);
+@define-color noti-close-bg rgba(255, 255, 255, 0.1);
+@define-color noti-close-bg-hover rgba(255, 255, 255, 0.15);
+
 @define-color bg-selected rgb(0, 128, 255);
 
 .notification-row {
   outline: none;
 }
+
 .notification-row:focus,
 .notification-row:hover {
-  background: @bg-focus;
+  background: @noti-bg-focus;
 }
 
 .notification {
-  border-radius: 10px;
+  border-radius: 12px;
   margin: 6px 12px;
-  box-shadow: 0px 2px 4px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.7),
+    0 2px 6px 2px rgba(0, 0, 0, 0.3);
   padding: 0;
 }
 
@@ -27,39 +34,47 @@
 .low {
   background: yellow;
   padding: 6px;
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
 .normal {
   background: green;
   padding: 6px;
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
 .critical {
   background: red;
   padding: 6px;
-  border-radius: 10px;
+  border-radius: 12px;
 }
 */
 
 .notification-content {
   background: transparent;
   padding: 6px;
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
 .close-button {
-  background: black;
+  background: @noti-close-bg;
   color: white;
   text-shadow: none;
-  padding: 0 2px;
-  box-shadow: 0px 2px 4px 2px rgba(0, 0, 0, 0.3);
+  padding: 0;
   border-radius: 100%;
+  margin-top: 10px;
+  margin-right: 16px;
+  box-shadow: none;
+  border: none;
+  min-width: 24px;
+  min-height: 24px;
 }
+
 .close-button:hover {
-  background: rgb(30, 30, 30);
+  box-shadow: none;
+  background: @noti-close-bg-hover;
   transition: all 0.15s ease-in-out;
+  border: none;
 }
 
 .notification-default-action,
@@ -67,17 +82,19 @@
   padding: 4px;
   margin: 0;
   box-shadow: none;
-  background: @bg;
-  border: 1px solid @border-color;
+  background: @noti-bg;
+  border: 1px solid @noti-border-color;
+  color: white;
 }
 
 .notification-default-action:hover,
 .notification-action:hover {
-  background: @bg-hover;
+  -gtk-icon-effect: none;
+  background: @noti-bg-hover;
 }
 
 .notification-default-action {
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
 /* When alternative actions are visible */
@@ -96,9 +113,10 @@
 .notification-action:first-child {
   border-bottom-left-radius: 10px;
 }
+
 .notification-action:last-child {
   border-bottom-right-radius: 10px;
-  border-right: 1px solid @border-color;
+  border-right: 1px solid @noti-border-color;
 }
 
 .image {
@@ -107,63 +125,117 @@
 .body-image {
   margin-top: 6px;
   background-color: white;
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
 .summary {
-  color: white;
-  text-shadow: none;
-}
-
-.time {
-  color: white;
-  text-shadow: none;
-}
-
-.body {
+  font-size: 16px;
+  font-weight: bold;
   background: transparent;
   color: white;
   text-shadow: none;
 }
 
+.time {
+  font-size: 16px;
+  font-weight: bold;
+  background: transparent;
+  color: white;
+  text-shadow: none;
+  margin-right: 18px;
+}
+
+.body {
+  font-size: 15px;
+  font-weight: normal;
+  background: transparent;
+  color: white;
+  text-shadow: none;
+}
+
+/* The "Notifications" and "Do Not Disturb" text widget */
 .top-action-title {
   color: white;
   text-shadow: none;
 }
 
-.control-center-clear-all {
-  color: white;
-  text-shadow: none;
-  background: @bg;
-  border: 1px solid @border-color;
-  box-shadow: none;
-  border-radius: 10px;
-}
-.control-center-clear-all:hover {
-  background: @bg-hover;
-}
-
-.control-center-dnd {
-  border-radius: 10px;
-  background: @bg;
-  border: 1px solid @border-color;
-  box-shadow: none;
-}
-
-.control-center-dnd:checked {
-  background: @bg-selected;
-}
-.control-center-dnd slider {
-  background: @bg-hover;
-}
-
 .control-center {
-  background: rgba(0, 0, 0, 0.7);
+  background: @cc-bg;
 }
+
 .control-center-list {
   background: transparent;
 }
 
 .floating-notifications {
   background: transparent;
+}
+
+/* Window behind control center and on all other monitors */
+.blank-window {
+  background: alpha(black, 0.25);
+}
+
+/*** Widgets ***/
+
+/* Title widget */
+.widget-title {
+  margin: 8px;
+  font-size: 1.5rem;
+}
+.widget-title > button {
+  font-size: initial;
+  color: white;
+  text-shadow: none;
+  background: @noti-bg;
+  border: 1px solid @noti-border-color;
+  box-shadow: none;
+  border-radius: 12px;
+}
+.widget-title > button:hover {
+  background: @noti-bg-hover;
+}
+
+/* DND widget */
+.widget-dnd {
+  margin: 8px;
+  font-size: 1.1rem;
+}
+.widget-dnd > switch {
+  font-size: initial;
+  border-radius: 12px;
+  background: @noti-bg;
+  border: 1px solid @noti-border-color;
+  box-shadow: none;
+}
+.widget-dnd > switch:checked {
+  background: @bg-selected;
+}
+.widget-dnd > switch slider {
+  background: @noti-bg-hover;
+  border-radius: 12px;
+}
+
+/* Label widget */
+.widget-label {
+  margin: 8px;
+}
+.widget-label > label {
+  font-size: 1.1rem;
+}
+
+/* Mpris widget */
+.widget-mpris {
+  /* The parent to all players */
+}
+.widget-mpris-player {
+  padding: 8px;
+  margin: 8px;
+}
+.widget-mpris-title {
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+.widget-mpris-subtitle {
+  font-size: 1.1rem;
 }

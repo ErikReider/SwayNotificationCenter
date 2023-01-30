@@ -11,10 +11,8 @@ namespace SwayNotificationCenter {
         [GtkChild]
         unowned Gtk.Box box;
 
-        private Gtk.Switch dnd_button;
-        private Gtk.Button clear_all_button;
-
-        private CcDaemon cc_daemon;
+        private SwayncDaemon swaync_daemon;
+        private NotiDaemon noti_daemon;
 
         private uint list_position = 0;
 
@@ -22,8 +20,14 @@ namespace SwayNotificationCenter {
         private bool list_reverse = false;
         private Gtk.Align list_align = Gtk.Align.START;
 
-        public ControlCenter (CcDaemon cc_daemon) {
-            this.cc_daemon = cc_daemon;
+        private Array<Widgets.BaseWidget> widgets = new Array<Widgets.BaseWidget> ();
+        private const string[] DEFAULT_WIDGETS = { "title", "dnd", "notifications" };
+
+        public ControlCenter (SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
+            this.swaync_daemon = swaync_daemon;
+            this.noti_daemon = noti_daemon;
+
+            this.swaync_daemon.reloading_css.connect (reload_notifications_style);
 
             if (!GtkLayerShell.is_supported ()) {
                 stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
@@ -33,9 +37,32 @@ namespace SwayNotificationCenter {
                 Process.exit (1);
             }
             GtkLayerShell.init_for_window (this);
-            this.set_anchor ();
+            GtkLayerShell.set_namespace (this, "swaync-control-center");
+            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
+            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, true);
+            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
+            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
 
             viewport.size_allocate.connect (size_alloc);
+
+            this.map.connect (() => {
+                set_anchor ();
+                // Wait until the layer has attached
+                ulong id = 0;
+                id = notify["has-toplevel-focus"].connect (() => {
+                    disconnect (id);
+                    unowned Gdk.Monitor monitor = null;
+                    unowned Gdk.Window ? win = get_window ();
+                    if (win != null) {
+                        monitor = get_display ().get_monitor_at_window (win);
+                    }
+                    swaync_daemon.show_blank_windows (monitor);
+                });
+            });
+            this.unmap.connect (swaync_daemon.hide_blank_windows);
+
+            this.button_release_event.connect (blank_window_press);
+            this.touch_event.connect (blank_window_press);
 
             // Only use release for closing notifications due to Escape key
             // sometimes being passed through to unfucused application
@@ -78,7 +105,11 @@ namespace SwayNotificationCenter {
                             close_all_notifications ();
                             break;
                         case "D":
-                            set_switch_dnd_state (!dnd_button.get_state ());
+                            try {
+                                swaync_daemon.toggle_dnd ();
+                            } catch (Error e) {
+                                error ("Error: %s\n", e.message);
+                            }
                             break;
                         case "Down":
                             if (list_position + 1 < children.length ()) {
@@ -112,25 +143,61 @@ namespace SwayNotificationCenter {
                 return true;
             });
 
-            clear_all_button = new Gtk.Button.with_label ("Clear All");
-            clear_all_button.get_style_context ().add_class (
-                "control-center-clear-all");
-            clear_all_button.clicked.connect (close_all_notifications);
-            this.box.add (new TopAction ("Notifications",
-                                         clear_all_button,
-                                         true));
+            add_widgets ();
+        }
 
-            dnd_button = new Gtk.Switch ();
-            dnd_button.get_style_context ().add_class ("control-center-dnd");
-            dnd_button.state_set.connect ((widget, state) => {
-                try {
-                    this.cc_daemon.set_dnd (state);
-                } catch (Error e) {
-                    stderr.printf (e.message + "\n");
+        /** Adds all custom widgets. Removes previous widgets */
+        public void add_widgets () {
+            // Remove all widgets
+            foreach (var widget in widgets.data) {
+                box.remove (widget);
+            }
+            widgets.remove_range (0, widgets.length);
+
+            string[] w = ConfigModel.instance.widgets.data;
+            if (w.length == 0) w = DEFAULT_WIDGETS;
+            bool has_notification = false;
+            foreach (string key in w) {
+                // Reposition the scrolled_window
+                if (key == "notifications") {
+                    has_notification = true;
+                    uint pos = box.get_children ().length ();
+                    box.reorder_child (scrolled_window, (int) (pos > 0 ? --pos : 0));
+                    continue;
                 }
-                return false;
-            });
-            this.box.add (new TopAction ("Do Not Disturb", dnd_button, false));
+                // Add the widget if it is valid
+                Widgets.BaseWidget ? widget = Widgets.get_widget_from_key (
+                    key, swaync_daemon, noti_daemon);
+                if (widget == null) continue;
+                widgets.append_val (widget);
+                box.pack_start (widgets.index (widgets.length - 1),
+                                false, true, 0);
+            }
+            if (!has_notification) {
+                warning ("Notification widget not included in \"widgets\" config. Using default bottom position");
+                uint pos = box.get_children ().length ();
+                box.reorder_child (scrolled_window, (int) (pos > 0 ? --pos : 0));
+            }
+        }
+
+        private bool blank_window_press (Gdk.Event event) {
+            // Calculate if the clicked coords intersect the ControlCenter
+            double x, y;
+            event.get_root_coords (out x, out y);
+            Gdk.Rectangle click_rectangle = Gdk.Rectangle () {
+                width = 1,
+                height = 1,
+                x = (int) x,
+                y = (int) y,
+            };
+            if (box.intersect (click_rectangle, null)) return true;
+            try {
+                swaync_daemon.set_visibility (false);
+            } catch (Error e) {
+                stderr.printf ("ControlCenter BlankWindow Click Error: %s\n",
+                               e.message);
+            }
+            return true;
         }
 
         /** Resets the UI positions */
@@ -145,55 +212,64 @@ namespace SwayNotificationCenter {
 #else
             GtkLayerShell.set_keyboard_interactivity (this, keyboard_shortcuts);
 #endif
-            GtkLayerShell.set_layer (this, GtkLayerShell.Layer.TOP);
 
-            GtkLayerShell.set_margin (this, GtkLayerShell.Edge.TOP, ConfigModel.instance.control_center_margin_top);
-            GtkLayerShell.set_margin (this, GtkLayerShell.Edge.BOTTOM, ConfigModel.instance.control_center_margin_bottom);
-            GtkLayerShell.set_margin (this, GtkLayerShell.Edge.RIGHT, ConfigModel.instance.control_center_margin_right);
-            GtkLayerShell.set_margin (this, GtkLayerShell.Edge.LEFT, ConfigModel.instance.control_center_margin_left);
+            // Set layer
+            GtkLayerShell.Layer layer = GtkLayerShell.Layer.TOP;
+            switch (ConfigModel.instance.layer) {
+                case Layer.BACKGROUND:
+                    layer = GtkLayerShell.Layer.BACKGROUND;
+                    break;
+                case Layer.BOTTOM:
+                    layer = GtkLayerShell.Layer.BOTTOM;
+                    break;
+                case Layer.TOP:
+                    layer = GtkLayerShell.Layer.TOP;
+                    break;
+                case Layer.OVERLAY:
+                    layer = GtkLayerShell.Layer.OVERLAY;
+                    break;
+            }
+            GtkLayerShell.set_layer (this, layer);
 
-            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
-            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
+            // Set the box margins
+            box.set_margin_top (ConfigModel.instance.control_center_margin_top);
+            box.set_margin_start (ConfigModel.instance.control_center_margin_left);
+            box.set_margin_end (ConfigModel.instance.control_center_margin_right);
+            box.set_margin_bottom (ConfigModel.instance.control_center_margin_bottom);
+
+            // Anchor box to north/south edges as needed
+            Gtk.Align align_x = Gtk.Align.END;
             switch (ConfigModel.instance.positionX) {
                 case PositionX.LEFT:
-                    GtkLayerShell.set_anchor (this,
-                                              GtkLayerShell.Edge.RIGHT,
-                                              false);
-                    GtkLayerShell.set_anchor (this,
-                                              GtkLayerShell.Edge.LEFT,
-                                              true);
+                    align_x = Gtk.Align.START;
                     break;
                 case PositionX.CENTER:
-                    GtkLayerShell.set_anchor (this,
-                                              GtkLayerShell.Edge.RIGHT,
-                                              false);
-                    GtkLayerShell.set_anchor (this,
-                                              GtkLayerShell.Edge.LEFT,
-                                              false);
+                    align_x = Gtk.Align.CENTER;
                     break;
-                default:
-                    GtkLayerShell.set_anchor (this,
-                                              GtkLayerShell.Edge.LEFT,
-                                              false);
-                    GtkLayerShell.set_anchor (this,
-                                              GtkLayerShell.Edge.RIGHT,
-                                              true);
+                case PositionX.RIGHT:
+                    align_x = Gtk.Align.END;
                     break;
             }
+            Gtk.Align align_y = Gtk.Align.START;
             switch (ConfigModel.instance.positionY) {
-                case PositionY.BOTTOM:
-                    list_reverse = true;
-                    list_align = Gtk.Align.END;
-                    this.box.set_child_packing (
-                        scrolled_window, true, true, 0, Gtk.PackType.START);
-                    break;
                 case PositionY.TOP:
+                    align_y = Gtk.Align.START;
+                    // Set cc widget position
                     list_reverse = false;
                     list_align = Gtk.Align.START;
-                    this.box.set_child_packing (
-                        scrolled_window, true, true, 0, Gtk.PackType.END);
+                    break;
+                case PositionY.BOTTOM:
+                    align_y = Gtk.Align.END;
+                    // Set cc widget position
+                    list_reverse = true;
+                    list_align = Gtk.Align.END;
                     break;
             }
+            // Fit the ControlCenter to the monitor height
+            if (ConfigModel.instance.fit_to_screen) align_y = Gtk.Align.FILL;
+            // Set the ControlCenter alignment
+            box.set_halign (align_x);
+            box.set_valign (align_y);
 
             list_box.set_valign (list_align);
             list_box.set_sort_func ((w1, w2) => {
@@ -201,10 +277,14 @@ namespace SwayNotificationCenter {
                 var b = (Notification) w2;
                 if (a == null || b == null) return 0;
                 // Sort the list in reverse if needed
-                int val1 = list_reverse ? 1 : -1;
-                int val2 = list_reverse ? -1 : 1;
-                return a.param.time > b.param.time ? val1 : val2;
+                if (a.param.time == b.param.time) return 0;
+                int val = list_reverse ? 1 : -1;
+                return a.param.time > b.param.time ? val : val * -1;
             });
+
+            // Always set the size request in all events.
+            box.set_size_request (ConfigModel.instance.control_center_width,
+                                  ConfigModel.instance.control_center_height);
         }
 
         private void size_alloc () {
@@ -217,12 +297,11 @@ namespace SwayNotificationCenter {
         }
 
         private void scroll_to_start (bool reverse) {
-            const bool horizontal_scroll = false;
             Gtk.ScrollType scroll_type = Gtk.ScrollType.START;
             if (reverse) {
                 scroll_type = Gtk.ScrollType.END;
             }
-            scrolled_window.scroll_child (scroll_type, horizontal_scroll);
+            scrolled_window.scroll_child (scroll_type, false);
         }
 
         public uint notification_count () {
@@ -236,9 +315,9 @@ namespace SwayNotificationCenter {
             }
 
             try {
-                cc_daemon.subscribe (notification_count (),
-                                     cc_daemon.get_dnd (),
-                                     get_visibility ());
+                swaync_daemon.subscribe (notification_count (),
+                                         swaync_daemon.get_dnd (),
+                                         get_visibility ());
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }
@@ -257,9 +336,12 @@ namespace SwayNotificationCenter {
         }
 
         private void on_visibility_change () {
+            // Updates all widgets on visibility change
+            foreach (var widget in widgets.data) {
+                widget.on_cc_visibility_change (visible);
+            }
+
             if (this.visible) {
-                // Reload the settings from config
-                this.set_anchor ();
                 // Focus the first notification
                 list_position = list_reverse ?
                                 (list_box.get_children ().length () - 1) : 0;
@@ -272,10 +354,9 @@ namespace SwayNotificationCenter {
                     if (noti != null) noti.set_time ();
                 }
             }
-        }
-
-        public void set_switch_dnd_state (bool state) {
-            if (this.dnd_button.state != state) this.dnd_button.state = state;
+            swaync_daemon.subscribe (notification_count (),
+                                     noti_daemon.dnd,
+                                     this.visible);
         }
 
         public bool toggle_visibility () {
@@ -307,18 +388,11 @@ namespace SwayNotificationCenter {
                     break;
                 }
             }
-            try {
-                cc_daemon.subscribe (notification_count (),
-                                     cc_daemon.get_dnd (),
-                                     get_visibility ());
-            } catch (Error e) {
-                stderr.printf (e.message + "\n");
-            }
         }
 
         public void add_notification (NotifyParams param,
-                                      NotiDaemon notiDaemon) {
-            var noti = new Notification (param, notiDaemon);
+                                      NotiDaemon noti_daemon) {
+            var noti = new Notification.regular (param, noti_daemon);
             noti.grab_focus.connect ((w) => {
                 uint i = list_box.get_children ().index (w);
                 if (list_position != uint.MAX && list_position != i) {
@@ -329,9 +403,9 @@ namespace SwayNotificationCenter {
             list_box.add (noti);
             scroll_to_start (list_reverse);
             try {
-                cc_daemon.subscribe (notification_count (),
-                                     cc_daemon.get_dnd (),
-                                     get_visibility ());
+                swaync_daemon.subscribe (notification_count (),
+                                         swaync_daemon.get_dnd (),
+                                         get_visibility ());
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }
@@ -342,7 +416,7 @@ namespace SwayNotificationCenter {
         }
 
         /** Forces each notification EventBox to reload its style_context #27 */
-        public void reload_notifications_style () {
+        private void reload_notifications_style () {
             foreach (var c in list_box.get_children ()) {
                 Notification noti = (Notification) c;
                 if (noti != null) noti.reload_style_context ();

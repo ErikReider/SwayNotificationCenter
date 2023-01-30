@@ -63,7 +63,7 @@ Scripting rules and logic:
 . *Only one* script can be fired per notification
 . Each script requires `exec` and at least one of the other properties
 . All listed properties must match the notification for the script to be ran
-. If any of the propeties doesn't match, the script will be skipped
+. If any of the properties doesn't match, the script will be skipped
 . If a notification doesn't include one of the properties, that property will be skipped
 
 Notification information can be printed into a terminal by running

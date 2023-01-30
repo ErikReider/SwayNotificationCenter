@@ -10,8 +10,12 @@ _arguments -s \
     '(-cp --close-panel)'{-cp,--close-panel}'[Closes the notificaion panel]' \
     '(-d --toggle-dnd)'{-d,--toggle-dnd}'[Toggle and print the current dnd state]' \
     '(-D --get-dnd)'{-D,--get-dnd}'[Print the current dnd state]' \
+    '(-dn --dnd-on)'{-dn,--dnd-on}'[Turn dnd on and print the new dnd state]' \
+    '(-df --dnd-off)'{-df,--dnd-off}'[Turn dnd off and print the new dnd state]' \
     '(-c --count)'{-c,--count}'[Print the current notificaion count]' \
-    '(-C --close-all)'{-C,--close-all}'[Closes all notifications]' \
+    '(--hide-latest)'--hide-latest'[Closes all notifications]' \
+    '(--close-latest)'--close-latest'[Hides latest notification. Still shown in Control Center]' \
+    '(-C --close-all)'{-C,--close-all}'[Closes latest notification]' \
     '(-sw --skip-wait)'{-sw,--skip-wait}"[Doesn't wait when swaync hasn't been started]" \
     '(-s --subscribe)'{-s,--subscribe}'[Subscribe to notificaion add and close events]' \
     '(-swb --subscribe-waybar)'{-swb,--subscribe-waybar}'[Subscribe to notificaion add and close events with waybar support. Read README for example]' \

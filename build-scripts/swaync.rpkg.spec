@@ -1,6 +1,6 @@
 # vim: syntax=spec
 Name:       {{{ git_dir_name }}}
-Version:    0.5
+Version:    0.7.3
 Release:    1%{?dist}
 Summary:    Notification daemon with GTK GUI
 Provides:   desktop-notification-daemon
@@ -21,6 +21,8 @@ BuildRequires: libgee-devel >= 0.20
 BuildRequires: json-glib-devel >= 1.0
 BuildRequires: libhandy-devel >= 1.4.0
 BuildRequires: systemd-devel
+BuildRequires: systemd
+BuildRequires: scdoc
 %{?systemd_requires}
 
 %description
@@ -47,6 +49,7 @@ A simple notification daemon with a GTK gui for notifications and the control ce
 %{_bindir}/swaync-client
 %{_bindir}/swaync
 %license COPYING
+%{_sysconfdir}/xdg/swaync/configSchema.json
 %{_sysconfdir}/xdg/swaync/config.json
 %{_sysconfdir}/xdg/swaync/style.css
 %{_userunitdir}/swaync.service
@@ -63,6 +66,10 @@ A simple notification daemon with a GTK gui for notifications and the control ce
 %dir %{_datadir}/zsh/site-functions
 %{_datadir}/zsh/site-functions/_swaync
 %{_datadir}/zsh/site-functions/_swaync-client
+%{_datadir}/glib-2.0/schemas/org.erikreider.swaync.gschema.xml
+%{_mandir}/man1/swaync-client.1.gz
+%{_mandir}/man1/swaync.1.gz
+%{_mandir}/man5/swaync.5.gz
 
 # Changelog will be empty until you make first annotated Git tag.
 %changelog

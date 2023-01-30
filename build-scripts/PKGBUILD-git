@@ -1,0 +1,44 @@
+# Maintainer: Erik Reider <erik.reider@protonmail.com>
+pkgname=swaync-git
+_pkgname=swaync
+pkgver=v0.7.3.r1.g3f35290
+pkgrel=1
+pkgdesc="A simple notificaion daemon with a GTK panel for checking previous notifications like other DEs"
+url="https://github.com/ErikReider/SwayNotificationCenter"
+arch=(
+    'x86_64'
+    'aarch64' # ARM v8 64-bit
+    'armv7h'  # ARM v7 hardfloat
+)
+license=('GPL3')
+depends=("gtk3" "gtk-layer-shell" "dbus" "glib2" "gobject-introspection" "libgee" "json-glib" "libhandy")
+conflicts=("swaync" "swaync-client")
+provides=("swaync" "swaync-client")
+makedepends=(vala meson git scdoc)
+source=("$_pkgname::git+$url")
+sha256sums=('SKIP')
+
+pkgver() {
+    cd $_pkgname
+    (
+        set -o pipefail
+        git describe --long 2>/dev/null | sed 's/\([^-]*-g\)/r\1/;s/-/./g' \
+            || printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+    )
+}
+
+prepare() {
+    cd $_pkgname
+    git checkout main
+}
+
+build() {
+    arch-meson $_pkgname build -Dscripting=true
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir/" ninja -C build install
+    install -Dm644 "$_pkgfoldername-$pkgver/COPYING" -t "$pkgdir/usr/share/licenses/$pkgname"
+    install -Dm644 "$_pkgfoldername-$pkgver/README.md" -t "$pkgdir/usr/share/doc/$pkgname"
+}

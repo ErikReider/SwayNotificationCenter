@@ -1,4 +1,4 @@
-# Sets the version to a vala variable in Contants.vala
+# Sets the version to a vala variable in Constants.vala
 version = '@0@'.format(meson.project_version())
 git = find_program('git', native: true, required: false)
 if git.found()
@@ -22,16 +22,34 @@ constants = configure_file(
   configuration : const_config_data
 )
 
+widget_sources = [
+  # Helpers
+  'controlCenter/widgets/baseWidget.vala',
+  'controlCenter/widgets/factory.vala',
+  # Widget: Title
+  'controlCenter/widgets/title/title.vala',
+  # Widget: Dnd
+  'controlCenter/widgets/dnd/dnd.vala',
+  # Widget: Label
+  'controlCenter/widgets/label/label.vala',
+  # Widget: MPRIS
+  'controlCenter/widgets/mpris/mpris.vala',
+  'controlCenter/widgets/mpris/interfaces.vala',
+  'controlCenter/widgets/mpris/mpris_player.vala',
+]
+
 app_sources = [
   'main.vala',
   'configModel/configModel.vala',
+  'swayncDaemon/swayncDaemon.vala',
   'notiDaemon/notiDaemon.vala',
   'notiModel/notiModel.vala',
-  'notiWindow/notiWindow.vala',
+  'notificationWindow/notificationWindow.vala',
   'notification/notification.vala',
-  'ccDaemon/ccDaemon.vala',
   'controlCenter/controlCenter.vala',
+  widget_sources,
   'controlCenter/topAction/topAction.vala',
+  'blankWindow/blankWindow.vala',
   'functions.vala',
   constants,
 ]

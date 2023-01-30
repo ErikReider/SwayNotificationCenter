@@ -1,37 +1,30 @@
 namespace SwayNotificationCenter {
-    public class NotiWindow {
-        private NotificationWindow notis = new NotificationWindow ();
-
-        private unowned NotificationWindow notificationWindow {
+    [GtkTemplate (ui = "/org/erikreider/sway-notification-center/notificationWindow/notificationWindow.ui")]
+    public class NotificationWindow : Gtk.ApplicationWindow {
+        private static NotificationWindow ? window = null;
+        /**
+         * A NotificationWindow singleton due to a nasty notification
+         * enter_notify_event bug where GTK still thinks that the cursor is at
+         * that location after closing the last notification. The next notification
+         * would sometimes automatically be hovered...
+         * The only way to "solve" this is to close the window and reopen a new one.
+         */
+        public static NotificationWindow instance {
             get {
-                if (!notis.get_realized () || notis.closed) {
-                    notis = new NotificationWindow ();
+                if (window == null) {
+                    window = new NotificationWindow ();
+                } else if (!window.get_mapped () ||
+                           !window.get_realized () ||
+                           !(window.get_child () is Gtk.Widget)) {
+                    window.destroy ();
+                    window = new NotificationWindow ();
                 }
-                return notis;
+                return window;
             }
         }
 
-        public void change_visibility (bool value) {
-            notificationWindow.change_visibility (value);
-        }
-
-        public void close_all_notifications () {
-            notificationWindow.close_all_notifications ();
-        }
-
-        public void add_notification (NotifyParams param,
-                                      NotiDaemon notiDaemon) {
-            notificationWindow.add_notification (param, notiDaemon);
-        }
-
-        public void close_notification (uint32 id) {
-            notificationWindow.close_notification (id);
-        }
-    }
-
-    [GtkTemplate (ui = "/org/erikreider/sway-notification-center/notiWindow/notiWindow.ui")]
-    private class NotificationWindow : Gtk.ApplicationWindow {
-
+        [GtkChild]
+        unowned Gtk.ScrolledWindow scrolled_window;
         [GtkChild]
         unowned Gtk.Viewport viewport;
         [GtkChild]
@@ -41,9 +34,9 @@ namespace SwayNotificationCenter {
 
         private double last_upper = 0;
 
-        public bool closed = false;
+        private const int MAX_HEIGHT = 600;
 
-        public NotificationWindow () {
+        private NotificationWindow () {
             if (!GtkLayerShell.is_supported ()) {
                 stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
                 stderr.printf ("Swaync only works on Wayland!\n");
@@ -52,8 +45,15 @@ namespace SwayNotificationCenter {
                 Process.exit (1);
             }
             GtkLayerShell.init_for_window (this);
+            GtkLayerShell.set_namespace (this, "swaync-control-center");
             GtkLayerShell.set_layer (this, GtkLayerShell.Layer.OVERLAY);
             this.set_anchor ();
+
+            // -1 should set it to the content size unless it exceeds max_height
+            scrolled_window.set_min_content_height (-1);
+            scrolled_window.set_max_content_height (MAX_HEIGHT);
+            scrolled_window.set_propagate_natural_height (true);
+
             viewport.size_allocate.connect (size_alloc);
 
             this.default_width = ConfigModel.instance.notification_window_width;
@@ -124,28 +124,31 @@ namespace SwayNotificationCenter {
         public void close_all_notifications () {
             if (!this.get_realized ()) return;
             foreach (var w in box.get_children ()) {
-                remove_notification ((Notification) w);
+                remove_notification ((Notification) w, false);
             }
         }
 
-        private void remove_notification (Notification noti) {
+        private void remove_notification (Notification ? noti, bool replaces) {
             // Remove notification and its destruction timeout
             if (noti != null) {
                 noti.remove_noti_timeout ();
                 noti.destroy ();
             }
 
-            if (!this.get_realized ()) return;
-            if (box.get_children ().length () == 0) {
-                this.closed = true;
-                this.close ();
+            if (!replaces
+                && (!get_realized ()
+                    || !get_mapped ()
+                    || !(get_child () is Gtk.Widget)
+                    || box.get_children ().length () == 0)) {
+                close ();
+                return;
             }
         }
 
         public void add_notification (NotifyParams param,
-                                      NotiDaemon notiDaemon) {
+                                      NotiDaemon noti_daemon) {
             var noti = new Notification.timed (param,
-                                               notiDaemon,
+                                               noti_daemon,
                                                ConfigModel.instance.timeout,
                                                ConfigModel.instance.timeout_low,
                                                ConfigModel.instance.timeout_critical);
@@ -156,18 +159,40 @@ namespace SwayNotificationCenter {
                 box.pack_end (noti);
             }
             this.grab_focus ();
-            this.show ();
+            if (!this.get_mapped () || !this.get_realized ()) {
+                this.set_anchor ();
+                this.show ();
+            }
+
+            // IMPORTANT: queue a resize event to force the layout to be recomputed
+            noti.queue_resize ();
             scroll_to_start (list_reverse);
         }
 
-        public void close_notification (uint32 id) {
+        public void close_notification (uint32 id, bool replaces) {
             foreach (var w in box.get_children ()) {
                 var noti = (Notification) w;
                 if (noti != null && noti.param.applied_id == id) {
-                    remove_notification (noti);
+                    remove_notification (noti, replaces);
                     break;
                 }
             }
+        }
+
+        public uint32 ? get_latest_notification () {
+            List<weak Gtk.Widget> children = box.get_children ();
+            if (children.is_empty ()) return null;
+
+            Gtk.Widget ? child = null;
+            if (list_reverse) {
+                child = children.last ().data;
+            } else {
+                child = children.first ().data;
+            }
+
+            if (child == null || !(child is Notification)) return null;
+            Notification noti = (Notification) child;
+            return noti.param.applied_id;
         }
     }
 }

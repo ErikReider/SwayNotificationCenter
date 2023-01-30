@@ -1,9 +1,15 @@
 project('sway-notificaton-center', ['c', 'vala'],
-  version: '0.5',
+  version: '0.7.3',
   meson_version: '>= 0.50.0',
   default_options: [ 'warning_level=2' ],
 )
 
+add_project_arguments(['--enable-gobject-tracing'], language: 'vala')
+add_project_arguments(['--enable-checking'], language: 'vala')
+
+i18n = import('i18n')
+
+subdir('data')
 subdir('src')
 
 datadir = get_option('datadir')
@@ -120,3 +126,6 @@ if get_option('man-pages')
     endforeach
   endif
 endif
+
+# Run the postinstall script when installing
+meson.add_install_script('build-aux/meson/postinstall.py')

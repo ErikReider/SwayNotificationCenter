@@ -41,7 +41,7 @@ namespace SwayNotificationCenter {
         }
     }
 
-    public struct Image_Data {
+    public struct ImageData {
         int width;
         int height;
         int rowstride;
@@ -53,22 +53,22 @@ namespace SwayNotificationCenter {
         bool is_initialized;
     }
 
-    public struct Action {
-        string identifier { get; set; }
-        string name { get; set; }
+    public class Action : Object {
+        public string identifier { get; set; }
+        public string name { get; set; }
 
         public string to_string () {
             if (identifier == null || name == null) return "None";
-            return @"Name: $name, Id: $identifier";
+            return "Name: %s, Id: %s".printf (name, identifier);
         }
     }
 
-    public struct NotifyParams {
+    public class NotifyParams : Object {
         public uint32 applied_id { get; set; }
         public string app_name { get; set; }
         public uint32 replaces_id { get; set; }
         public string app_icon { get; set; }
-        public Action default_action { get; set; }
+        public Action ? default_action { get; set; }
         public string summary { get; set; }
         public string body { get; set; }
         public HashTable<string, Variant> hints { get; set; }
@@ -77,12 +77,13 @@ namespace SwayNotificationCenter {
 
         // Hints
         public bool action_icons { get; set; }
-        public Image_Data image_data { get; set; }
-        public Image_Data icon_data { get; set; }
+        public ImageData image_data { get; set; }
+        public ImageData icon_data { get; set; }
         public string image_path { get; set; }
         public string desktop_entry { get; set; }
         public string category { get; set; }
         public bool resident { get; set; }
+        public bool transient { get; set; }
         public UrgencyLevels urgency { get; set; }
         /** Replaces the old notification with the same value of:
          * - x-canonical-private-synchronous
@@ -90,21 +91,22 @@ namespace SwayNotificationCenter {
          */
         public string ? synchronous { get; set; }
         /** Used for notification progress bar (0->100) */
-        public int ? value {
+        public int value {
             get {
-                return _value;
+                return priv_value;
             }
             set {
-                _value = value == null ? value : value.clamp (0, 100);
+                priv_value = value.clamp (0, 100);
             }
         }
-        private int ? _value { private get; private set; }
+        private int priv_value { private get; private set; }
+        public bool has_synch { public get; private set; }
 
         // Custom hints
         /** Disables scripting for notification */
         public bool swaync_no_script { get; set; }
 
-        public Action[] actions { get; set; }
+        public Array<Action> actions { get; set; }
 
         /** If the notification replaces another */
         public bool replaces { get; set; }
@@ -126,26 +128,26 @@ namespace SwayNotificationCenter {
             this.body = body;
             this.hints = hints;
             this.expire_timeout = expire_timeout;
-            this.time = (int64) (GLib.get_real_time () * 0.000001);
+            this.time = (int64) (get_real_time () * 0.000001);
 
             this.replaces = false;
-            this.value = null;
+            this.has_synch = false;
 
             s_hints ();
 
-            Action[] ac_array = {};
+            Array<Action> ac_array = new Array<Action> ();
             if (actions.length > 1 && actions.length % 2 == 0) {
                 for (int i = 0; i < actions.length; i++) {
-                    var action = Action ();
-                    action._identifier = actions[i];
-                    action._name = actions[i + 1];
-                    if (action._name != null && action._identifier != null
-                        && action._name != "" && action._identifier != "") {
+                    var action = new Action ();
+                    action.identifier = actions[i];
+                    action.name = actions[i + 1];
+                    if (action.name != null && action.identifier != null
+                        && action.name != "" && action.identifier != "") {
 
-                        if (action._identifier.down () == "default") {
+                        if (action.identifier.down () == "default") {
                             default_action = action;
                         } else {
-                            ac_array += action;
+                            ac_array.append_val (action);
                         }
                     }
                     i++;
@@ -159,24 +161,25 @@ namespace SwayNotificationCenter {
                 Variant hint_value = hints[hint];
                 switch (hint) {
                     case "SWAYNC_NO_SCRIPT":
-                        if (hint_value.is_of_type (GLib.VariantType.BOOLEAN)) {
+                        if (hint_value.is_of_type (VariantType.BOOLEAN)) {
                             swaync_no_script = hint_value.get_boolean ();
                         }
                         break;
                     case "value":
-                        if (hint_value.is_of_type (GLib.VariantType.INT32)) {
+                        if (hint_value.is_of_type (VariantType.INT32)) {
+                            this.has_synch = true;
                             value = hint_value.get_int32 ();
                         }
                         break;
                     case "synchronous":
                     case "private-synchronous":
                     case "x-canonical-private-synchronous":
-                        if (hint_value.is_of_type (GLib.VariantType.STRING)) {
+                        if (hint_value.is_of_type (VariantType.STRING)) {
                             synchronous = hint_value.get_string ();
                         }
                         break;
                     case "action-icons":
-                        if (hint_value.is_of_type (GLib.VariantType.BOOLEAN)) {
+                        if (hint_value.is_of_type (VariantType.BOOLEAN)) {
                             action_icons = hint_value.get_boolean ();
                         }
                         break;
@@ -184,7 +187,7 @@ namespace SwayNotificationCenter {
                     case "image_data":
                     case "icon_data":
                         if (image_data.is_initialized) break;
-                        var img_d = Image_Data ();
+                        var img_d = ImageData ();
                         // Read each value
                         // https://specifications.freedesktop.org/notification-spec/latest/ar01s05.html
                         img_d.width = hint_value.get_child_value (0).get_int32 ();
@@ -205,27 +208,34 @@ namespace SwayNotificationCenter {
                         break;
                     case "image-path":
                     case "image_path":
-                        if (hint_value.is_of_type (GLib.VariantType.STRING)) {
+                        if (hint_value.is_of_type (VariantType.STRING)) {
                             image_path = hint_value.get_string ();
                         }
                         break;
                     case "desktop-entry":
-                        if (hint_value.is_of_type (GLib.VariantType.STRING)) {
+                        if (hint_value.is_of_type (VariantType.STRING)) {
                             desktop_entry = hint_value.get_string ();
                         }
                         break;
                     case "category":
-                        if (hint_value.is_of_type (GLib.VariantType.STRING)) {
+                        if (hint_value.is_of_type (VariantType.STRING)) {
                             category = hint_value.get_string ();
                         }
                         break;
                     case "resident":
-                        if (hint_value.is_of_type (GLib.VariantType.BOOLEAN)) {
+                        if (hint_value.is_of_type (VariantType.BOOLEAN)) {
                             resident = hint_value.get_boolean ();
                         }
                         break;
+                    case "transient":
+                        if (hint_value.is_of_type (VariantType.BOOLEAN)) {
+                            transient = hint_value.get_boolean ();
+                        } else if (hint_value.is_of_type (VariantType.INT32)) {
+                            transient = hint_value.get_int32 () == 1;
+                        }
+                        break;
                     case "urgency":
-                        if (hint_value.is_of_type (GLib.VariantType.BYTE)) {
+                        if (hint_value.is_of_type (VariantType.BYTE)) {
                             urgency = UrgencyLevels.from_value (hint_value.get_byte ());
                         }
                         break;
@@ -234,13 +244,14 @@ namespace SwayNotificationCenter {
         }
 
         public string to_string () {
-            var params = new HashTable<string, string ? >(str_hash, str_equal);
+            var params = new HashTable<string, string ? > (str_hash, str_equal);
 
             params.set ("applied_id", applied_id.to_string ());
             params.set ("app_name", app_name);
             params.set ("replaces_id", replaces_id.to_string ());
             params.set ("app_icon", app_icon);
-            params.set ("default_action", default_action.to_string ());
+            params.set ("default_action", default_action == null
+                        ? null : default_action.to_string ());
             params.set ("summary", summary);
             params.set ("body", "\t" + body);
             string[] _hints = {};
@@ -250,7 +261,7 @@ namespace SwayNotificationCenter {
                 if (!key.contains ("image") && !key.contains ("icon")) {
                     data = v.print (true);
                 }
-                _hints += @"\n\t$key: " + data;
+                _hints += "\n\t%s: %s".printf (key, data);
             }
             params.set ("hints", string.joinv ("", _hints));
             params.set ("expire_timeout", expire_timeout.to_string ());
@@ -265,7 +276,7 @@ namespace SwayNotificationCenter {
             params.set ("resident", resident.to_string ());
             params.set ("urgency", urgency.to_string ());
             string[] _actions = {};
-            foreach (var _action in actions) {
+            foreach (var _action in actions.data) {
                 _actions += "\n\t" + _action.to_string ();
             }
             params.set ("actions", string.joinv ("", _actions));
@@ -273,7 +284,7 @@ namespace SwayNotificationCenter {
             string[] result = {};
             foreach (var k in params.get_keys ()) {
                 string ? v = params[k];
-                result += @"$k:\t\t" + v;
+                result += "%s:\t\t %s".printf (k, v);
             }
             return "\n" + string.joinv ("\n", result);
         }

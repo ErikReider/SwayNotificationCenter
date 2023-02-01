@@ -37,7 +37,6 @@ namespace SwayNotificationCenter.Widgets {
                 string ? l = get_prop<string> (config, "label");
                 if (l != null) this.label = l;
                 bool ? show = get_prop<bool> (config, "draw-value");
-                print ("DRAW: %b\n", show);
                 if (show != null && show) {
                     slider.draw_value = true;
                     tooltip = false;
@@ -54,6 +53,14 @@ namespace SwayNotificationCenter.Widgets {
             show_all ();
 
             this.client.start ();
+        }
+
+        public override void on_cc_visibility_change(bool val){
+            if (val) {
+                this.client.start ();
+            } else {
+                this.client.close ();
+            }
         }
 
         private void default_device_changed (PulseDevice device) {

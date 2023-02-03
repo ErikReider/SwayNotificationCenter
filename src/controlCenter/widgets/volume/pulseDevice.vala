@@ -6,7 +6,6 @@ namespace SwayNotificationCenter.Widgets {
         public string name;
         public string description;
         public uint32 n_sinks;
-        public uint32 n_sources;
         public uint32 priority;
         int available;
 
@@ -14,7 +13,6 @@ namespace SwayNotificationCenter.Widgets {
             this.name = profile->name;
             this.description = profile->description;
             this.n_sinks = profile->n_sinks;
-            this.n_sources = profile->n_sources;
             this.priority = profile->priority;
             this.available = profile->available;
         }
@@ -23,7 +21,6 @@ namespace SwayNotificationCenter.Widgets {
             return profile.name == name
                    && profile.description == description
                    && profile.n_sinks == n_sinks
-                   && profile.n_sources == n_sources
                    && profile.priority == priority
                    && profile.available == available;
         }
@@ -37,13 +34,13 @@ namespace SwayNotificationCenter.Widgets {
 
         /** The card index: ex. `Card #49` */
         public uint32 card_index { get; set; }
-        /** Sink/Source index: ex. `Sink #55` */
+        /** Sink index: ex. `Sink #55` */
         public uint32 device_index { get; set; }
 
         /** Input or Output */
         public Direction direction { get; set; }
 
-        /** Is default Sink/Source */
+        /** Is default Sink */
         public bool is_default { get; set; }
         /** If the device is virtual */
         public bool is_virtual { get; set; default = false; }
@@ -61,14 +58,12 @@ namespace SwayNotificationCenter.Widgets {
         public string card_active_profile { get; set; }
         /** The card sink port name: `Active Port` */
         public string card_sink_port_name { get; set; }
-        /** The card source port name: `Active Port` */
-        public string card_source_port_name { get; set; }
 
-        /** The Sink/Source name: `Name` */
+        /** The Sink name: `Name` */
         public string ? device_name { get; set; }
-        /** The Sink/Source description: `Description` */
+        /** The Sink description: `Description` */
         public string device_description { get; set; }
-        /** If the Sink/Source is muted: `Mute` */
+        /** If the Sink is muted: `Mute` */
         public bool is_muted { get; set; }
 
         public double volume { get; set; }
@@ -130,7 +125,7 @@ namespace SwayNotificationCenter.Widgets {
         /** All port profiles */
         public string[] port_profiles { get; set; }
         public Array<PulseCardProfile> profiles { get; set; }
-        public PulseCardProfile? active_profile { get; set; }
+        public PulseCardProfile ? active_profile { get; set; }
 
         construct {
             volume_operations = new LinkedList<Operation> ();

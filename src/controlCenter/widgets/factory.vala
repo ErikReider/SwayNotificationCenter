@@ -25,8 +25,8 @@ namespace SwayNotificationCenter.Widgets {
                 break;
             case "buttons-grid":
                 widget = new ButtonsGrid (suffix, swaync_daemon, noti_daemon);
-            case "pulse-volume":
-                widget = new PulseVolume (suffix, swaync_daemon, noti_daemon);
+            case "volume":
+                widget = new Volume (suffix, swaync_daemon, noti_daemon);
                 break;
             default:
                 warning ("Could not find widget: \"%s\"!", key);

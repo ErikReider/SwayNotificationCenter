@@ -44,6 +44,9 @@ widget_sources = [
   'controlCenter/widgets/volume/volume.vala',
   'controlCenter/widgets/volume/pulseDaemon.vala',
   'controlCenter/widgets/volume/pulseDevice.vala',
+  # Widget: Brightness Slider
+  'controlCenter/widgets/brightness/brightness.vala',
+  'controlCenter/widgets/brightness/brightnessUtil.vala',
 ]
 
 app_sources = [

@@ -123,6 +123,7 @@ These widgets can be customized, added, removed and even reordered
     ...
   }
 }
+
 ```
 </details>
 

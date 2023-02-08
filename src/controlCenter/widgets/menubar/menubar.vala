@@ -2,13 +2,22 @@ using GLib;
 
 namespace SwayNotificationCenter.Widgets {
 
+    public enum MenuType {
+        BUTTONS,
+        MENU
+    }
+
+    public enum Position {
+        LEFT,
+        RIGHT
+    }
     public struct ConfigObject {
         string ? name;
-        string ? type;
+        MenuType ? type;
         string ? label;
-        string ? position;
+        Position ? position;
         Action[] actions;
-        bool hidden;
+        Gtk.Box ? menu;
     }
 
     public struct Action {
@@ -25,9 +34,8 @@ namespace SwayNotificationCenter.Widgets {
 
         Gtk.Box menus_container;
         Gtk.Box topbar_container;
-        List<Gtk.Box> menus;
 
-        ConfigObject[] menu_objects;
+        List<ConfigObject ?> menu_objects;
 
         public Menubar (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             base (suffix, swaync_daemon, noti_daemon);
@@ -40,123 +48,127 @@ namespace SwayNotificationCenter.Widgets {
             menus_container = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
 
             topbar_container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
-            topbar_container.get_style_context ().add_class ("topbar");
+            topbar_container.get_style_context ().add_class ("menu-button-bar");
 
             menus_container.add (topbar_container);
 
-            foreach (var obj in menu_objects) {
-                add_menu (obj);
+            for (int i = 0; i < menu_objects.length (); i++) {
+                unowned ConfigObject ? obj = menu_objects.nth_data (i);
+                add_menu (ref obj);
             }
 
             pack_start (menus_container, true, true, 0);
             show_all ();
 
-            menus.foreach (m => m.hide ());
+            foreach (var obj in menu_objects) {
+                obj.menu ?.hide ();
+            }
         }
 
-        void add_menu (ConfigObject obj) {
-            if (obj.type == "buttons") {
-                Gtk.Box container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
-                container.get_style_context ().add_class (obj.name);
+        void add_menu (ref unowned ConfigObject ? obj) {
+            switch (obj.type) {
+                case MenuType.BUTTONS:
+                    Gtk.Box container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
+                    container.get_style_context ().add_class (obj.name);
 
-                foreach (Action a in obj.actions) {
-                    Gtk.Button b = new Gtk.Button.with_label (a.label);
+                    foreach (Action a in obj.actions) {
+                        Gtk.Button b = new Gtk.Button.with_label (a.label);
 
-                    b.clicked.connect (() => {
-                        execute_command (a.command);
-                    });
+                        b.clicked.connect (() => execute_command (a.command));
 
-                    container.add (b);
-                }
-                if (obj.position == "left") {
-                    topbar_container.pack_start (container, false, false, 0);
-                } else if (obj.position == "right") {
-                    topbar_container.pack_end (container, false, false, 0);
-                } else {
-                    debug ("Invalid position for menu item in config");
-                }
-            } else if (obj.type == "menu") {
-
-                Gtk.Button show_button = new Gtk.Button.with_label (obj.label);
-
-                Gtk.Box menu = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
-                menu.get_style_context ().add_class (obj.name);
-                menus.append (menu);
-                obj.hidden = true;
-
-                show_button.clicked.connect (() => {
-                    if (obj.hidden) {
-                        menus.foreach (m => m.hide ());
-                        menu.show ();
-                        obj.hidden = !obj.hidden;
-                    } else {
-                        menu.hide ();
-                        obj.hidden = !obj.hidden;
+                        container.add (b);
                     }
+                    switch (obj.position) {
+                        case Position.LEFT:
+                            topbar_container.pack_start (container, false, false, 0);
+                            break;
+                        case Position.RIGHT:
+                            topbar_container.pack_end (container, false, false, 0);
+                            break;
+                    }
+                    break;
+                case MenuType.MENU:
+                    Gtk.Button show_button = new Gtk.Button.with_label (obj.label);
+
+                    Gtk.Box menu = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
+                    menu.get_style_context ().add_class (obj.name);
+                    obj.menu = menu;
+
+                    show_button.clicked.connect (() => {
+                    bool visible = !menu.visible;
+                    foreach (var o in menu_objects) {
+                        o.menu ?.set_visible (false);
+                    }
+                    menu.set_visible (visible);
                 });
 
-                foreach (var a in obj.actions) {
-                    Gtk.Button b = new Gtk.Button.with_label (a.label);
-                    b.clicked.connect (() => {
-                        execute_command (a.command);
-                    });
-                    menu.pack_start (b, true, true, 0);
-                }
+                    foreach (var a in obj.actions) {
+                        Gtk.Button b = new Gtk.Button.with_label (a.label);
+                        b.clicked.connect (() => execute_command (a.command));
+                        menu.pack_start (b, true, true, 0);
+                    }
 
-                if (obj.position == "right") {
-                    topbar_container.pack_end (show_button, false, false, 0);
-                } else if (obj.position == "left") {
-                    topbar_container.pack_start (show_button, false, false, 0);
-                } else {
-                    debug ("Invalid position for menu item in config");
-                }
+                    switch (obj.position) {
+                        case Position.RIGHT:
+                            topbar_container.pack_end (show_button, false, false, 0);
+                            break;
+                        case Position.LEFT:
+                            topbar_container.pack_start (show_button, false, false, 0);
+                            break;
+                    }
 
-                menus_container.add (menu);
-            } else {
-                debug ("Invalid type for menu-object");
+                    menus_container.add (menu);
+                    break;
             }
         }
 
         protected void parse_config_objects (Json.Object config) {
             var elements = config.get_members ();
 
-            menu_objects = new ConfigObject[elements.length ()];
+            menu_objects = new List<ConfigObject ?> ();
             for (int i = 0; i < elements.length (); i++) {
                 string e = elements.nth_data (i);
                 Json.Object ? obj = config.get_object_member (e);
-                if (obj != null) {
-                    string[] key = e.split ("#");
 
-                    string type = key[0];
-                    string name = key[1];
+                if (obj == null) continue;
 
-                    string ? pos = get_prop<string> (obj, "position");
-                    if (pos == null) {
-                        pos = "right";
-                        debug ("No type for menu-object given using default");
-                    }
+                string[] key = e.split ("#");
+                string t = key[0];
+                MenuType type = MenuType.BUTTONS;
+                if (t == "buttons") type = MenuType.BUTTONS;
+                else if (t == "menu") type = MenuType.MENU;
+                else info ("Invalid type for menu-object - valid options: 'menu' || 'buttons' using default");
 
-                    Json.Array ? actions = get_prop_array (obj, "actions");
-                    if (actions == null) {
-                        debug ("Error parsing actions for menu-object");
-                    }
+                string name = key[1];
 
-                    string ? label = get_prop<string> (obj, "label");
-                    if (label == null) {
-                        label = "Menu";
-                        debug ("No label for menu-object given using default");
-                    }
+                string ? p = get_prop<string> (obj, "position");
+                Position pos;
+                if (p != "left" && p != "right") {
+                    pos = Position.RIGHT;
+                    info ("No position for menu-object given using default");
+                } else if (p == "right") pos = Position.RIGHT;
+                else pos = Position.LEFT;
 
-                    Action[] actions_list = parse_actions (actions);
-                    menu_objects[i] = ConfigObject () {
-                        name = name,
-                        type = type,
-                        label = label,
-                        position = pos,
-                        actions = actions_list,
-                        hidden = true
-                    };
+                Json.Array ? actions = get_prop_array (obj, "actions");
+                if (actions == null) {
+                    info ("Error parsing actions for menu-object");
                 }
+
+                string ? label = get_prop<string> (obj, "label");
+                if (label == null) {
+                    label = "Menu";
+                    info ("No label for menu-object given using default");
+                }
+
+                Action[] actions_list = parse_actions (actions);
+                menu_objects.append (ConfigObject () {
+                    name = name,
+                    type = type,
+                    label = label,
+                    position = pos,
+                    actions = actions_list,
+                    menu = null,
+                });
             }
         }
     }

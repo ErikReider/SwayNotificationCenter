@@ -266,6 +266,12 @@
         },
         "^mpris(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
           "$ref": "#/widgets/mpris"
+        },
+        "^buttons(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
+          "$ref": "#/widgets/buttons"
+        },
+        "^menubar(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
+          "$ref": "#/widgets/menubar"
         }
       }
     }
@@ -337,6 +343,73 @@
           "type": "integer",
           "description": "The border radius of the album art",
           "default": 12
+        }
+      }
+    },
+    "buttons": {
+      "type": "object",
+      "description": "A widget to add a grid of buttons that execute shell commands",
+      "additionalProperties": false,
+      "properties": {
+        "actions": {
+          "type": "array",
+          "description": "A list of actions containing a label and a command",
+          "properties": {
+            "label": {
+              "type": "string",
+              "description": "Text to be displayed in button",
+              "default": "label"
+            },
+            "command": {
+              "type": "string",
+              "description": "Command to be executed on click",
+              "default": ""
+            }
+          }
+        }
+      }
+    },
+    "menubar": {
+      "type": "object",
+      "description": "A bar that contains action-buttons and buttons to open a dropdown with action-buttons",
+      "additionalProperties": false,
+      "properties": {
+        "^menu(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
+          "type": "object",
+          "description": "A button that opens a dropdown with action-buttons",
+          "additionalProperties": false,
+          "properties": {
+            "label": {
+              "type": "string",
+              "description": "Text to be displayed in button",
+              "default": "Menu"
+            },
+            "position": {
+              "type": "string",
+              "description": "Horizontal position of the button in the bar",
+              "default": "right",
+              "enum": ["right", "left"]
+            },
+            "actions": {
+              "$ref" : "#/widgets/buttons/properties/actions"
+            }
+          }
+        },
+        "^buttons(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
+          "type": "object",
+          "description": "A list of action-buttons to be displayed in the topbar",
+          "additionalProperties": false,
+          "properties": {
+            "position": {
+              "type": "string",
+              "description": "Horizontal position of the button in the bar",
+              "default": "right",
+              "enum": ["right", "left"]
+            }
+          },
+          "actions": {
+            "$ref" : "#/widgets/buttons/properties/actions"
+          }
         }
       }
     }

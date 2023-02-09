@@ -40,6 +40,7 @@ widget_sources = [
   'controlCenter/widgets/menubar/menubar.vala',
   # Widget: Buttons Grid
   'controlCenter/widgets/buttonsGrid/buttonsGrid.vala',
+  # Widget: Volume
   'controlCenter/widgets/volume/volume.vala',
   'controlCenter/widgets/volume/pulseDaemon.vala',
   'controlCenter/widgets/volume/pulseDevice.vala',

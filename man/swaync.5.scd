@@ -366,6 +366,16 @@ config file to be able to detect config errors
 								description: "Command to be executed on click" ++
 					description: A list of actions containing a label and a command ++
 			description: A grid of buttons that execute shell commands ++
+		*volume*++
+			type: object ++
+			css class: widget-volume ++
+			properties: ++
+				label: ++
+					type: string ++
+					optional: true ++
+					default: "Volume" ++
+					description: Text displayed in front of the volume slider ++
+			description: Slider to control pulse volume ++				
 			
 	example:
 ```

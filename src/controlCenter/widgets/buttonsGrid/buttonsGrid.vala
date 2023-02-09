@@ -2,16 +2,16 @@ using GLib;
 
 namespace SwayNotificationCenter.Widgets {
 
-    public class Buttons : BaseWidget {
+    public class ButtonsGrid : BaseWidget {
         public override string widget_name {
             get {
-                return "buttons";
+                return "buttons-grid";
             }
         }
 
         Action[] actions;
 
-        public Buttons (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
+        public ButtonsGrid (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             base (suffix, swaync_daemon, noti_daemon);
 
             Json.Object ? config = get_config (this);
@@ -21,6 +21,7 @@ namespace SwayNotificationCenter.Widgets {
             }
 
             Gtk.FlowBox container = new Gtk.FlowBox ();
+            container.set_selection_mode (Gtk.SelectionMode.NONE);
             pack_start (container, true, true, 0);
 
             // add action to container

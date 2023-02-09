@@ -376,7 +376,7 @@ config file to be able to detect config errors
 					default: "Volume" ++
 					description: Text displayed in front of the volume slider ++
 			description: Slider to control pulse volume ++				
-			
+
 	example:
 ```
 {

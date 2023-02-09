@@ -11,7 +11,7 @@ arch=(
     'armv7h'  # ARM v7 hardfloat
 )
 license=(GPL3)
-depends=("gtk3" "gtk-layer-shell" "dbus" "glib2" "gobject-introspection" "libgee" "json-glib" "libhandy")
+depends=("gtk3" "gtk-layer-shell" "dbus" "glib2" "gobject-introspection" "libgee" "json-glib" "libhandy" "libpulse")
 conflicts=("swaync" "swaync-client")
 provides=("swaync" "swaync-client")
 makedepends=(vala meson git scdoc)

@@ -36,6 +36,10 @@ widget_sources = [
   'controlCenter/widgets/mpris/mpris.vala',
   'controlCenter/widgets/mpris/interfaces.vala',
   'controlCenter/widgets/mpris/mpris_player.vala',
+  # Widget: Menubar
+  'controlCenter/widgets/menubar/menubar.vala',
+  # Widget: Buttons Grid
+  'controlCenter/widgets/buttonsGrid/buttonsGrid.vala',
 ]
 
 app_sources = [
@@ -62,6 +66,7 @@ app_deps = [
   dependency('libhandy-1', version: '>= 1.2.3'),
   meson.get_compiler('c').find_library('gtk-layer-shell'),
   meson.get_compiler('c').find_library('m', required : true),
+  meson.get_compiler('vala').find_library('posix'),
 ]
 
 # Checks if the user wants scripting enabled

@@ -20,6 +20,12 @@ namespace SwayNotificationCenter.Widgets {
             case "mpris":
                 widget = new Mpris.Mpris (suffix, swaync_daemon, noti_daemon);
                 break;
+            case "menubar":
+                widget = new Menubar (suffix, swaync_daemon, noti_daemon);
+                break;
+            case "buttons-grid":
+                widget = new ButtonsGrid (suffix, swaync_daemon, noti_daemon);
+                break;
             default:
                 warning ("Could not find widget: \"%s\"!", key);
                 return null;

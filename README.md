@@ -49,6 +49,8 @@ These widgets can be customized, added, removed and even reordered
 - Notifications (Will always be visible)
 - Label
 - Mpris (Media player controls for Spotify, Firefox, Chrome, etc...)
+- Menubar with dropdown and buttons
+- Button grid
 
 ## Planned Features
 

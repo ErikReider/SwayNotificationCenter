@@ -1,3 +1,5 @@
+using Posix;
+
 namespace SwayNotificationCenter.Widgets {
     public abstract class BaseWidget : Gtk.Box {
         public abstract string widget_name { get; }
@@ -39,7 +41,7 @@ namespace SwayNotificationCenter.Widgets {
 
         public virtual void on_cc_visibility_change (bool value) {}
 
-        protected T? get_prop<T> (Json.Object config, string value_key) {
+        protected T ? get_prop<T> (Json.Object config, string value_key) {
             if (!config.has_member (value_key)) {
                 debug ("%s: Config doesn't have key: %s!\n", key, value_key);
                 return null;
@@ -69,6 +71,44 @@ namespace SwayNotificationCenter.Widgets {
                 default:
                     return null;
             }
+        }
+
+        protected Json.Array ? get_prop_array (Json.Object config, string value_key) {
+            if (!config.has_member (value_key)) {
+                debug ("%s: Config doesn't have key: %s!\n", key, value_key);
+                return null;
+            }
+            var member = config.get_member (value_key);
+            if (member.get_node_type () != Json.NodeType.ARRAY) {
+                debug ("Unable to find Json Array for member %s", value_key);
+            }
+            return config.get_array_member (value_key);
+        }
+
+        protected Action[] parse_actions (Json.Array actions) {
+            Action[] res = new Action[actions.get_length ()];
+            for (int i = 0; i < actions.get_length (); i++) {
+                string label = actions.get_object_element (i).get_string_member_with_default ("label", "label");
+                string command = actions.get_object_element (i).get_string_member_with_default ("command", "");
+                res[i] = Action () {
+                    label = label,
+                    command = command
+                };
+            }
+            return res;
+        }
+
+        protected void execute_command (string cmd) {
+            pid_t pid;
+            int status;
+            if ((pid = fork ()) < 0) {
+                perror ("fork()");
+            }
+            if (pid == 0) { // Child process
+                execl ("/bin/sh", "sh", "-c", cmd);
+                exit (EXIT_FAILURE); // should not return from execl
+            }
+            waitpid (pid, out status, 1);
         }
     }
 }

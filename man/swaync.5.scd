@@ -191,6 +191,10 @@ config file to be able to detect config errors
 			optional: true ++
 		*mpris*++
 			optional: true ++
+		*menubar*++
+			optional: true ++
+		*buttons-grid*++
+			optional: true ++
 	description: ++
 		Which order and which widgets to display. ++
 		If the \"notifications\" widget isn't specified, it ++
@@ -280,6 +284,89 @@ config file to be able to detect config errors
 					default: 12 ++
 					description: The border radius of the album art. ++
 			description: A widget that displays multiple music players. ++
+		*menubar*++
+			type: object ++
+			css classes: ++
+				widget-menubar ++
+				.widget-menubar>box>.menu-button-bar ++
+				name of element given after menu or buttons with # ++
+			patternProperties: ++
+				menu#<name>: ++
+					type: object ++
+					properties: ++
+						label: ++
+							type: string ++
+							optional: true ++
+							default: "Menu" ++
+							description: Label of button to show/hide menu dropdown ++
+						position: ++
+							type: string ++
+							optional: true ++
+							default: "right" ++
+							description: Horizontal position of the button in the bar ++
+							enum: ["right", "left"] ++
+						actions: ++
+							type: array ++
+							Default values: [] ++
+							Valid array values: ++
+								type: object ++
+								properties: ++
+									label: ++
+										type: string ++
+										default: "label" ++
+										description: Text to be displayed in button ++
+									command: ++
+										type: string ++
+										default: "" ++
+										description: "Command to be executed on click" ++
+							description: A list of actions containing a label and a command ++
+					description: A button to reveal a dropdown with action-buttons ++
+				buttons#<name>: ++
+					type: object ++
+					properties: ++
+						position: ++
+							type: string ++
+							optional: true ++
+							default: "right" ++
+							description: Horizontal position of the buttons in the bar ++
+							enum: ["right", "left"] ++
+						actions: ++
+							type: array ++
+							Default values: [] ++
+							Valid array values: ++
+								type: object ++
+								properties: ++
+									label: ++
+										type: string ++
+										default: "label" ++
+										description: Text to be displayed in button ++
+									command: ++
+										type: string ++
+										default: "" ++
+										description: "Command to be executed on click" ++
+							description: A list of actions containing a label and a command ++
+					description: A list of buttons to be displayed in the menu-button-bar ++
+		*buttons-grid*++
+			type: object ++
+			css class: widget-buttons (access buttons with >flowbox>flowboxchild>button) ++
+			properties: ++
+				actions: ++
+					type: array ++
+					Default values: [] ++
+					Valid array values: ++
+						type: object ++
+						properties: ++
+							label: ++
+								type: string ++
+								default: "label" ++
+								description: Text to be displayed in button ++
+							command: ++
+								type: string ++
+								default: "" ++
+								description: "Command to be executed on click" ++
+					description: A list of actions containing a label and a command ++
+			description: A grid of buttons that execute shell commands ++
+			
 	example:
 ```
 {
@@ -299,6 +386,38 @@ config file to be able to detect config errors
 		"mpris": {
 			"image-size": 96,
 			"image-radius": 12
+		},
+		"menubar": {
+			"menu#power": {
+				"label": "Power",
+				"position": "right",
+				"actions": [
+					{
+						"label": "Shut down",
+						"command": "systemctl poweroff"
+					},
+					...
+				]
+			},
+			"buttons#screenshot": {
+				"position": "left",
+				"actions": [
+					{
+						"label": "Screenshot",
+						"command": "grim"
+					},
+					...
+				]
+			}
+		},
+		"buttons": {
+			"actions": [
+				{
+					"label": "wifi",
+					"command": "rofi-wifi-menu"
+				},
+				...
+			]
 		}
 	}
 }

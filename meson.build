@@ -1,6 +1,6 @@
 project('sway-notificaton-center', ['c', 'vala'],
   version: '0.7.3',
-  meson_version: '>= 0.50.0',
+  meson_version: '>= 0.59.0',
   default_options: [ 'warning_level=2' ],
 )
 
@@ -30,7 +30,7 @@ configure_file(
 systemd = dependency('systemd', required: false)
 if get_option('systemd-service')
   if systemd.found()
-    systemd_service_install_dir = systemd.get_pkgconfig_variable('systemduserunitdir')
+    systemd_service_install_dir = systemd.get_variable(pkgconfig :'systemduserunitdir')
   else
     systemd_service_install_dir = join_paths(libdir, 'systemd', 'user')
   endif
@@ -98,7 +98,7 @@ endif
 if get_option('man-pages')
   scdoc = dependency('scdoc', version: '>=1.9.2', native: true, required: true)
   if scdoc.found()
-    scdoc_prog = find_program(scdoc.get_pkgconfig_variable('scdoc'), native: true)
+    scdoc_prog = find_program(scdoc.get_variable(pkgconfig :'scdoc'), native: true)
 
     mandir = get_option('mandir')
     man_files = [

@@ -1,3 +1,4 @@
+// From SwaySettings PulseAudio page: https://github.com/ErikReider/SwaySettings/blob/407c9e99dd3e50a0f09c64d94a9e6ff741488378/src/Pages/Pulse/PulseDevice.vala
 using PulseAudio;
 using Gee;
 

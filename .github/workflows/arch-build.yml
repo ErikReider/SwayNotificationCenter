@@ -18,7 +18,7 @@ jobs:
     container: archlinux:latest
     runs-on: ubuntu-latest
     env:
-      PACKAGES: meson gtk3 gobject-introspection vala json-glib libhandy gtk-layer-shell scdoc
+      PACKAGES: meson gtk3 gobject-introspection vala json-glib libhandy gtk-layer-shell scdoc libpulse libgee
     steps:
       - name: Install packages
         run: |

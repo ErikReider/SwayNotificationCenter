@@ -1,5 +1,3 @@
-using GLib;
-
 namespace SwayNotificationCenter.Widgets {
     public class Volume : BaseWidget {
         public override string widget_name {
@@ -8,10 +6,8 @@ namespace SwayNotificationCenter.Widgets {
             }
         }
 
-        Gtk.Label label_widget;
+        Gtk.Label label_widget = new Gtk.Label (null);
         Gtk.Scale slider = new Gtk.Scale.with_range (Gtk.Orientation.HORIZONTAL, 0, 100, 1);
-
-        string label = "Volume";
 
         private PulseDevice ? default_sink = null;
         private PulseDaemon client = new PulseDaemon ();
@@ -20,10 +16,12 @@ namespace SwayNotificationCenter.Widgets {
             this.client.change_default_device.connect (default_device_changed);
 
             slider.value_changed.connect (() => {
-                this.client.set_device_volume (
-                    default_sink,
-                    (float) slider.get_value ());
-                slider.tooltip_text = ((int) slider.get_value ()).to_string ();
+                if (default_sink != null) {
+                    this.client.set_device_volume (
+                        default_sink,
+                        (float) slider.get_value ());
+                    slider.tooltip_text = ((int) slider.get_value ()).to_string ();
+                }
             });
         }
 
@@ -33,13 +31,11 @@ namespace SwayNotificationCenter.Widgets {
 
             Json.Object ? config = get_config (this);
             if (config != null) {
-                string ? l = get_prop<string> (config, "label");
-                if (l != null) this.label = l;
+                string ? label = get_prop<string> (config, "label");
+                label_widget.set_label (label ?? "Volume");
             }
 
             slider.draw_value = false;
-
-            label_widget = new Gtk.Label (label);
 
             add (label_widget);
             pack_start (slider, true, true, 0);

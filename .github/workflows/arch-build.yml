@@ -14,13 +14,22 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  arch-build:
+    container: archlinux:latest
     runs-on: ubuntu-latest
-    container:
-      image: erikreider/swaync:archlinux
+    env:
+      PACKAGES: meson gtk3 gobject-introspection vala json-glib libhandy gtk-layer-shell scdoc
     steps:
-      - uses: actions/checkout@v2
+      - name: Install packages
+        run: |
+          pacman-key --init
+          pacman -Sy --noconfirm $PACKAGES
+
+      - name: Check out sources
+        uses: actions/checkout@v3
+
       - name: Meson configure
         run: meson build
+
       - name: Build
         run: ninja -C build

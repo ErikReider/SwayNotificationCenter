@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  package:
+  fedora-build:
     container: fedora:rawhide
     runs-on: ubuntu-latest
 

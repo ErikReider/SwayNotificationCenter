@@ -52,6 +52,7 @@ These widgets can be customized, added, removed and even reordered
 - Menubar with dropdown and buttons
 - Button grid
 - Volume slider using PulseAudio
+- Backlight slider
 
 ## Planned Features
 

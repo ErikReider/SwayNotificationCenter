@@ -375,7 +375,22 @@ config file to be able to detect config errors
 					optional: true ++
 					default: "Volume" ++
 					description: Text displayed in front of the volume slider ++
-			description: Slider to control pulse volume ++				
+			description: Slider to control pulse volume ++
+		*backlight*++
+			type: object ++
+			css class: widget-backlight ++
+			properties: ++
+				label: ++
+					type: string ++
+					optional: true ++
+					default: "Brightness" ++
+					description: Text displayed in front of the backlight slider ++
+				device: ++
+					type: string ++
+					optional: true ++
+					default: "intel_backlight" ++
+					description: Name of monitor (find possible devices using `ls /sys/class/backlight`) ++
+			description: Slider to control screen brightness ++	
 
 	example:
 ```

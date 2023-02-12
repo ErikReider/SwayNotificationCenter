@@ -441,7 +441,24 @@
           "description": "Text displayed in front of the volume slider",
           "default": "Volume"
         }
-      }
+      }      
+    },
+    "backlight": {
+      "type": "object",
+      "description": "Slider to control monitor brightness",
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Text displayed in front of the backlight slider",
+          "default": "Brightness"
+        },
+        "device": {
+          "type": "string",
+          "description": "Name of monitor (find possible devices using `ls /sys/class/backlight`)",
+          "default": "intel_backlight"
+        }
+      }      
     }
   }
 }

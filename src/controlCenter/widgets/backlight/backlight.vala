@@ -1,36 +1,38 @@
 using GLib;
 
 namespace SwayNotificationCenter.Widgets {
-    public class Brightness : BaseWidget {
+    public class Backlight : BaseWidget {
         public override string widget_name {
             get {
-                return "brightness";
+                return "backlight";
             }
         }
 
-        BrightnessUtil client;
+        BacklightUtil client;
 
-        string device = "intel_backlight";
-        string label = "Brightness";
-
-        Gtk.Label label_widget;
+        Gtk.Label label_widget = new Gtk.Label (null);
         Gtk.Scale slider = new Gtk.Scale.with_range (Gtk.Orientation.HORIZONTAL, 0, 100, 1);
 
-        public Brightness (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
+        construct {
+            slider.value_changed.connect (() => {
+                this.client.set_brightness ((float) slider.get_value ());
+                slider.tooltip_text = ((int) slider.get_value ()).to_string ();
+            });
+        }
+
+        public Backlight (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             base (suffix, swaync_daemon, noti_daemon);
 
             Json.Object ? config = get_config (this);
             if (config != null) {
-                string ? l = get_prop<string> (config, "label");
-                if (l != null) this.label = l;
-                string ? d = get_prop<string> (config, "device");
-                if (d != null) this.device = d;
+                string ? label = get_prop<string> (config, "label");
+                label_widget.set_label (label ?? "Brightness");
+                string ? device = get_prop<string> (config, "device");
+                client = new BacklightUtil (device ?? "intel_backlight");
             }
 
-            client = new BrightnessUtil ("intel_backlight");
             this.client.brightness_change.connect (brightness_changed);
-
-            label_widget = new Gtk.Label (label);
+            slider.draw_value = false;
 
             add (label_widget);
             pack_start (slider, true, true, 0);

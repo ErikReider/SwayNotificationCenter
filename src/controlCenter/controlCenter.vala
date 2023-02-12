@@ -7,9 +7,14 @@ namespace SwayNotificationCenter {
         [GtkChild]
         unowned Gtk.Viewport viewport;
         [GtkChild]
+        unowned Gtk.Stack stack;
+        [GtkChild]
         unowned Gtk.ListBox list_box;
         [GtkChild]
         unowned Gtk.Box box;
+
+        const string STACK_NOTIFICATIONS_PAGE = "notifications-list";
+        const string STACK_PLACEHOLDER_PAGE = "notifications-placeholder";
 
         private SwayncDaemon swaync_daemon;
         private NotiDaemon noti_daemon;
@@ -141,6 +146,16 @@ namespace SwayNotificationCenter {
                     navigate_list (list_position);
                 }
                 return true;
+            });
+
+            // Switches the stack page depending on the 
+            list_box.add.connect (() => {
+                stack.set_visible_child_name (STACK_NOTIFICATIONS_PAGE);
+            });
+
+            list_box.remove.connect ((container, _widget) => {
+                if (container.get_children ().length () > 0) return;
+                stack.set_visible_child_name (STACK_PLACEHOLDER_PAGE);
             });
 
             add_widgets ();

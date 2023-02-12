@@ -167,6 +167,10 @@
   background: transparent;
 }
 
+.control-center-list-placeholder {
+  opacity: 0.5;
+}
+
 .floating-notifications {
   background: transparent;
 }

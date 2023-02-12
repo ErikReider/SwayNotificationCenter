@@ -272,6 +272,9 @@
         },
         "^menubar(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
           "$ref": "#/widgets/menubar"
+        },
+        "^volume(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
+          "$ref": "#/widgets/volume"
         }
       }
     }
@@ -415,6 +418,18 @@
           }
         }
       }
+    },
+    "volume": {
+      "type": "object",
+      "description": "Slider to control pulse volume",
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Text displayed in front of the volume slider",
+          "default": "Volume"
+        }
+      }      
     }
   }
 }

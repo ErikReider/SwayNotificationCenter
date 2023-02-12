@@ -51,6 +51,7 @@ These widgets can be customized, added, removed and even reordered
 - Mpris (Media player controls for Spotify, Firefox, Chrome, etc...)
 - Menubar with dropdown and buttons
 - Button grid
+- Volume slider using PulseAudio
 
 ## Planned Features
 

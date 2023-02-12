@@ -23,6 +23,7 @@ BuildRequires: libhandy-devel >= 1.4.0
 BuildRequires: systemd-devel
 BuildRequires: systemd
 BuildRequires: scdoc
+BuildRequires: pulseaudio-libs-devel
 %{?systemd_requires}
 
 %description

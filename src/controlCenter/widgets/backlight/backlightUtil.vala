@@ -1,6 +1,11 @@
 namespace SwayNotificationCenter.Widgets {
     class BacklightUtil {
 
+        [DBus (name = "org.freedesktop.login1.Session")]
+        interface Login1 : Object {
+            public abstract void set_brightness (string subsystem, string name, uint32 brightness) throws GLib.Error;
+        }
+
 
         string path_current;
         string path_max;
@@ -10,12 +15,24 @@ namespace SwayNotificationCenter.Widgets {
 
         int max;
 
+        Login1 login1;
+        string device;
+
         public signal void brightness_change (int percent);
 
-        public BacklightUtil (string device) {
+        public BacklightUtil (string d) {
+            this.device = d;
+
             path_current = Path.build_filename ("/sys/class/backlight/" + device + "/brightness");
             path_max = Path.build_filename ("/sys/class/backlight/" + device + "/max_brightness");
             set_max_value ();
+
+            try {
+                // setup DBus for setting brightness
+                login1 = Bus.get_proxy_sync (BusType.SYSTEM, "org.freedesktop.login1", "/org/freedesktop/login1/session/auto");
+            } catch (Error e) {
+                error ("Error %s\n", e.message);
+            }
         }
 
         public void start () {
@@ -32,7 +49,7 @@ namespace SwayNotificationCenter.Widgets {
                     get_brightness ();
                 });
             } catch (Error e) {
-                warning ("Error %s\n", e.message);
+                error ("Error %s\n", e.message);
             }
         }
 
@@ -41,7 +58,12 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         public void set_brightness (float percent) {
-            // int actual = calc_actual (percent);
+            try {
+                int actual = calc_actual (percent);
+                login1.set_brightness ("backlight", device, actual);
+            } catch (Error e) {
+                error ("Error %s\n", e.message);
+            }
         }
 
         // get current brightness and emit signal
@@ -52,7 +74,7 @@ namespace SwayNotificationCenter.Widgets {
                 int val = calc_percent (int.parse (data));
                 this.brightness_change (val);
             } catch (Error e) {
-                warning ("Error %s\n", e.message);
+                error ("Error %s\n", e.message);
             }
         }
 
@@ -64,7 +86,7 @@ namespace SwayNotificationCenter.Widgets {
                 string data = dis_max.read_line (null);
                 max = int.parse (data);
             } catch (Error e) {
-                warning ("Error: %s\n", e.message);
+                error ("Error %s\n", e.message);
             }
         }
 
@@ -72,8 +94,8 @@ namespace SwayNotificationCenter.Widgets {
             return val * 100 / max;
         }
 
-        private int calc_actual (int val) {
-            return val * max / 100;
+        private int calc_actual (float val) {
+            return (int) val * max / 100;
         }
     }
 }

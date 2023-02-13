@@ -254,19 +254,25 @@ namespace SwayNotificationCenter {
 
             // Anchor box to north/south edges as needed
             Gtk.Align align_x = Gtk.Align.END;
-            switch (ConfigModel.instance.positionX) {
+            PositionX pos_x = ConfigModel.instance.control_center_positionX;
+            if (pos_x == PositionX.NONE) pos_x = ConfigModel.instance.positionX;
+            switch (pos_x) {
                 case PositionX.LEFT:
                     align_x = Gtk.Align.START;
                     break;
                 case PositionX.CENTER:
                     align_x = Gtk.Align.CENTER;
                     break;
+                default:
                 case PositionX.RIGHT:
                     align_x = Gtk.Align.END;
                     break;
             }
             Gtk.Align align_y = Gtk.Align.START;
-            switch (ConfigModel.instance.positionY) {
+            PositionY pos_y = ConfigModel.instance.control_center_positionY;
+            if (pos_y == PositionY.NONE) pos_y = ConfigModel.instance.positionY;
+            switch (pos_y) {
+                default:
                 case PositionY.TOP:
                     align_y = Gtk.Align.START;
                     // Set cc widget position

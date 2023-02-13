@@ -32,6 +32,18 @@
       "default": "top",
       "enum": ["top", "bottom"]
     },
+    "control-center-positionX": {
+      "type": "string",
+      "description": "Optional: Horizontal position of the control center. Supersedes positionX if not set to `none`",
+      "default": "none",
+      "enum": ["right", "left", "center", "none"]
+    },
+    "control-center-positionY": {
+      "type": "string",
+      "description": "Optional: Vertical position of the control center. Supersedes positionY if not set to `none`",
+      "default": "none",
+      "enum": ["top", "bottom", "none"]
+    },
     "control-center-margin-top": {
       "type": "integer",
       "description": "The margin (in pixels) at the top of the notification center. 0 to disable",

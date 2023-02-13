@@ -424,6 +424,10 @@ namespace SwayNotificationCenter {
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }
+
+            // Keep focus on currently focused notification
+            list_box.grab_focus ();
+            navigate_list (++list_position);
         }
 
         public bool get_visibility () {

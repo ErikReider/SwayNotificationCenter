@@ -1,30 +1,10 @@
 namespace SwayNotificationCenter {
     public enum PositionX {
-        RIGHT, LEFT, CENTER;
-
-        public string parse () {
-            switch (this) {
-                default:
-                    return "right";
-                case LEFT:
-                    return "left";
-                case CENTER:
-                    return "center";
-            }
-        }
+        RIGHT, LEFT, CENTER, NONE;
     }
 
     public enum PositionY {
-        TOP, BOTTOM;
-
-        public string parse () {
-            switch (this) {
-                default:
-                    return "top";
-                case BOTTOM:
-                    return "bottom";
-            }
-        }
+        TOP, BOTTOM, NONE;
     }
 
     public enum ImageVisibility {
@@ -431,6 +411,15 @@ namespace SwayNotificationCenter {
 
         /** Hides the control center when clicking on notification action */
         public bool hide_on_action { get; set; default = true; }
+
+        /** The controlcenters horizontal alignment. Supersedes `positionX` if not `NONE` */
+        public PositionX control_center_positionX { // vala-lint=naming-convention
+            get; set; default = PositionX.NONE;
+        }
+        /** The controlcenters vertical alignment. Supersedes `positionY` if not `NONE` */
+        public PositionY control_center_positionY { // vala-lint=naming-convention
+            get; set; default = PositionY.NONE;
+        }
 
         /** GtkLayerShell margins around the notification center */
         private int control_center_margin_top_ = 0;

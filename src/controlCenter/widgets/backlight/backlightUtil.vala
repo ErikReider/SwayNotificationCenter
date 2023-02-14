@@ -6,25 +6,31 @@ namespace SwayNotificationCenter.Widgets {
             public abstract void set_brightness (string subsystem, string name, uint32 brightness) throws GLib.Error;
         }
 
-
         string path_current;
         string path_max;
         File fd;
         FileMonitor monitor;
-        ulong monitor_id;
 
         int max;
 
         Login1 login1;
         string device;
+        string subsystem;
 
         public signal void brightness_change (int percent);
 
-        public BacklightUtil (string d) {
+        public BacklightUtil (string s, string d) {
+            this.subsystem = s;
             this.device = d;
 
-            path_current = Path.build_filename ("/sys/class/backlight/" + device + "/brightness");
-            path_max = Path.build_filename ("/sys/class/backlight/" + device + "/max_brightness");
+            path_current = Path.build_filename ("/sys/class/" + subsystem + "/" + device + "/brightness");
+            path_max = Path.build_filename ("/sys/class/" + subsystem + "/" + device + "/max_brightness");
+            fd = File.new_for_path (path_current);
+            try {
+                monitor = fd.monitor (FileMonitorFlags.NONE, null);
+            } catch (Error e) {
+                error ("Error %s\n", e.message);
+            }
             set_max_value ();
 
             try {
@@ -36,34 +42,32 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         public void start () {
-            fd = File.new_for_path (path_current);
-
             // get changes made while controlCenter not shown
             get_brightness ();
 
-            // connect monitor to monitor changes
-            try {
-                monitor = fd.monitor (FileMonitorFlags.NONE, null);
+            connect_monitor ();
+        }
 
-                monitor_id = monitor.changed.connect ((src, dest, event) => {
-                    get_brightness ();
-                });
-            } catch (Error e) {
-                error ("Error %s\n", e.message);
-            }
+        private void connect_monitor () {
+            // connect monitor to monitor changes
+            monitor.changed.connect ((src, dest, event) => {
+                get_brightness ();
+            });
         }
 
         public void close () {
-            monitor.disconnect (monitor_id);
+            monitor.cancel ();
         }
 
         public void set_brightness (float percent) {
+            this.close ();
             try {
                 int actual = calc_actual (percent);
-                login1.set_brightness ("backlight", device, actual);
+                login1.set_brightness (subsystem, device, actual);
             } catch (Error e) {
                 error ("Error %s\n", e.message);
             }
+            connect_monitor ();
         }
 
         // get current brightness and emit signal

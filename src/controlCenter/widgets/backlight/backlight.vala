@@ -14,6 +14,7 @@ namespace SwayNotificationCenter.Widgets {
         Gtk.Scale slider = new Gtk.Scale.with_range (Gtk.Orientation.HORIZONTAL, 0, 100, 1);
 
         construct {
+            slider.set_round_digits (0);
             slider.value_changed.connect (() => {
                 this.client.set_brightness ((float) slider.get_value ());
                 slider.tooltip_text = ((int) slider.get_value ()).to_string ();
@@ -28,7 +29,15 @@ namespace SwayNotificationCenter.Widgets {
                 string ? label = get_prop<string> (config, "label");
                 label_widget.set_label (label ?? "Brightness");
                 string ? device = get_prop<string> (config, "device");
-                client = new BacklightUtil (device ?? "intel_backlight");
+                string ? subsystem = get_prop<string> (config, "subsystem");
+                if (subsystem != "backlight" && subsystem != "leds") {
+                    info ("Invalid subsystem for device %s. Use 'backlight' or 'leds'. Using default: 'backlight'", device);
+                    subsystem = "backlight";
+                }
+                client = new BacklightUtil (subsystem ?? "backlight", device ?? "intel_backlight");
+
+                int ? min = get_prop<int> (config, "min");
+                if (min != null) slider.set_range (min, 100);
             }
 
             this.client.brightness_change.connect (brightness_changed);

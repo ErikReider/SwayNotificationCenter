@@ -389,7 +389,18 @@ config file to be able to detect config errors
 					type: string ++
 					optional: true ++
 					default: "intel_backlight" ++
-					description: Name of monitor (find possible devices using `ls /sys/class/backlight`) ++
+					description: Name of monitor (find possible devices using `ls /sys/class/backlight` or `ls /sys/class/leds` ) ++
+				subsystem: ++
+					type: string ++
+					optional: true ++
+					default: "backlight" ++
+					description: Kernel subsystem for brightness control ++
+					enum: ["backlight", "leds"] ++
+				min: ++
+					type: integer ++
+					optional: true ++
+					default: 0 ++
+					description: Lowest possible value for brightness ++
 			description: Slider to control screen brightness ++	
 
 	example:

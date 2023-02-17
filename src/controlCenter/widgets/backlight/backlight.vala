@@ -13,14 +13,6 @@ namespace SwayNotificationCenter.Widgets {
         Gtk.Label label_widget = new Gtk.Label (null);
         Gtk.Scale slider = new Gtk.Scale.with_range (Gtk.Orientation.HORIZONTAL, 0, 100, 1);
 
-        construct {
-            slider.set_round_digits (0);
-            slider.value_changed.connect (() => {
-                this.client.set_brightness ((float) slider.get_value ());
-                slider.tooltip_text = ((int) slider.get_value ()).to_string ();
-            });
-        }
-
         public Backlight (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             base (suffix, swaync_daemon, noti_daemon);
 
@@ -37,11 +29,19 @@ namespace SwayNotificationCenter.Widgets {
                 client = new BacklightUtil (subsystem ?? "backlight", device ?? "intel_backlight");
 
                 int ? min = get_prop<int> (config, "min");
-                if (min != null) slider.set_range (min, 100);
+                if (min == null) min = 0;
+                if (subsystem == "backlight") slider.set_range (min, 100);
+                else if (subsystem == "leds") slider.set_range (min, this.client.get_max_value ());
             }
 
             this.client.brightness_change.connect (brightness_changed);
-            slider.draw_value = false;
+
+            slider.set_draw_value (false);
+            slider.set_round_digits (0);
+            slider.value_changed.connect (() => {
+                this.client.set_brightness ((float) slider.get_value ());
+                slider.tooltip_text = ((int) slider.get_value ()).to_string ();
+            });
 
             add (label_widget);
             pack_start (slider, true, true, 0);

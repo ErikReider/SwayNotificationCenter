@@ -62,8 +62,12 @@ namespace SwayNotificationCenter.Widgets {
         public void set_brightness (float percent) {
             this.close ();
             try {
-                int actual = calc_actual (percent);
-                login1.set_brightness (subsystem, device, actual);
+                if (subsystem == "backlight") {
+                    int actual = calc_actual (percent);
+                    login1.set_brightness (subsystem, device, actual);
+                } else {
+                    login1.set_brightness (subsystem, device, (uint32) percent);
+                }
             } catch (Error e) {
                 error ("Error %s\n", e.message);
             }
@@ -100,6 +104,10 @@ namespace SwayNotificationCenter.Widgets {
 
         private int calc_actual (float val) {
             return (int) val * max / 100;
+        }
+
+        public int get_max_value () {
+            return this.max;
         }
     }
 }

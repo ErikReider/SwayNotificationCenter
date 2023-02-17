@@ -202,6 +202,7 @@ config file to be able to detect config errors
 	multiple of same widget: ++
 		Append a # with any value to the end of the widget name. ++
 		Example: "title#TheMainTitle" ++
+		To address this widget specifically in the css file use the css class .TheMainTitle ++
 	example:
 ```
 {
@@ -219,6 +220,7 @@ config file to be able to detect config errors
 	multiple of same widget: ++
 		Append a # with any value to the end of the widget name. ++
 		Example: "title#TheMainTitle" ++
+		To address this widget specifically in the css file use the css class .TheMainTitle ++
 	Widgets to customize: ++
 		*title*++
 			type: object ++

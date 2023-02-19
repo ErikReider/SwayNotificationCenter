@@ -105,7 +105,8 @@ namespace SwayNotificationCenter {
 
         construct {
             try {
-                code_regex = new Regex ("((\\D|^)(123 456)(\\D|$))|(\\D|^)\\d{4,7}(\\D|$)");
+                code_regex = new Regex ("(?<= |^)(\\d{3}(-| )\\d{3}|\\d{4,7})(?= |$|\\.|,)",
+                                        RegexCompileFlags.MULTILINE);
                 string joined_tags = string.joinv ("|", TAGS);
                 tag_regex = new Regex ("&lt;(/?(?:%s))&gt;".printf (joined_tags));
                 string unescaped = string.joinv ("|", UNESCAPE_CHARS);
@@ -296,7 +297,7 @@ namespace SwayNotificationCenter {
             if (body.length == 0) return null;
 
             MatchInfo info;
-            var result = code_regex.match_all (body, RegexMatchFlags.NOTEMPTY, out info);
+            var result = code_regex.match (body, RegexMatchFlags.NOTEMPTY, out info);
             string ? match = info.fetch (0);
             if (!result || match == null) return null;
 

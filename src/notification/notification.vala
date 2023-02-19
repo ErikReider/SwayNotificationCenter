@@ -175,6 +175,7 @@ namespace SwayNotificationCenter {
                     this.carousel.reorder (event_box, 0);
                     this.carousel_empty_widget_index = 1;
                     break;
+                default:
                 case PositionX.RIGHT:
                 case PositionX.CENTER:
                     this.carousel.scroll_to (event_box);

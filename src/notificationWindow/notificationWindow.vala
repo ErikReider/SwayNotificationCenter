@@ -88,6 +88,7 @@ namespace SwayNotificationCenter {
                         this, GtkLayerShell.Edge.BOTTOM, true);
                     list_reverse = true;
                     break;
+                default:
                 case PositionY.TOP:
                     list_reverse = false;
                     GtkLayerShell.set_anchor (

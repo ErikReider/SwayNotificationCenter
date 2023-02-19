@@ -275,5 +275,16 @@ namespace SwayNotificationCenter {
                 surface,
                 (double) buffer_width / 2 / scale - width / 2, 0);
         }
+
+        public delegate bool FilterFunc (char character);
+
+        public static string filter_string (string body, FilterFunc func) {
+            string result = "";
+            foreach (char char in (char[]) body.data) {
+                if (!func (char)) continue;
+                result += char.to_string ();
+            }
+            return result;
+        }
     }
 }

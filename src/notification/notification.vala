@@ -23,7 +23,7 @@ namespace SwayNotificationCenter {
         [GtkChild]
         unowned Gtk.Button close_button;
 
-        private Gtk.ButtonBox alt_actions_box;
+        private Gtk.ButtonBox alt_actions_box = new Gtk.ButtonBox (Gtk.Orientation.HORIZONTAL);
 
         [GtkChild]
         unowned Gtk.Label summary;
@@ -65,6 +65,8 @@ namespace SwayNotificationCenter {
 
         private int carousel_empty_widget_index = 0;
 
+        private static Regex code_regex;
+
         private static Regex tag_regex;
         private static Regex tag_unescape_regex;
         private static Regex img_tag_regex;
@@ -103,6 +105,8 @@ namespace SwayNotificationCenter {
 
         construct {
             try {
+                code_regex = new Regex ("(?<= |^)(\\d{3}(-| )\\d{3}|\\d{4,7})(?= |$|\\.|,)",
+                                        RegexCompileFlags.MULTILINE);
                 string joined_tags = string.joinv ("|", TAGS);
                 tag_regex = new Regex ("&lt;(/?(?:%s))&gt;".printf (joined_tags));
                 string unescaped = string.joinv ("|", UNESCAPE_CHARS);
@@ -287,14 +291,35 @@ namespace SwayNotificationCenter {
             }
         }
 
+        /** Returns the first code found, else null */
+        private string ? parse_body_codes () {
+            string body = this.body.get_text ().strip ();
+            if (body.length == 0) return null;
+
+            MatchInfo info;
+            var result = code_regex.match (body, RegexMatchFlags.NOTEMPTY, out info);
+            string ? match = info.fetch (0);
+            if (!result || match == null) return null;
+
+            return Functions.filter_string (
+                match.strip (), (c) => c.isdigit () || c.isspace ()).strip ();
+        }
+
         public void click_default_action () {
             action_clicked (param.default_action, true);
         }
 
         public void click_alt_action (uint index) {
-            if (param.actions.length == 0 || index >= param.actions.length) {
+            List<weak Gtk.Widget>? children = alt_actions_box.get_children ();
+            uint length = children.length ();
+            if (length == 0 || index >= length) return;
+
+            unowned Gtk.Widget button = children.nth_data (index);
+            if (button is Gtk.Button) {
+                ((Gtk.Button) button).clicked ();
                 return;
             }
+            // Backup if the above fails
             action_clicked (param.actions.index (index));
         }
 
@@ -331,12 +356,31 @@ namespace SwayNotificationCenter {
         }
 
         private void set_actions () {
-            if (param.actions.length > 0) {
+            // Check for security codes
+            string ? code = parse_body_codes ();
+            if (param.actions.length > 0 || code != null) {
                 var viewport = new Gtk.Viewport (null, null);
                 var scroll = new Gtk.ScrolledWindow (null, null);
-                alt_actions_box = new Gtk.ButtonBox (Gtk.Orientation.HORIZONTAL);
                 alt_actions_box.set_homogeneous (true);
                 alt_actions_box.set_layout (Gtk.ButtonBoxStyle.EXPAND);
+
+                // Add "Copy code" Action if available and copy it to clipboard when clicked
+                if (code != null && code.length > 0) {
+                    string action_name = "COPY \"%s\"".printf (code);
+                    var action_button = new Gtk.Button.with_label (action_name);
+                    action_button.clicked.connect (() => {
+                        // Copy to clipboard
+                        get_clipboard (Gdk.SELECTION_CLIPBOARD).set_text (code, -1);
+                        // Dismiss notification
+                        action_clicked (null);
+                    });
+                    action_button
+                     .get_style_context ().add_class ("notification-action");
+                    action_button.set_can_focus (false);
+                    alt_actions_box.add (action_button);
+                }
+
+                // Add notification specified actions
                 foreach (var action in param.actions.data) {
                     var action_button = new Gtk.Button.with_label (action.name);
                     action_button.clicked.connect (() => action_clicked (action));
@@ -466,7 +510,7 @@ namespace SwayNotificationCenter {
 
             uint timeout;
             switch (param.urgency) {
-                case UrgencyLevels.LOW :
+                case UrgencyLevels.LOW:
                     timeout = timeout_low_delay * 1000;
                     break;
                 case UrgencyLevels.NORMAL:

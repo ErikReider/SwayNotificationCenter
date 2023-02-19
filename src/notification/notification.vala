@@ -290,16 +290,15 @@ namespace SwayNotificationCenter {
             }
         }
 
-        /// Returns the first code found, else null
+        /** Returns the first code found, else null */
         private string ? parse_body_codes () {
             string body = this.body.get_text ().strip ();
+            if (body.length == 0) return null;
 
             MatchInfo info;
             var result = code_regex.match_all (body, RegexMatchFlags.NOTEMPTY, out info);
-            if (!result) return null;
-
             string ? match = info.fetch (0);
-            if (match == null) return null;
+            if (!result || match == null) return null;
 
             return Functions.filter_string (
                 match.strip (), (c) => c.isdigit () || c.isspace ()).strip ();
@@ -360,8 +359,8 @@ namespace SwayNotificationCenter {
 
                 // Add "Copy code" Action if available and copy it to clipboard when clicked
                 if (code != null && code.length > 0) {
-                    string name = "COPY \"%s\"".printf (code);
-                    var action_button = new Gtk.Button.with_label (name);
+                    string action_name = "COPY \"%s\"".printf (code);
+                    var action_button = new Gtk.Button.with_label (action_name);
                     action_button.clicked.connect (() => {
                         // Copy to clipboard
                         get_clipboard (Gdk.SELECTION_CLIPBOARD).set_text (code, -1);

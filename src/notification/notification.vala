@@ -23,7 +23,7 @@ namespace SwayNotificationCenter {
         [GtkChild]
         unowned Gtk.Button close_button;
 
-        private Gtk.ButtonBox alt_actions_box;
+        private Gtk.ButtonBox alt_actions_box = new Gtk.ButtonBox (Gtk.Orientation.HORIZONTAL);
 
         [GtkChild]
         unowned Gtk.Label summary;
@@ -310,9 +310,16 @@ namespace SwayNotificationCenter {
         }
 
         public void click_alt_action (uint index) {
-            if (param.actions.length == 0 || index >= param.actions.length) {
+            List<weak Gtk.Widget>? children = alt_actions_box.get_children ();
+            uint length = children.length ();
+            if (length == 0 || index >= length) return;
+
+            unowned Gtk.Widget button = children.nth_data (index);
+            if (button is Gtk.Button) {
+                ((Gtk.Button) button).clicked ();
                 return;
             }
+            // Backup if the above fails
             action_clicked (param.actions.index (index));
         }
 
@@ -354,7 +361,6 @@ namespace SwayNotificationCenter {
             if (param.actions.length > 0 || code != null) {
                 var viewport = new Gtk.Viewport (null, null);
                 var scroll = new Gtk.ScrolledWindow (null, null);
-                alt_actions_box = new Gtk.ButtonBox (Gtk.Orientation.HORIZONTAL);
                 alt_actions_box.set_homogeneous (true);
                 alt_actions_box.set_layout (Gtk.ButtonBoxStyle.EXPAND);
 

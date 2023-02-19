@@ -391,7 +391,7 @@ config file to be able to detect config errors
 					type: string ++
 					optional: true ++
 					default: "intel_backlight" ++
-					description: Name of monitor (find possible devices using `ls /sys/class/backlight` or `ls /sys/class/leds` ) ++
+					description: Device in `/sys/class/backlight` or `/sys/class/leds` ++
 				subsystem: ++
 					type: string ++
 					optional: true ++

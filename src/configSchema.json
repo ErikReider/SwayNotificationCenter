@@ -287,6 +287,9 @@
         },
         "^volume(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
           "$ref": "#/widgets/volume"
+        },
+        "^backlight(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
+          "$ref": "#/widgets/backlight"
         }
       }
     }
@@ -466,8 +469,8 @@
         },
         "min": {
           "type": "integer",
-					"default": 0,
-					"description": "Lowest possible value for brightness"
+          "default": 0,
+          "description": "Lowest possible value for brightness"
         }
       }      
     }

@@ -20,21 +20,34 @@ namespace SwayNotificationCenter.Widgets {
             if (config != null) {
                 string ? label = get_prop<string> (config, "label");
                 label_widget.set_label (label ?? "Brightness");
-                string ? device = get_prop<string> (config, "device");
-                string ? subsystem = get_prop<string> (config, "subsystem");
-                if (subsystem != "backlight" && subsystem != "leds") {
-                    info ("Invalid subsystem for device %s. Use 'backlight' or 'leds'. Using default: 'backlight'", device);
-                    subsystem = "backlight";
-                }
-                client = new BacklightUtil (subsystem ?? "backlight", device ?? "intel_backlight");
+                string device = (get_prop<string> (config, "device") ?? "intel_backlight");
+                string subsystem = (get_prop<string> (config, "subsystem") ?? "backlight");
+                int min = get_prop<int> (config, "min");
 
-                int ? min = get_prop<int> (config, "min");
-                if (min == null) min = 0;
-                if (subsystem == "backlight") slider.set_range (min, 100);
-                else if (subsystem == "leds") slider.set_range (min, this.client.get_max_value ());
+                switch (subsystem) {
+                    default:
+                    case "backlight":
+                        if (subsystem != "backlight")
+                            info ("Invalid subsystem %s for device %s. " +
+                                  "Use 'backlight' or 'leds'. Using default: 'backlight'",
+                                  subsystem, device);
+                        client = new BacklightUtil ("backlight", device);
+                        slider.set_range (min, 100);
+                        break;
+                    case "leds":
+                        client = new BacklightUtil ("leds", device);
+                        slider.set_range (min, this.client.get_max_value ());
+                        break;
+                }
             }
 
-            this.client.brightness_change.connect (brightness_changed);
+            this.client.brightness_change.connect ((percent) => {
+                if (percent < 0) { // invalid device path
+                    hide ();
+                } else {
+                    slider.set_value (percent);
+                }
+            });
 
             slider.set_draw_value (false);
             slider.set_round_digits (0);
@@ -47,10 +60,6 @@ namespace SwayNotificationCenter.Widgets {
             pack_start (slider, true, true, 0);
 
             show_all ();
-        }
-
-        public void brightness_changed (int percent) {
-            slider.set_value (percent);
         }
 
         public override void on_cc_visibility_change (bool val) {

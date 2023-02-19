@@ -9,7 +9,7 @@ namespace SwayNotificationCenter.Widgets {
         string path_current;
         string path_max;
         File fd;
-        FileMonitor monitor;
+        FileMonitor monitor = null;
 
         int max;
 
@@ -23,15 +23,23 @@ namespace SwayNotificationCenter.Widgets {
             this.subsystem = s;
             this.device = d;
 
-            path_current = Path.build_filename ("/sys/class/" + subsystem + "/" + device + "/brightness");
-            path_max = Path.build_filename ("/sys/class/" + subsystem + "/" + device + "/max_brightness");
+            path_current = Path.build_path (Path.DIR_SEPARATOR_S,
+                                            "/sys", "class", subsystem, device, "brightness");
+            path_max = Path.build_path (Path.DIR_SEPARATOR_S,
+                                        "/sys", "class", subsystem, device, "max_brightness");
             fd = File.new_for_path (path_current);
-            try {
-                monitor = fd.monitor (FileMonitorFlags.NONE, null);
-            } catch (Error e) {
-                error ("Error %s\n", e.message);
+            if (fd.query_exists ()) {
+                set_max_value ();
+                try {
+                    monitor = fd.monitor (FileMonitorFlags.NONE, null);
+                } catch (Error e) {
+                    error ("Error %s\n", e.message);
+                }
+            } else {
+                this.brightness_change (-1);
+                warning ("Could not find device %s\n", path_current);
+                close ();
             }
-            set_max_value ();
 
             try {
                 // setup DBus for setting brightness
@@ -42,21 +50,29 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         public void start () {
-            // get changes made while controlCenter not shown
-            get_brightness ();
+            if (fd.query_exists ()) {
+                // get changes made while controlCenter not shown
+                get_brightness ();
 
-            connect_monitor ();
+                connect_monitor ();
+            } else {
+                this.brightness_change (-1);
+                warning ("Could not find device %s\n", path_current);
+                close ();
+            }
         }
 
         private void connect_monitor () {
-            // connect monitor to monitor changes
-            monitor.changed.connect ((src, dest, event) => {
-                get_brightness ();
-            });
+            if (monitor != null) {
+                // connect monitor to monitor changes
+                monitor.changed.connect ((src, dest, event) => {
+                    get_brightness ();
+                });
+            }
         }
 
         public void close () {
-            monitor.cancel ();
+            if (monitor != null) monitor.cancel ();
         }
 
         public void set_brightness (float percent) {
@@ -88,7 +104,6 @@ namespace SwayNotificationCenter.Widgets {
 
         private void set_max_value () {
             try {
-
                 File fd_max = File.new_for_path (path_max);
                 DataInputStream dis_max = new DataInputStream (fd_max.read (null));
                 string data = dis_max.read_line (null);

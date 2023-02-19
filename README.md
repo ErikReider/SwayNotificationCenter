@@ -33,6 +33,7 @@ Post your setup here: [Config flex 💪](https://github.com/ErikReider/SwayNotif
 - Restores previous Do not disturb value after restart
 - Click notification to execute default action
 - Show alternative notification actions
+- Copy detected 2FA codes to clipboard
 - Customization through a CSS file
 - Trackpad/mouse gesture to close notification
 - The same features as any other basic notification daemon

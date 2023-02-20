@@ -135,6 +135,10 @@ config file to be able to detect config errors
 			type: string ++
 			optional: true ++
 			description: The app-name. Uses Regex.++
+		*desktop-entry*++
+			type: string ++
+			optional: true ++
+			description: The desktop-entry. Uses Regex.++
 		*summary*++
 			type: string ++
 			optional: true ++
@@ -451,6 +455,10 @@ config file to be able to detect config errors
 			type: string ++
 			optional: true ++
 			description: The app-name. Uses Regex.++
+		*desktop-entry*++
+			type: string ++
+			optional: true ++
+			description: The desktop-entry. Uses Regex.++
 		*summary*++
 			type: string ++
 			optional: true ++

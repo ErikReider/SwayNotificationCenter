@@ -171,6 +171,10 @@
               "type": "string",
               "description": "The app-name. Uses Regex."
             },
+            "desktop-entry": {
+              "type": "string",
+              "description": "The desktop-entry. Uses Regex."
+            },
             "summary": {
               "type": "string",
               "description": "The summary of the notification. Uses Regex."
@@ -221,6 +225,10 @@
             "app-name": {
               "type": "string",
               "description": "The app-name. Uses Regex."
+            },
+            "desktop-entry": {
+              "type": "string",
+              "description": "The desktop-entry. Uses Regex."
             },
             "summary": {
               "type": "string",

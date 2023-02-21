@@ -3,7 +3,8 @@ namespace SwayNotificationCenter.Widgets {
 
         [DBus (name = "org.freedesktop.login1.Session")]
         interface Login1 : Object {
-            public abstract void set_brightness (string subsystem, string name, uint32 brightness) throws GLib.Error;
+            public abstract void set_brightness (string subsystem,
+                                                 string name, uint32 brightness) throws GLib.Error;
         }
 
         string path_current;
@@ -43,7 +44,8 @@ namespace SwayNotificationCenter.Widgets {
 
             try {
                 // setup DBus for setting brightness
-                login1 = Bus.get_proxy_sync (BusType.SYSTEM, "org.freedesktop.login1", "/org/freedesktop/login1/session/auto");
+                login1 = Bus.get_proxy_sync (BusType.SYSTEM,
+                                             "org.freedesktop.login1", "/org/freedesktop/login1/session/auto");
             } catch (Error e) {
                 error ("Error %s\n", e.message);
             }

@@ -69,26 +69,41 @@ namespace SwayNotificationCenter {
 
     public class NotificationMatching : Object, Json.Serializable {
         public string ? app_name { get; set; default = null; }
+        public string ? desktop_entry { get; set; default = null; }
         public string ? summary { get; set; default = null; }
         public string ? body { get; set; default = null; }
         public string ? urgency { get; set; default = null; }
         public string ? category { get; set; default = null; }
+
+        private const RegexCompileFlags REGEX_COMPILE_OPTIONS =
+            RegexCompileFlags.MULTILINE
+            | RegexCompileFlags.JAVASCRIPT_COMPAT;
+
+        private const RegexMatchFlags REGEX_MATCH_FLAGS = RegexMatchFlags.NOTEMPTY;
 
         public virtual bool matches_notification (NotifyParams param) {
             if (app_name != null) {
                 if (param.app_name == null) return false;
                 bool result = Regex.match_simple (
                     app_name, param.app_name,
-                    0,
-                    RegexMatchFlags.NOTEMPTY);
+                    REGEX_COMPILE_OPTIONS,
+                    REGEX_MATCH_FLAGS);
+                if (!result) return false;
+            }
+            if (desktop_entry != null) {
+                if (param.desktop_entry == null) return false;
+                bool result = Regex.match_simple (
+                    desktop_entry, param.desktop_entry,
+                    REGEX_COMPILE_OPTIONS,
+                    REGEX_MATCH_FLAGS);
                 if (!result) return false;
             }
             if (summary != null) {
                 if (param.summary == null) return false;
                 bool result = Regex.match_simple (
                     summary, param.summary,
-                    0,
-                    RegexMatchFlags.NOTEMPTY);
+                    REGEX_COMPILE_OPTIONS,
+                    REGEX_MATCH_FLAGS);
                 if (!result) return false;
             }
             if (body != null) {
@@ -96,22 +111,22 @@ namespace SwayNotificationCenter {
                 bool result = Regex.match_simple (
                     body, param.body,
                     0,
-                    RegexMatchFlags.NOTEMPTY);
+                    REGEX_MATCH_FLAGS);
                 if (!result) return false;
             }
             if (urgency != null) {
                 bool result = Regex.match_simple (
                     urgency, param.urgency.to_string (),
-                    0,
-                    RegexMatchFlags.NOTEMPTY);
+                    REGEX_COMPILE_OPTIONS,
+                    REGEX_MATCH_FLAGS);
                 if (!result) return false;
             }
             if (category != null) {
                 if (param.category == null) return false;
                 bool result = Regex.match_simple (
                     category, param.category,
-                    0,
-                    RegexMatchFlags.NOTEMPTY);
+                    REGEX_COMPILE_OPTIONS,
+                    REGEX_MATCH_FLAGS);
                 if (!result) return false;
             }
             return true;
@@ -120,6 +135,7 @@ namespace SwayNotificationCenter {
         public string to_string () {
             string[] fields = {};
             if (app_name != null) fields += "app-name: %s".printf (app_name);
+            if (desktop_entry != null) fields += "desktop-entry: %s".printf (desktop_entry);
             if (summary != null) fields += "summary: %s".printf (summary);
             if (body != null) fields += "body: %s".printf (body);
             if (urgency != null) fields += "urgency: %s".printf (urgency);

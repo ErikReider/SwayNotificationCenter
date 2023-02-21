@@ -10,7 +10,11 @@ namespace SwayNotificationCenter {
         unowned Gtk.EventBox event_box;
 
         [GtkChild]
-        unowned Gtk.Button default_button;
+        unowned Gtk.EventBox default_action;
+
+
+        /** The default_action gesture. Allows clicks while not in swipe gesture. */
+        private Gtk.GestureMultiPress gesture;
 
         [GtkChild]
         unowned Gtk.ProgressBar progress_bar;
@@ -35,6 +39,17 @@ namespace SwayNotificationCenter {
         unowned Gtk.Image img;
         [GtkChild]
         unowned Gtk.Image body_image;
+
+        // Inline Reply
+        [GtkChild]
+        unowned Gtk.Box inline_reply_box;
+        [GtkChild]
+        unowned Gtk.Entry inline_reply_entry;
+        [GtkChild]
+        unowned Gtk.Button inline_reply_button;
+
+        private bool default_action_down = false;
+        private bool default_action_in = false;
 
         public static Gtk.IconSize icon_size = Gtk.IconSize.INVALID;
         private int notification_icon_size { get; default = ConfigModel.instance.notification_icon_size; }
@@ -116,6 +131,17 @@ namespace SwayNotificationCenter {
                 stderr.printf ("Invalid regex: %s", e.message);
             }
 
+            // Build the default_action gesture
+            gesture = new Gtk.GestureMultiPress (default_action);
+            gesture.set_touch_only (false);
+            gesture.set_exclusive (true);
+            gesture.set_button (Gdk.BUTTON_PRIMARY);
+            gesture.pressed.connect (this.gesture_pressed_cb);
+            gesture.released.connect (this.gesture_released_cb);
+            gesture.update.connect (this.gesture_update_cb);
+            gesture.cancel.connect (this.gesture_cancel_cb);
+            gesture.set_propagation_phase (Gtk.PropagationPhase.BUBBLE);
+
             this.transition_time = ConfigModel.instance.transition_time;
             build_noti ();
 
@@ -123,6 +149,71 @@ namespace SwayNotificationCenter {
                 add_notification_timeout ();
                 this.size_allocate.connect (on_size_allocation);
             }
+        }
+
+        private void gesture_pressed_cb (Gtk.GestureMultiPress gesture,
+                                         int n_press,
+                                         double x,
+                                         double y) {
+            default_action_in = true;
+            default_action_down = true;
+            default_action_update_state ();
+        }
+
+        private void gesture_released_cb (Gtk.GestureMultiPress gesture,
+                                          int n_press,
+                                          double x,
+                                          double y) {
+            // Emit released
+            default_action_release (default_action_in);
+
+            Gdk.EventSequence ? sequence = gesture.get_current_sequence ();
+            if (sequence == null) {
+                default_action_in = false;
+                default_action_update_state ();
+            }
+        }
+
+        private void gesture_update_cb (Gtk.Gesture gesture,
+                                        Gdk.EventSequence ? sequence) {
+            Gtk.GestureSingle gesture_single = (Gtk.GestureSingle) gesture;
+            if (sequence != gesture_single.get_current_sequence ()) return;
+
+            Gtk.Allocation allocation;
+            double x, y;
+
+            default_action.get_allocation (out allocation);
+            gesture.get_point (sequence, out x, out y);
+            bool in_button = (x >= 0 && y >= 0 && x < allocation.width && y < allocation.height);
+            if (default_action_in != in_button) {
+                default_action_in = in_button;
+                default_action_update_state ();
+            }
+        }
+
+        private void gesture_cancel_cb (Gtk.Gesture gesture,
+                                        Gdk.EventSequence ? sequence) {
+            default_action_release (false);
+        }
+
+        private void default_action_release (bool emit) {
+            if (!default_action_down) return;
+            default_action_down = false;
+            if (emit) {
+                click_default_action ();
+            }
+        }
+
+        private void default_action_update_state () {
+            bool pressed = default_action_in && default_action_down;
+
+            Gtk.StateFlags flags = default_action.get_state_flags () &
+                                   ~(Gtk.StateFlags.PRELIGHT | Gtk.StateFlags.ACTIVE);
+
+            if (default_action_in) flags |= Gtk.StateFlags.PRELIGHT;
+            if (pressed) flags |= Gtk.StateFlags.ACTIVE;
+
+            default_action.set_state_flags (flags, true);
         }
 
         private void on_size_allocation (Gtk.Allocation _ignored) {
@@ -151,13 +242,31 @@ namespace SwayNotificationCenter {
                 return true;
             });
 
-            default_button.clicked.connect (click_default_action);
+            // Adds CSS :hover selector to EventBox
+            default_action.enter_notify_event.connect ((event) => {
+                if (event.detail != Gdk.NotifyType.INFERIOR
+                    && event.window == default_action.get_window ()) {
+                    default_action_in = true;
+                    default_action_update_state ();
+                }
+                return true;
+            });
+            default_action.leave_notify_event.connect ((event) => {
+                if (event.detail != Gdk.NotifyType.INFERIOR
+                    && event.window == default_action.get_window ()) {
+                    default_action_in = false;
+                    default_action_update_state ();
+                }
+                return true;
+            });
+
+            default_action.unmap.connect (() => default_action_in = false);
 
             close_revealer.set_transition_duration (this.transition_time);
 
             close_button.clicked.connect (() => close_notification ());
 
-            this.event_box.enter_notify_event.connect (() => {
+            this.event_box.enter_notify_event.connect ((event) => {
                 close_revealer.set_reveal_child (true);
                 remove_noti_timeout ();
                 return false;
@@ -207,6 +316,7 @@ namespace SwayNotificationCenter {
 
             set_body ();
             set_icon ();
+            set_inline_reply ();
             set_actions ();
             set_style_urgency ();
 
@@ -353,6 +463,36 @@ namespace SwayNotificationCenter {
                     base_box.get_style_context ().add_class ("critical");
                     break;
             }
+        }
+
+        // TODO: Fix Entry focus when in NotificationWindow
+        // TODO: Default CSS
+        private void set_inline_reply () {
+            if (param.inline_reply == null) return;
+
+            inline_reply_box.show ();
+
+            inline_reply_entry.set_placeholder_text (
+                param.inline_reply_placeholder ?? "Enter Text");
+            // Set reply Button sensitivity to disabled if Entry text is empty
+            inline_reply_entry.bind_property (
+                "text",
+                inline_reply_button, "sensitive",
+                BindingFlags.SYNC_CREATE,
+                (binding, srcval, ref targetval) => {
+                    targetval.set_boolean (((string) srcval).strip ().length > 0);
+                    return true;
+                },
+                null);
+
+            inline_reply_button.set_label (param.inline_reply.name ?? "Reply");
+            inline_reply_button.clicked.connect (() => {
+                string text = inline_reply_entry.get_text ().strip ();
+                if (text.length == 0) return;
+                noti_daemon.NotificationReplied (param.applied_id, text);
+                // Dismiss notification without activating Action
+                action_clicked (null);
+            });
         }
 
         private void set_actions () {
@@ -542,6 +682,7 @@ namespace SwayNotificationCenter {
         /** Forces the EventBox to reload its style_context #27 */
         public void reload_style_context () {
             event_box.get_style_context ().changed ();
+            default_action.get_style_context ().changed ();
         }
     }
 }

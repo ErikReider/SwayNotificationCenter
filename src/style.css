@@ -85,6 +85,7 @@
   background: @noti-bg;
   border: 1px solid @noti-border-color;
   color: white;
+  transition: all 0.15s ease-in-out;
 }
 
 .notification-default-action:hover,
@@ -117,6 +118,16 @@
 .notification-action:last-child {
   border-bottom-right-radius: 10px;
   border-right: 1px solid @noti-border-color;
+}
+
+.inline-reply {
+  margin-top: 8px;
+}
+.inline-reply-entry {
+
+}
+.inline-reply-button {
+  margin-left: 4px;
 }
 
 .image {

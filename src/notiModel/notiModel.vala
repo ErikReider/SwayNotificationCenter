@@ -102,6 +102,10 @@ namespace SwayNotificationCenter {
         private int priv_value { private get; private set; }
         public bool has_synch { public get; private set; }
 
+        /** Inline-replies */
+        public Action ? inline_reply { get; set; }
+        public string ? inline_reply_placeholder { get; set; }
+
         // Custom hints
         /** Disables scripting for notification */
         public bool swaync_no_script { get; set; }
@@ -133,30 +137,12 @@ namespace SwayNotificationCenter {
             this.replaces = false;
             this.has_synch = false;
 
-            s_hints ();
+            parse_hints ();
 
-            Array<Action> ac_array = new Array<Action> ();
-            if (actions.length > 1 && actions.length % 2 == 0) {
-                for (int i = 0; i < actions.length; i++) {
-                    var action = new Action ();
-                    action.identifier = actions[i];
-                    action.name = actions[i + 1];
-                    if (action.name != null && action.identifier != null
-                        && action.name != "" && action.identifier != "") {
-
-                        if (action.identifier.down () == "default") {
-                            default_action = action;
-                        } else {
-                            ac_array.append_val (action);
-                        }
-                    }
-                    i++;
-                }
-            }
-            this.actions = ac_array;
+            parse_actions (actions);
         }
 
-        private void s_hints () {
+        private void parse_hints () {
             foreach (var hint in hints.get_keys ()) {
                 Variant hint_value = hints[hint];
                 switch (hint) {
@@ -239,8 +225,42 @@ namespace SwayNotificationCenter {
                             urgency = UrgencyLevels.from_value (hint_value.get_byte ());
                         }
                         break;
+                    case "x-kde-reply-placeholder-text":
+                        if (hint_value.is_of_type (VariantType.STRING)) {
+                            inline_reply_placeholder = hint_value.get_string ();
+                        }
+                        break;
                 }
             }
+        }
+
+        private void parse_actions (string[] actions) {
+            Array<Action> parsed_actions = new Array<Action> ();
+            if (actions.length > 1 && actions.length % 2 == 0) {
+                for (int i = 0; i < actions.length; i++) {
+                    var action = new Action ();
+                    action.identifier = actions[i];
+                    action.name = actions[i + 1];
+                    if (action.name != null && action.identifier != null
+                        && action.name != "" && action.identifier != "") {
+
+                        string id = action.identifier.down ();
+                        switch (id) {
+                            case "default":
+                                default_action = action;
+                                break;
+                            case "inline-reply":
+                                inline_reply = action;
+                                break;
+                            default:
+                                parsed_actions.append_val (action);
+                                break;
+                        }
+                    }
+                    i++;
+                }
+            }
+            this.actions = parsed_actions;
         }
 
         public string to_string () {

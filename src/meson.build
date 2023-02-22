@@ -56,7 +56,6 @@ app_sources = [
   'notification/notification.vala',
   'controlCenter/controlCenter.vala',
   widget_sources,
-  'controlCenter/topAction/topAction.vala',
   'blankWindow/blankWindow.vala',
   'functions.vala',
   constants,

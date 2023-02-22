@@ -16,6 +16,10 @@ namespace SwayNotificationCenter {
         const string STACK_NOTIFICATIONS_PAGE = "notifications-list";
         const string STACK_PLACEHOLDER_PAGE = "notifications-placeholder";
 
+        private Gtk.GestureMultiPress blank_window_gesture;
+        private bool blank_window_down = false;
+        private bool blank_window_in = false;
+
         private SwayncDaemon swaync_daemon;
         private NotiDaemon noti_daemon;
 
@@ -66,8 +70,62 @@ namespace SwayNotificationCenter {
             });
             this.unmap.connect (swaync_daemon.hide_blank_windows);
 
-            this.button_release_event.connect (blank_window_press);
-            this.touch_event.connect (blank_window_press);
+            /*
+             * Handling of bank window presses (pressing outside of ControlCenter)
+             */
+            blank_window_gesture = new Gtk.GestureMultiPress (this);
+            blank_window_gesture.set_touch_only (false);
+            blank_window_gesture.set_exclusive (true);
+            blank_window_gesture.set_button (Gdk.BUTTON_PRIMARY);
+            blank_window_gesture.set_propagation_phase (Gtk.PropagationPhase.BUBBLE);
+            blank_window_gesture.pressed.connect ((_gesture, _n_press, x, y) => {
+                // Calculate if the clicked coords intersect the ControlCenter
+                Gdk.Rectangle click_rectangle = Gdk.Rectangle () {
+                    width = 1,
+                    height = 1,
+                    x = (int) x,
+                    y = (int) y,
+                };
+                blank_window_in = !box.intersect (click_rectangle, null);
+                blank_window_down = true;
+            });
+            blank_window_gesture.released.connect ((gesture, _n_press, _x, _y) => {
+                // Emit released
+                if (!blank_window_down) return;
+                blank_window_down = false;
+                if (blank_window_in) {
+                    try {
+                        swaync_daemon.set_visibility (false);
+                    } catch (Error e) {
+                        stderr.printf ("ControlCenter BlankWindow Click Error: %s\n",
+                                       e.message);
+                    }
+                }
+
+                Gdk.EventSequence ? sequence = gesture.get_current_sequence ();
+                if (sequence == null) {
+                    blank_window_in = false;
+                }
+            });
+            blank_window_gesture.update.connect ((gesture, sequence) => {
+                Gtk.GestureSingle gesture_single = (Gtk.GestureSingle) gesture;
+                if (sequence != gesture_single.get_current_sequence ()) return;
+                // Calculate if the clicked coords intersect the ControlCenter
+                double x, y;
+                gesture.get_point (sequence, out x, out y);
+                Gdk.Rectangle click_rectangle = Gdk.Rectangle () {
+                    width = 1,
+                    height = 1,
+                    x = (int) x,
+                    y = (int) y,
+                };
+                if (box.intersect (click_rectangle, null)) {
+                    blank_window_in = false;
+                }
+            });
+            blank_window_gesture.cancel.connect ((gesture, sequence) => {
+                blank_window_down = false;
+            });
 
             // Only use release for closing notifications due to Escape key
             // sometimes being passed through to unfucused application
@@ -193,26 +251,6 @@ namespace SwayNotificationCenter {
                 uint pos = box.get_children ().length ();
                 box.reorder_child (scrolled_window, (int) (pos > 0 ? --pos : 0));
             }
-        }
-
-        private bool blank_window_press (Gdk.Event event) {
-            // Calculate if the clicked coords intersect the ControlCenter
-            double x, y;
-            event.get_root_coords (out x, out y);
-            Gdk.Rectangle click_rectangle = Gdk.Rectangle () {
-                width = 1,
-                height = 1,
-                x = (int) x,
-                y = (int) y,
-            };
-            if (box.intersect (click_rectangle, null)) return true;
-            try {
-                swaync_daemon.set_visibility (false);
-            } catch (Error e) {
-                stderr.printf ("ControlCenter BlankWindow Click Error: %s\n",
-                               e.message);
-            }
-            return true;
         }
 
         /** Resets the UI positions */

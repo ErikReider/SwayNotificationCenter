@@ -295,6 +295,9 @@
         },
         "^volume(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
           "$ref": "#/widgets/volume"
+        },
+        "^backlight(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
+          "$ref": "#/widgets/backlight"
         }
       }
     }
@@ -449,7 +452,35 @@
           "description": "Text displayed in front of the volume slider",
           "default": "Volume"
         }
-      }
+      }      
+    },
+    "backlight": {
+      "type": "object",
+      "description": "Slider to control monitor brightness",
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Text displayed in front of the backlight slider",
+          "default": "Brightness"
+        },
+        "device": {
+          "type": "string",
+          "description": "Name of monitor (find possible devices using `ls /sys/class/backlight` or `ls /sys/class/leds`)",
+          "default": "intel_backlight"
+        },
+        "subsystem": {
+          "type": "string",
+          "description": "Kernel subsystem for brightness control",
+          "default": "backlight",
+          "enum": ["backlight", "leds"]
+        },
+        "min": {
+          "type": "integer",
+          "default": 0,
+          "description": "Lowest possible value for brightness"
+        }
+      }      
     }
   }
 }

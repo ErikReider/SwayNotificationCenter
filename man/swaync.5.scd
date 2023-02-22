@@ -206,6 +206,7 @@ config file to be able to detect config errors
 	multiple of same widget: ++
 		Append a # with any value to the end of the widget name. ++
 		Example: "title#TheMainTitle" ++
+		To address this widget specifically in the css file use the css class .TheMainTitle ++
 	example:
 ```
 {
@@ -223,6 +224,7 @@ config file to be able to detect config errors
 	multiple of same widget: ++
 		Append a # with any value to the end of the widget name. ++
 		Example: "title#TheMainTitle" ++
+		To address this widget specifically in the css file use the css class .TheMainTitle ++
 	Widgets to customize: ++
 		*title*++
 			type: object ++
@@ -379,7 +381,33 @@ config file to be able to detect config errors
 					optional: true ++
 					default: "Volume" ++
 					description: Text displayed in front of the volume slider ++
-			description: Slider to control pulse volume ++				
+			description: Slider to control pulse volume ++
+		*backlight*++
+			type: object ++
+			css class: widget-backlight ++
+			properties: ++
+				label: ++
+					type: string ++
+					optional: true ++
+					default: "Brightness" ++
+					description: Text displayed in front of the backlight slider ++
+				device: ++
+					type: string ++
+					optional: true ++
+					default: "intel_backlight" ++
+					description: Device in `/sys/class/backlight` or `/sys/class/leds` ++
+				subsystem: ++
+					type: string ++
+					optional: true ++
+					default: "backlight" ++
+					description: Kernel subsystem for brightness control ++
+					enum: ["backlight", "leds"] ++
+				min: ++
+					type: integer ++
+					optional: true ++
+					default: 0 ++
+					description: Lowest possible value for brightness ++
+			description: Slider to control screen brightness ++	
 
 	example:
 ```

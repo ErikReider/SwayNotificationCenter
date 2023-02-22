@@ -44,6 +44,9 @@ widget_sources = [
   'controlCenter/widgets/volume/volume.vala',
   'controlCenter/widgets/volume/pulseDaemon.vala',
   'controlCenter/widgets/volume/pulseDevice.vala',
+  # Widget: Backlight Slider
+  'controlCenter/widgets/backlight/backlight.vala',
+  'controlCenter/widgets/backlight/backlightUtil.vala',
 ]
 
 app_sources = [

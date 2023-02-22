@@ -290,3 +290,11 @@
   margin: 8px;
   border-radius: 12px;
 }
+
+/* Backlight widget */
+.widget-backlight {
+  background-color: @noti-bg;
+  padding: 8px;
+  margin: 8px;
+  border-radius: 12px;
+}

@@ -22,7 +22,7 @@ namespace SwayNotificationCenter.Widgets {
                 label_widget.set_label (label ?? "Brightness");
                 string device = (get_prop<string> (config, "device") ?? "intel_backlight");
                 string subsystem = (get_prop<string> (config, "subsystem") ?? "backlight");
-                int min = get_prop<int> (config, "min");
+                int min = int.max (0, get_prop<int> (config, "min"));
 
                 switch (subsystem) {
                     default:

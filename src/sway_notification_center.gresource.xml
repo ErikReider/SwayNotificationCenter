@@ -4,7 +4,6 @@
     <file>notificationWindow/notificationWindow.ui</file>
     <file>notification/notification.ui</file>
     <file>controlCenter/controlCenter.ui</file>
-    <file>controlCenter/topAction/topAction.ui</file>
     <file>controlCenter/widgets/mpris/mpris_player.ui</file>
   </gresource>
 </gresources>

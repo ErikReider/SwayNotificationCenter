@@ -164,12 +164,6 @@
   text-shadow: none;
 }
 
-/* The "Notifications" and "Do Not Disturb" text widget */
-.top-action-title {
-  color: white;
-  text-shadow: none;
-}
-
 .control-center {
   background: @cc-bg;
 }

@@ -45,7 +45,7 @@ namespace SwayNotificationCenter {
                 Process.exit (1);
             }
             GtkLayerShell.init_for_window (this);
-            GtkLayerShell.set_namespace (this, "swaync-control-center");
+            GtkLayerShell.set_namespace (this, "swaync-notification-window");
             GtkLayerShell.set_layer (this, GtkLayerShell.Layer.OVERLAY);
             this.set_anchor ();
 

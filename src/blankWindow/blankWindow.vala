@@ -48,7 +48,22 @@ namespace SwayNotificationCenter {
 
             GtkLayerShell.set_exclusive_zone (this, -1);
 
-            GtkLayerShell.set_layer (this, GtkLayerShell.Layer.TOP);
+            GtkLayerShell.Layer layer = GtkLayerShell.Layer.TOP;
+            switch (ConfigModel.instance.layer) {
+                case Layer.BACKGROUND:
+                    layer = GtkLayerShell.Layer.BACKGROUND;
+                    break;
+                case Layer.BOTTOM:
+                    layer = GtkLayerShell.Layer.BOTTOM;
+                    break;
+                case Layer.TOP:
+                    layer = GtkLayerShell.Layer.TOP;
+                    break;
+                case Layer.OVERLAY:
+                    layer = GtkLayerShell.Layer.OVERLAY;
+                    break;
+            }
+            GtkLayerShell.set_layer (this, layer);
 
             get_style_context ().add_class ("blank-window");
         }

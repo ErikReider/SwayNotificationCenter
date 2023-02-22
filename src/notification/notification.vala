@@ -131,16 +131,53 @@ namespace SwayNotificationCenter {
                 stderr.printf ("Invalid regex: %s", e.message);
             }
 
-            // Build the default_action gesture
+            // Build the default_action gesture. Makes clickes compatible with
+            // the Hdy Swipe gesture unlike a regular ::button_release_event
             gesture = new Gtk.GestureMultiPress (default_action);
             gesture.set_touch_only (false);
             gesture.set_exclusive (true);
             gesture.set_button (Gdk.BUTTON_PRIMARY);
-            gesture.pressed.connect (this.gesture_pressed_cb);
-            gesture.released.connect (this.gesture_released_cb);
-            gesture.update.connect (this.gesture_update_cb);
-            gesture.cancel.connect (this.gesture_cancel_cb);
             gesture.set_propagation_phase (Gtk.PropagationPhase.BUBBLE);
+            gesture.pressed.connect ((_gesture, _n_press, _x, _y) => {
+                default_action_in = true;
+                default_action_down = true;
+                default_action_update_state ();
+            });
+            gesture.released.connect ((gesture, _n_press, _x, _y) => {
+                // Emit released
+                if (!default_action_down) return;
+                default_action_down = false;
+                if (default_action_in) {
+                    click_default_action ();
+                }
+
+                Gdk.EventSequence ? sequence = gesture.get_current_sequence ();
+                if (sequence == null) {
+                    default_action_in = false;
+                    default_action_update_state ();
+                }
+            });
+            gesture.update.connect ((gesture, sequence) => {
+                Gtk.GestureSingle gesture_single = (Gtk.GestureSingle) gesture;
+                if (sequence != gesture_single.get_current_sequence ()) return;
+
+                Gtk.Allocation allocation;
+                double x, y;
+
+                default_action.get_allocation (out allocation);
+                gesture.get_point (sequence, out x, out y);
+                bool in_button = (x >= 0 && y >= 0 && x < allocation.width && y < allocation.height);
+                if (default_action_in != in_button) {
+                    default_action_in = in_button;
+                    default_action_update_state ();
+                }
+            });
+            gesture.cancel.connect ((_gesture, _sequence) => {
+                if (default_action_down) {
+                    default_action_down = false;
+                    default_action_update_state ();
+                }
+            });
 
             this.transition_time = ConfigModel.instance.transition_time;
             build_noti ();
@@ -148,59 +185,6 @@ namespace SwayNotificationCenter {
             if (is_timed) {
                 add_notification_timeout ();
                 this.size_allocate.connect (on_size_allocation);
-            }
-        }
-
-        private void gesture_pressed_cb (Gtk.GestureMultiPress gesture,
-                                         int n_press,
-                                         double x,
-                                         double y) {
-            default_action_in = true;
-            default_action_down = true;
-            default_action_update_state ();
-        }
-
-        private void gesture_released_cb (Gtk.GestureMultiPress gesture,
-                                          int n_press,
-                                          double x,
-                                          double y) {
-            // Emit released
-            default_action_release (default_action_in);
-
-            Gdk.EventSequence ? sequence = gesture.get_current_sequence ();
-            if (sequence == null) {
-                default_action_in = false;
-                default_action_update_state ();
-            }
-        }
-
-        private void gesture_update_cb (Gtk.Gesture gesture,
-                                        Gdk.EventSequence ? sequence) {
-            Gtk.GestureSingle gesture_single = (Gtk.GestureSingle) gesture;
-            if (sequence != gesture_single.get_current_sequence ()) return;
-
-            Gtk.Allocation allocation;
-            double x, y;
-
-            default_action.get_allocation (out allocation);
-            gesture.get_point (sequence, out x, out y);
-            bool in_button = (x >= 0 && y >= 0 && x < allocation.width && y < allocation.height);
-            if (default_action_in != in_button) {
-                default_action_in = in_button;
-                default_action_update_state ();
-            }
-        }
-
-        private void gesture_cancel_cb (Gtk.Gesture gesture,
-                                        Gdk.EventSequence ? sequence) {
-            default_action_release (false);
-        }
-
-        private void default_action_release (bool emit) {
-            if (!default_action_down) return;
-            default_action_down = false;
-            if (emit) {
-                click_default_action ();
             }
         }
 
@@ -420,7 +404,7 @@ namespace SwayNotificationCenter {
         }
 
         public void click_alt_action (uint index) {
-            List<weak Gtk.Widget>? children = alt_actions_box.get_children ();
+            List<weak Gtk.Widget> ? children = alt_actions_box.get_children ();
             uint length = children.length ();
             if (length == 0 || index >= length) return;
 
@@ -480,9 +464,9 @@ namespace SwayNotificationCenter {
                 inline_reply_button, "sensitive",
                 BindingFlags.SYNC_CREATE,
                 (binding, srcval, ref targetval) => {
-                    targetval.set_boolean (((string) srcval).strip ().length > 0);
-                    return true;
-                },
+                targetval.set_boolean (((string) srcval).strip ().length > 0);
+                return true;
+            },
                 null);
 
             inline_reply_button.set_label (param.inline_reply.name ?? "Reply");

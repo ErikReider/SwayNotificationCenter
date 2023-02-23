@@ -185,11 +185,11 @@ public int command_line (string[] args) {
                 break;
             case "--get-inhibited":
             case "-I":
-                print(cc_daemon.is_inhibited ().to_string ());
+                print (cc_daemon.is_inhibited ().to_string ());
                 break;
             case "--get-num-inhibitors":
             case "-In":
-                print(cc_daemon.number_of_inhibitors ().to_string ());
+                print (cc_daemon.number_of_inhibitors ().to_string ());
                 break;
             case "--inhibitor-add":
             case "-Ia":

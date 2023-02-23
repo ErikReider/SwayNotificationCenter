@@ -1,3 +1,4 @@
+# vim: ft=PKGBUILD
 # Maintainer: Erik Reider <erik.reider@protonmail.com>
 pkgname=swaync
 pkgver=0.8.0
@@ -16,7 +17,7 @@ conflicts=("swaync" "swaync-client")
 provides=("swaync" "swaync-client")
 makedepends=(vala meson git scdoc)
 source=("${_pkgfoldername}-${pkgver}.tar.gz::${url}/archive/v${pkgver}.tar.gz")
-sha256sums=('c17553ac00e3824ea6c9c2ebf777d9e1c73e0cb46dd663b91eab04c71303ced6')
+sha256sums=('0640043fef600a5a494ac22f09e99118462e7ef2bdfd7fc85230b3e517bfc7d6')
 
 build() {
     arch-meson "${_pkgfoldername}-${pkgver}" build -Dscripting=true

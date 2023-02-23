@@ -1,7 +1,8 @@
+# vim: ft=PKGBUILD
 # Maintainer: Erik Reider <erik.reider@protonmail.com>
 pkgname=swaync-git
 _pkgname=swaync
-pkgver=v0.8.0.r418.14c830a
+pkgver=v0.8.0.r2.g50f40a2
 pkgrel=1
 pkgdesc="A simple notificaion daemon with a GTK panel for checking previous notifications like other DEs"
 url="https://github.com/ErikReider/SwayNotificationCenter"
@@ -39,6 +40,6 @@ build() {
 
 package() {
     DESTDIR="$pkgdir/" ninja -C build install
-    install -Dm644 "$_pkgfoldername-$pkgver/COPYING" -t "$pkgdir/usr/share/licenses/$pkgname"
-    install -Dm644 "$_pkgfoldername-$pkgver/README.md" -t "$pkgdir/usr/share/doc/$pkgname"
+    install -Dm644 "$_pkgname/COPYING" -t "$pkgdir/usr/share/licenses/$pkgname"
+    install -Dm644 "$_pkgname/README.md" -t "$pkgdir/usr/share/doc/$pkgname"
 }

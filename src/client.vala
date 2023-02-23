@@ -45,27 +45,31 @@ private CcDaemon cc_daemon = null;
 
 private void print_help (string[] args) {
     print ("Usage:\n");
-    print ("\t %s <OPTION>\n".printf (args[0]));
+    print ("  %s <OPTION>\n".printf (args[0]));
     print ("Help:\n");
-    print ("\t -h, \t --help \t\t Show help options\n");
-    print ("\t -v, \t --version \t\t Prints version\n");
+    print ("  -h, \t --help \t\t\t Show help options\n");
+    print ("  -v, \t --version \t\t\t Prints version\n");
     print ("Options:\n");
-    print ("\t -R, \t --reload-config \t Reload the config file\n");
-    print ("\t -rs, \t --reload-css \t\t Reload the css file. Location change requires restart\n");
-    print ("\t -t, \t --toggle-panel \t Toggle the notificaion panel\n");
-    print ("\t -op, \t --open-panel \t\t Opens the notificaion panel\n");
-    print ("\t -cp, \t --close-panel \t\t Closes the notificaion panel\n");
-    print ("\t -d, \t --toggle-dnd \t\t Toggle and print the current dnd state\n");
-    print ("\t -D, \t --get-dnd \t\t Print the current dnd state\n");
-    print ("\t -dn, \t --dnd-on \t\t Turn dnd on and print the new dnd state\n");
-    print ("\t -df, \t --dnd-off \t\t Turn dnd off and print the new dnd state\n");
-    print ("\t -c, \t --count \t\t Print the current notificaion count\n");
-    print ("\t     \t --hide-latest \t\t Hides latest notification. Still shown in Control Center\n");
-    print ("\t     \t --close-latest \t Closes latest notification\n");
-    print ("\t -C, \t --close-all \t\t Closes all notifications\n");
-    print ("\t -sw, \t --skip-wait \t\t Doesn't wait when swaync hasn't been started\n");
-    print ("\t -s, \t --subscribe \t\t Subscribe to notificaion add and close events\n");
-    print ("\t -swb, \t --subscribe-waybar \t Subscribe to notificaion add and close events "
+    print ("  -R, \t --reload-config \t\t Reload the config file\n");
+    print ("  -rs, \t --reload-css \t\t\t Reload the css file. Location change requires restart\n");
+    print ("  -t, \t --toggle-panel \t\t Toggle the notificaion panel\n");
+    print ("  -op, \t --open-panel \t\t\t Opens the notificaion panel\n");
+    print ("  -cp, \t --close-panel \t\t\t Closes the notificaion panel\n");
+    print ("  -d, \t --toggle-dnd \t\t\t Toggle and print the current dnd state\n");
+    print ("  -D, \t --get-dnd \t\t\t Print the current dnd state\n");
+    print ("  -dn, \t --dnd-on \t\t\t Turn dnd on and print the new dnd state\n");
+    print ("  -df, \t --dnd-off \t\t\t Turn dnd off and print the new dnd state\n");
+    print ("  -I, \t --get-inhibited \t\t Print if currently inhibited or not\n");
+    print ("  -In, \t --get-num-inhibitors \t\t Print number of inhibitors\n");
+    print ("  -Ia, \t --inhibitor-add [APP_ID] \t Add an inhibitor\n");
+    print ("  -Ir, \t --inhibitor-remove [APP_ID] \t Remove an inhibitor\n");
+    print ("  -c, \t --count \t\t\t Print the current notificaion count\n");
+    print ("      \t --hide-latest \t\t\t Hides latest notification. Still shown in Control Center\n");
+    print ("      \t --close-latest \t\t Closes latest notification\n");
+    print ("  -C, \t --close-all \t\t\t Closes all notifications\n");
+    print ("  -sw, \t --skip-wait \t\t\t Doesn't wait when swaync hasn't been started\n");
+    print ("  -s, \t --subscribe \t\t\t Subscribe to notificaion add and close events\n");
+    print ("  -swb,  --subscribe-waybar \t\t Subscribe to notificaion add and close events "
            + "with waybar support. Read README for example\n");
 }
 

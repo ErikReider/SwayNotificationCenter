@@ -14,6 +14,10 @@ _swaync-client() {
         -D
         -dn
         -df
+        -I
+        -In
+        -Ia
+        -Ir
         -c
         -C
         -sw
@@ -33,6 +37,10 @@ _swaync-client() {
         --get-dnd
         --dnd-on
         --dnd-off
+        --get-inhibited
+        --get-num-inhibitors
+        --inhibitor-add
+        --inhibitor-remove
         --count
         --hide-latest
         --close-latest

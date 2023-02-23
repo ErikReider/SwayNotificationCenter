@@ -43,6 +43,18 @@ swaync-client - Client executable
 *-df, --dnd-off*
 	Turn dnd off and print the new dnd state
 
+*-I, --get-inhibited*
+	Print if currently inhibited or not
+
+*-In, --get-num-inhibitors*
+	Print number of inhibitors
+
+*-Ia, --inhibitor-add [APP_ID]*
+	Add an inhibitor
+
+*-Ir, --inhibitor-remove [APP_ID]*
+	Remove an inhibitor
+
 *-c, --count*
 	Print the current notificaion count
 

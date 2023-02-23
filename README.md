@@ -279,7 +279,11 @@ Waybar config
       "notification": "<span foreground='red'><sup></sup></span>",
       "none": "",
       "dnd-notification": "<span foreground='red'><sup></sup></span>",
-      "dnd-none": ""
+      "dnd-none": "",
+      "inhibited-notification": "<span foreground='red'><sup></sup></span>",
+      "inhibited-none": "",
+      "dnd-inhibited-notification": "<span foreground='red'><sup></sup></span>",
+      "dnd-inhibited-none": ""
     },
     "return-type": "json",
     "exec-if": "which swaync-client",

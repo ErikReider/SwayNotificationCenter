@@ -37,7 +37,7 @@ interface CcDaemon : Object {
 
     public abstract bool add_inhibitor (string application_id) throws DBusError, IOError;
     public abstract bool remove_inhibitor (string application_id) throws DBusError, IOError;
-    public abstract int number_of_inhibitors () throws DBusError, IOError;
+    public abstract uint number_of_inhibitors () throws DBusError, IOError;
     public abstract bool is_inhibited () throws DBusError, IOError;
 }
 

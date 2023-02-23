@@ -30,6 +30,7 @@ Post your setup here: [Config flex 💪](https://github.com/ErikReider/SwayNotif
 - A panel to view previous notifications
 - Show album art for notifications like Spotify
 - Do not disturb
+- Inhibiting notifications through DBUS or client
 - Restores previous Do not disturb value after restart
 - Click notification to execute default action
 - Show alternative notification actions
@@ -278,7 +279,11 @@ Waybar config
       "notification": "<span foreground='red'><sup></sup></span>",
       "none": "",
       "dnd-notification": "<span foreground='red'><sup></sup></span>",
-      "dnd-none": ""
+      "dnd-none": "",
+      "inhibited-notification": "<span foreground='red'><sup></sup></span>",
+      "inhibited-none": "",
+      "dnd-inhibited-notification": "<span foreground='red'><sup></sup></span>",
+      "dnd-inhibited-none": ""
     },
     "return-type": "json",
     "exec-if": "which swaync-client",

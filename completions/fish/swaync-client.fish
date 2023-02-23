@@ -10,6 +10,11 @@ complete -c swaync-client -s d -l toggle-dnd --description "Toggle and print the
 complete -c swaync-client -s D -l get-dnd --description "Print the current dnd state" -r
 complete -c swaync-client -s dn -l dnd-on --description "Turn dnd on and print the new dnd state" -r
 complete -c swaync-client -s df -l dnd-off --description "Turn dnd off and print the new dnd state" -r
+complete -c swaync-client -s I -l get-inhibited --description "Print if currently inhibited or not" -r
+complete -c swaync-client -s In -l get-num-inhibitors --description "Print number of inhibitors" -r
+complete -c swaync-client -s Ia -l inhibitor-add --description "Add an inhibitor" -r
+complete -c swaync-client -s Ir -l inhibitor-remove --description "Remove an inhibitor" -r
+complete -c swaync-client -s Ic -l inhibitors-clear --description "Clears all inhibitors" -r
 complete -c swaync-client -s c -l count --description "Print the current notificaion count" -r
 complete -c swaync-client      -l hide-latest --description "Hides latest notification. Still shown in Control Center" -r
 complete -c swaync-client      -l close-latest --description "Closes latest notification" -r

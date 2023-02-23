@@ -2,13 +2,19 @@ namespace SwayNotificationCenter {
     [DBus (name = "org.freedesktop.Notifications")]
     public class NotiDaemon : Object {
         private uint32 noti_id = 0;
+
         public bool dnd { get; set; default = false; }
+
         private HashTable<string, uint32> synchronous_ids =
             new HashTable<string, uint32> (str_hash, str_equal);
 
         public ControlCenter control_center;
 
+        public unowned SwayncDaemon swaync_daemon;
+
         public NotiDaemon (SwayncDaemon swaync_daemon) {
+            this.swaync_daemon = swaync_daemon;
+
             this.notify["dnd"].connect (() => on_dnd_toggle (dnd));
 
             // Init dnd from gsettings
@@ -56,9 +62,10 @@ namespace SwayNotificationCenter {
                 control_center.close_notification (id);
                 NotificationClosed (id, ClosedReasons.DISMISSED);
 
-                swaync_daemon.subscribe (control_center.notification_count (),
+                swaync_daemon.subscribe_v2 (control_center.notification_count (),
                                          dnd,
-                                         control_center.get_visibility ());
+                                         control_center.get_visibility (),
+                                         swaync_daemon.inhibited);
             }
         }
 
@@ -119,13 +126,13 @@ namespace SwayNotificationCenter {
          */
         [DBus (name = "Notify")]
         public uint32 new_notification (string app_name,
-                                  uint32 replaces_id,
-                                  string app_icon,
-                                  string summary,
-                                  string body,
-                                  string[] actions,
-                                  HashTable<string, Variant> hints,
-                                  int expire_timeout) throws DBusError, IOError {
+                                        uint32 replaces_id,
+                                        string app_icon,
+                                        string summary,
+                                        string body,
+                                        string[] actions,
+                                        HashTable<string, Variant> hints,
+                                        int expire_timeout) throws DBusError, IOError {
             uint32 id = replaces_id;
             if (replaces_id == 0 || replaces_id > noti_id) id = ++noti_id;
 
@@ -179,15 +186,17 @@ namespace SwayNotificationCenter {
             // Only show popup notification if it is ENABLED or TRANSIENT
             if ((state == NotificationStatusEnum.ENABLED || state == NotificationStatusEnum.TRANSIENT)
                 && !control_center.get_visibility ()) {
+                // Also check if urgency is Critical and not inhibited and dnd
                 if (param.urgency == UrgencyLevels.CRITICAL ||
-                    (!dnd && param.urgency != UrgencyLevels.CRITICAL)) {
+                    (!dnd && !swaync_daemon.inhibited
+                     && param.urgency != UrgencyLevels.CRITICAL)) {
                     NotificationWindow.instance.add_notification (param, this);
                 }
             }
             // Only add notification to CC if it isn't IGNORED and not transient/TRANSIENT
             if (state != NotificationStatusEnum.IGNORED
-                  && state != NotificationStatusEnum.TRANSIENT
-                  && !param.transient) {
+                && state != NotificationStatusEnum.TRANSIENT
+                && !param.transient) {
                 control_center.add_notification (param, this);
             }
 
@@ -245,13 +254,13 @@ namespace SwayNotificationCenter {
                             string _summary = "Failed to run script: %s".printf (key);
                             string _body = "<b>Output:</b> " + error_msg;
                             this.new_notification ("SwayNotificationCenter",
-                                         0,
-                                         "dialog-error",
-                                         _summary,
-                                         _body,
-                                         {},
-                                         _hints,
-                                         -1);
+                                                   0,
+                                                   "dialog-error",
+                                                   _summary,
+                                                   _body,
+                                                   {},
+                                                   _hints,
+                                                   -1);
                         } catch (Error e) {
                             stderr.printf ("NOTIFING SCRIPT-FAIL ERROR: %s\n",
                                            e.message);

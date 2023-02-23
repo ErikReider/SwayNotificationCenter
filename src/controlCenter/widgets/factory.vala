@@ -32,6 +32,9 @@ namespace SwayNotificationCenter.Widgets {
             case "backlight":
                 widget = new Backlight (suffix, swaync_daemon, noti_daemon);
                 break;
+            case "inhibitors":
+                widget = new Inhibitors (suffix, swaync_daemon, noti_daemon);
+                break;
             default:
                 warning ("Could not find widget: \"%s\"!", key);
                 return null;

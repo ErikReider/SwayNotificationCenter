@@ -55,6 +55,9 @@ swaync-client - Client executable
 *-Ir, --inhibitor-remove [APP_ID]*
 	Remove an inhibitor
 
+*-Ic, --inhibitors-clear*
+	Clears all inhibitors
+
 *-c, --count*
 	Print the current notificaion count
 

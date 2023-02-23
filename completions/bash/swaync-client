@@ -18,6 +18,7 @@ _swaync-client() {
         -In
         -Ia
         -Ir
+        -Ic
         -c
         -C
         -sw
@@ -41,6 +42,7 @@ _swaync-client() {
         --get-num-inhibitors
         --inhibitor-add
         --inhibitor-remove
+        --inhibitors-clear
         --count
         --hide-latest
         --close-latest

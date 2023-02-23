@@ -39,6 +39,7 @@ interface CcDaemon : Object {
     public abstract bool remove_inhibitor (string application_id) throws DBusError, IOError;
     public abstract uint number_of_inhibitors () throws DBusError, IOError;
     public abstract bool is_inhibited () throws DBusError, IOError;
+    public abstract bool clear_inhibitors () throws DBusError, IOError;
 }
 
 private CcDaemon cc_daemon = null;
@@ -63,6 +64,7 @@ private void print_help (string[] args) {
     print ("  -In, \t --get-num-inhibitors \t\t Print number of inhibitors\n");
     print ("  -Ia, \t --inhibitor-add [APP_ID] \t Add an inhibitor\n");
     print ("  -Ir, \t --inhibitor-remove [APP_ID] \t Remove an inhibitor\n");
+    print ("  -Ic, \t --inhibitors-clear \t\t Clears all inhibitors\n");
     print ("  -c, \t --count \t\t\t Print the current notificaion count\n");
     print ("      \t --hide-latest \t\t\t Hides latest notification. Still shown in Control Center\n");
     print ("      \t --close-latest \t\t Closes latest notification\n");
@@ -218,6 +220,14 @@ public int command_line (string[] args) {
                     break;
                 }
                 stderr.printf ("Inhibitor: \"%s\" does not exist!...", args[2]);
+                break;
+            case "inhibitors-clear":
+            case "-Ic":
+                if (cc_daemon.clear_inhibitors ()) {
+                    print ("Cleared all inhibitors");
+                    break;
+                }
+                print ("No inhibitors to clear...");
                 break;
             case "--subscribe":
             case "-s":

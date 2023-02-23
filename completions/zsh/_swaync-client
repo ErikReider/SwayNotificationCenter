@@ -16,6 +16,7 @@ _arguments -s \
     '(-In --get-num-inhibitors)'{-In,--get-num-inhibitors}'[Print number of inhibitors]' \
     '(-Ia --inhibitor-add)'{-Ia,--inhibitor-add}'[Add an inhibitor]' \
     '(-Ir --inhibitor-remove)'{-Ir,--inhibitor-remove}'[Remove an inhibitor]' \
+    '(-Ic --inhibitors-clear)'{-Ic,--inhibitors-clear}'[Clears all inhibitors]' \
     '(-c --count)'{-c,--count}'[Print the current notificaion count]' \
     '(--hide-latest)'--hide-latest'[Closes all notifications]' \
     '(--close-latest)'--close-latest'[Hides latest notification. Still shown in Control Center]' \

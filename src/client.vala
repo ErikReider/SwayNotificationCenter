@@ -2,6 +2,7 @@ public struct SwayncDaemonData {
     public bool dnd;
     public bool cc_open;
     public uint count;
+    public bool inhibited;
 }
 
 [DBus (name = "org.erikreider.swaync.cc")]
@@ -32,7 +33,12 @@ interface CcDaemon : Object {
     [DBus (name = "GetSubscribeData")]
     public abstract SwayncDaemonData get_subscribe_data () throws Error;
 
-    public signal void subscribe (uint count, bool dnd, bool cc_open);
+    public signal void subscribe_v2 (uint count, bool dnd, bool cc_open, bool inhibited);
+
+    public abstract bool add_inhibitor (string application_id) throws DBusError, IOError;
+    public abstract bool remove_inhibitor (string application_id) throws DBusError, IOError;
+    public abstract int number_of_inhibitors () throws DBusError, IOError;
+    public abstract bool is_inhibited () throws DBusError, IOError;
 }
 
 private CcDaemon cc_daemon = null;
@@ -63,23 +69,25 @@ private void print_help (string[] args) {
            + "with waybar support. Read README for example\n");
 }
 
-private void on_subscribe (uint count, bool dnd, bool cc_open) {
+private void on_subscribe (uint count, bool dnd, bool cc_open, bool inhibited) {
     stdout.printf (
-        "{ \"count\": %u, \"dnd\": %s, \"visible\": %s }\n"
-         .printf (count, dnd.to_string (), cc_open.to_string ()));
+        "{ \"count\": %u, \"dnd\": %s, \"visible\": %s, \"inhibited\": %s }\n"
+         .printf (count, dnd.to_string (), cc_open.to_string (), inhibited.to_string ()));
 }
 
 private void print_subscribe () {
     try {
         SwayncDaemonData data = cc_daemon.get_subscribe_data ();
-        on_subscribe (data.count, data.dnd, data.cc_open);
+        on_subscribe (data.count, data.dnd, data.cc_open, data.inhibited);
     } catch (Error e) {
-        on_subscribe (0, false, false);
+        on_subscribe (0, false, false, false);
     }
 }
 
-private void on_subscribe_waybar (uint count, bool dnd, bool cc_open) {
-    string state = (dnd ? "dnd-" : "") + (count > 0 ? "notification" : "none");
+private void on_subscribe_waybar (uint count, bool dnd, bool cc_open, bool inhibited) {
+    string state = (dnd ? "dnd-" : "")
+                   + (inhibited ? "inhibited-" : "")
+                   + (count > 0 ? "notification" : "none");
 
     string tooltip = "";
     if (count > 0) {
@@ -99,9 +107,9 @@ private void on_subscribe_waybar (uint count, bool dnd, bool cc_open) {
 private void print_subscribe_waybar () {
     try {
         SwayncDaemonData data = cc_daemon.get_subscribe_data ();
-        on_subscribe_waybar (data.count, data.dnd, data.cc_open);
+        on_subscribe_waybar (data.count, data.dnd, data.cc_open, data.inhibited);
     } catch (Error e) {
-        on_subscribe_waybar (0, false, false);
+        on_subscribe_waybar (0, false, false, false);
     }
 }
 
@@ -175,12 +183,46 @@ public int command_line (string[] args) {
                 cc_daemon.set_dnd (false);
                 print (cc_daemon.get_dnd ().to_string ());
                 break;
+            case "--get-inhibited":
+            case "-I":
+                print(cc_daemon.is_inhibited ().to_string ());
+                break;
+            case "--get-num-inhibitors":
+            case "-In":
+                print(cc_daemon.number_of_inhibitors ().to_string ());
+                break;
+            case "--inhibitor-add":
+            case "-Ia":
+                if (args.length < 3) {
+                    stderr.printf ("Application ID needed!");
+                    Process.exit (1);
+                }
+                if (cc_daemon.add_inhibitor (args[2])) {
+                    print ("Added inhibitor: \"%s\"", args[2]);
+                    break;
+                }
+                stderr.printf ("Inhibitor: \"%s\" already added!...", args[2]);
+                break;
+            case "--inhibitor-remove":
+            case "-Ir":
+                if (args.length < 3) {
+                    stderr.printf ("Application ID needed!");
+                    Process.exit (1);
+                }
+                if (cc_daemon.remove_inhibitor (args[2])) {
+                    print ("Removed inhibitor: \"%s\"", args[2]);
+                    break;
+                }
+                stderr.printf ("Inhibitor: \"%s\" does not exist!...", args[2]);
+                break;
             case "--subscribe":
             case "-s":
-                cc_daemon.subscribe.connect (on_subscribe);
-                on_subscribe (cc_daemon.notification_count (),
-                              cc_daemon.get_dnd (),
-                              cc_daemon.get_visibility ());
+                cc_daemon.subscribe_v2.connect (on_subscribe);
+                var data = cc_daemon.get_subscribe_data ();
+                on_subscribe (data.count,
+                              data.dnd,
+                              data.cc_open,
+                              data.inhibited);
                 var loop = new MainLoop ();
                 Bus.watch_name (
                     BusType.SESSION,
@@ -192,7 +234,7 @@ public int command_line (string[] args) {
                 break;
             case "--subscribe-waybar":
             case "-swb":
-                cc_daemon.subscribe.connect (on_subscribe_waybar);
+                cc_daemon.subscribe_v2.connect (on_subscribe_waybar);
                 var loop = new MainLoop ();
                 Bus.watch_name (
                     BusType.SESSION,

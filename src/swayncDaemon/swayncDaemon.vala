@@ -3,11 +3,15 @@ namespace SwayNotificationCenter {
         public bool dnd;
         public bool cc_open;
         public uint count;
+        public bool inhibited;
     }
 
     [DBus (name = "org.erikreider.swaync.cc")]
     public class SwayncDaemon : Object {
         public NotiDaemon noti_daemon;
+
+        private GenericSet<string> inhibitors = new GenericSet<string> (str_hash, str_equal);
+        public bool inhibited { get; set; default = false; }
 
         private Array<BlankWindow> blank_windows = new Array<BlankWindow> ();
         private unowned Gdk.Display ? display = Gdk.Display.get_default ();
@@ -32,9 +36,10 @@ namespace SwayNotificationCenter {
 
             noti_daemon.on_dnd_toggle.connect ((dnd) => {
                 try {
-                    subscribe (noti_daemon.control_center.notification_count (),
+                    subscribe_v2 (noti_daemon.control_center.notification_count (),
                                dnd,
-                               get_visibility ());
+                               get_visibility (),
+                               inhibited);
                 } catch (Error e) {
                     stderr.printf (e.message + "\n");
                 }
@@ -42,9 +47,10 @@ namespace SwayNotificationCenter {
 
             // Update on start
             try {
-                subscribe (notification_count (),
+                subscribe_v2 (notification_count (),
                            get_dnd (),
-                           get_visibility ());
+                           get_visibility (),
+                           inhibited);
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }
@@ -135,13 +141,21 @@ namespace SwayNotificationCenter {
                        dnd = get_dnd (),
                        cc_open = get_visibility (),
                        count = notification_count (),
+                       inhibited = is_inhibited (),
             };
         }
 
         /**
-         * Called when Dot Not Disturb state changes and when
-         * notification gets added/removed
+         * Called when Dot Not Disturb state changes, notification gets
+         * added/removed, and when Control Center opens
          */
+        public signal void subscribe_v2 (uint count, bool dnd, bool cc_open, bool inhibited);
+
+        /**
+         * Called when Dot Not Disturb state changes, notification gets
+         * added/removed, Control Center opens, and when inhibitor state changes
+         */
+        [Version (deprecated = true, replacement = "SwayncDaemon.subscribe_v2")]
         public signal void subscribe (uint count, bool dnd, bool cc_open);
 
         /** Reloads the CSS file */
@@ -229,6 +243,49 @@ namespace SwayNotificationCenter {
         /** Closes a specific notification with the `id` */
         public void close_notification (uint32 id) throws DBusError, IOError {
             noti_daemon.control_center.close_notification (id);
+        }
+
+        /**
+         * Adds an inhibitor with the Application ID
+         * (ex: "org.erikreider.swaysettings", "swayidle", etc...).
+         *
+         * @return  false if the `application_id` already exists, otherwise true.
+         */
+        public bool add_inhibitor (string application_id) throws DBusError, IOError {
+            if (inhibitors.contains (application_id)) return false;
+            inhibitors.add (application_id);
+            inhibited = inhibitors.length > 0;
+            subscribe_v2 (noti_daemon.control_center.notification_count (),
+                       noti_daemon.dnd,
+                       get_visibility (),
+                       inhibited);
+            return true;
+        }
+
+        /**
+         * Removes an inhibitor with the Application ID
+         * (ex: "org.erikreider.swaysettings", "swayidle", etc...).
+         *
+         * @return  false if the `application_id` doesn't exist, otherwise true
+         */
+        public bool remove_inhibitor (string application_id) throws DBusError, IOError {
+            if (!inhibitors.remove (application_id)) return false;
+            inhibited = inhibitors.length > 0;
+            subscribe_v2 (noti_daemon.control_center.notification_count (),
+                       noti_daemon.dnd,
+                       get_visibility (),
+                       inhibited);
+            return true;
+        }
+
+        /** Get the number of inhibitors */
+        public uint number_of_inhibitors () throws DBusError, IOError {
+            return inhibitors.length;
+        }
+
+        /** Get if is inhibited */
+        public bool is_inhibited () throws DBusError, IOError {
+            return inhibited;
         }
     }
 }

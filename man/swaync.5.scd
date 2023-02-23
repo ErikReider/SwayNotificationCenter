@@ -199,6 +199,8 @@ config file to be able to detect config errors
 			optional: true ++
 		*buttons-grid*++
 			optional: true ++
+		*inhibitors*++
+			optional: true ++
 	description: ++
 		Which order and which widgets to display. ++
 		If the \"notifications\" widget isn't specified, it ++
@@ -211,6 +213,7 @@ config file to be able to detect config errors
 ```
 {
 	"widgets": [
+		"inhibitors",
 		"title",
 		"dnd",
 		"notifications"
@@ -407,7 +410,27 @@ config file to be able to detect config errors
 					optional: true ++
 					default: 0 ++
 					description: Lowest possible value for brightness ++
-			description: Slider to control screen brightness ++	
+			description: Slider to control screen brightness ++
+		*inhibitors*++
+			type: object ++
+			css class: widget-inhibitors ++
+			properties: ++
+				text: ++
+					type: string ++
+					optional: true ++
+					default: "Inhibitors" ++
+					description: The title of the widget ++
+				clear-all-button: ++
+					type: bool ++
+					optional: true ++
+					default: true ++
+					description: Whether to display a "Clear All" button ++
+				button-text: ++
+					type: string ++
+					optional: true ++
+					default: "Clear All" ++
+					description: "Clear All" button text ++
+			description: Displayed if notifications are inhibited.
 
 	example:
 ```

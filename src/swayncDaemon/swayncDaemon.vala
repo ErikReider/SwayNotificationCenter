@@ -12,6 +12,8 @@ namespace SwayNotificationCenter {
 
         private GenericSet<string> inhibitors = new GenericSet<string> (str_hash, str_equal);
         public bool inhibited { get; set; default = false; }
+        [DBus (visible = false)]
+        public signal void inhibited_changed (uint length);
 
         private Array<BlankWindow> blank_windows = new Array<BlankWindow> ();
         private unowned Gdk.Display ? display = Gdk.Display.get_default ();
@@ -255,6 +257,7 @@ namespace SwayNotificationCenter {
             if (inhibitors.contains (application_id)) return false;
             inhibitors.add (application_id);
             inhibited = inhibitors.length > 0;
+            inhibited_changed (inhibitors.length);
             subscribe_v2 (noti_daemon.control_center.notification_count (),
                        noti_daemon.dnd,
                        get_visibility (),
@@ -271,6 +274,7 @@ namespace SwayNotificationCenter {
         public bool remove_inhibitor (string application_id) throws DBusError, IOError {
             if (!inhibitors.remove (application_id)) return false;
             inhibited = inhibitors.length > 0;
+            inhibited_changed (inhibitors.length);
             subscribe_v2 (noti_daemon.control_center.notification_count (),
                        noti_daemon.dnd,
                        get_visibility (),
@@ -286,6 +290,19 @@ namespace SwayNotificationCenter {
         /** Get if is inhibited */
         public bool is_inhibited () throws DBusError, IOError {
             return inhibited;
+        }
+
+        /** Clear all inhibitors */
+        public bool clear_inhibitors () throws DBusError, IOError {
+            if (inhibitors.length == 0) return false;
+            inhibitors.remove_all ();
+            inhibited = false;
+            inhibited_changed (0);
+            subscribe_v2 (noti_daemon.control_center.notification_count (),
+                       noti_daemon.dnd,
+                       get_visibility (),
+                       inhibited);
+            return true;
         }
     }
 }

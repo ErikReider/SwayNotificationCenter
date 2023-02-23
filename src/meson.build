@@ -47,6 +47,8 @@ widget_sources = [
   # Widget: Backlight Slider
   'controlCenter/widgets/backlight/backlight.vala',
   'controlCenter/widgets/backlight/backlightUtil.vala',
+  # Widget: Inhibitors
+  'controlCenter/widgets/inhibitors/inhibitors.vala',
 ]
 
 app_sources = [

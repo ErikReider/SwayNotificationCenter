@@ -43,11 +43,17 @@
     }
   },
   "widgets": [
+    "inhibitors",
     "title",
     "dnd",
     "notifications"
   ],
   "widget-config": {
+    "inhibitors": {
+      "text": "Inhibitors",
+      "button-text": "Clear All",
+      "clear-all-button": true
+    },
     "title": {
       "text": "Notifications",
       "clear-all-button": true,

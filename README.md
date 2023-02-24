@@ -182,6 +182,21 @@ To reload the config, you'll need to run `swaync-client --reload-config`
 
 The main CSS style file is located in `/etc/xdg/swaync/style.css`. Copy it over to your `~/.config/swaync/` folder to customize without needing root access.
 
+## Notification Inhibition
+
+Notifications can be inhibited through the provided `swaync-client` executable
+or through the DBus interface `org.erikreider.swaync.cc`.
+
+Here's an example of notification inhibition while screen sharing through
+`xdg-desktop-portal-wlr`
+
+```conf
+# xdg-desktop-portal-wlr config
+[screencast]
+exec_before=swaync-client --inhibitor-add "xdg-desktop-portal-wlr"
+exec_after=swaync-client --inhibitor-remove "xdg-desktop-portal-wlr"
+```
+
 ## Scripting
 
 Scripting rules and logic:

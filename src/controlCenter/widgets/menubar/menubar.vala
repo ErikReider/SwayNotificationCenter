@@ -17,7 +17,9 @@ namespace SwayNotificationCenter.Widgets {
         string ? label;
         Position ? position;
         Action[] actions;
-        Gtk.Box ? menu;
+        Gtk.Revealer ? revealer;
+        int animation_duration;
+        Gtk.RevealerTransitionType ? animation_type;
     }
 
     public struct Action {
@@ -61,7 +63,7 @@ namespace SwayNotificationCenter.Widgets {
             show_all ();
 
             foreach (var obj in menu_objects) {
-                obj.menu ?.hide ();
+                obj.revealer ?.set_reveal_child (false);
             }
         }
 
@@ -92,14 +94,19 @@ namespace SwayNotificationCenter.Widgets {
 
                     Gtk.Box menu = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
                     menu.get_style_context ().add_class (obj.name);
-                    obj.menu = menu;
+
+                    Gtk.Revealer r = new Gtk.Revealer ();
+                    r.add (menu);
+                    r.set_transition_duration (obj.animation_duration);
+                    r.set_transition_type (obj.animation_type);
+                    obj.revealer = r;
 
                     show_button.clicked.connect (() => {
-                    bool visible = !menu.visible;
+                    bool visible = !r.get_reveal_child ();
                     foreach (var o in menu_objects) {
-                        o.menu ?.set_visible (false);
+                        o.revealer ?.set_reveal_child (false);
                     }
-                    menu.set_visible (visible);
+                    r.set_reveal_child (visible);
                 });
 
                     foreach (var a in obj.actions) {
@@ -117,7 +124,7 @@ namespace SwayNotificationCenter.Widgets {
                             break;
                     }
 
-                    menus_container.add (menu);
+                    menus_container.add (r);
                     break;
             }
         }
@@ -160,6 +167,31 @@ namespace SwayNotificationCenter.Widgets {
                     info ("No label for menu-object given using default");
                 }
 
+                int duration = get_prop<int> (obj, "animation_duration");
+
+                string ? animation_type = get_prop<string> (obj, "animation_type");
+                if (animation_type == null) {
+                    animation_type = "slide_down";
+                    info ("No animation-type for menu-object given using default");
+                }
+
+                Gtk.RevealerTransitionType revealer_type;
+
+                switch (animation_type) {
+                    case "none":
+                        revealer_type = Gtk.RevealerTransitionType.NONE;
+                        break;
+                    case "slide_up":
+                        revealer_type = Gtk.RevealerTransitionType.SLIDE_UP;
+                        break;
+                    case "slide_down":
+                        revealer_type = Gtk.RevealerTransitionType.SLIDE_DOWN;
+                        break;
+                    default:
+                        revealer_type = Gtk.RevealerTransitionType.NONE;
+                        break;
+                }
+
                 Action[] actions_list = parse_actions (actions);
                 menu_objects.append (ConfigObject () {
                     name = name,
@@ -167,7 +199,9 @@ namespace SwayNotificationCenter.Widgets {
                     label = label,
                     position = pos,
                     actions = actions_list,
-                    menu = null,
+                    revealer = null,
+                    animation_duration = duration,
+                    animation_type = revealer_type,
                 });
             }
         }

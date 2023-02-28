@@ -3,7 +3,7 @@
 pkgname=swaync-git
 _pkgname=swaync
 pkgver=v0.8.0.r2.g50f40a2
-pkgrel=1
+pkgrel=2
 pkgdesc="A simple notificaion daemon with a GTK panel for checking previous notifications like other DEs"
 url="https://github.com/ErikReider/SwayNotificationCenter"
 arch=(
@@ -14,7 +14,7 @@ arch=(
 license=('GPL3')
 depends=("gtk3" "gtk-layer-shell" "dbus" "glib2" "gobject-introspection" "libgee" "json-glib" "libhandy" "libpulse" )
 conflicts=("swaync" "swaync-client")
-provides=("swaync" "swaync-client")
+provides=("swaync" "swaync-client" "notification-daemon")
 makedepends=(vala meson git scdoc)
 source=("$_pkgname::git+$url")
 sha256sums=('SKIP')

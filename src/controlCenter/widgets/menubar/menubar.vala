@@ -167,7 +167,8 @@ namespace SwayNotificationCenter.Widgets {
                     info ("No label for menu-object given using default");
                 }
 
-                int duration = get_prop<int> (obj, "animation_duration");
+                int duration = int.max (0, get_prop<int> (obj, "animation_duration"));
+                if (duration == 0) duration = 250;
 
                 string ? animation_type = get_prop<string> (obj, "animation_type");
                 if (animation_type == null) {

@@ -314,6 +314,17 @@ config file to be able to detect config errors
 							default: "right" ++
 							description: Horizontal position of the button in the bar ++
 							enum: ["right", "left"] ++
+						animation_type: ++
+							type: string ++
+							optional: true ++
+							default: "slide_down" ++
+							description: Animation type for menu++
+							enum: ["slide_down", "slide_up", "none"] ++
+						animation_duration: ++
+							type: integer ++
+							optional: true ++
+							default: 250 ++
+							description: Duration of animation in milliseconds ++
 						actions: ++
 							type: array ++
 							Default values: [] ++

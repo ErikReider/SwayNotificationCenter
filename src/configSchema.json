@@ -423,6 +423,17 @@
               "default": "right",
               "enum": ["right", "left"]
             },
+            "animation_type": {
+              "type": "string",
+							"default": "slide_down",
+							"description": "Animation type for menu",
+							"enum": ["slide_down", "slide_up", "none"]
+            },
+            "animation_duration":{
+              "type": "integer",
+              "default": 250,
+              "description": "Duration of animation in milliseconds"
+            },
             "actions": {
               "$ref" : "#/widgets/buttons-grid/properties/actions"
             }

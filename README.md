@@ -1,11 +1,8 @@
 # SwayNotificationCenter
 
-[![Check build for Arch.](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/arch-build.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/arch-build.yml)
-
+[![Check PKGBUILD builds for Arch.](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/PKGBUILD-builds.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/PKGBUILD-builds.yml)
 [![Check build for Fedora.](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/fedora-build.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/fedora-build.yml)
-
 [![Check build for latest Ubuntu LTS.](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/ubuntu-build.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/ubuntu-build.yml)
-
 [![Linting](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/linting.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/linting.yml)
 
 A simple notification daemon with a GTK gui for notifications and the control center

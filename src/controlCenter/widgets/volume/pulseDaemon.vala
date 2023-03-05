@@ -39,7 +39,7 @@ namespace SwayNotificationCenter.Widgets {
             }
         }
 
-        ~PulseDaemon() {
+        ~PulseDaemon () {
             this.close ();
         }
 

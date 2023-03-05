@@ -19,7 +19,7 @@ namespace SwayNotificationCenter.Widgets {
         Action[] actions;
         Gtk.Revealer ? revealer;
         int animation_duration;
-        Gtk.RevealerTransitionType ? animation_type;
+        Gtk.RevealerTransitionType animation_type;
     }
 
     public struct Action {
@@ -71,7 +71,7 @@ namespace SwayNotificationCenter.Widgets {
             switch (obj.type) {
                 case MenuType.BUTTONS:
                     Gtk.Box container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
-                    container.get_style_context ().add_class (obj.name);
+                    if (obj.name != null) container.get_style_context ().add_class (obj.name);
 
                     foreach (Action a in obj.actions) {
                         Gtk.Button b = new Gtk.Button.with_label (a.label);
@@ -93,7 +93,7 @@ namespace SwayNotificationCenter.Widgets {
                     Gtk.Button show_button = new Gtk.Button.with_label (obj.label);
 
                     Gtk.Box menu = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
-                    menu.get_style_context ().add_class (obj.name);
+                    if (obj.name != null) menu.get_style_context ().add_class (obj.name);
 
                     Gtk.Revealer r = new Gtk.Revealer ();
                     r.add (menu);
@@ -102,12 +102,12 @@ namespace SwayNotificationCenter.Widgets {
                     obj.revealer = r;
 
                     show_button.clicked.connect (() => {
-                    bool visible = !r.get_reveal_child ();
-                    foreach (var o in menu_objects) {
-                        o.revealer ?.set_reveal_child (false);
-                    }
-                    r.set_reveal_child (visible);
-                });
+                        bool visible = !r.get_reveal_child ();
+                        foreach (var o in menu_objects) {
+                            o.revealer ?.set_reveal_child (false);
+                        }
+                        r.set_reveal_child (visible);
+                    });
 
                     foreach (var a in obj.actions) {
                         Gtk.Button b = new Gtk.Button.with_label (a.label);
@@ -179,6 +179,7 @@ namespace SwayNotificationCenter.Widgets {
                 Gtk.RevealerTransitionType revealer_type;
 
                 switch (animation_type) {
+                    default:
                     case "none":
                         revealer_type = Gtk.RevealerTransitionType.NONE;
                         break;
@@ -187,9 +188,6 @@ namespace SwayNotificationCenter.Widgets {
                         break;
                     case "slide_down":
                         revealer_type = Gtk.RevealerTransitionType.SLIDE_DOWN;
-                        break;
-                    default:
-                        revealer_type = Gtk.RevealerTransitionType.NONE;
                         break;
                 }
 

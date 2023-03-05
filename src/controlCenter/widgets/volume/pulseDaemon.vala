@@ -8,7 +8,7 @@ namespace SwayNotificationCenter.Widgets {
      * https://github.com/elementary/switchboard-plug-sound
      */
     public class PulseDaemon : Object {
-        private Context context;
+        private Context? context;
         private GLibMainLoop mainloop;
         private bool quitting = false;
 
@@ -33,8 +33,14 @@ namespace SwayNotificationCenter.Widgets {
 
         public void close () {
             quitting = true;
-            context.disconnect ();
-            context = null;
+            if (this.context != null) {
+                context.disconnect ();
+                context = null;
+            }
+        }
+
+        ~PulseDaemon() {
+            this.close ();
         }
 
         public signal void change_default_device (PulseDevice device);

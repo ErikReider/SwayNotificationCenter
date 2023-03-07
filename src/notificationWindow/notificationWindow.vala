@@ -24,7 +24,9 @@ namespace SwayNotificationCenter {
         }
 
         public static bool is_null {
-            get { return window == null; }
+            get {
+                return window == null;
+            }
         }
 
         [GtkChild]
@@ -127,13 +129,13 @@ namespace SwayNotificationCenter {
         }
 
         /** Return true to remove notification, false to skip */
-        public delegate bool remove_iter_func(Notification notification);
+        public delegate bool remove_iter_func (Notification notification);
 
-        public void close_all_notifications (remove_iter_func? func = null) {
+        public void close_all_notifications (remove_iter_func ? func = null) {
             if (!this.get_realized ()) return;
             foreach (var w in box.get_children ()) {
                 Notification notification = (Notification) w;
-                if (func == null || func(notification)) {
+                if (func == null || func (notification)) {
                     remove_notification (notification, false);
                 }
             }

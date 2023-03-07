@@ -17,6 +17,13 @@ namespace SwayNotificationCenter {
 
             this.notify["dnd"].connect (() => on_dnd_toggle (dnd));
 
+            on_dnd_toggle.connect ((dnd) => {
+                if (!dnd || NotificationWindow.is_null) return;
+                NotificationWindow.instance.close_all_notifications ((noti) => {
+                    return noti.param.urgency != UrgencyLevels.CRITICAL;
+                });
+            });
+
             // Init dnd from gsettings
             self_settings.bind ("dnd-state", this, "dnd", SettingsBindFlags.DEFAULT);
 
@@ -34,14 +41,12 @@ namespace SwayNotificationCenter {
 
         /** Toggles the current Do Not Disturb state */
         public bool toggle_dnd () throws DBusError, IOError {
-            on_dnd_toggle (dnd = !dnd);
-            return dnd;
+            return dnd = !dnd;
         }
 
         /** Sets the current Do Not Disturb state */
         [DBus (name = "SetDnd")]
         public void set_do_not_disturb (bool state) throws DBusError, IOError {
-            on_dnd_toggle (state);
             dnd = state;
         }
 
@@ -63,9 +68,9 @@ namespace SwayNotificationCenter {
                 NotificationClosed (id, ClosedReasons.DISMISSED);
 
                 swaync_daemon.subscribe_v2 (control_center.notification_count (),
-                                         dnd,
-                                         control_center.get_visibility (),
-                                         swaync_daemon.inhibited);
+                                            dnd,
+                                            control_center.get_visibility (),
+                                            swaync_daemon.inhibited);
             }
         }
 

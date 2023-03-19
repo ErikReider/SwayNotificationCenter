@@ -8,7 +8,7 @@ namespace SwayNotificationCenter.Widgets {
      * https://github.com/elementary/switchboard-plug-sound
      */
     public class PulseDaemon : Object {
-        private Context? context;
+        private Context ? context;
         private GLibMainLoop mainloop;
         private bool quitting = false;
 
@@ -21,10 +21,14 @@ namespace SwayNotificationCenter.Widgets {
 
         public HashMap<string, PulseDevice> sinks { get; private set; }
 
+        public HashMap<uint32, PulseSinkInput> active_sinks { get; private set; }
+
         construct {
             mainloop = new GLibMainLoop ();
 
             sinks = new HashMap<string, PulseDevice> ();
+
+            active_sinks = new HashMap<uint32, PulseSinkInput>();
         }
 
         public void start () {
@@ -44,6 +48,10 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         public signal void change_default_device (PulseDevice device);
+
+        public signal void new_active_sink (PulseSinkInput device);
+        public signal void change_active_sink (PulseSinkInput device);
+        public signal void remove_active_sink (PulseSinkInput device);
 
         public signal void new_device (PulseDevice device);
         public signal void change_device (PulseDevice device);
@@ -100,6 +108,26 @@ namespace SwayNotificationCenter.Widgets {
             var type = t & Context.SubscriptionEventType.FACILITY_MASK;
             var event = t & Context.SubscriptionEventType.TYPE_MASK;
             switch (type) {
+                case Context.SubscriptionEventType.SINK_INPUT:
+                    switch (event) {
+                        default: break;
+                        case Context.SubscriptionEventType.NEW:
+                        case Context.SubscriptionEventType.CHANGE:
+                            ctx.get_sink_input_info_list (this.get_sink_input_info);
+                            break;
+                        case Context.SubscriptionEventType.REMOVE:
+                            // A safe way of removing the sink_input
+                            var iter = active_sinks.map_iterator ();
+                            while (iter.next ()) {
+                                var sink_input = iter.get_value ();
+                                if (sink_input.index != index) continue;
+                                this.remove_active_sink (sink_input);
+                                iter.unset ();
+                                break;
+                            }
+                            break;
+                    }
+                    break;
                 case Context.SubscriptionEventType.SINK:
                     switch (event) {
                         default: break;
@@ -165,6 +193,56 @@ namespace SwayNotificationCenter.Widgets {
 
             ctx.get_card_info_list (this.get_card_info);
             ctx.get_sink_info_list (this.get_sink_info);
+
+            ctx.get_sink_input_info_list (this.get_sink_input_info);
+        }
+
+        private void get_sink_input_info (Context ctx, SinkInputInfo ? info, int eol) {
+            if (info == null || eol != 0) return;
+
+            uint32 id = PulseSinkInput.get_hash_map_key (info.index);
+            PulseSinkInput sink_input = null;
+            bool has_sink_input = active_sinks.has_key (id);
+            if (has_sink_input) {
+                sink_input = active_sinks.get (id);
+            } else {
+                sink_input = new PulseSinkInput ();
+            }
+
+            sink_input.index = info.index;
+            sink_input.sink_index = info.sink;
+            sink_input.client_index = info.client;
+
+            sink_input.name = info.proplist.gets ("application.name");
+            sink_input.application_binary = info.proplist
+                                             .gets ("application.process.binary");
+            sink_input.application_icon_name = info.proplist
+                                                .gets ("application.icon_name");
+            sink_input.media_name = info.proplist.gets ("media.name");
+
+            sink_input.is_muted = info.mute == 1;
+
+            sink_input.cvolume = info.volume;
+            sink_input.channel_map = info.channel_map;
+            sink_input.balance = sink_input.cvolume
+                                  .get_balance (sink_input.channel_map);
+            sink_input.volume_operations.foreach ((op) => {
+                if (op.get_state () != Operation.State.RUNNING) {
+                    sink_input.volume_operations.remove (op);
+                }
+                return Source.CONTINUE;
+            });
+            if (sink_input.volume_operations.is_empty) {
+                sink_input.volume = volume_to_double (
+                    sink_input.cvolume.max ());
+            }
+
+            if (!has_sink_input) {
+                active_sinks.set (id, sink_input);
+                this.new_active_sink (sink_input);
+            } else {
+                this.change_active_sink (sink_input);
+            }
         }
 
         private void get_card_info (Context ctx, CardInfo ? info, int eol) {
@@ -368,6 +446,26 @@ namespace SwayNotificationCenter.Widgets {
         /*
          * Setters
          */
+        public void set_sink_input_volume (PulseSinkInput sink_input, double volume) {
+            sink_input.volume_operations.foreach ((operation) => {
+                if (operation.get_state () == Operation.State.RUNNING) {
+                    operation.cancel ();
+                }
+
+                sink_input.volume_operations.remove (operation);
+                return GLib.Source.CONTINUE;
+            });
+
+            var cvol = sink_input.cvolume;
+            cvol.scale (double_to_volume (volume));
+            Operation ? operation = null;
+            operation = context.set_sink_input_volume (
+                sink_input.index, cvol);
+            if (operation != null) {
+                sink_input.volume_operations.add (operation);
+            }
+        }
+
         public void set_device_volume (PulseDevice device, double volume) {
             device.volume_operations.foreach ((operation) => {
                 if (operation.get_state () == Operation.State.RUNNING) {
@@ -515,10 +613,10 @@ namespace SwayNotificationCenter.Widgets {
             }
         }
 
-        // public void set_sink_input_mute (bool state, PulseSinkInput sink_input) {
-        // if (sink_input.is_muted == state) return;
-        // context.set_sink_input_mute (sink_input.index, state);
-        // }
+        public void set_sink_input_mute (bool state, PulseSinkInput sink_input) {
+            if (sink_input.is_muted == state) return;
+            context.set_sink_input_mute (sink_input.index, state);
+        }
 
         /*
          * Volume utils

@@ -167,10 +167,10 @@ namespace SwayNotificationCenter.Widgets {
                     info ("No label for menu-object given using default");
                 }
 
-                int duration = int.max (0, get_prop<int> (obj, "animation_duration"));
+                int duration = int.max (0, get_prop<int> (obj, "animation-duration"));
                 if (duration == 0) duration = 250;
 
-                string ? animation_type = get_prop<string> (obj, "animation_type");
+                string ? animation_type = get_prop<string> (obj, "animation-type");
                 if (animation_type == null) {
                     animation_type = "slide_down";
                     info ("No animation-type for menu-object given using default");
@@ -202,6 +202,14 @@ namespace SwayNotificationCenter.Widgets {
                     animation_duration = duration,
                     animation_type = revealer_type,
                 });
+            }
+        }
+
+        public override void on_cc_visibility_change (bool val) {
+            if (!val) {
+                foreach (var obj in menu_objects) {
+                    obj.revealer ?.set_reveal_child (false);
+                }
             }
         }
     }

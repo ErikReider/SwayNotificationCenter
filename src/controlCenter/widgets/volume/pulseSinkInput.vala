@@ -87,6 +87,7 @@ namespace SwayNotificationCenter.Widgets {
 
             scale.value_changed.connect (() => {
                 client.set_sink_input_volume (sink_input, (float) scale.get_value ());
+                scale.tooltip_text = ((int) scale.get_value ()).to_string ();
             });
         }
 
@@ -99,6 +100,7 @@ namespace SwayNotificationCenter.Widgets {
             );
 
             scale.set_value (sink_input.volume);
+            scale.tooltip_text = ((int) scale.get_value ()).to_string ();
 
             this.show_all ();
         }

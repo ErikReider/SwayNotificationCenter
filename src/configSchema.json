@@ -423,13 +423,13 @@
               "default": "right",
               "enum": ["right", "left"]
             },
-            "animation_type": {
+            "animation-type": {
               "type": "string",
               "default": "slide_down",
               "description": "Animation type for menu",
               "enum": ["slide_down", "slide_up", "none"]
             },
-            "animation_duration":{
+            "animation-duration":{
               "type": "integer",
               "default": 250,
               "description": "Duration of animation in milliseconds"
@@ -466,6 +466,32 @@
           "type": "string",
           "description": "Text displayed in front of the volume slider",
           "default": "Volume"
+        },
+        "show-per-app": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show per app volume control"
+        },
+        "button-label-1": {
+          "type": "string",
+          "default": "⇧",
+          "description": "Label shown when per app control not shown"
+        },
+        "button-label-2": {
+          "type": "string",
+          "default": "⇩",
+          "description": "Label shown when per app control not shown"
+        },
+        "animation-type": {
+          "type": "string",
+          "default": "slide_down",
+          "description": "Animation type for menu",
+          "enum": ["slide_down", "slide_up", "none"]
+        },
+        "animation-duration":{
+          "type": "integer",
+          "default": 250,
+          "description": "Duration of animation in milliseconds"
         }
       }
     },

@@ -16,6 +16,8 @@ namespace SwayNotificationCenter.Widgets {
         Gtk.Revealer revealer;
 
         string[] show_label = { "⇧", "⇩" };
+        Gtk.RevealerTransitionType revealer_type = Gtk.RevealerTransitionType.SLIDE_DOWN;
+        int revealer_duration = 250;
 
         private PulseDevice ? default_sink = null;
         private PulseDaemon client = new PulseDaemon ();
@@ -44,6 +46,30 @@ namespace SwayNotificationCenter.Widgets {
                 label_widget.set_label (label ?? "Volume");
 
                 show_per_app = get_prop<bool> (config, "show-per-app") ? true : false;
+
+                string ? l1 = get_prop<string> (config, "button-label-1");
+                if (l1 != null) show_label[0] = l1;
+                string ? l2 = get_prop<string> (config, "button-label-2");
+                if (l2 != null) show_label[1] = l2;
+
+                revealer_duration = int.max (0, get_prop<int> (config, "animation-duration"));
+                if (revealer_duration == 0) revealer_duration = 250;
+
+                string ? animation_type = get_prop<string> (config, "animation-type");
+                if (animation_type != null) {
+                    switch (animation_type) {
+                        default:
+                        case "none":
+                            revealer_type = Gtk.RevealerTransitionType.NONE;
+                            break;
+                        case "slide_up":
+                            revealer_type = Gtk.RevealerTransitionType.SLIDE_UP;
+                            break;
+                        case "slide_down":
+                            revealer_type = Gtk.RevealerTransitionType.SLIDE_DOWN;
+                            break;
+                    }
+                }
             }
 
             this.orientation = Gtk.Orientation.VERTICAL;
@@ -57,6 +83,8 @@ namespace SwayNotificationCenter.Widgets {
             if (show_per_app) {
                 reveal_button = new Gtk.Button.with_label (show_label[0]);
                 revealer = new Gtk.Revealer ();
+                revealer.transition_type = revealer_type;
+                revealer.transition_duration = revealer_duration;
                 levels_listbox = new Gtk.ListBox ();
                 levels_listbox.get_style_context ().add_class ("per-app-volume");
                 revealer.add (levels_listbox);
@@ -91,6 +119,7 @@ namespace SwayNotificationCenter.Widgets {
                 this.client.start ();
             } else {
                 this.client.close ();
+                if (show_per_app) revealer.set_reveal_child (false);
             }
         }
 

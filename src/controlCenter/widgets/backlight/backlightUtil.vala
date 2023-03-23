@@ -116,11 +116,11 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         private int calc_percent (int val) {
-            return val * 100 / max;
+            return (int) Math.round(val * 100.0 / max);
         }
 
         private int calc_actual (float val) {
-            return (int) val * max / 100;
+            return (int) Math.round(val * max / 100);
         }
 
         public int get_max_value () {

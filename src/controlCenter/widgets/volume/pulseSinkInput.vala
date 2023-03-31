@@ -29,6 +29,8 @@ namespace SwayNotificationCenter.Widgets {
         public ChannelMap channel_map;
         public LinkedList<Operation> volume_operations;
 
+        public bool active;
+
         /** Gets the name to be shown to the user:
          * "application_name"
          */
@@ -68,14 +70,14 @@ namespace SwayNotificationCenter.Widgets {
 
         private unowned PulseDaemon client;
 
-        public SinkInputRow (PulseSinkInput sink_input, PulseDaemon client) {
+        public SinkInputRow (PulseSinkInput sink_input, PulseDaemon client, int icon_size) {
             this.client = client;
 
             update (sink_input);
 
             scale.draw_value = false;
 
-            icon.pixel_size = 24;
+            icon.pixel_size = icon_size;
 
             container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
 

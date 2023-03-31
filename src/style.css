@@ -291,6 +291,18 @@
   border-radius: 12px;
 }
 
+.widget-volume>box>button {
+  background: transparent;
+  border: none;
+}
+
+.per-app-volume {
+  background-color: @noti-bg-alt;
+  padding: 4px 8px 8px 8px;
+  margin: 0px 8px 8px 8px;
+  border-radius: 12px
+}
+
 /* Backlight widget */
 .widget-backlight {
   background-color: @noti-bg;

@@ -28,7 +28,7 @@ namespace SwayNotificationCenter.Widgets {
 
             sinks = new HashMap<string, PulseDevice> ();
 
-            active_sinks = new HashMap<uint32, PulseSinkInput>();
+            active_sinks = new HashMap<uint32, PulseSinkInput> ();
         }
 
         public void start () {
@@ -194,7 +194,18 @@ namespace SwayNotificationCenter.Widgets {
             ctx.get_card_info_list (this.get_card_info);
             ctx.get_sink_info_list (this.get_sink_info);
 
+            foreach (var sink_input in active_sinks) {
+                sink_input.value.active = false;
+            }
             ctx.get_sink_input_info_list (this.get_sink_input_info);
+            var iter = active_sinks.map_iterator ();
+            while (iter.next ()) {
+                var sink_input = iter.get_value ();
+                if (!sink_input.active) {
+                    this.remove_active_sink (sink_input);
+                    iter.unset ();
+                }
+            }
         }
 
         private void get_sink_input_info (Context ctx, SinkInputInfo ? info, int eol) {
@@ -236,6 +247,7 @@ namespace SwayNotificationCenter.Widgets {
                 sink_input.volume = volume_to_double (
                     sink_input.cvolume.max ());
             }
+            sink_input.active = true;
 
             if (!has_sink_input) {
                 active_sinks.set (id, sink_input);

@@ -402,16 +402,21 @@ config file to be able to detect config errors
 					optional: true ++
 					default: false ++
 					description: Show per app volume control ++
-				button-label-1: ++
+				expand-button-label: ++
 					type: string ++
 					optional: true ++
 					default: "⇧" ++
-					description: Label shown when per app control not shown ++
-				button-label-2: ++
+					description: Label displayed on button to show per app volume control ++
+				collapse-button-label: ++
 					type: string ++
 					optional: true ++
 					default: "⇩" ++
-					description: Label shown when per app control shown ++
+					description: Label displayed on button to hide per app volume control ++
+				icon-size: ++
+					type: integer ++
+					optional: true ++
+					default: 24 ++
+					description: Size of the application icon in per app volume control ++
 				animation-type: ++
 					type: string ++
 					optional: true ++

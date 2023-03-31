@@ -15,7 +15,10 @@ namespace SwayNotificationCenter.Widgets {
         Gtk.Button reveal_button;
         Gtk.Revealer revealer;
 
-        string[] show_label = { "⇧", "⇩" };
+        string expand_label = "⇧";
+        string collapse_label = "⇩";
+        int icon_size = 24;
+
         Gtk.RevealerTransitionType revealer_type = Gtk.RevealerTransitionType.SLIDE_DOWN;
         int revealer_duration = 250;
 
@@ -47,10 +50,13 @@ namespace SwayNotificationCenter.Widgets {
 
                 show_per_app = get_prop<bool> (config, "show-per-app") ? true : false;
 
-                string ? l1 = get_prop<string> (config, "button-label-1");
-                if (l1 != null) show_label[0] = l1;
-                string ? l2 = get_prop<string> (config, "button-label-2");
-                if (l2 != null) show_label[1] = l2;
+                string ? l1 = get_prop<string> (config, "expand-button-label");
+                if (l1 != null) expand_label = l1;
+                string ? l2 = get_prop<string> (config, "collapse-button-label");
+                if (l2 != null) collapse_label = l2;
+
+                int i = int.max (get_prop<int> (config, "icon-size"), 0);
+                if (i != 0) icon_size = i;
 
                 revealer_duration = int.max (0, get_prop<int> (config, "animation-duration"));
                 if (revealer_duration == 0) revealer_duration = 250;
@@ -81,7 +87,7 @@ namespace SwayNotificationCenter.Widgets {
             add (main_volume_slider_container);
 
             if (show_per_app) {
-                reveal_button = new Gtk.Button.with_label (show_label[0]);
+                reveal_button = new Gtk.Button.with_label (expand_label);
                 revealer = new Gtk.Revealer ();
                 revealer.transition_type = revealer_type;
                 revealer.transition_duration = revealer_duration;
@@ -90,7 +96,7 @@ namespace SwayNotificationCenter.Widgets {
                 revealer.add (levels_listbox);
 
                 foreach (var item in this.client.active_sinks.values) {
-                    levels_listbox.add (new SinkInputRow (item, client));
+                    levels_listbox.add (new SinkInputRow (item, client, icon_size));
                 }
 
                 this.client.change_active_sink.connect (active_sink_change);
@@ -101,9 +107,9 @@ namespace SwayNotificationCenter.Widgets {
                     bool show = revealer.reveal_child;
                     revealer.set_reveal_child (!show);
                     if (show) {
-                        reveal_button.label = show_label[0];
+                        reveal_button.label = expand_label;
                     } else {
-                        reveal_button.label = show_label[1];
+                        reveal_button.label = collapse_label;
                     }
                 });
 
@@ -142,7 +148,7 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         private void active_sink_added (PulseSinkInput sink) {
-            levels_listbox.add (new SinkInputRow (sink, client));
+            levels_listbox.add (new SinkInputRow (sink, client, icon_size));
             show_all ();
         }
 
@@ -154,9 +160,6 @@ namespace SwayNotificationCenter.Widgets {
                     levels_listbox.remove (row);
                     break;
                 }
-            }
-            if (levels_listbox.get_children ().length () == 0) {
-                print ("EMPTY\n");
             }
         }
     }

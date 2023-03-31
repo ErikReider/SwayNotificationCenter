@@ -472,15 +472,20 @@
           "default": false,
           "description": "Show per app volume control"
         },
-        "button-label-1": {
+        "expand-button-label": {
           "type": "string",
           "default": "⇧",
-          "description": "Label shown when per app control not shown"
+          "description": "Label displayed on button to show per app volume control"
         },
-        "button-label-2": {
+        "collapse-button-label": {
           "type": "string",
           "default": "⇩",
-          "description": "Label shown when per app control not shown"
+          "description": "Label displayed on button to hide per app volume control"
+        },
+        "icon-size": {
+          "type": "integer",
+          "default": 24,
+          "description": "Size of the application icon in per app volume control"
         },
         "animation-type": {
           "type": "string",

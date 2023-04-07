@@ -472,6 +472,11 @@
           "default": false,
           "description": "Show per app volume control"
         },
+        "empty-list-label": {
+          "type": "string",
+          "default": "No active sink input",
+          "description": "Text displayed when there are not active sink inputs"
+        },
         "expand-button-label": {
           "type": "string",
           "default": "⇧",

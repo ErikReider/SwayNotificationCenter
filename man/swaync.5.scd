@@ -402,6 +402,11 @@ config file to be able to detect config errors
 					optional: true ++
 					default: false ++
 					description: Show per app volume control ++
+				empty-list-label: ++
+					type: string ++
+					optional: true ++
+					default: "No active sink input" ++
+					description: Text displayed when there are not active sink inputs ++
 				expand-button-label: ++
 					type: string ++
 					optional: true ++

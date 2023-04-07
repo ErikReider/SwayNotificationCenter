@@ -14,6 +14,8 @@ namespace SwayNotificationCenter.Widgets {
         Gtk.ListBox levels_listbox;
         Gtk.Button reveal_button;
         Gtk.Revealer revealer;
+        Gtk.Label no_sink_inputs_label;
+        string empty_label = "No active sink input";
 
         string expand_label = "⇧";
         string collapse_label = "⇩";
@@ -49,6 +51,9 @@ namespace SwayNotificationCenter.Widgets {
                 label_widget.set_label (label ?? "Volume");
 
                 show_per_app = get_prop<bool> (config, "show-per-app") ? true : false;
+
+                string ? el = get_prop<string> (config, "empty-list-label");
+                if (el != null) empty_label = el;
 
                 string ? l1 = get_prop<string> (config, "expand-button-label");
                 if (l1 != null) expand_label = l1;
@@ -94,6 +99,11 @@ namespace SwayNotificationCenter.Widgets {
                 levels_listbox = new Gtk.ListBox ();
                 levels_listbox.get_style_context ().add_class ("per-app-volume");
                 revealer.add (levels_listbox);
+
+                if (this.client.active_sinks.size == 0) {
+                    no_sink_inputs_label = new Gtk.Label (empty_label);
+                    levels_listbox.add (no_sink_inputs_label);
+                }
 
                 foreach (var item in this.client.active_sinks.values) {
                     levels_listbox.add (new SinkInputRow (item, client, icon_size));
@@ -148,6 +158,11 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         private void active_sink_added (PulseSinkInput sink) {
+            // one element added -> remove the empty label
+            if (this.client.active_sinks.size == 1) {
+                var label = levels_listbox.get_children ().first ().data;
+                levels_listbox.remove ((Gtk.Widget) label);
+            }
             levels_listbox.add (new SinkInputRow (sink, client, icon_size));
             show_all ();
         }
@@ -160,6 +175,10 @@ namespace SwayNotificationCenter.Widgets {
                     levels_listbox.remove (row);
                     break;
                 }
+            }
+            if (levels_listbox.get_children ().length () == 0) {
+                levels_listbox.add (no_sink_inputs_label);
+                show_all ();
             }
         }
     }

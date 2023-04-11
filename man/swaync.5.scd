@@ -314,13 +314,13 @@ config file to be able to detect config errors
 							default: "right" ++
 							description: Horizontal position of the button in the bar ++
 							enum: ["right", "left"] ++
-						animation_type: ++
+						animation-type: ++
 							type: string ++
 							optional: true ++
 							default: "slide_down" ++
 							description: Animation type for menu++
 							enum: ["slide_down", "slide_up", "none"] ++
-						animation_duration: ++
+						animation-duration: ++
 							type: integer ++
 							optional: true ++
 							default: 250 ++
@@ -388,13 +388,51 @@ config file to be able to detect config errors
 			description: A grid of buttons that execute shell commands ++
 		*volume*++
 			type: object ++
-			css class: widget-volume ++
+			css class: ++
+				widget-volume ++
+				per-app-volume ++
 			properties: ++
 				label: ++
 					type: string ++
 					optional: true ++
 					default: "Volume" ++
 					description: Text displayed in front of the volume slider ++
+				show-per-app: ++
+					type: bool ++
+					optional: true ++
+					default: false ++
+					description: Show per app volume control ++
+				empty-list-label: ++
+					type: string ++
+					optional: true ++
+					default: "No active sink input" ++
+					description: Text displayed when there are not active sink inputs ++
+				expand-button-label: ++
+					type: string ++
+					optional: true ++
+					default: "⇧" ++
+					description: Label displayed on button to show per app volume control ++
+				collapse-button-label: ++
+					type: string ++
+					optional: true ++
+					default: "⇩" ++
+					description: Label displayed on button to hide per app volume control ++
+				icon-size: ++
+					type: integer ++
+					optional: true ++
+					default: 24 ++
+					description: Size of the application icon in per app volume control ++
+				animation-type: ++
+					type: string ++
+					optional: true ++
+					default: "slide_down" ++
+					description: Animation type for the per app volume control ++
+					enum: ["slide_down", "slide_up", "none"] ++
+				animation-duration: ++
+					type: integer ++
+					optional: true ++
+					default: 250 ++
+					description: Duration of animation in milliseconds ++
 			description: Slider to control pulse volume ++
 		*backlight*++
 			type: object ++

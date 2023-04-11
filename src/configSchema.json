@@ -423,13 +423,13 @@
               "default": "right",
               "enum": ["right", "left"]
             },
-            "animation_type": {
+            "animation-type": {
               "type": "string",
               "default": "slide_down",
               "description": "Animation type for menu",
               "enum": ["slide_down", "slide_up", "none"]
             },
-            "animation_duration":{
+            "animation-duration":{
               "type": "integer",
               "default": 250,
               "description": "Duration of animation in milliseconds"
@@ -466,6 +466,42 @@
           "type": "string",
           "description": "Text displayed in front of the volume slider",
           "default": "Volume"
+        },
+        "show-per-app": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show per app volume control"
+        },
+        "empty-list-label": {
+          "type": "string",
+          "default": "No active sink input",
+          "description": "Text displayed when there are not active sink inputs"
+        },
+        "expand-button-label": {
+          "type": "string",
+          "default": "⇧",
+          "description": "Label displayed on button to show per app volume control"
+        },
+        "collapse-button-label": {
+          "type": "string",
+          "default": "⇩",
+          "description": "Label displayed on button to hide per app volume control"
+        },
+        "icon-size": {
+          "type": "integer",
+          "default": 24,
+          "description": "Size of the application icon in per app volume control"
+        },
+        "animation-type": {
+          "type": "string",
+          "default": "slide_down",
+          "description": "Animation type for menu",
+          "enum": ["slide_down", "slide_up", "none"]
+        },
+        "animation-duration":{
+          "type": "integer",
+          "default": 250,
+          "description": "Duration of animation in milliseconds"
         }
       }
     },

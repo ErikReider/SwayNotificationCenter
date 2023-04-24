@@ -78,7 +78,7 @@ dnf install SwayNotificationCenter
 
 ### Fedora Silverblue (and other rpm-ostree variants):
 
-The package can be downloaded from COPR after adding the COPR repo as a ostree repo, and installed as a overlaid package:
+The package can be layered over the base image after adding the Copr repo as an ostree repo:
 
 ```zsh
 ostree remote add SwayNotificationCenter https://download.copr.fedorainfracloud.org/results/erikreider/SwayNotificationCenter/fedora-$releasever-$basearch/

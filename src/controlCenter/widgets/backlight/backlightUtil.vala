@@ -97,8 +97,12 @@ namespace SwayNotificationCenter.Widgets {
             try {
                 var dis = new DataInputStream (fd.read (null));
                 string data = dis.read_line (null);
-                int val = calc_percent (int.parse (data));
-                this.brightness_change (val);
+                if (subsystem == "backlight") {
+                    int val = calc_percent (int.parse (data));
+                    this.brightness_change (val);
+                } else {
+                    this.brightness_change (int.parse (data));
+                }
             } catch (Error e) {
                 error ("Error %s\n", e.message);
             }

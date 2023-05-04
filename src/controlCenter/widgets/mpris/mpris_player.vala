@@ -287,6 +287,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         }
 
         private void update_button_shuffle (HashTable<string, Variant> metadata) {
+            if (!(button_shuffle is Gtk.Widget)) return;
+
             if (source.media_player.can_control) {
                 // Shuffle check
                 Variant ? shuffle = source.get_mpris_player_prop ("Shuffle");
@@ -305,11 +307,15 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         }
 
         private void update_button_prev (HashTable<string, Variant> metadata) {
+            if (!(button_prev is Gtk.Widget)) return;
+
             button_prev.set_sensitive (source.media_player.can_go_previous
                                        && source.media_player.can_control);
         }
 
         private void update_button_play_pause (HashTable<string, Variant> metadata) {
+            if (!(button_play_pause is Gtk.Widget)) return;
+
             string icon_name;
             bool check;
             switch (source.media_player.playback_status) {
@@ -329,11 +335,15 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         }
 
         private void update_button_forward (HashTable<string, Variant> metadata) {
+            if (!(button_next is Gtk.Widget)) return;
+
             button_next.set_sensitive (source.media_player.can_go_next
                                        && source.media_player.can_control);
         }
 
         private void update_button_repeat (HashTable<string, Variant> metadata) {
+            if (!(button_repeat is Gtk.Widget)) return;
+
             if (source.media_player.can_control) {
                 // Repeat check
                 Variant ? repeat = source.get_mpris_player_prop ("LoopStatus");

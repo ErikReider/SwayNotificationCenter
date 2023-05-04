@@ -77,29 +77,21 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             });
             // Prev
             button_prev.clicked.connect (() => {
-                try {
-                    source.media_player.previous ();
-                } catch (Error e) {
-                    error ("Previous Error: %s", e.message);
-                }
+                source.media_player.previous.begin (() => {
+                    update_buttons (source.media_player.metadata);
+                });
             });
             // Next
             button_next.clicked.connect (() => {
-                try {
-                    source.media_player.next ();
-                } catch (Error e) {
-                    error ("Next Error: %s", e.message);
-                }
+                source.media_player.next.begin (() => {
+                    update_buttons (source.media_player.metadata);
+                });
             });
             // Play/Pause
             button_play_pause.clicked.connect (() => {
-                try {
-                    source.media_player.play_pause ();
-                    // Wait until dbus value has updated
-                    button_play_pause.sensitive = false;
-                } catch (Error e) {
-                    error ("PlayPause Error: %s", e.message);
-                }
+                source.media_player.play_pause.begin (() => {
+                    update_buttons (source.media_player.metadata);
+                });
             });
         }
 
@@ -137,11 +129,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                         update_button_forward (metadata);
                         break;
                     case "CanControl":
-                        update_button_shuffle (metadata);
-                        update_button_repeat (metadata);
-                        update_button_prev (metadata);
-                        update_button_forward (metadata);
-                        update_button_play_pause (metadata);
+                        update_buttons (metadata);
                         break;
                 }
             }
@@ -163,6 +151,11 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             // Subtitle
             update_sub_title (metadata);
 
+            // Update the buttons
+            update_buttons (metadata);
+        }
+
+        private void update_buttons (HashTable<string, Variant> metadata) {
             // Shuffle check
             update_button_shuffle (metadata);
 
@@ -320,7 +313,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             string icon_name;
             bool check;
             switch (source.media_player.playback_status) {
-                case "Playing" :
+                case "Playing":
                     icon_name = ICON_PAUSE;
                     check = source.media_player.can_pause;
                     break;

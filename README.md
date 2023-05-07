@@ -177,7 +177,7 @@ See `swaync(5)` man page for more information
 
 To reload the config, you'll need to run `swaync-client --reload-config`
 
-The main CSS style file is located in `/etc/xdg/swaync/style.css`. Copy it over to your `~/.config/swaync/` folder to customize without needing root access.
+The main CSS style file is located in `/etc/xdg/swaync/style.css`. Copy it over to your `~/.config/swaync/` folder to customize without needing root access. **Tip**: running swaync like this `GTK_DEBUG=interactive swaync` will open a inspector window that'll allow you to see all of the CSS classes + other information.
 
 ## Notification Inhibition
 

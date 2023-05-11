@@ -68,12 +68,12 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
     [DBus (name = "org.mpris.MediaPlayer2.Player")]
     public interface MprisMediaPlayer : MprisProps {
-        public abstract void next () throws Error;
-        public abstract void previous () throws Error;
-        public abstract void pause () throws Error;
-        public abstract void play_pause () throws Error;
-        public abstract void stop () throws Error;
-        public abstract void play () throws Error;
+        public abstract async void next () throws Error;
+        public abstract async void previous () throws Error;
+        public abstract async void pause () throws Error;
+        public abstract async void play_pause () throws Error;
+        public abstract async void stop () throws Error;
+        public abstract async void play () throws Error;
 
         public abstract string playback_status { owned get; }
         public abstract HashTable<string, Variant> metadata { owned get; }

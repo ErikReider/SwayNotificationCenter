@@ -55,6 +55,7 @@ widget_sources = [
 
 app_sources = [
   'main.vala',
+  'orderedHashTable/orderedHashTable.vala',
   'configModel/configModel.vala',
   'swayncDaemon/swayncDaemon.vala',
   'notiDaemon/notiDaemon.vala',

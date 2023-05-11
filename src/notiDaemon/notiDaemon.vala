@@ -154,7 +154,8 @@ namespace SwayNotificationCenter {
 
             // The notification visibility state
             NotificationStatusEnum state = NotificationStatusEnum.ENABLED;
-            var visibilities = ConfigModel.instance.notification_visibility;
+            unowned OrderedHashTable<NotificationVisibility> visibilities =
+                ConfigModel.instance.notification_visibility;
             foreach (string key in visibilities.get_keys ()) {
                 unowned NotificationVisibility vis = visibilities[key];
                 if (!vis.matches_notification (param)) continue;
@@ -211,7 +212,7 @@ namespace SwayNotificationCenter {
                 return id;
             }
             // Run the first script if notification meets requirements
-            HashTable<string, Script> scripts = ConfigModel.instance.scripts;
+            OrderedHashTable<Script> scripts = ConfigModel.instance.scripts;
             if (scripts.length == 0) return id;
             this.run_scripts (param, ScriptRunOnType.RECEIVE);
 #endif
@@ -229,7 +230,7 @@ namespace SwayNotificationCenter {
                 return;
             }
             // Run the first script if notification meets requirements
-            HashTable<string, Script> scripts = ConfigModel.instance.scripts;
+            OrderedHashTable<Script> scripts = ConfigModel.instance.scripts;
             if (scripts.length == 0) return;
             foreach (string key in scripts.get_keys ()) {
                 unowned Script script = scripts[key];

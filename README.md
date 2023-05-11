@@ -1,4 +1,5 @@
-# SwayNotificationCenter
+SwayNotificationCenter
+======================
 
 [![Check PKGBUILD builds for Arch.](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/PKGBUILD-builds.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/PKGBUILD-builds.yml)
 [![Check build for Fedora.](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/fedora-build.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/fedora-build.yml)
@@ -7,8 +8,39 @@
 
 A simple notification daemon with a GTK gui for notifications and the control center
 
-*Note: Only supports Desktops / Window Managers that support 
-`wlr_layer_shell_unstable_v1` like Sway or anything wlroots based*
+*Note: SwayNotificationCenter only supports Desktops / Window Managers that
+support `wlr_layer_shell_unstable_v1` like Sway or anything wlroots based*
+
+*Note 2: SwayNotificationCenter does not support third-party GTK3 themes and is
+only tested with the default GTK **Adwaita** theme. Usage of any third-party
+theme might require extra tweaks to the default CSS style file*
+
+Table of Contents
+=================
+
+  * [Screenshots](#screenshots)
+  * [Want to show off your sick config?](#want-to-show-off-your-sick-config)
+  * [Features](#features)
+  * [Available Widgets](#available-widgets)
+  * [Planned Features](#planned-features)
+  * [Install](#install)
+     * [Arch](#arch)
+     * [Fedora](#fedora)
+     * [Fedora Silverblue (and other rpm-ostree variants)](#fedora-silverblue-and-other-rpm-ostree-variants)
+     * [Gentoo](#gentoo)
+     * [OpenSUSE Tumbleweed](#opensuse-tumbleweed)
+     * [Ubuntu](#ubuntu)
+     * [Debian](#debian)
+     * [Other](#other)
+  * [Sway Usage](#sway-usage)
+  * [Run](#run)
+  * [Control Center Shortcuts](#control-center-shortcuts)
+  * [Configuring](#configuring)
+  * [Notification Inhibition](#notification-inhibition)
+  * [Scripting](#scripting)
+     * [Disable scripting](#disable-scripting)
+  * [i3status-rs Example](#i3status-rs-example)
+  * [Waybar Example](#waybar-example)
 
 ## Screenshots
 
@@ -60,14 +92,14 @@ These widgets can be customized, added, removed and even reordered
 
 ## Install
 
-### Arch:
+### Arch
 
 The package is available on the AUR:
 
 - [swaync](https://aur.archlinux.org/packages/swaync/)
 - [swaync-git](https://aur.archlinux.org/packages/swaync-git/)
 
-### Fedora:
+### Fedora
 
 The package is available on COPR:
 
@@ -76,7 +108,7 @@ dnf copr enable erikreider/SwayNotificationCenter
 dnf install SwayNotificationCenter
 ```
 
-### Fedora Silverblue (and other rpm-ostree variants):
+### Fedora Silverblue (and other rpm-ostree variants)
 
 The package can be layered over the base image after adding the Copr repo as an ostree repo:
 
@@ -85,7 +117,7 @@ ostree remote add SwayNotificationCenter https://download.copr.fedorainfracloud.
 rpm-ostree install SwayNotificationCenter
 ```
 
-### Gentoo:
+### Gentoo
 
 An **unofficial** ebuild is available in [GURU](https://github.com/gentoo/guru)
 
@@ -101,17 +133,17 @@ emerge --ask gui-apps/swaync
 sudo zypper install SwayNotificationCenter
 ```
 
-### Ubuntu:
+### Ubuntu
 
 Will be included in the official repos in the
 [Lunar](https://packages.ubuntu.com/lunar/sway-notification-center) release.
 
-### Debian:
+### Debian
 
 Will be included in the official repos in the
 [Bookworm](https://packages.debian.org/source/sid/sway-notification-center) release.
 
-### Other:
+### Other
 
 ```zsh
 meson build

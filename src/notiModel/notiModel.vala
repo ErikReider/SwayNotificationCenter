@@ -300,6 +300,7 @@ namespace SwayNotificationCenter {
                 _actions += "\n\t" + _action.to_string ();
             }
             params.set ("actions", string.joinv ("", _actions));
+            params.set ("inline-reply", inline_reply.to_string () ?? "false");
 
             string[] result = {};
             foreach (var k in params.get_keys ()) {

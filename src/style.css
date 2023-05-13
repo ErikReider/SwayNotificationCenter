@@ -6,10 +6,14 @@
 
 @define-color noti-border-color rgba(255, 255, 255, 0.15);
 @define-color noti-bg rgb(48, 48, 48);
+@define-color noti-bg-darker rgb(38, 38, 38);
 @define-color noti-bg-hover rgb(56, 56, 56);
 @define-color noti-bg-focus rgba(68, 68, 68, 0.6);
 @define-color noti-close-bg rgba(255, 255, 255, 0.1);
 @define-color noti-close-bg-hover rgba(255, 255, 255, 0.15);
+
+@define-color text-color rgb(255, 255, 255);
+@define-color text-color-disabled rgb(150, 150, 150);
 
 @define-color bg-selected rgb(0, 128, 255);
 
@@ -58,7 +62,7 @@
 
 .close-button {
   background: @noti-close-bg;
-  color: white;
+  color: @text-color;
   text-shadow: none;
   padding: 0;
   border-radius: 100%;
@@ -84,7 +88,7 @@
   box-shadow: none;
   background: @noti-bg;
   border: 1px solid @noti-border-color;
-  color: white;
+  color: @text-color;
   transition: all 0.15s ease-in-out;
 }
 
@@ -124,10 +128,26 @@
   margin-top: 8px;
 }
 .inline-reply-entry {
-
+  background: @noti-bg-darker;
+  color: @text-color;
+  caret-color: @text-color;
+  border: 1px solid @noti-border-color;
+  border-radius: 12px;
 }
 .inline-reply-button {
   margin-left: 4px;
+  background: @noti-bg;
+  border: 1px solid @noti-border-color;
+  border-radius: 12px;
+  color: @text-color;
+}
+.inline-reply-button:disabled {
+  background: initial;
+  color: @text-color-disabled;
+  border: 1px solid transparent;
+}
+.inline-reply-button:hover {
+  background: @noti-bg-hover;
 }
 
 .image {
@@ -143,7 +163,7 @@
   font-size: 16px;
   font-weight: bold;
   background: transparent;
-  color: white;
+  color: @text-color;
   text-shadow: none;
 }
 
@@ -151,7 +171,7 @@
   font-size: 16px;
   font-weight: bold;
   background: transparent;
-  color: white;
+  color: @text-color;
   text-shadow: none;
   margin-right: 18px;
 }
@@ -160,7 +180,7 @@
   font-size: 15px;
   font-weight: normal;
   background: transparent;
-  color: white;
+  color: @text-color;
   text-shadow: none;
 }
 
@@ -194,7 +214,7 @@
 }
 .widget-title > button {
   font-size: initial;
-  color: white;
+  color: @text-color;
   text-shadow: none;
   background: @noti-bg;
   border: 1px solid @noti-border-color;
@@ -329,7 +349,7 @@
 }
 .widget-inhibitors > button {
   font-size: initial;
-  color: white;
+  color: @text-color;
   text-shadow: none;
   background: @noti-bg;
   border: 1px solid @noti-border-color;

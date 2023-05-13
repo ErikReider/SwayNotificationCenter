@@ -469,6 +469,16 @@ namespace SwayNotificationCenter {
             },
                 null);
 
+            inline_reply_entry.key_release_event.connect ((w, event_key) => {
+                switch (Gdk.keyval_name (event_key.keyval)) {
+                    case "Return":
+                        inline_reply_button.clicked ();
+                        return true;
+                    default:
+                        return false;
+                }
+            });
+
             inline_reply_button.set_label (param.inline_reply.name ?? "Reply");
             inline_reply_button.clicked.connect (() => {
                 string text = inline_reply_entry.get_text ().strip ();

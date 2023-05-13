@@ -215,7 +215,7 @@ namespace SwayNotificationCenter {
                 return false;
             });
 
-            // Switches the stack page depending on the 
+            // Switches the stack page depending on the
             list_box.add.connect (() => {
                 stack.set_visible_child_name (STACK_NOTIFICATIONS_PAGE);
             });
@@ -383,9 +383,10 @@ namespace SwayNotificationCenter {
             }
 
             try {
-                swaync_daemon.subscribe (notification_count (),
+                swaync_daemon.subscribe_v2 (notification_count (),
                                          swaync_daemon.get_dnd (),
-                                         get_visibility ());
+                                         get_visibility (),
+                                         swaync_daemon.inhibited);
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }
@@ -422,9 +423,10 @@ namespace SwayNotificationCenter {
                     if (noti != null) noti.set_time ();
                 }
             }
-            swaync_daemon.subscribe (notification_count (),
+            swaync_daemon.subscribe_v2 (notification_count (),
                                      noti_daemon.dnd,
-                                     this.visible);
+                                     this.visible,
+                                     swaync_daemon.inhibited);
         }
 
         public bool toggle_visibility () {
@@ -471,9 +473,10 @@ namespace SwayNotificationCenter {
             list_box.add (noti);
             scroll_to_start (list_reverse);
             try {
-                swaync_daemon.subscribe (notification_count (),
+                swaync_daemon.subscribe_v2 (notification_count (),
                                          swaync_daemon.get_dnd (),
-                                         get_visibility ());
+                                         get_visibility (),
+                                         swaync_daemon.inhibited);
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }

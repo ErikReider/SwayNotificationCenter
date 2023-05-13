@@ -1,6 +1,6 @@
 namespace SwayNotificationCenter {
     [GtkTemplate (ui = "/org/erikreider/sway-notification-center/notification/notification.ui")]
-    private class Notification : Gtk.ListBoxRow {
+    public class Notification : Gtk.ListBoxRow {
         [GtkChild]
         unowned Gtk.Revealer revealer;
         [GtkChild]

@@ -1,17 +1,46 @@
-# SwayNotificationCenter
+SwayNotificationCenter
+======================
 
-[![Check build for Arch.](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/arch-build.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/arch-build.yml)
-
+[![Check PKGBUILD builds for Arch.](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/PKGBUILD-builds.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/PKGBUILD-builds.yml)
 [![Check build for Fedora.](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/fedora-build.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/fedora-build.yml)
-
 [![Check build for latest Ubuntu LTS.](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/ubuntu-build.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/ubuntu-build.yml)
-
 [![Linting](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/linting.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/linting.yml)
 
 A simple notification daemon with a GTK gui for notifications and the control center
 
-*Note: Only supports Desktops / Window Managers that support 
-`wlr_layer_shell_unstable_v1` like Sway or anything wlroots based*
+*Note: SwayNotificationCenter only supports Desktops / Window Managers that
+support `wlr_layer_shell_unstable_v1` like Sway or anything wlroots based*
+
+*Note 2: SwayNotificationCenter does not support third-party GTK3 themes and is
+only tested with the default GTK **Adwaita** theme. Usage of any third-party
+theme might require extra tweaks to the default CSS style file*
+
+Table of Contents
+=================
+
+  * [Screenshots](#screenshots)
+  * [Want to show off your sick config?](#want-to-show-off-your-sick-config)
+  * [Features](#features)
+  * [Available Widgets](#available-widgets)
+  * [Planned Features](#planned-features)
+  * [Install](#install)
+     * [Arch](#arch)
+     * [Fedora](#fedora)
+     * [Fedora Silverblue (and other rpm-ostree variants)](#fedora-silverblue-and-other-rpm-ostree-variants)
+     * [Gentoo](#gentoo)
+     * [OpenSUSE Tumbleweed](#opensuse-tumbleweed)
+     * [Ubuntu](#ubuntu)
+     * [Debian](#debian)
+     * [Other](#other)
+  * [Sway Usage](#sway-usage)
+  * [Run](#run)
+  * [Control Center Shortcuts](#control-center-shortcuts)
+  * [Configuring](#configuring)
+  * [Notification Inhibition](#notification-inhibition)
+  * [Scripting](#scripting)
+     * [Disable scripting](#disable-scripting)
+  * [i3status-rs Example](#i3status-rs-example)
+  * [Waybar Example](#waybar-example)
 
 ## Screenshots
 
@@ -31,6 +60,7 @@ Post your setup here: [Config flex 💪](https://github.com/ErikReider/SwayNotif
 - A panel to view previous notifications
 - Show album art for notifications like Spotify
 - Do not disturb
+- Inhibiting notifications through DBUS or client
 - Restores previous Do not disturb value after restart
 - Click notification to execute default action
 - Show alternative notification actions
@@ -54,6 +84,7 @@ These widgets can be customized, added, removed and even reordered
 - Menubar with dropdown and buttons
 - Button grid
 - Volume slider using PulseAudio
+- Backlight slider
 
 ## Planned Features
 
@@ -62,14 +93,14 @@ These widgets can be customized, added, removed and even reordered
 
 ## Install
 
-### Arch:
+### Arch
 
 The package is available on the AUR:
 
 - [swaync](https://aur.archlinux.org/packages/swaync/)
 - [swaync-git](https://aur.archlinux.org/packages/swaync-git/)
 
-### Fedora:
+### Fedora
 
 The package is available on COPR:
 
@@ -78,16 +109,16 @@ dnf copr enable erikreider/SwayNotificationCenter
 dnf install SwayNotificationCenter
 ```
 
-### Fedora Silverblue (and other rpm-ostree variants):
+### Fedora Silverblue (and other rpm-ostree variants)
 
-The package can be downloaded from COPR after adding the COPR repo as a ostree repo, and installed as a overlaid package:
+The package can be layered over the base image after adding the Copr repo as an ostree repo:
 
 ```zsh
 ostree remote add SwayNotificationCenter https://download.copr.fedorainfracloud.org/results/erikreider/SwayNotificationCenter/fedora-$releasever-$basearch/
 rpm-ostree install SwayNotificationCenter
 ```
 
-### Gentoo:
+### Gentoo
 
 An **unofficial** ebuild is available in [GURU](https://github.com/gentoo/guru)
 
@@ -103,17 +134,17 @@ emerge --ask gui-apps/swaync
 sudo zypper install SwayNotificationCenter
 ```
 
-### Ubuntu:
+### Ubuntu
 
 Will be included in the official repos in the
 [Lunar](https://packages.ubuntu.com/lunar/sway-notification-center) release.
 
-### Debian:
+### Debian
 
 Will be included in the official repos in the
 [Bookworm](https://packages.debian.org/source/sid/sway-notification-center) release.
 
-### Other:
+### Other
 
 ```zsh
 meson build
@@ -179,7 +210,26 @@ See `swaync(5)` man page for more information
 
 To reload the config, you'll need to run `swaync-client --reload-config`
 
-The main CSS style file is located in `/etc/xdg/swaync/style.css`. Copy it over to your `~/.config/swaync/` folder to customize without needing root access.
+The main CSS style file is located in `/etc/xdg/swaync/style.css`. Copy it over 
+to your `~/.config/swaync/` folder to customize without needing root access. 
+
+**Tip**: running swaync with `GTK_DEBUG=interactive swaync` will open a inspector 
+window that'll allow you to see all of the CSS classes + other information.
+
+## Notification Inhibition
+
+Notifications can be inhibited through the provided `swaync-client` executable
+or through the DBus interface `org.erikreider.swaync.cc`.
+
+Here's an example of notification inhibition while screen sharing through
+`xdg-desktop-portal-wlr`
+
+```conf
+# xdg-desktop-portal-wlr config
+[screencast]
+exec_before=swaync-client --inhibitor-add "xdg-desktop-portal-wlr"
+exec_after=swaync-client --inhibitor-remove "xdg-desktop-portal-wlr"
+```
 
 ## Scripting
 
@@ -278,7 +328,11 @@ Waybar config
       "notification": "<span foreground='red'><sup></sup></span>",
       "none": "",
       "dnd-notification": "<span foreground='red'><sup></sup></span>",
-      "dnd-none": ""
+      "dnd-none": "",
+      "inhibited-notification": "<span foreground='red'><sup></sup></span>",
+      "inhibited-none": "",
+      "dnd-inhibited-notification": "<span foreground='red'><sup></sup></span>",
+      "dnd-inhibited-none": ""
     },
     "return-type": "json",
     "exec-if": "which swaync-client",

@@ -41,7 +41,8 @@ namespace SwayNotificationCenter.Widgets {
 
         public virtual void on_cc_visibility_change (bool value) {}
 
-        protected T ? get_prop<T> (Json.Object config, string value_key) {
+        protected T ? get_prop<T> (Json.Object config, string value_key, out bool found = null) {
+            found = false;
             if (!config.has_member (value_key)) {
                 debug ("%s: Config doesn't have key: %s!\n", key, value_key);
                 return null;
@@ -61,6 +62,7 @@ namespace SwayNotificationCenter.Widgets {
                          member.get_value_type ().name ());
                 return null;
             }
+            found = true;
             switch (generic_base_type) {
                 case Type.STRING:
                     return member.get_string ();
@@ -69,6 +71,7 @@ namespace SwayNotificationCenter.Widgets {
                 case Type.BOOLEAN:
                     return member.get_boolean ();
                 default:
+                    found = false;
                     return null;
             }
         }

@@ -261,7 +261,7 @@
     "widgets": {
       "type": "array",
       "description": "Which order and which widgets to display. If the \"notifications\" widget isn't specified, it will be placed at the bottom.",
-      "default": ["title", "dnd", "notifications"],
+      "default": ["inhibitors", "title", "dnd", "notifications"],
       "items": {
         "type": "string",
         // Sadly can't use regex and enums at the same time. Fix in the future?
@@ -295,6 +295,13 @@
         },
         "^volume(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
           "$ref": "#/widgets/volume"
+        },
+        "^backlight(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
+          "$ref": "#/widgets/backlight"
+        },
+        "^inhibitors(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
+          // References the widget structure from "widgets" below
+          "$ref": "#/widgets/inhibitors"
         }
       }
     }
@@ -416,6 +423,17 @@
               "default": "right",
               "enum": ["right", "left"]
             },
+            "animation-type": {
+              "type": "string",
+              "default": "slide_down",
+              "description": "Animation type for menu",
+              "enum": ["slide_down", "slide_up", "none"]
+            },
+            "animation-duration":{
+              "type": "integer",
+              "default": 250,
+              "description": "Duration of animation in milliseconds"
+            },
             "actions": {
               "$ref" : "#/widgets/buttons-grid/properties/actions"
             }
@@ -448,6 +466,92 @@
           "type": "string",
           "description": "Text displayed in front of the volume slider",
           "default": "Volume"
+        },
+        "show-per-app": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show per app volume control"
+        },
+        "empty-list-label": {
+          "type": "string",
+          "default": "No active sink input",
+          "description": "Text displayed when there are not active sink inputs"
+        },
+        "expand-button-label": {
+          "type": "string",
+          "default": "⇧",
+          "description": "Label displayed on button to show per app volume control"
+        },
+        "collapse-button-label": {
+          "type": "string",
+          "default": "⇩",
+          "description": "Label displayed on button to hide per app volume control"
+        },
+        "icon-size": {
+          "type": "integer",
+          "default": 24,
+          "description": "Size of the application icon in per app volume control"
+        },
+        "animation-type": {
+          "type": "string",
+          "default": "slide_down",
+          "description": "Animation type for menu",
+          "enum": ["slide_down", "slide_up", "none"]
+        },
+        "animation-duration":{
+          "type": "integer",
+          "default": 250,
+          "description": "Duration of animation in milliseconds"
+        }
+      }
+    },
+    "backlight": {
+      "type": "object",
+      "description": "Slider to control monitor brightness",
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Text displayed in front of the backlight slider",
+          "default": "Brightness"
+        },
+        "device": {
+          "type": "string",
+          "description": "Name of monitor (find possible devices using `ls /sys/class/backlight` or `ls /sys/class/leds`)",
+          "default": "intel_backlight"
+        },
+        "subsystem": {
+          "type": "string",
+          "description": "Kernel subsystem for brightness control",
+          "default": "backlight",
+          "enum": ["backlight", "leds"]
+        },
+        "min": {
+          "type": "integer",
+          "default": 0,
+          "description": "Lowest possible value for brightness"
+        }
+      }
+    },
+    "inhibitors": {
+      "type": "object",
+      "description": "Control Center Inhibitors Widget",
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The title of the widget",
+          "default": "Inhibitors"
+        },
+        "clear-all-button": {
+          "type": "boolean",
+          "description": "Wether to display a \"Clear All\" button",
+          "default": true
+        },
+        "button-text": {
+          "type": "string",
+          "description": "\"Clear All\" button text",
+          "default": "Clear All"
         }
       }
     }

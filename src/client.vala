@@ -2,6 +2,7 @@ public struct SwayncDaemonData {
     public bool dnd;
     public bool cc_open;
     public uint count;
+    public bool inhibited;
 }
 
 [DBus (name = "org.erikreider.swaync.cc")]
@@ -32,54 +33,67 @@ interface CcDaemon : Object {
     [DBus (name = "GetSubscribeData")]
     public abstract SwayncDaemonData get_subscribe_data () throws Error;
 
-    public signal void subscribe (uint count, bool dnd, bool cc_open);
+    public signal void subscribe_v2 (uint count, bool dnd, bool cc_open, bool inhibited);
+
+    public abstract bool add_inhibitor (string application_id) throws DBusError, IOError;
+    public abstract bool remove_inhibitor (string application_id) throws DBusError, IOError;
+    public abstract uint number_of_inhibitors () throws DBusError, IOError;
+    public abstract bool is_inhibited () throws DBusError, IOError;
+    public abstract bool clear_inhibitors () throws DBusError, IOError;
 }
 
 private CcDaemon cc_daemon = null;
 
 private void print_help (string[] args) {
     print ("Usage:\n");
-    print ("\t %s <OPTION>\n".printf (args[0]));
+    print ("  %s <OPTION>\n".printf (args[0]));
     print ("Help:\n");
-    print ("\t -h, \t --help \t\t Show help options\n");
-    print ("\t -v, \t --version \t\t Prints version\n");
+    print ("  -h, \t --help \t\t\t Show help options\n");
+    print ("  -v, \t --version \t\t\t Prints version\n");
     print ("Options:\n");
-    print ("\t -R, \t --reload-config \t Reload the config file\n");
-    print ("\t -rs, \t --reload-css \t\t Reload the css file. Location change requires restart\n");
-    print ("\t -t, \t --toggle-panel \t Toggle the notificaion panel\n");
-    print ("\t -op, \t --open-panel \t\t Opens the notificaion panel\n");
-    print ("\t -cp, \t --close-panel \t\t Closes the notificaion panel\n");
-    print ("\t -d, \t --toggle-dnd \t\t Toggle and print the current dnd state\n");
-    print ("\t -D, \t --get-dnd \t\t Print the current dnd state\n");
-    print ("\t -dn, \t --dnd-on \t\t Turn dnd on and print the new dnd state\n");
-    print ("\t -df, \t --dnd-off \t\t Turn dnd off and print the new dnd state\n");
-    print ("\t -c, \t --count \t\t Print the current notificaion count\n");
-    print ("\t     \t --hide-latest \t\t Hides latest notification. Still shown in Control Center\n");
-    print ("\t     \t --close-latest \t Closes latest notification\n");
-    print ("\t -C, \t --close-all \t\t Closes all notifications\n");
-    print ("\t -sw, \t --skip-wait \t\t Doesn't wait when swaync hasn't been started\n");
-    print ("\t -s, \t --subscribe \t\t Subscribe to notificaion add and close events\n");
-    print ("\t -swb, \t --subscribe-waybar \t Subscribe to notificaion add and close events "
+    print ("  -R, \t --reload-config \t\t Reload the config file\n");
+    print ("  -rs, \t --reload-css \t\t\t Reload the css file. Location change requires restart\n");
+    print ("  -t, \t --toggle-panel \t\t Toggle the notificaion panel\n");
+    print ("  -op, \t --open-panel \t\t\t Opens the notificaion panel\n");
+    print ("  -cp, \t --close-panel \t\t\t Closes the notificaion panel\n");
+    print ("  -d, \t --toggle-dnd \t\t\t Toggle and print the current dnd state\n");
+    print ("  -D, \t --get-dnd \t\t\t Print the current dnd state\n");
+    print ("  -dn, \t --dnd-on \t\t\t Turn dnd on and print the new dnd state\n");
+    print ("  -df, \t --dnd-off \t\t\t Turn dnd off and print the new dnd state\n");
+    print ("  -I, \t --get-inhibited \t\t Print if currently inhibited or not\n");
+    print ("  -In, \t --get-num-inhibitors \t\t Print number of inhibitors\n");
+    print ("  -Ia, \t --inhibitor-add [APP_ID] \t Add an inhibitor\n");
+    print ("  -Ir, \t --inhibitor-remove [APP_ID] \t Remove an inhibitor\n");
+    print ("  -Ic, \t --inhibitors-clear \t\t Clears all inhibitors\n");
+    print ("  -c, \t --count \t\t\t Print the current notificaion count\n");
+    print ("      \t --hide-latest \t\t\t Hides latest notification. Still shown in Control Center\n");
+    print ("      \t --close-latest \t\t Closes latest notification\n");
+    print ("  -C, \t --close-all \t\t\t Closes all notifications\n");
+    print ("  -sw, \t --skip-wait \t\t\t Doesn't wait when swaync hasn't been started\n");
+    print ("  -s, \t --subscribe \t\t\t Subscribe to notificaion add and close events\n");
+    print ("  -swb,  --subscribe-waybar \t\t Subscribe to notificaion add and close events "
            + "with waybar support. Read README for example\n");
 }
 
-private void on_subscribe (uint count, bool dnd, bool cc_open) {
+private void on_subscribe (uint count, bool dnd, bool cc_open, bool inhibited) {
     stdout.printf (
-        "{ \"count\": %u, \"dnd\": %s, \"visible\": %s }\n"
-         .printf (count, dnd.to_string (), cc_open.to_string ()));
+        "{ \"count\": %u, \"dnd\": %s, \"visible\": %s, \"inhibited\": %s }\n"
+         .printf (count, dnd.to_string (), cc_open.to_string (), inhibited.to_string ()));
 }
 
 private void print_subscribe () {
     try {
         SwayncDaemonData data = cc_daemon.get_subscribe_data ();
-        on_subscribe (data.count, data.dnd, data.cc_open);
+        on_subscribe (data.count, data.dnd, data.cc_open, data.inhibited);
     } catch (Error e) {
-        on_subscribe (0, false, false);
+        on_subscribe (0, false, false, false);
     }
 }
 
-private void on_subscribe_waybar (uint count, bool dnd, bool cc_open) {
-    string state = (dnd ? "dnd-" : "") + (count > 0 ? "notification" : "none");
+private void on_subscribe_waybar (uint count, bool dnd, bool cc_open, bool inhibited) {
+    string state = (dnd ? "dnd-" : "")
+                   + (inhibited ? "inhibited-" : "")
+                   + (count > 0 ? "notification" : "none");
 
     string tooltip = "";
     if (count > 0) {
@@ -99,9 +113,9 @@ private void on_subscribe_waybar (uint count, bool dnd, bool cc_open) {
 private void print_subscribe_waybar () {
     try {
         SwayncDaemonData data = cc_daemon.get_subscribe_data ();
-        on_subscribe_waybar (data.count, data.dnd, data.cc_open);
+        on_subscribe_waybar (data.count, data.dnd, data.cc_open, data.inhibited);
     } catch (Error e) {
-        on_subscribe_waybar (0, false, false);
+        on_subscribe_waybar (0, false, false, false);
     }
 }
 
@@ -175,12 +189,54 @@ public int command_line (string[] args) {
                 cc_daemon.set_dnd (false);
                 print (cc_daemon.get_dnd ().to_string ());
                 break;
+            case "--get-inhibited":
+            case "-I":
+                print (cc_daemon.is_inhibited ().to_string ());
+                break;
+            case "--get-num-inhibitors":
+            case "-In":
+                print (cc_daemon.number_of_inhibitors ().to_string ());
+                break;
+            case "--inhibitor-add":
+            case "-Ia":
+                if (args.length < 3) {
+                    stderr.printf ("Application ID needed!");
+                    Process.exit (1);
+                }
+                if (cc_daemon.add_inhibitor (args[2])) {
+                    print ("Added inhibitor: \"%s\"", args[2]);
+                    break;
+                }
+                stderr.printf ("Inhibitor: \"%s\" already added!...", args[2]);
+                break;
+            case "--inhibitor-remove":
+            case "-Ir":
+                if (args.length < 3) {
+                    stderr.printf ("Application ID needed!");
+                    Process.exit (1);
+                }
+                if (cc_daemon.remove_inhibitor (args[2])) {
+                    print ("Removed inhibitor: \"%s\"", args[2]);
+                    break;
+                }
+                stderr.printf ("Inhibitor: \"%s\" does not exist!...", args[2]);
+                break;
+            case "inhibitors-clear":
+            case "-Ic":
+                if (cc_daemon.clear_inhibitors ()) {
+                    print ("Cleared all inhibitors");
+                    break;
+                }
+                print ("No inhibitors to clear...");
+                break;
             case "--subscribe":
             case "-s":
-                cc_daemon.subscribe.connect (on_subscribe);
-                on_subscribe (cc_daemon.notification_count (),
-                              cc_daemon.get_dnd (),
-                              cc_daemon.get_visibility ());
+                cc_daemon.subscribe_v2.connect (on_subscribe);
+                var data = cc_daemon.get_subscribe_data ();
+                on_subscribe (data.count,
+                              data.dnd,
+                              data.cc_open,
+                              data.inhibited);
                 var loop = new MainLoop ();
                 Bus.watch_name (
                     BusType.SESSION,
@@ -192,7 +248,7 @@ public int command_line (string[] args) {
                 break;
             case "--subscribe-waybar":
             case "-swb":
-                cc_daemon.subscribe.connect (on_subscribe_waybar);
+                cc_daemon.subscribe_v2.connect (on_subscribe_waybar);
                 var loop = new MainLoop ();
                 Bus.watch_name (
                     BusType.SESSION,

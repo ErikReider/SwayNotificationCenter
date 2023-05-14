@@ -351,6 +351,11 @@ namespace SwayNotificationCenter {
             get; set; default = Layer.TOP;
         }
 
+        /**
+         * Wether or not the windows should be opened as layer-shell surfaces
+         */
+        public bool layer_shell { get; set; default = true; }
+
         /** The CSS loading priority */
         public CssPriority cssPriority { // vala-lint=naming-convention
             get; set; default = CssPriority.APPLICATION;

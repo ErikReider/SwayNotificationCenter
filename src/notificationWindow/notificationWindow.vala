@@ -43,16 +43,18 @@ namespace SwayNotificationCenter {
         private const int MAX_HEIGHT = 600;
 
         private NotificationWindow () {
-            if (!GtkLayerShell.is_supported ()) {
-                stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
-                stderr.printf ("Swaync only works on Wayland!\n");
-                stderr.printf ("If running waylans session, try running:\n");
-                stderr.printf ("\tGDK_BACKEND=wayland swaync\n");
-                Process.exit (1);
+            if (swaync_daemon.use_layer_shell) {
+                if (!GtkLayerShell.is_supported ()) {
+                    stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
+                    stderr.printf ("Swaync only works on Wayland!\n");
+                    stderr.printf ("If running waylans session, try running:\n");
+                    stderr.printf ("\tGDK_BACKEND=wayland swaync\n");
+                    Process.exit (1);
+                }
+                GtkLayerShell.init_for_window (this);
+                GtkLayerShell.set_namespace (this, "swaync-notification-window");
+                GtkLayerShell.set_layer (this, GtkLayerShell.Layer.OVERLAY);
             }
-            GtkLayerShell.init_for_window (this);
-            GtkLayerShell.set_namespace (this, "swaync-notification-window");
-            GtkLayerShell.set_layer (this, GtkLayerShell.Layer.OVERLAY);
             this.set_anchor ();
 
             // -1 should set it to the content size unless it exceeds max_height
@@ -68,18 +70,21 @@ namespace SwayNotificationCenter {
         private void set_anchor () {
             switch (ConfigModel.instance.positionX) {
                 case PositionX.LEFT:
+                    if (!swaync_daemon.use_layer_shell) break;
                     GtkLayerShell.set_anchor (
                         this, GtkLayerShell.Edge.RIGHT, false);
                     GtkLayerShell.set_anchor (
                         this, GtkLayerShell.Edge.LEFT, true);
                     break;
                 case PositionX.CENTER:
+                    if (!swaync_daemon.use_layer_shell) break;
                     GtkLayerShell.set_anchor (
                         this, GtkLayerShell.Edge.RIGHT, false);
                     GtkLayerShell.set_anchor (
                         this, GtkLayerShell.Edge.LEFT, false);
                     break;
                 default:
+                    if (!swaync_daemon.use_layer_shell) break;
                     GtkLayerShell.set_anchor (
                         this, GtkLayerShell.Edge.LEFT, false);
                     GtkLayerShell.set_anchor (
@@ -90,6 +95,7 @@ namespace SwayNotificationCenter {
                 default:
                 case PositionY.TOP:
                     list_reverse = false;
+                    if (!swaync_daemon.use_layer_shell) break;
                     GtkLayerShell.set_anchor (
                         this, GtkLayerShell.Edge.BOTTOM, false);
                     GtkLayerShell.set_anchor (
@@ -97,17 +103,19 @@ namespace SwayNotificationCenter {
                     break;
                 case PositionY.CENTER:
                     list_reverse = false;
+                    if (!swaync_daemon.use_layer_shell) break;
                     GtkLayerShell.set_anchor (
                         this, GtkLayerShell.Edge.BOTTOM, false);
                     GtkLayerShell.set_anchor (
                         this, GtkLayerShell.Edge.TOP, false);
                     break;
                 case PositionY.BOTTOM:
+                    list_reverse = true;
+                    if (!swaync_daemon.use_layer_shell) break;
                     GtkLayerShell.set_anchor (
                         this, GtkLayerShell.Edge.TOP, false);
                     GtkLayerShell.set_anchor (
                         this, GtkLayerShell.Edge.BOTTOM, true);
-                    list_reverse = true;
                     break;
             }
         }

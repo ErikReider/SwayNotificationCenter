@@ -38,19 +38,21 @@ namespace SwayNotificationCenter {
 
             this.swaync_daemon.reloading_css.connect (reload_notifications_style);
 
-            if (!GtkLayerShell.is_supported ()) {
-                stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
-                stderr.printf ("Swaync only works on Wayland!\n");
-                stderr.printf ("If running waylans session, try running:\n");
-                stderr.printf ("\tGDK_BACKEND=wayland swaync\n");
-                Process.exit (1);
+            if (swaync_daemon.use_layer_shell) {
+                if (!GtkLayerShell.is_supported ()) {
+                    stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
+                    stderr.printf ("Swaync only works on Wayland!\n");
+                    stderr.printf ("If running waylans session, try running:\n");
+                    stderr.printf ("\tGDK_BACKEND=wayland swaync\n");
+                    Process.exit (1);
+                }
+                GtkLayerShell.init_for_window (this);
+                GtkLayerShell.set_namespace (this, "swaync-control-center");
+                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
+                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, true);
+                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
+                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
             }
-            GtkLayerShell.init_for_window (this);
-            GtkLayerShell.set_namespace (this, "swaync-control-center");
-            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
-            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, true);
-            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
-            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
 
             viewport.size_allocate.connect (size_alloc);
 
@@ -255,34 +257,36 @@ namespace SwayNotificationCenter {
 
         /** Resets the UI positions */
         private void set_anchor () {
-            // Grabs the keyboard input until closed
-            bool keyboard_shortcuts = ConfigModel.instance.keyboard_shortcuts;
+            if (swaync_daemon.use_layer_shell) {
+                // Grabs the keyboard input until closed
+                bool keyboard_shortcuts = ConfigModel.instance.keyboard_shortcuts;
 #if HAVE_LATEST_GTK_LAYER_SHELL
-            var mode = keyboard_shortcuts ?
-                       GtkLayerShell.KeyboardMode.EXCLUSIVE :
-                       GtkLayerShell.KeyboardMode.NONE;
-            GtkLayerShell.set_keyboard_mode (this, mode);
+                var mode = keyboard_shortcuts ?
+                           GtkLayerShell.KeyboardMode.EXCLUSIVE :
+                           GtkLayerShell.KeyboardMode.NONE;
+                GtkLayerShell.set_keyboard_mode (this, mode);
 #else
-            GtkLayerShell.set_keyboard_interactivity (this, keyboard_shortcuts);
+                GtkLayerShell.set_keyboard_interactivity (this, keyboard_shortcuts);
 #endif
 
-            // Set layer
-            GtkLayerShell.Layer layer = GtkLayerShell.Layer.TOP;
-            switch (ConfigModel.instance.layer) {
-                case Layer.BACKGROUND:
-                    layer = GtkLayerShell.Layer.BACKGROUND;
-                    break;
-                case Layer.BOTTOM:
-                    layer = GtkLayerShell.Layer.BOTTOM;
-                    break;
-                case Layer.TOP:
-                    layer = GtkLayerShell.Layer.TOP;
-                    break;
-                case Layer.OVERLAY:
-                    layer = GtkLayerShell.Layer.OVERLAY;
-                    break;
+                // Set layer
+                GtkLayerShell.Layer layer = GtkLayerShell.Layer.TOP;
+                switch (ConfigModel.instance.layer) {
+                    case Layer.BACKGROUND:
+                        layer = GtkLayerShell.Layer.BACKGROUND;
+                        break;
+                    case Layer.BOTTOM:
+                        layer = GtkLayerShell.Layer.BOTTOM;
+                        break;
+                    case Layer.TOP:
+                        layer = GtkLayerShell.Layer.TOP;
+                        break;
+                    case Layer.OVERLAY:
+                        layer = GtkLayerShell.Layer.OVERLAY;
+                        break;
+                }
+                GtkLayerShell.set_layer (this, layer);
             }
-            GtkLayerShell.set_layer (this, layer);
 
             // Set the box margins
             box.set_margin_top (ConfigModel.instance.control_center_margin_top);

@@ -21,9 +21,14 @@ namespace SwayNotificationCenter {
         [DBus (visible = false)]
         public signal void reloading_css ();
 
+        // Only set on swaync start due to some limitations of GtkLayerShell
+        [DBus (visible = false)]
+        public bool use_layer_shell { get; private set; }
+
         public SwayncDaemon () {
             // Init noti_daemon
             this.noti_daemon = new NotiDaemon (this);
+            this.use_layer_shell = ConfigModel.instance.layer_shell;
             Bus.own_name (BusType.SESSION, "org.freedesktop.Notifications",
                           BusNameOwnerFlags.NONE,
                           on_noti_bus_aquired,
@@ -122,6 +127,7 @@ namespace SwayNotificationCenter {
 
         [DBus (visible = false)]
         public void show_blank_windows (Gdk.Monitor ? monitor) {
+            if (!use_layer_shell) return;
             foreach (unowned BlankWindow win in blank_windows.data) {
                 if (win.monitor != monitor) win.show ();
             }
@@ -129,6 +135,7 @@ namespace SwayNotificationCenter {
 
         [DBus (visible = false)]
         public void hide_blank_windows () {
+            if (!use_layer_shell) return;
             foreach (unowned BlankWindow win in blank_windows.data) {
                 win.hide ();
             }

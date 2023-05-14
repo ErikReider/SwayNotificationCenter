@@ -479,26 +479,28 @@ namespace SwayNotificationCenter {
         }
 
         /** Categories settings */
-        public HashTable<string, Category> categories_settings {
+        public OrderedHashTable<Category> categories_settings {
             get;
             set;
-            default = new HashTable<string, Category> (str_hash, str_equal);
+            default = new OrderedHashTable<Category> ();
         }
 
+
         /** Notification Status */
-        public HashTable<string, NotificationVisibility> notification_visibility {
+        public OrderedHashTable<NotificationVisibility> notification_visibility {
             get;
             set;
-            default = new HashTable<string, NotificationVisibility> (str_hash, str_equal);
+            default = new OrderedHashTable<NotificationVisibility> ();
         }
 
 #if WANT_SCRIPTING
         /** Scripts */
-        public HashTable<string, Script> scripts {
+        public OrderedHashTable<Script> scripts {
             get;
             set;
-            default = new HashTable<string, Script> (str_hash, str_equal);
+            default = new OrderedHashTable<Script> ();
         }
+
         /** Show notification if script fails */
         public bool script_fail_notify { get; set; default = true; }
 #endif
@@ -597,11 +599,12 @@ namespace SwayNotificationCenter {
         }
 
         /** Widgets to show in ControlCenter */
-        public HashTable<string, Json.Object> widget_config {
+        public OrderedHashTable<Json.Object> widget_config {
             get;
             set;
-            default = new HashTable<string, Json.Object> (str_hash, str_equal);
+            default = new OrderedHashTable<Json.Object> ();
         }
+
 
         /* Methods */
 
@@ -617,7 +620,7 @@ namespace SwayNotificationCenter {
             switch (property_name) {
                 case "categories-settings" :
                     bool status;
-                    HashTable<string, Category> result =
+                    OrderedHashTable<Category> result =
                         extract_hashtable<Category> (
                             property_name,
                             property_node,
@@ -626,7 +629,7 @@ namespace SwayNotificationCenter {
                     return status;
                 case "notification-visibility":
                     bool status;
-                    HashTable<string, NotificationVisibility> result =
+                    OrderedHashTable<NotificationVisibility> result =
                         extract_hashtable<NotificationVisibility> (
                             property_name,
                             property_node,
@@ -636,7 +639,7 @@ namespace SwayNotificationCenter {
 #if WANT_SCRIPTING
                 case "scripts":
                     bool status;
-                    HashTable<string, Script> result =
+                    OrderedHashTable<Script> result =
                         extract_hashtable<Script> (
                             property_name,
                             property_node,
@@ -653,8 +656,8 @@ namespace SwayNotificationCenter {
                     value = result;
                     return status;
                 case "widget-config":
-                    HashTable<string, Json.Object> result
-                        = new HashTable<string, Json.Object> (str_hash, str_equal);
+                    OrderedHashTable<Json.Object> result
+                        = new OrderedHashTable<Json.Object> ();
                     if (property_node.get_value_type ().name () != "JsonObject") {
                         value = result;
                         return true;
@@ -668,7 +671,7 @@ namespace SwayNotificationCenter {
                         Json.Node ? node = obj.get_member (key);
                         if (node.get_node_type () != Json.NodeType.OBJECT) continue;
                         Json.Object ? o = node.get_object ();
-                        if (o != null) result.set (key, o);
+                        if (o != null) result.insert (key, o);
                     }
                     value = result;
                     return true;
@@ -701,29 +704,29 @@ namespace SwayNotificationCenter {
             switch (property_name) {
                 case "categories-settings" :
                     node = new Json.Node (Json.NodeType.OBJECT);
-                    var table = (HashTable<string, Category>) value.get_boxed ();
+                    var table = (OrderedHashTable<Category>) value;
                     node.set_object (serialize_hashtable<Category> (table));
                     break;
                 case "notification-visibility":
                     node = new Json.Node (Json.NodeType.OBJECT);
-                    var table = (HashTable<string, NotificationVisibility>) value.get_boxed ();
+                    var table = (OrderedHashTable<NotificationVisibility>) value;
                     node.set_object (serialize_hashtable<NotificationVisibility> (table));
                     break;
 #if WANT_SCRIPTING
                 case "scripts":
                     node = new Json.Node (Json.NodeType.OBJECT);
-                    var table = (HashTable<string, Script>) value.get_boxed ();
+                    var table = (OrderedHashTable<Script>) value;
                     node.set_object (serialize_hashtable<Script> (table));
                     break;
 #endif
                 case "widgets":
                     node = new Json.Node (Json.NodeType.ARRAY);
-                    var table = (GenericArray<string>) value.get_boxed ();
+                    var table = (GenericArray<string>) value;
                     node.set_array (serialize_array<string> (table));
                     break;
                 case "widget-config":
                     node = new Json.Node (Json.NodeType.OBJECT);
-                    var table = (HashTable<string, Json.Object>) value.get_boxed ();
+                    var table = (OrderedHashTable<Json.Object>) value;
                     node.set_object (serialize_hashtable<Json.Object> (table));
                     break;
                 default:
@@ -739,7 +742,7 @@ namespace SwayNotificationCenter {
         }
 
         /**
-         * Extracts and returns a HashTable<string, GLib.Object>
+         * Extracts and returns a OrderedHashTable<GLib.Object>
          * from a nested JSON Object.
          *
          * Can only accept these types:
@@ -748,11 +751,11 @@ namespace SwayNotificationCenter {
          * - int64
          * - GLib.Object
          */
-        private HashTable<string, T> extract_hashtable<T> (string property_name,
+        private OrderedHashTable<T> extract_hashtable<T> (string property_name,
                                                            Json.Node node,
                                                            out bool status) {
             status = false;
-            var tmp_table = new HashTable<string, T> (str_hash, str_equal);
+            var tmp_table = new OrderedHashTable<T> ();
 
             if (node.get_node_type () != Json.NodeType.OBJECT) {
                 stderr.printf ("Node %s is not a json object!...\n",
@@ -833,12 +836,12 @@ namespace SwayNotificationCenter {
             return tmp_table;
         }
 
-        private Json.Object serialize_hashtable<T> (HashTable<string, T> table) {
+        private Json.Object serialize_hashtable<T> (OrderedHashTable<T> table) {
             var json_object = new Json.Object ();
 
             if (table == null) return json_object;
 
-            foreach (string * key in table.get_keys ()) {
+            foreach (string key in table.get_keys ()) {
                 unowned T item = table.get (key);
                 if (item == null) continue;
 

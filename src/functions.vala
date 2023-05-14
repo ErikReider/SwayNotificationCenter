@@ -291,7 +291,7 @@ namespace SwayNotificationCenter {
          * Gets the Gdk.Monitor from the output_name. "auto" returns null
          */
         public static unowned Gdk.Monitor? get_monitor_from_name (owned string output_name) {
-            output_name = output_name.strip ().down();
+            output_name = output_name.strip ().down ();
             if (output_name.length < 1 || output_name == "auto") return null;
 
             unowned Gdk.Screen screen = Gdk.Screen.get_default ();
@@ -299,7 +299,7 @@ namespace SwayNotificationCenter {
             int num_monitors = display.get_n_monitors ();
             for (int num = 0; num < num_monitors; num++) {
                 string? plug = screen.get_monitor_plug_name (num);
-                if (plug != null && plug.strip ().down() == output_name) {
+                if (plug != null && plug.strip ().down () == output_name) {
                     unowned Gdk.Monitor monitor = display.get_monitor (num);
                     if (monitor != null) return monitor;
                 }

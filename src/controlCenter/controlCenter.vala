@@ -317,6 +317,12 @@ namespace SwayNotificationCenter {
                     list_reverse = false;
                     list_align = Gtk.Align.START;
                     break;
+                case PositionY.CENTER:
+                    align_y = Gtk.Align.CENTER;
+                    // Set cc widget position
+                    list_reverse = false;
+                    list_align = Gtk.Align.START;
+                    break;
                 case PositionY.BOTTOM:
                     align_y = Gtk.Align.END;
                     // Set cc widget position

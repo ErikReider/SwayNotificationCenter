@@ -30,7 +30,7 @@
       "type": "string",
       "description": "Vertical position of control center and notification window",
       "default": "top",
-      "enum": ["top", "bottom"]
+      "enum": ["top", "center", "bottom"]
     },
     "control-center-positionX": {
       "type": "string",

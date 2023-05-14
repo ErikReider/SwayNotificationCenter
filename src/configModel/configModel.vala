@@ -4,7 +4,7 @@ namespace SwayNotificationCenter {
     }
 
     public enum PositionY {
-        TOP, BOTTOM, NONE;
+        TOP, BOTTOM, CENTER, NONE;
     }
 
     public enum ImageVisibility {

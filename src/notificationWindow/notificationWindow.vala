@@ -87,13 +87,6 @@ namespace SwayNotificationCenter {
                     break;
             }
             switch (ConfigModel.instance.positionY) {
-                case PositionY.BOTTOM:
-                    GtkLayerShell.set_anchor (
-                        this, GtkLayerShell.Edge.TOP, false);
-                    GtkLayerShell.set_anchor (
-                        this, GtkLayerShell.Edge.BOTTOM, true);
-                    list_reverse = true;
-                    break;
                 default:
                 case PositionY.TOP:
                     list_reverse = false;
@@ -101,6 +94,20 @@ namespace SwayNotificationCenter {
                         this, GtkLayerShell.Edge.BOTTOM, false);
                     GtkLayerShell.set_anchor (
                         this, GtkLayerShell.Edge.TOP, true);
+                    break;
+                case PositionY.CENTER:
+                    list_reverse = false;
+                    GtkLayerShell.set_anchor (
+                        this, GtkLayerShell.Edge.BOTTOM, false);
+                    GtkLayerShell.set_anchor (
+                        this, GtkLayerShell.Edge.TOP, false);
+                    break;
+                case PositionY.BOTTOM:
+                    GtkLayerShell.set_anchor (
+                        this, GtkLayerShell.Edge.TOP, false);
+                    GtkLayerShell.set_anchor (
+                        this, GtkLayerShell.Edge.BOTTOM, true);
+                    list_reverse = true;
                     break;
             }
         }

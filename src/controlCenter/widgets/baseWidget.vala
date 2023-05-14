@@ -27,7 +27,7 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         protected Json.Object ? get_config (Gtk.Widget widget) {
-            unowned HashTable<string, Json.Object> config
+            unowned OrderedHashTable<Json.Object> config
                 = ConfigModel.instance.widget_config;
             string ? orig_key = null;
             Json.Object ? props = null;

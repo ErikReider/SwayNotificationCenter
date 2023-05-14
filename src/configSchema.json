@@ -25,6 +25,11 @@
       "description": "Wether or not the windows should be opened as layer-shell surfaces. Note: Requires swaync restart to apply",
       "default": true
     },
+    "output": {
+      "type": "string",
+      "description": "The output to display the layer surfaces on. \"auto\" for automatic selection",
+      "default": "auto"
+    },
     "cssPriority": {
       "type": "string",
       "description": "Which GTK priority to use when loading the default and user CSS files. Pick \"user\" to override XDG_CONFIG_HOME/gtk-3.0/gtk.css",

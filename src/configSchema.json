@@ -69,6 +69,11 @@
       "description": "The margin (in pixels) at the left of the notification center. 0 to disable",
       "default": 0
     },
+    "notification-2fa-action": {
+      "type": "boolean",
+      "description": "If each notification should display a 'COPY \"1234\"' action",
+      "default": true
+    },
     "notification-icon-size": {
       "type": "integer",
       "description": "The notification icon size (in pixels)",

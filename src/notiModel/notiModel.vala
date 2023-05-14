@@ -264,7 +264,7 @@ namespace SwayNotificationCenter {
         }
 
         public string to_string () {
-            var params = new HashTable<string, string ? > (str_hash, str_equal);
+            var params = new HashTable<string, string ?> (str_hash, str_equal);
 
             params.set ("applied_id", applied_id.to_string ());
             params.set ("app_name", app_name);
@@ -300,7 +300,8 @@ namespace SwayNotificationCenter {
                 _actions += "\n\t" + _action.to_string ();
             }
             params.set ("actions", string.joinv ("", _actions));
-            params.set ("inline-reply", inline_reply.to_string () ?? "false");
+            params.set ("inline-reply", inline_reply == null
+                        ? null : inline_reply.to_string ());
 
             string[] result = {};
             foreach (var k in params.get_keys ()) {

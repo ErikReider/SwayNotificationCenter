@@ -449,8 +449,6 @@ namespace SwayNotificationCenter {
             }
         }
 
-        // TODO: Fix Entry focus when in NotificationWindow
-        // TODO: Default CSS
         private void set_inline_reply () {
             if (param.inline_reply == null) return;
 

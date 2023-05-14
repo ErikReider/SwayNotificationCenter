@@ -27,8 +27,8 @@ namespace SwayNotificationCenter {
 
         public SwayncDaemon () {
             // Init noti_daemon
-            this.noti_daemon = new NotiDaemon (this);
             this.use_layer_shell = ConfigModel.instance.layer_shell;
+            this.noti_daemon = new NotiDaemon (this);
             Bus.own_name (BusType.SESSION, "org.freedesktop.Notifications",
                           BusNameOwnerFlags.NONE,
                           on_noti_bus_aquired,

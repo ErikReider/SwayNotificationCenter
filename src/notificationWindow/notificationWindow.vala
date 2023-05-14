@@ -36,6 +36,8 @@ namespace SwayNotificationCenter {
         [GtkChild]
         unowned Gtk.Box box;
 
+        private unowned Gdk.Monitor current_monitor;
+
         private bool list_reverse = false;
 
         private double last_upper = 0;
@@ -68,6 +70,16 @@ namespace SwayNotificationCenter {
         }
 
         private void set_anchor () {
+            if (swaync_daemon.use_layer_shell) {
+                // Set current monitor to display on
+                unowned Gdk.Monitor? mon
+                    = Functions.get_monitor_from_name (ConfigModel.instance.output);
+                if (mon != current_monitor) {
+                    GtkLayerShell.set_monitor (this, mon);
+                    current_monitor = mon;
+                }
+            }
+
             switch (ConfigModel.instance.positionX) {
                 case PositionX.LEFT:
                     if (!swaync_daemon.use_layer_shell) break;

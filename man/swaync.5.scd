@@ -18,7 +18,7 @@ config file to be able to detect config errors
 *positionY* ++
 	type: string ++
 	default: top ++
-	values: top, bottom ++
+	values: top, bottom, center ++
 	description: Vertical position of control center and notification window
 
 *layer* ++

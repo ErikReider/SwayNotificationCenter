@@ -27,14 +27,13 @@ namespace SwayNotificationCenter {
 
         public string parse () {
             switch (this) {
-                default:
-                    return "top";
                 case BACKGROUND:
                     return "background";
                 case BOTTOM:
                     return "bottom";
                 case TOP:
                     return "top";
+                default:
                 case OVERLAY:
                     return "overlay";
             }
@@ -346,9 +345,9 @@ namespace SwayNotificationCenter {
             get; set; default = PositionY.TOP;
         }
 
-        /** Layer of control center */
+        /** Layer of notification window */
         public Layer layer {
-            get; set; default = Layer.TOP;
+            get; set; default = Layer.OVERLAY;
         }
 
         /**
@@ -481,6 +480,11 @@ namespace SwayNotificationCenter {
             set {
                 control_center_margin_right_ = value < 0 ? 0 : value;
             }
+        }
+
+        /** Layer of Control Center window */
+        public Layer control_center_layer {
+            get; set; default = Layer.TOP;
         }
 
         /** Categories settings */

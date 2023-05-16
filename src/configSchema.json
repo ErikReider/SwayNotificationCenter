@@ -16,8 +16,8 @@
     },
     "layer": {
       "type": "string",
-      "description": "Layer of control center window",
-      "default": "top",
+      "description": "Layer of notification window",
+      "default": "overlay",
       "enum": ["background", "bottom", "top", "overlay"]
     },
     "layer-shell": {
@@ -68,6 +68,12 @@
       "type": "integer",
       "description": "The margin (in pixels) at the left of the notification center. 0 to disable",
       "default": 0
+    },
+    "control-center-layer": {
+      "type": "string",
+      "description": "Layer of control center window",
+      "default": "none",
+      "enum": ["background", "bottom", "top", "overlay", "none"]
     },
     "notification-2fa-action": {
       "type": "boolean",

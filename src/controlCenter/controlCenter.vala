@@ -270,8 +270,8 @@ namespace SwayNotificationCenter {
 #endif
 
                 // Set layer
-                GtkLayerShell.Layer layer = GtkLayerShell.Layer.TOP;
-                switch (ConfigModel.instance.layer) {
+                GtkLayerShell.Layer layer;
+                switch (ConfigModel.instance.control_center_layer) {
                     case Layer.BACKGROUND:
                         layer = GtkLayerShell.Layer.BACKGROUND;
                         break;
@@ -281,6 +281,7 @@ namespace SwayNotificationCenter {
                     case Layer.TOP:
                         layer = GtkLayerShell.Layer.TOP;
                         break;
+                    default:
                     case Layer.OVERLAY:
                         layer = GtkLayerShell.Layer.OVERLAY;
                         break;

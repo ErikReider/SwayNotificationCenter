@@ -43,16 +43,17 @@ namespace SwayNotificationCenter {
         private const int MAX_HEIGHT = 600;
 
         private NotificationWindow () {
-            if (!GtkLayerShell.is_supported ()) {
-                stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
-                stderr.printf ("Swaync only works on Wayland!\n");
-                stderr.printf ("If running waylans session, try running:\n");
-                stderr.printf ("\tGDK_BACKEND=wayland swaync\n");
-                Process.exit (1);
+            if (swaync_daemon.use_layer_shell) {
+                if (!GtkLayerShell.is_supported ()) {
+                    stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
+                    stderr.printf ("Swaync only works on Wayland!\n");
+                    stderr.printf ("If running waylans session, try running:\n");
+                    stderr.printf ("\tGDK_BACKEND=wayland swaync\n");
+                    Process.exit (1);
+                }
+                GtkLayerShell.init_for_window (this);
+                GtkLayerShell.set_namespace (this, "swaync-notification-window");
             }
-            GtkLayerShell.init_for_window (this);
-            GtkLayerShell.set_namespace (this, "swaync-notification-window");
-            GtkLayerShell.set_layer (this, GtkLayerShell.Layer.OVERLAY);
             this.set_anchor ();
 
             // -1 should set it to the content size unless it exceeds max_height
@@ -66,43 +67,68 @@ namespace SwayNotificationCenter {
         }
 
         private void set_anchor () {
-            switch (ConfigModel.instance.positionX) {
-                case PositionX.LEFT:
-                    GtkLayerShell.set_anchor (
-                        this, GtkLayerShell.Edge.RIGHT, false);
-                    GtkLayerShell.set_anchor (
-                        this, GtkLayerShell.Edge.LEFT, true);
-                    break;
-                case PositionX.CENTER:
-                    GtkLayerShell.set_anchor (
-                        this, GtkLayerShell.Edge.RIGHT, false);
-                    GtkLayerShell.set_anchor (
-                        this, GtkLayerShell.Edge.LEFT, false);
-                    break;
-                default:
-                    GtkLayerShell.set_anchor (
-                        this, GtkLayerShell.Edge.LEFT, false);
-                    GtkLayerShell.set_anchor (
-                        this, GtkLayerShell.Edge.RIGHT, true);
-                    break;
+            if (swaync_daemon.use_layer_shell) {
+                GtkLayerShell.Layer layer;
+                switch (ConfigModel.instance.layer) {
+                    case Layer.BACKGROUND:
+                        layer = GtkLayerShell.Layer.BACKGROUND;
+                        break;
+                    case Layer.BOTTOM:
+                        layer = GtkLayerShell.Layer.BOTTOM;
+                        break;
+                    case Layer.TOP:
+                        layer = GtkLayerShell.Layer.TOP;
+                        break;
+                    default:
+                    case Layer.OVERLAY:
+                        layer = GtkLayerShell.Layer.OVERLAY;
+                        break;
+                }
+                GtkLayerShell.set_layer (this, layer);
+
+                switch (ConfigModel.instance.positionX) {
+                    case PositionX.LEFT:
+                        GtkLayerShell.set_anchor (
+                            this, GtkLayerShell.Edge.RIGHT, false);
+                        GtkLayerShell.set_anchor (
+                            this, GtkLayerShell.Edge.LEFT, true);
+                        break;
+                    case PositionX.CENTER:
+                        GtkLayerShell.set_anchor (
+                            this, GtkLayerShell.Edge.RIGHT, false);
+                        GtkLayerShell.set_anchor (
+                            this, GtkLayerShell.Edge.LEFT, false);
+                        break;
+                    default:
+                        GtkLayerShell.set_anchor (
+                            this, GtkLayerShell.Edge.LEFT, false);
+                        GtkLayerShell.set_anchor (
+                            this, GtkLayerShell.Edge.RIGHT, true);
+                        break;
+                }
+                switch (ConfigModel.instance.positionY) {
+                    default:
+                    case PositionY.TOP:
+                        GtkLayerShell.set_anchor (
+                            this, GtkLayerShell.Edge.BOTTOM, false);
+                        GtkLayerShell.set_anchor (
+                            this, GtkLayerShell.Edge.TOP, true);
+                        break;
+                    case PositionY.CENTER:
+                        GtkLayerShell.set_anchor (
+                            this, GtkLayerShell.Edge.BOTTOM, false);
+                        GtkLayerShell.set_anchor (
+                            this, GtkLayerShell.Edge.TOP, false);
+                        break;
+                    case PositionY.BOTTOM:
+                        GtkLayerShell.set_anchor (
+                            this, GtkLayerShell.Edge.TOP, false);
+                        GtkLayerShell.set_anchor (
+                            this, GtkLayerShell.Edge.BOTTOM, true);
+                        break;
+                }
             }
-            switch (ConfigModel.instance.positionY) {
-                case PositionY.BOTTOM:
-                    GtkLayerShell.set_anchor (
-                        this, GtkLayerShell.Edge.TOP, false);
-                    GtkLayerShell.set_anchor (
-                        this, GtkLayerShell.Edge.BOTTOM, true);
-                    list_reverse = true;
-                    break;
-                default:
-                case PositionY.TOP:
-                    list_reverse = false;
-                    GtkLayerShell.set_anchor (
-                        this, GtkLayerShell.Edge.BOTTOM, false);
-                    GtkLayerShell.set_anchor (
-                        this, GtkLayerShell.Edge.TOP, true);
-                    break;
-            }
+            list_reverse = ConfigModel.instance.positionY == PositionY.BOTTOM;
         }
 
         private void size_alloc () {

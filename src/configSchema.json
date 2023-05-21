@@ -16,9 +16,14 @@
     },
     "layer": {
       "type": "string",
-      "description": "Layer of control center window",
-      "default": "top",
+      "description": "Layer of notification window",
+      "default": "overlay",
       "enum": ["background", "bottom", "top", "overlay"]
+    },
+    "layer-shell": {
+      "type": "boolean",
+      "description": "Wether or not the windows should be opened as layer-shell surfaces. Note: Requires swaync restart to apply",
+      "default": true
     },
     "cssPriority": {
       "type": "string",
@@ -30,7 +35,7 @@
       "type": "string",
       "description": "Vertical position of control center and notification window",
       "default": "top",
-      "enum": ["top", "bottom"]
+      "enum": ["top", "center", "bottom"]
     },
     "control-center-positionX": {
       "type": "string",
@@ -46,23 +51,34 @@
     },
     "control-center-margin-top": {
       "type": "integer",
-      "description": "The margin (in pixels) at the top of the notification center. 0 to disable",
+      "description": "The margin (in pixels) at the top of the control center. 0 to disable",
       "default": 0
     },
     "control-center-margin-bottom": {
       "type": "integer",
-      "description": "The margin (in pixels) at the bottom of the notification center. 0 to disable",
+      "description": "The margin (in pixels) at the bottom of the control center. 0 to disable",
       "default": 0
     },
     "control-center-margin-right": {
       "type": "integer",
-      "description": "The margin (in pixels) at the right of the notification center. 0 to disable",
+      "description": "The margin (in pixels) at the right of the control center. 0 to disable",
       "default": 0
     },
     "control-center-margin-left": {
       "type": "integer",
-      "description": "The margin (in pixels) at the left of the notification center. 0 to disable",
+      "description": "The margin (in pixels) at the left of the control center. 0 to disable",
       "default": 0
+    },
+    "control-center-layer": {
+      "type": "string",
+      "description": "Layer of control center window",
+      "default": "none",
+      "enum": ["background", "bottom", "top", "overlay", "none"]
+    },
+    "notification-2fa-action": {
+      "type": "boolean",
+      "description": "If each notification should display a 'COPY \"1234\"' action",
+      "default": true
     },
     "notification-icon-size": {
       "type": "integer",

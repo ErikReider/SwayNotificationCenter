@@ -387,6 +387,7 @@ namespace SwayNotificationCenter {
 
         /** Returns the first code found, else null */
         private string ? parse_body_codes () {
+            if (!ConfigModel.instance.notification_2fa_action) return null;
             string body = this.body.get_text ().strip ();
             if (body.length == 0) return null;
 

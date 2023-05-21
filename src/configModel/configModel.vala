@@ -4,7 +4,7 @@ namespace SwayNotificationCenter {
     }
 
     public enum PositionY {
-        TOP, BOTTOM, NONE;
+        TOP, BOTTOM, CENTER, NONE;
     }
 
     public enum ImageVisibility {
@@ -27,14 +27,13 @@ namespace SwayNotificationCenter {
 
         public string parse () {
             switch (this) {
-                default:
-                    return "top";
                 case BACKGROUND:
                     return "background";
                 case BOTTOM:
                     return "bottom";
                 case TOP:
                     return "top";
+                default:
                 case OVERLAY:
                     return "overlay";
             }
@@ -346,10 +345,15 @@ namespace SwayNotificationCenter {
             get; set; default = PositionY.TOP;
         }
 
-        /** Layer of control center */
+        /** Layer of notification window */
         public Layer layer {
-            get; set; default = Layer.TOP;
+            get; set; default = Layer.OVERLAY;
         }
+
+        /**
+         * Wether or not the windows should be opened as layer-shell surfaces
+         */
+        public bool layer_shell { get; set; default = true; }
 
         /** The CSS loading priority */
         public CssPriority cssPriority { // vala-lint=naming-convention
@@ -478,6 +482,11 @@ namespace SwayNotificationCenter {
             }
         }
 
+        /** Layer of Control Center window */
+        public Layer control_center_layer {
+            get; set; default = Layer.TOP;
+        }
+
         /** Categories settings */
         public OrderedHashTable<Category> categories_settings {
             get;
@@ -540,6 +549,11 @@ namespace SwayNotificationCenter {
                     ? value : CONTROL_CENTER_MINIMUM_WIDTH;
             }
         }
+
+        /**
+         * If each notification should display a 'COPY \"1234\"' action
+         */
+        public bool notification_2fa_action { get; set; default = true; }
 
         /**
          * Notification icon size, in pixels.

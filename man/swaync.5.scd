@@ -18,14 +18,21 @@ config file to be able to detect config errors
 *positionY* ++
 	type: string ++
 	default: top ++
-	values: top, bottom ++
+	values: top, center, bottom ++
 	description: Vertical position of control center and notification window
 
 *layer* ++
 	type: string ++
-	default: top ++
+	default: overlay ++
 	values: background, bottom, top, overlay ++
-	description: Layer of control center window relative to normal windows. background is below all windows, overlay is above all windows.
+	description: Layer of notification window relative to normal windows. ++
+		background is below all windows, overlay is above all windows.
+
+*layer-shell* ++
+	type: bool ++
+	default: true ++
+	description: Wether or not the windows should be opened as layer-shell ++
+		surfaces. Note: Requires swaync restart to apply
 
 *cssPriority* ++
 	type: string ++
@@ -53,6 +60,18 @@ config file to be able to detect config errors
 	type: integer ++
 	default: 0 ++
 	description: The margin (in pixels) at the left of the notification center. 0 to disable
+
+*control-center-layer* ++
+	type: string ++
+	default: top ++
+	values: background, bottom, top, overlay ++
+	description: Layer of control center window relative to normal windows. ++
+		background is below all windows, overlay is above all windows.
+
+*notification-2fa-action* ++
+	type: bool ++
+	default: true ++
+	description: If each notification should display a 'COPY \"1234\"' action
 
 *timeout* ++
 	type: integer ++

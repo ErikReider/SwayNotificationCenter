@@ -51,22 +51,22 @@
     },
     "control-center-margin-top": {
       "type": "integer",
-      "description": "The margin (in pixels) at the top of the notification center. 0 to disable",
+      "description": "The margin (in pixels) at the top of the control center. 0 to disable",
       "default": 0
     },
     "control-center-margin-bottom": {
       "type": "integer",
-      "description": "The margin (in pixels) at the bottom of the notification center. 0 to disable",
+      "description": "The margin (in pixels) at the bottom of the control center. 0 to disable",
       "default": 0
     },
     "control-center-margin-right": {
       "type": "integer",
-      "description": "The margin (in pixels) at the right of the notification center. 0 to disable",
+      "description": "The margin (in pixels) at the right of the control center. 0 to disable",
       "default": 0
     },
     "control-center-margin-left": {
       "type": "integer",
-      "description": "The margin (in pixels) at the left of the notification center. 0 to disable",
+      "description": "The margin (in pixels) at the left of the control center. 0 to disable",
       "default": 0
     },
     "control-center-layer": {

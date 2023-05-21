@@ -1,4 +1,7 @@
 namespace SwayNotificationCenter {
+
+    public enum NotificationType { CONTROL_CENTER, POPUP }
+
     [GtkTemplate (ui = "/org/erikreider/sway-notification-center/notification/notification.ui")]
     public class Notification : Gtk.ListBoxRow {
         [GtkChild]
@@ -70,6 +73,12 @@ namespace SwayNotificationCenter {
         public NotifyParams param { get; construct; }
         public NotiDaemon noti_daemon { get; construct; }
 
+        public NotificationType notification_type {
+            get;
+            construct;
+            default = NotificationType.POPUP;
+        }
+
         public uint timeout_delay { get; construct; }
         public uint timeout_low_delay { get; construct; }
         public uint timeout_critical_delay { get; construct; }
@@ -77,6 +86,8 @@ namespace SwayNotificationCenter {
         public int transition_time { get; construct; }
 
         public int number_of_body_lines { get; construct; default = 10; }
+
+        public bool has_inline_reply { get; private set; default = false; }
 
         private int carousel_empty_widget_index = 0;
 
@@ -98,18 +109,23 @@ namespace SwayNotificationCenter {
 
         /** Show a non-timed notification */
         public Notification.regular (NotifyParams param,
-                                     NotiDaemon noti_daemon) {
-            Object (noti_daemon: noti_daemon, param: param);
+                                     NotiDaemon noti_daemon,
+                                     NotificationType notification_type) {
+            Object (noti_daemon: noti_daemon,
+                    param: param,
+                    notification_type: notification_type);
         }
 
         /** Show a timed notification */
         public Notification.timed (NotifyParams param,
                                    NotiDaemon noti_daemon,
+                                   NotificationType notification_type,
                                    uint timeout,
                                    uint timeout_low,
                                    uint timeout_critical) {
             Object (noti_daemon: noti_daemon,
                     param: param,
+                    notification_type: notification_type,
                     is_timed: true,
                     timeout_delay: timeout,
                     timeout_low_delay: timeout_low,
@@ -451,7 +467,17 @@ namespace SwayNotificationCenter {
         }
 
         private void set_inline_reply () {
+            // Only show inline replies in popup notifications if the compositor
+            // supports ON_DEMAND layer shell keyboard interactivity
+            if (!ConfigModel.instance.notification_inline_replies
+                || (ConfigModel.instance.layer_shell
+                   && layer_shell_protocol_version < 4
+                   && notification_type == NotificationType.POPUP)) {
+                return;
+            }
             if (param.inline_reply == null) return;
+
+            has_inline_reply = true;
 
             inline_reply_box.show ();
 

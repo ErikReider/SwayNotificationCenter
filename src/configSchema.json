@@ -80,6 +80,11 @@
       "description": "If each notification should display a 'COPY \"1234\"' action",
       "default": true
     },
+    "notification-inline-replies": {
+      "type": "boolean",
+      "description": "If notifications should display a text field to reply if the sender requests it. NOTE: Replying in popup notifications is only available if the compositor supports GTK Layer-Shell ON_DEMAND keyboard interactivity.",
+      "default": false
+    },
     "notification-icon-size": {
       "type": "integer",
       "description": "The notification icon size (in pixels)",

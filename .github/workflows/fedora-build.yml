@@ -11,7 +11,7 @@ on:
 
 jobs:
   fedora-build:
-    container: fedora:rawhide
+    container: fedora:latest
     runs-on: ubuntu-latest
 
     steps:

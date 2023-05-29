@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.2 -->
+<!-- Generated with glade 3.40.0 -->
 <interface>
   <requires lib="gtk+" version="3.24"/>
   <requires lib="libhandy" version="1.2"/>
@@ -45,10 +45,10 @@
                             <property name="can-focus">False</property>
                             <property name="orientation">vertical</property>
                             <child>
-                              <object class="GtkButton" id="default_button">
+                              <object class="GtkEventBox" id="default_action">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="receives-default">False</property>
+                                <property name="events">GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK | GDK_STRUCTURE_MASK</property>
                                 <child>
                                   <object class="GtkBox">
                                     <property name="visible">True</property>
@@ -190,6 +190,49 @@
                                         <property name="expand">False</property>
                                         <property name="fill">False</property>
                                         <property name="position">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkBox" id="inline_reply_box">
+                                        <property name="can-focus">False</property>
+                                        <child>
+                                          <object class="GtkEntry" id="inline_reply_entry">
+                                            <property name="visible">True</property>
+                                            <property name="can-focus">True</property>
+                                            <property name="input-hints">GTK_INPUT_HINT_SPELLCHECK | GTK_INPUT_HINT_EMOJI | GTK_INPUT_HINT_NONE</property>
+                                            <style>
+                                              <class name="inline-reply-entry"/>
+                                            </style>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">True</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkButton" id="inline_reply_button">
+                                            <property name="visible">True</property>
+                                            <property name="can-focus">True</property>
+                                            <property name="receives-default">True</property>
+                                            <style>
+                                              <class name="inline-reply-button"/>
+                                            </style>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">1</property>
+                                          </packing>
+                                        </child>
+                                        <style>
+                                          <class name="inline-reply"/>
+                                        </style>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">3</property>
                                       </packing>
                                     </child>
                                     <style>

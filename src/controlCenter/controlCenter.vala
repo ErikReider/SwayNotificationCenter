@@ -133,6 +133,14 @@ namespace SwayNotificationCenter {
             // sometimes being passed through to unfucused application
             // Ex: Firefox in a fullscreen YouTube video
             this.key_release_event.connect ((w, event_key) => {
+                if (this.get_focus () is Gtk.Entry) {
+                    switch (Gdk.keyval_name (event_key.keyval)) {
+                        case "Escape":
+                            this.set_focus (null);
+                            return true;
+                    }
+                    return false;
+                }
                 if (event_key.type == Gdk.EventType.KEY_RELEASE) {
                     switch (Gdk.keyval_name (event_key.keyval)) {
                         case "Escape":
@@ -145,6 +153,7 @@ namespace SwayNotificationCenter {
             });
 
             this.key_press_event.connect ((w, event_key) => {
+                if (this.get_focus () is Gtk.Entry) return false;
                 if (event_key.type == Gdk.EventType.KEY_PRESS) {
                     var children = list_box.get_children ();
                     Notification noti = (Notification)
@@ -205,7 +214,7 @@ namespace SwayNotificationCenter {
                     }
                     navigate_list (list_position);
                 }
-                return true;
+                return false;
             });
 
             // Switches the stack page depending on the
@@ -464,7 +473,9 @@ namespace SwayNotificationCenter {
 
         public void add_notification (NotifyParams param,
                                       NotiDaemon noti_daemon) {
-            var noti = new Notification.regular (param, noti_daemon);
+            var noti = new Notification.regular (param,
+                                                 noti_daemon,
+                                                 NotificationType.CONTROL_CENTER);
             noti.grab_focus.connect ((w) => {
                 uint i = list_box.get_children ().index (w);
                 if (list_position != uint.MAX && list_position != i) {

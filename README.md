@@ -56,6 +56,7 @@ Post your setup here: [Config flex 💪](https://github.com/ErikReider/SwayNotif
 
 - Keyboard shortcuts
 - Notification body markup with image support
+- Inline replies
 - A panel to view previous notifications
 - Show album art for notifications like Spotify
 - Do not disturb

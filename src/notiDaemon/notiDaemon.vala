@@ -113,6 +113,7 @@ namespace SwayNotificationCenter {
                        "synchronous",
                        "private-synchronous",
                        "x-canonical-private-synchronous",
+                       "inline-reply",
             };
         }
 
@@ -339,5 +340,8 @@ namespace SwayNotificationCenter {
          * support the concept of being able to "invoke" a notification.
          */
         public signal void ActionInvoked (uint32 id, string action_key);
+
+        /** To be used by the non-standard "inline-reply" capability */
+        public signal void NotificationReplied (uint32 id, string text);
     }
 }

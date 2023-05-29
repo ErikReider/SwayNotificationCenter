@@ -1,4 +1,7 @@
 namespace SwayNotificationCenter {
+
+    public enum NotificationType { CONTROL_CENTER, POPUP }
+
     [GtkTemplate (ui = "/org/erikreider/sway-notification-center/notification/notification.ui")]
     public class Notification : Gtk.ListBoxRow {
         [GtkChild]
@@ -10,7 +13,11 @@ namespace SwayNotificationCenter {
         unowned Gtk.EventBox event_box;
 
         [GtkChild]
-        unowned Gtk.Button default_button;
+        unowned Gtk.EventBox default_action;
+
+
+        /** The default_action gesture. Allows clicks while not in swipe gesture. */
+        private Gtk.GestureMultiPress gesture;
 
         [GtkChild]
         unowned Gtk.ProgressBar progress_bar;
@@ -36,6 +43,17 @@ namespace SwayNotificationCenter {
         [GtkChild]
         unowned Gtk.Image body_image;
 
+        // Inline Reply
+        [GtkChild]
+        unowned Gtk.Box inline_reply_box;
+        [GtkChild]
+        unowned Gtk.Entry inline_reply_entry;
+        [GtkChild]
+        unowned Gtk.Button inline_reply_button;
+
+        private bool default_action_down = false;
+        private bool default_action_in = false;
+
         public static Gtk.IconSize icon_size = Gtk.IconSize.INVALID;
         private int notification_icon_size { get; default = ConfigModel.instance.notification_icon_size; }
 
@@ -55,6 +73,12 @@ namespace SwayNotificationCenter {
         public NotifyParams param { get; construct; }
         public NotiDaemon noti_daemon { get; construct; }
 
+        public NotificationType notification_type {
+            get;
+            construct;
+            default = NotificationType.POPUP;
+        }
+
         public uint timeout_delay { get; construct; }
         public uint timeout_low_delay { get; construct; }
         public uint timeout_critical_delay { get; construct; }
@@ -62,6 +86,8 @@ namespace SwayNotificationCenter {
         public int transition_time { get; construct; }
 
         public int number_of_body_lines { get; construct; default = 10; }
+
+        public bool has_inline_reply { get; private set; default = false; }
 
         private int carousel_empty_widget_index = 0;
 
@@ -83,18 +109,23 @@ namespace SwayNotificationCenter {
 
         /** Show a non-timed notification */
         public Notification.regular (NotifyParams param,
-                                     NotiDaemon noti_daemon) {
-            Object (noti_daemon: noti_daemon, param: param);
+                                     NotiDaemon noti_daemon,
+                                     NotificationType notification_type) {
+            Object (noti_daemon: noti_daemon,
+                    param: param,
+                    notification_type: notification_type);
         }
 
         /** Show a timed notification */
         public Notification.timed (NotifyParams param,
                                    NotiDaemon noti_daemon,
+                                   NotificationType notification_type,
                                    uint timeout,
                                    uint timeout_low,
                                    uint timeout_critical) {
             Object (noti_daemon: noti_daemon,
                     param: param,
+                    notification_type: notification_type,
                     is_timed: true,
                     timeout_delay: timeout,
                     timeout_low_delay: timeout_low,
@@ -116,6 +147,54 @@ namespace SwayNotificationCenter {
                 stderr.printf ("Invalid regex: %s", e.message);
             }
 
+            // Build the default_action gesture. Makes clickes compatible with
+            // the Hdy Swipe gesture unlike a regular ::button_release_event
+            gesture = new Gtk.GestureMultiPress (default_action);
+            gesture.set_touch_only (false);
+            gesture.set_exclusive (true);
+            gesture.set_button (Gdk.BUTTON_PRIMARY);
+            gesture.set_propagation_phase (Gtk.PropagationPhase.BUBBLE);
+            gesture.pressed.connect ((_gesture, _n_press, _x, _y) => {
+                default_action_in = true;
+                default_action_down = true;
+                default_action_update_state ();
+            });
+            gesture.released.connect ((gesture, _n_press, _x, _y) => {
+                // Emit released
+                if (!default_action_down) return;
+                default_action_down = false;
+                if (default_action_in) {
+                    click_default_action ();
+                }
+
+                Gdk.EventSequence ? sequence = gesture.get_current_sequence ();
+                if (sequence == null) {
+                    default_action_in = false;
+                    default_action_update_state ();
+                }
+            });
+            gesture.update.connect ((gesture, sequence) => {
+                Gtk.GestureSingle gesture_single = (Gtk.GestureSingle) gesture;
+                if (sequence != gesture_single.get_current_sequence ()) return;
+
+                Gtk.Allocation allocation;
+                double x, y;
+
+                default_action.get_allocation (out allocation);
+                gesture.get_point (sequence, out x, out y);
+                bool in_button = (x >= 0 && y >= 0 && x < allocation.width && y < allocation.height);
+                if (default_action_in != in_button) {
+                    default_action_in = in_button;
+                    default_action_update_state ();
+                }
+            });
+            gesture.cancel.connect ((_gesture, _sequence) => {
+                if (default_action_down) {
+                    default_action_down = false;
+                    default_action_update_state ();
+                }
+            });
+
             this.transition_time = ConfigModel.instance.transition_time;
             build_noti ();
 
@@ -123,6 +202,18 @@ namespace SwayNotificationCenter {
                 add_notification_timeout ();
                 this.size_allocate.connect (on_size_allocation);
             }
+        }
+
+        private void default_action_update_state () {
+            bool pressed = default_action_in && default_action_down;
+
+            Gtk.StateFlags flags = default_action.get_state_flags () &
+                                   ~(Gtk.StateFlags.PRELIGHT | Gtk.StateFlags.ACTIVE);
+
+            if (default_action_in) flags |= Gtk.StateFlags.PRELIGHT;
+            if (pressed) flags |= Gtk.StateFlags.ACTIVE;
+
+            default_action.set_state_flags (flags, true);
         }
 
         private void on_size_allocation (Gtk.Allocation _ignored) {
@@ -151,13 +242,31 @@ namespace SwayNotificationCenter {
                 return true;
             });
 
-            default_button.clicked.connect (click_default_action);
+            // Adds CSS :hover selector to EventBox
+            default_action.enter_notify_event.connect ((event) => {
+                if (event.detail != Gdk.NotifyType.INFERIOR
+                    && event.window == default_action.get_window ()) {
+                    default_action_in = true;
+                    default_action_update_state ();
+                }
+                return true;
+            });
+            default_action.leave_notify_event.connect ((event) => {
+                if (event.detail != Gdk.NotifyType.INFERIOR
+                    && event.window == default_action.get_window ()) {
+                    default_action_in = false;
+                    default_action_update_state ();
+                }
+                return true;
+            });
+
+            default_action.unmap.connect (() => default_action_in = false);
 
             close_revealer.set_transition_duration (this.transition_time);
 
             close_button.clicked.connect (() => close_notification ());
 
-            this.event_box.enter_notify_event.connect (() => {
+            this.event_box.enter_notify_event.connect ((event) => {
                 close_revealer.set_reveal_child (true);
                 remove_noti_timeout ();
                 return false;
@@ -207,6 +316,7 @@ namespace SwayNotificationCenter {
 
             set_body ();
             set_icon ();
+            set_inline_reply ();
             set_actions ();
             set_style_urgency ();
 
@@ -311,7 +421,7 @@ namespace SwayNotificationCenter {
         }
 
         public void click_alt_action (uint index) {
-            List<weak Gtk.Widget>? children = alt_actions_box.get_children ();
+            List<weak Gtk.Widget> ? children = alt_actions_box.get_children ();
             uint length = children.length ();
             if (length == 0 || index >= length) return;
 
@@ -354,6 +464,54 @@ namespace SwayNotificationCenter {
                     base_box.get_style_context ().add_class ("critical");
                     break;
             }
+        }
+
+        private void set_inline_reply () {
+            // Only show inline replies in popup notifications if the compositor
+            // supports ON_DEMAND layer shell keyboard interactivity
+            if (!ConfigModel.instance.notification_inline_replies
+                || (ConfigModel.instance.layer_shell
+                   && layer_shell_protocol_version < 4
+                   && notification_type == NotificationType.POPUP)) {
+                return;
+            }
+            if (param.inline_reply == null) return;
+
+            has_inline_reply = true;
+
+            inline_reply_box.show ();
+
+            inline_reply_entry.set_placeholder_text (
+                param.inline_reply_placeholder ?? "Enter Text");
+            // Set reply Button sensitivity to disabled if Entry text is empty
+            inline_reply_entry.bind_property (
+                "text",
+                inline_reply_button, "sensitive",
+                BindingFlags.SYNC_CREATE,
+                (binding, srcval, ref targetval) => {
+                targetval.set_boolean (((string) srcval).strip ().length > 0);
+                return true;
+            },
+                null);
+
+            inline_reply_entry.key_release_event.connect ((w, event_key) => {
+                switch (Gdk.keyval_name (event_key.keyval)) {
+                    case "Return":
+                        inline_reply_button.clicked ();
+                        return true;
+                    default:
+                        return false;
+                }
+            });
+
+            inline_reply_button.set_label (param.inline_reply.name ?? "Reply");
+            inline_reply_button.clicked.connect (() => {
+                string text = inline_reply_entry.get_text ().strip ();
+                if (text.length == 0) return;
+                noti_daemon.NotificationReplied (param.applied_id, text);
+                // Dismiss notification without activating Action
+                action_clicked (null);
+            });
         }
 
         private void set_actions () {
@@ -543,6 +701,7 @@ namespace SwayNotificationCenter {
         /** Forces the EventBox to reload its style_context #27 */
         public void reload_style_context () {
             event_box.get_style_context ().changed ();
+            default_action.get_style_context ().changed ();
         }
     }
 }

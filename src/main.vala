@@ -3,6 +3,8 @@ namespace SwayNotificationCenter {
     static string ? style_path;
     static string ? config_path;
 
+    static uint layer_shell_protocol_version = 3;
+
     static Settings self_settings;
 
     public void main (string[] args) {
@@ -39,6 +41,10 @@ namespace SwayNotificationCenter {
 
         ConfigModel.init (config_path);
         Functions.load_css (style_path);
+
+        if (ConfigModel.instance.layer_shell) {
+            layer_shell_protocol_version = GtkLayerShell.get_protocol_version ();
+        }
 
         swaync_daemon = new SwayncDaemon ();
         Bus.own_name (BusType.SESSION, "org.erikreider.swaync.cc",

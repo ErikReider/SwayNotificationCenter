@@ -556,6 +556,12 @@ namespace SwayNotificationCenter {
         public bool notification_2fa_action { get; set; default = true; }
 
         /**
+         * If notifications should display a text field to reply if the
+         * sender requests it.
+         */
+        public bool notification_inline_replies { get; set; default = false; }
+
+        /**
          * Notification icon size, in pixels.
          */
         private const int NOTIFICATION_ICON_MINIMUM_SIZE = 16;

@@ -40,6 +40,8 @@ namespace SwayNotificationCenter {
 
         private double last_upper = 0;
 
+        Gee.HashSet<uint32> inline_reply_notifications = new Gee.HashSet<uint32> ();
+
         private const int MAX_HEIGHT = 600;
 
         private NotificationWindow () {
@@ -158,6 +160,7 @@ namespace SwayNotificationCenter {
         public delegate bool remove_iter_func (Notification notification);
 
         public void close_all_notifications (remove_iter_func ? func = null) {
+            inline_reply_notifications.clear ();
             if (!this.get_realized ()) return;
             foreach (var w in box.get_children ()) {
                 Notification notification = (Notification) w;
@@ -170,6 +173,17 @@ namespace SwayNotificationCenter {
         private void remove_notification (Notification ? noti, bool replaces) {
             // Remove notification and its destruction timeout
             if (noti != null) {
+#if HAVE_LATEST_GTK_LAYER_SHELL
+                if (noti.has_inline_reply) {
+                    inline_reply_notifications.remove (noti.param.applied_id);
+                    if (inline_reply_notifications.size == 0
+                        && GtkLayerShell.get_keyboard_mode (this)
+                        != GtkLayerShell.KeyboardMode.NONE) {
+                        GtkLayerShell.set_keyboard_mode (
+                            this, GtkLayerShell.KeyboardMode.NONE);
+                    }
+                }
+#endif
                 noti.remove_noti_timeout ();
                 noti.destroy ();
             }
@@ -188,9 +202,21 @@ namespace SwayNotificationCenter {
                                       NotiDaemon noti_daemon) {
             var noti = new Notification.timed (param,
                                                noti_daemon,
+                                               NotificationType.POPUP,
                                                ConfigModel.instance.timeout,
                                                ConfigModel.instance.timeout_low,
                                                ConfigModel.instance.timeout_critical);
+#if HAVE_LATEST_GTK_LAYER_SHELL
+            if (noti.has_inline_reply) {
+                inline_reply_notifications.add (param.applied_id);
+
+                if (GtkLayerShell.get_keyboard_mode (this)
+                    != GtkLayerShell.KeyboardMode.ON_DEMAND) {
+                    GtkLayerShell.set_keyboard_mode (
+                        this, GtkLayerShell.KeyboardMode.ON_DEMAND);
+                }
+            }
+#endif
 
             if (list_reverse) {
                 box.pack_start (noti);

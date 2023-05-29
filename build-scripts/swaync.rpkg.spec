@@ -33,6 +33,36 @@ Requires:       dbus
 %description
 A simple notification daemon with a GTK gui for notifications and the control center
 
+%package bash-completion
+BuildArch:      noarch
+Summary:        Bash completion files for %{name}
+
+Requires:       bash
+Requires:       %{name} = %{version}-%{release}
+
+%description bash-completion
+This package installs Bash completion files for %{name}
+
+%package zsh-completion
+BuildArch:      noarch
+Summary:        Zsh completion files for %{name}
+
+Requires:       zsh
+Requires:       %{name} = %{version}-%{release}
+
+%description zsh-completion
+This package installs Zsh completion files for %{name}
+
+%package fish-completion
+BuildArch:      noarch
+Summary:        Fish completion files for %{name}
+
+Requires:       fish
+Requires:       %{name} = %{version}-%{release}
+
+%description fish-completion
+This package installs Fish completion files for %{name}
+
 %prep
 {{{ git_dir_setup_macro }}}
 
@@ -54,27 +84,27 @@ A simple notification daemon with a GTK gui for notifications and the control ce
 %{_bindir}/swaync-client
 %{_bindir}/swaync
 %license COPYING
-%{_sysconfdir}/xdg/swaync/configSchema.json
-%{_sysconfdir}/xdg/swaync/config.json
-%{_sysconfdir}/xdg/swaync/style.css
+%config %{_sysconfdir}/xdg/swaync/configSchema.json
+%config %{_sysconfdir}/xdg/swaync/config.json
+%config %{_sysconfdir}/xdg/swaync/style.css
 %{_userunitdir}/swaync.service
-%dir %{_datadir}/bash-completion
-%dir %{_datadir}/bash-completion/completions
-%{_datadir}/bash-completion/completions/swaync
-%{_datadir}/bash-completion/completions/swaync-client
 %{_datadir}/dbus-1/services/org.erikreider.swaync.service
-%dir %{_datadir}/fish
-%dir %{_datadir}/fish/vendor_completions.d
-%{_datadir}/fish/vendor_completions.d/swaync-client.fish
-%{_datadir}/fish/vendor_completions.d/swaync.fish
-%dir %{_datadir}/zsh
-%dir %{_datadir}/zsh/site-functions
-%{_datadir}/zsh/site-functions/_swaync
-%{_datadir}/zsh/site-functions/_swaync-client
 %{_datadir}/glib-2.0/schemas/org.erikreider.swaync.gschema.xml
 %{_mandir}/man1/swaync-client.1.gz
 %{_mandir}/man1/swaync.1.gz
 %{_mandir}/man5/swaync.5.gz
+
+%files bash-completion
+%{_datadir}/bash-completion/completions/swaync
+%{_datadir}/bash-completion/completions/swaync-client
+
+%files zsh-completion
+%{_datadir}/zsh/site-functions/_swaync
+%{_datadir}/zsh/site-functions/_swaync-client
+
+%files fish-completion
+%{_datadir}/fish/vendor_completions.d/swaync-client.fish
+%{_datadir}/fish/vendor_completions.d/swaync.fish
 
 # Changelog will be empty until you make first annotated Git tag.
 %changelog

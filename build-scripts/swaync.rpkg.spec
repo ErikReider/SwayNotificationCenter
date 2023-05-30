@@ -1,11 +1,13 @@
 # vim: syntax=spec
+%global alt_pkg_name swaync
+
 Name:       {{{ git_dir_name }}}
 Version:    0.9.0
 Release:    1%{?dist}
 Summary:    Notification daemon with GTK GUI
 Provides:   desktop-notification-daemon
-Provides:   sway-notification-center = %{version}
-Provides:   swaync = %{version}
+Provides:   sway-notification-center = %{version}-%{release}
+Provides:   %{alt_pkg_name} = %{version}-%{release}
 License:    GPLv3
 URL:        https://github.com/ErikReider/SwayNotificationCenter
 VCS:        {{{ git_dir_vcs }}}
@@ -36,6 +38,7 @@ A simple notification daemon with a GTK gui for notifications and the control ce
 %package bash-completion
 BuildArch:      noarch
 Summary:        Bash completion files for %{name}
+Provides:       %{alt_pkg_name}-bash-completion = %{version}-%{release}
 
 Requires:       bash
 Requires:       %{name} = %{version}-%{release}
@@ -46,6 +49,7 @@ This package installs Bash completion files for %{name}
 %package zsh-completion
 BuildArch:      noarch
 Summary:        Zsh completion files for %{name}
+Provides:       %{alt_pkg_name}-zsh-completion = %{version}-%{release}
 
 Requires:       zsh
 Requires:       %{name} = %{version}-%{release}
@@ -56,6 +60,7 @@ This package installs Zsh completion files for %{name}
 %package fish-completion
 BuildArch:      noarch
 Summary:        Fish completion files for %{name}
+Provides:       %{alt_pkg_name}-fish-completion = %{version}-%{release}
 
 Requires:       fish
 Requires:       %{name} = %{version}-%{release}

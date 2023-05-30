@@ -241,15 +241,16 @@ namespace SwayNotificationCenter {
                     var action = new Action ();
                     action.identifier = actions[i];
                     action.name = actions[i + 1];
-                    if (action.name != null && action.identifier != null
-                        && action.name != "" && action.identifier != "") {
-
+                    if (action.name != null && action.identifier != null ) {
                         string id = action.identifier.down ();
                         switch (id) {
                             case "default":
                                 default_action = action;
                                 break;
                             case "inline-reply":
+                                if (action.name == "") {
+                                    action.name = "reply";
+                                }
                                 inline_reply = action;
                                 break;
                             default:

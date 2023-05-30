@@ -84,9 +84,9 @@ This package installs Fish completion files for %{name}
 %{_bindir}/swaync-client
 %{_bindir}/swaync
 %license COPYING
-%config %{_sysconfdir}/xdg/swaync/configSchema.json
-%config %{_sysconfdir}/xdg/swaync/config.json
-%config %{_sysconfdir}/xdg/swaync/style.css
+%config(noreplace) %{_sysconfdir}/xdg/swaync/configSchema.json
+%config(noreplace) %{_sysconfdir}/xdg/swaync/config.json
+%config(noreplace) %{_sysconfdir}/xdg/swaync/style.css
 %{_userunitdir}/swaync.service
 %{_datadir}/dbus-1/services/org.erikreider.swaync.service
 %{_datadir}/glib-2.0/schemas/org.erikreider.swaync.gschema.xml

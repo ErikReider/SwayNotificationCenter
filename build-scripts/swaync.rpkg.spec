@@ -40,7 +40,7 @@ BuildArch:      noarch
 Summary:        Bash completion files for %{name}
 Provides:       %{alt_pkg_name}-bash-completion = %{version}-%{release}
 
-Requires:       bash
+Requires:       bash-completion
 Requires:       %{name} = %{version}-%{release}
 
 %description bash-completion

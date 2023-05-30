@@ -241,7 +241,7 @@ namespace SwayNotificationCenter {
                     var action = new Action ();
                     action.identifier = actions[i];
                     action.name = actions[i + 1];
-                    if (action.name != null && action.identifier != null ) {
+                    if (action.name != null && action.identifier != null) {
                         string id = action.identifier.down ();
                         switch (id) {
                             case "default":
@@ -249,7 +249,7 @@ namespace SwayNotificationCenter {
                                 break;
                             case "inline-reply":
                                 if (action.name == "") {
-                                    action.name = "reply";
+                                    action.name = "Reply";
                                 }
                                 inline_reply = action;
                                 break;

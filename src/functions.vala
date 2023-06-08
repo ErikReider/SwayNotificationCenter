@@ -144,12 +144,17 @@ namespace SwayNotificationCenter {
                 // Fallback location. Specified in postinstall.py
                 "/usr/local/etc/xdg/swaync/config.json"
             };
-            if (custom_path != null && custom_path.length > 0) {
+            if (custom_path != null && (custom_path = custom_path.strip ()).length > 0) {
                 // Replaces the home directory relative path with a absolute path
                 if (custom_path.get (0) == '~') {
                     custom_path = Environment.get_home_dir () + custom_path[1:];
                 }
-                paths += custom_path;
+
+                if (File.new_for_path (custom_path).query_exists ()) {
+                    paths += custom_path;
+                } else {
+                    critical ("Custom config file \"%s\" not found, skipping...", custom_path);
+                }
             }
             paths += Path.build_path (Path.DIR_SEPARATOR.to_string (),
                                       Environment.get_user_config_dir (),

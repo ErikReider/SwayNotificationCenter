@@ -309,11 +309,14 @@ namespace SwayNotificationCenter {
 
         /** Reloads the config and calls `ModifyNode` before deserializing */
         public static void reload_config (ModifyNode modify_cb = () => {}) {
+            // Re-check if config file path still exists
+            string path = Functions.get_config_path (_path);
+
             ConfigModel m = null;
             try {
-                if (_path.length == 0) return;
+                if (path.strip ().length == 0) return;
                 Json.Parser parser = new Json.Parser ();
-                parser.load_from_file (_path);
+                parser.load_from_file (path);
                 Json.Node ? node = parser.get_root ();
                 if (node == null) {
                     throw new Json.ParserError.PARSE ("Node is null!");
@@ -331,6 +334,7 @@ namespace SwayNotificationCenter {
                 stderr.printf (e.message + "\n");
             }
             _instance = m ?? new ConfigModel ();
+            _path = path;
             debug (_instance.to_string ());
         }
 

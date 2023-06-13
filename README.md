@@ -136,13 +136,20 @@ sudo zypper install SwayNotificationCenter
 
 ### Ubuntu
 
-Will be included in the official repos in the
-[Lunar](https://packages.ubuntu.com/lunar/sway-notification-center) release.
+Lunar and later:
+
+```
+sudo apt install sway-notification-center
+```
+
 
 ### Debian
 
-Will be included in the official repos in the
-[Bookworm](https://packages.debian.org/source/sid/sway-notification-center) release.
+Bookworm and later:
+
+```
+sudo apt install sway-notification-center
+```
 
 ### Other
 

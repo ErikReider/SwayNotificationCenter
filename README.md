@@ -304,14 +304,14 @@ meson install -C build
 
 ## i3status-rs Example
 
-> **Note** Ths requires i3status-rs version 0.30.0+
+> **Note** Ths requires i3status-rs version 0.31.0+
 
 i3status-rs config
 
 ```toml
 [[block]]
 block = "notify"
-format = " $icon {($notification_count.eng(1)) |}"
+format = " $icon {($notification_count.eng(w:1)) |}"
 driver = "swaync"
 [[block.click]]
 button = "left"

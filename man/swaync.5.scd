@@ -218,6 +218,10 @@ config file to be able to detect config errors
 			optional: true ++
 		*buttons-grid*++
 			optional: true ++
+		*volume*++
+			optional: true ++
+		*backlight*++
+			optional: true ++
 		*inhibitors*++
 			optional: true ++
 	description: ++

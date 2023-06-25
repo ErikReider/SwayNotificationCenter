@@ -23,13 +23,13 @@ swaync-client - Client executable
 	Reload the css file. Location change requires restart
 
 *-t, --toggle-panel*
-	Toggle the notificaion panel
+	Toggle the notification panel
 
 *-op, --open-panel*
-	Opens the notificaion panel
+	Opens the notification panel
 
 *-cp, --close-panel*
-	Closes the notificaion panel
+	Closes the notification panel
 
 *-d, --toggle-dnd*
 	Toggle and print the current dnd state
@@ -59,7 +59,7 @@ swaync-client - Client executable
 	Clears all inhibitors
 
 *-c, --count*
-	Print the current notificaion count
+	Print the current notification count
 
 *--hide-latest*
 	Hides latest notification. Still shown in Control Center
@@ -74,7 +74,7 @@ swaync-client - Client executable
 	Doesn't wait when swaync hasn't been started
 
 *-s, --subscribe*
-	Subscribe to notificaion add and close events
+	Subscribe to notification add and close events
 
 *-swb, --subscribe-waybar*
-	Subscribe to notificaion add and close events with waybar support. Read README for example
+	Subscribe to notification add and close events with waybar support. Read README for example

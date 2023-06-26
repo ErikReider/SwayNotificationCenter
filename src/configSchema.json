@@ -128,11 +128,6 @@
       "description": "If the control center should expand to both edges of the screen",
       "default": true
     },
-    "relative-timestamps": {
-      "type": "boolean",
-      "description": "Display notification timestamps relative to now e.g. \"26 minutes ago\". If false, a local iso8601-formatted absolute timestamp is displayed.",
-      "default": true
-    },
     "control-center-height": {
       "type": "integer",
       "description": "Height of the control center in pixels. Ignored when 'fit-to-screen' is set to 'true'",

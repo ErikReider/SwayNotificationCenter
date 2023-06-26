@@ -53,9 +53,9 @@ private void print_help (string[] args) {
     print ("Options:\n");
     print ("  -R, \t --reload-config \t\t Reload the config file\n");
     print ("  -rs, \t --reload-css \t\t\t Reload the css file. Location change requires restart\n");
-    print ("  -t, \t --toggle-panel \t\t Toggle the notification panel\n");
-    print ("  -op, \t --open-panel \t\t\t Opens the notification panel\n");
-    print ("  -cp, \t --close-panel \t\t\t Closes the notification panel\n");
+    print ("  -t, \t --toggle-panel \t\t Toggle the notificaion panel\n");
+    print ("  -op, \t --open-panel \t\t\t Opens the notificaion panel\n");
+    print ("  -cp, \t --close-panel \t\t\t Closes the notificaion panel\n");
     print ("  -d, \t --toggle-dnd \t\t\t Toggle and print the current dnd state\n");
     print ("  -D, \t --get-dnd \t\t\t Print the current dnd state\n");
     print ("  -dn, \t --dnd-on \t\t\t Turn dnd on and print the new dnd state\n");
@@ -65,13 +65,13 @@ private void print_help (string[] args) {
     print ("  -Ia, \t --inhibitor-add [APP_ID] \t Add an inhibitor\n");
     print ("  -Ir, \t --inhibitor-remove [APP_ID] \t Remove an inhibitor\n");
     print ("  -Ic, \t --inhibitors-clear \t\t Clears all inhibitors\n");
-    print ("  -c, \t --count \t\t\t Print the current notification count\n");
+    print ("  -c, \t --count \t\t\t Print the current notificaion count\n");
     print ("      \t --hide-latest \t\t\t Hides latest notification. Still shown in Control Center\n");
     print ("      \t --close-latest \t\t Closes latest notification\n");
     print ("  -C, \t --close-all \t\t\t Closes all notifications\n");
     print ("  -sw, \t --skip-wait \t\t\t Doesn't wait when swaync hasn't been started\n");
-    print ("  -s, \t --subscribe \t\t\t Subscribe to notification add and close events\n");
-    print ("  -swb,  --subscribe-waybar \t\t Subscribe to notification add and close events "
+    print ("  -s, \t --subscribe \t\t\t Subscribe to notificaion add and close events\n");
+    print ("  -swb,  --subscribe-waybar \t\t Subscribe to notificaion add and close events "
            + "with waybar support. Read README for example\n");
 }
 

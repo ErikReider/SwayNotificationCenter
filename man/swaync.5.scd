@@ -124,6 +124,12 @@ config file to be able to detect config errors
 	default: true ++
 	description: Whether the control center should expand vertically to fill the screen
 
+*relative-timestamps* ++
+	type: bool ++
+	default: true ++
+	description: Display notification timestamps relative to now e.g. \"26 minutes ago\".
+	If false, a local iso8601-formatted absolute timestamp is displayed. 
+
 *control-center-height* ++
 	type: integer ++
 	default: 500 ++

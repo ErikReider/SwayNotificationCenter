@@ -556,10 +556,15 @@ namespace SwayNotificationCenter {
         }
 
         public void set_time () {
-            this.time.set_text (get_readable_time ());
+            if(ConfigModel.instance.relative_timestamps) {
+                this.time.set_text (get_relative_time ());
+            }
+            else {
+                this.time.set_text (get_iso8601_time ());
+            }
         }
 
-        private string get_readable_time () {
+        private string get_relative_time () {
             string value = "";
 
             double diff = (get_real_time () * 0.000001) - param.time;
@@ -588,6 +593,11 @@ namespace SwayNotificationCenter {
                 value += " ago";
             }
             return value;
+        }
+
+        private string get_iso8601_time () {
+            var dtime = new DateTime.from_unix_local (param.time);
+            return dtime.format_iso8601 ();
         }
 
         public void close_notification (bool is_timeout = false) {

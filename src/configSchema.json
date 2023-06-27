@@ -389,11 +389,6 @@
           "type": "integer",
           "description": "The size of the album art",
           "default": 96
-        },
-        "image-radius": {
-          "type": "integer",
-          "description": "The border radius of the album art",
-          "default": 12
         }
       }
     },

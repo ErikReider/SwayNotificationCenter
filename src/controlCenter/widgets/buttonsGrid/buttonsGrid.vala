@@ -22,7 +22,7 @@ namespace SwayNotificationCenter.Widgets {
 
             Gtk.FlowBox container = new Gtk.FlowBox ();
             container.set_selection_mode (Gtk.SelectionMode.NONE);
-            pack_start (container, true, true, 0);
+            prepend (container);
 
             // add action to container
             foreach (var act in actions) {
@@ -33,7 +33,6 @@ namespace SwayNotificationCenter.Widgets {
                 container.insert (b, -1);
             }
 
-            show_all ();
         }
     }
 }

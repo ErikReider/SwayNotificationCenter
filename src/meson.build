@@ -26,6 +26,8 @@ widget_sources = [
   # Helpers
   'controlCenter/widgets/baseWidget.vala',
   'controlCenter/widgets/factory.vala',
+  # Widget: Notifications
+  'controlCenter/widgets/notifications/notifications.vala',
   # Widget: Title
   'controlCenter/widgets/title/title.vala',
   # Widget: Dnd
@@ -55,27 +57,107 @@ widget_sources = [
 
 app_sources = [
   'main.vala',
-  'orderedHashTable/orderedHashTable.vala',
+  'functions.vala',
   'configModel/configModel.vala',
+  'orderedHashTable/orderedHashTable.vala',
+  'customWidgets/iterBox.vala',
+  'customWidgets/blankWindow.vala',
+  'customWidgets/dismissibleWidget.vala',
+  'customWidgets/scaledImage.vala',
   'swayncDaemon/swayncDaemon.vala',
   'notiDaemon/notiDaemon.vala',
   'notiModel/notiModel.vala',
   'notificationWindow/notificationWindow.vala',
   'notification/notification.vala',
+  'notification/notificationContent.vala',
   'controlCenter/controlCenter.vala',
+  'emptyWindow/emptyWindow.vala',
   widget_sources,
-  'blankWindow/blankWindow.vala',
-  'functions.vala',
   constants,
 ]
 
+# vapi_dir = meson.current_source_dir() / 'vapi'
+
+libadwaita_version = '>= 1.3.2'
+libadwaita_dep = dependency(
+  'libadwaita-1',
+  # 'libadwaita-0',
+  version: libadwaita_version,
+  required: false,
+)
+if not libadwaita_dep.found()
+  libadwaita_project = subproject(
+    'libadwaita',
+    version: libadwaita_version,
+  )
+  libadwaita_dep = declare_dependency(
+    dependencies: [
+      libadwaita_project.get_variable('libadwaita_dep'),
+      libadwaita_project.get_variable('libadwaita_vapi'),
+    ],
+  )
+  libadwaita_vapi = meson.build_root() / 'subprojects' / 'libadwaita' / 'src'
+  add_project_arguments(['--vapidir', libadwaita_vapi], language: 'vala')
+endif
+
+# libadwaita = dependency(
+#   'libadwaita-1',
+#   version: '>= 1.3.2',
+#   fallback: ['libadwaita', 'libadwaita_dep'],
+# )
+
+layershell_version = '>= 1.0.0'
+# layershell_proj = subproject(
+#   'gtk4-layer-shell',
+#   required: false,
+#   version: layershell_version,
+# )
+# layershell_dep = dependency(
+#   'gtk4-layer-shell-0',
+#   fallback: ['gtk4-layer-shell', 'gtk_layer_shell'],
+#   version: layershell_version,
+#   required: false,
+# )
+# layershell_vapi = ''
+# if not layershell.found()
+#   layershell_project = subproject(
+#     'gtk4-layer-shell',
+#     version: layershell_version,
+#   )
+#   layershell = declare_dependency(
+#     dependencies: [
+#       layershell_project.get_variable('gtk_layer_shell'),
+#       layershell_project.get_variable('vapi'),
+#     ],
+#   )
+#   layershell_vapi = meson.build_root() / 'subprojects' / 'gtk4-layer-shell' / 'src'
+# endif
+
+# if not layershell_dep.found()
+#   layershell_proj = subproject(
+#     'gtk4-layer-shell',
+#     required: false,
+#     version: layershell_version,
+#   )
+# # layershell_lib = layershell_proj.get_variable('gtk_layer_shell_lib')
+#   layershell_dep = layershell_proj.get_variable('gtk_layer_shell')
+#   layershell_vapi = layershell_proj.get_variable('vapi')
+# # layershell = dependency('gtk4-layer-shell-0', version: layershell_version)
+# endif
+
 app_deps = [
+  # layershell_lib,
+  # layershell_dep,
+  # layershell_vapi,
   dependency('gio-2.0', version: '>= 2.50'),
   dependency('gio-unix-2.0', version: '>= 2.50'),
-  dependency('gtk+-3.0', version: '>= 3.22'),
+  dependency('gtk4', version: '>= 4.11.3'),
+  libadwaita_dep,
+  # libadwaita,
+  # dependency('libadwaita-1', version: '>= 1.3.2'),
   dependency('json-glib-1.0', version: '>= 1.0'),
-  dependency('libhandy-1', version: '>= 1.2.3'),
-  meson.get_compiler('c').find_library('gtk-layer-shell'),
+  dependency('gtk4-layer-shell-0', version: layershell_version),
+  # dependency('libhandy-1', version: '>= 1.2.3'),
   meson.get_compiler('c').find_library('m', required : true),
   meson.get_compiler('vala').find_library('posix'),
   dependency('gee-0.8'),
@@ -89,37 +171,41 @@ if get_option('scripting')
 endif
 
 # Detect libhandy version
-libhandy = dependency('libhandy-1')
-if libhandy.version() >= '1.3.9'
-    add_project_arguments('-D', 'HAVE_LATEST_LIBHANDY', language: 'vala')
-endif
+# libhandy = dependency('libhandy-1')
+# if libhandy.version() >= '1.3.9'
+#     add_project_arguments('-D', 'HAVE_LATEST_LIBHANDY', language: 'vala')
+# endif
 
 # Detect gtk-layer-shell version
-gtk_layer_shell = dependency(
-  'gtk-layer-shell-0',
-  fallback: ['gtk-layer-shell-0', 'gtk-layer-shell'],
-)
-if gtk_layer_shell.version() >= '0.6.0'
-    add_project_arguments('-D', 'HAVE_LATEST_GTK_LAYER_SHELL', language: 'vala')
-endif
+# gtk_layer_shell = dependency(
+#   'gtk-layer-shell-0',
+#   fallback: ['gtk-layer-shell-0', 'gtk-layer-shell'],
+# )
+# if gtk_layer_shell.version() >= '0.6.0'
+#     add_project_arguments('-D', 'HAVE_LATEST_GTK_LAYER_SHELL', language: 'vala')
+# endif
 
 args = [
   '--target-glib=2.50',
-  '--pkg=GtkLayerShell-0.1',
+  # '--pkg=GtkLayerShell-0.1',
+  '--library=gtk4',
+  '--library=libadwaita-1',
 ]
 
 sysconfdir = get_option('sysconfdir')
-gnome = import('gnome')
 
-app_sources += gnome.compile_resources('sway_notification_center-resources',
-  'sway_notification_center.gresource.xml',
+app_resources += gnome.compile_resources('sway_notification_center-resources',
+  'swaync_template.gresource.xml',
   c_name: 'sway_notification_center'
 )
 
+# add_project_arguments(['--vapidir', vapi_dir], language: 'vala')
+
 executable('swaync',
-  app_sources,
+  [ app_sources, app_resources ],
   vala_args: args,
   dependencies: app_deps,
+  # link_with: [layershell_lib],
   install: true,
 )
 

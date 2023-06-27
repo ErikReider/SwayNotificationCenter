@@ -8,12 +8,6 @@ namespace SwayNotificationCenter {
     static Settings self_settings;
 
     public void main (string[] args) {
-        Gtk.init (ref args);
-        Hdy.init ();
-        Functions.init ();
-
-        self_settings = new Settings ("org.erikreider.swaync");
-
         if (args.length > 0) {
             for (uint i = 1; i < args.length; i++) {
                 string arg = args[i];
@@ -39,25 +33,40 @@ namespace SwayNotificationCenter {
             }
         }
 
-        ConfigModel.init (config_path);
-        Functions.load_css (style_path);
+        Adw.init ();
+        Gtk.init ();
+        Functions.init ();
 
-        if (ConfigModel.instance.layer_shell) {
-            layer_shell_protocol_version = GtkLayerShell.get_protocol_version ();
-        }
+        var app = new Gtk.Application ("org.erikreider.swaync", ApplicationFlags.DEFAULT_FLAGS);
 
-        swaync_daemon = new SwayncDaemon ();
-        Bus.own_name (BusType.SESSION, "org.erikreider.swaync.cc",
-                      BusNameOwnerFlags.NONE,
-                      on_cc_bus_aquired,
-                      () => {},
-                      () => {
-            stderr.printf (
-                "Could not acquire swaync name!...\n");
-            Process.exit (1);
+        app.activate.connect (() => {
+            self_settings = new Settings ("org.erikreider.swaync");
+
+            ConfigModel.init (config_path);
+            Functions.load_css (style_path);
+
+            if (ConfigModel.instance.layer_shell) {
+                layer_shell_protocol_version = GtkLayerShell.get_protocol_version ();
+            }
+
+            swaync_daemon = new SwayncDaemon ();
+            // TODO: Remove ".cc"/"/cc" for all servers and client
+            Bus.own_name (BusType.SESSION, "org.erikreider.swaync.cc",
+                          BusNameOwnerFlags.NONE,
+                          on_cc_bus_aquired,
+                          () => {},
+                          () => {
+                stderr.printf (
+                    "Could not acquire swaync name!...\n");
+                Process.exit (1);
+            });
+            app.add_window (swaync_daemon.noti_daemon.control_center);
         });
 
-        Gtk.main ();
+        // Gtk.init ();
+
+        // new MainLoop ().run ();
+        app.run (null);
     }
 
     void on_cc_bus_aquired (DBusConnection conn) {

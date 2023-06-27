@@ -1,30 +1,20 @@
 namespace SwayNotificationCenter.Widgets.Mpris {
-    [GtkTemplate (ui = "/org/erikreider/sway-notification-center/controlCenter/widgets/mpris/mpris_player.ui")]
     public class MprisPlayer : Gtk.Box {
-        [GtkChild]
-        unowned Gtk.Label title;
-        [GtkChild]
-        unowned Gtk.Label sub_title;
+        public Gtk.Label title;
+        Gtk.Label sub_title;
 
-        [GtkChild]
-        unowned Gtk.Image album_art;
+        ScaledImage album_art;
 
-        [GtkChild]
-        unowned Gtk.Button button_shuffle;
-        [GtkChild]
-        unowned Gtk.Button button_prev;
-        [GtkChild]
-        unowned Gtk.Button button_play_pause;
-        [GtkChild]
-        unowned Gtk.Image button_play_pause_img;
-        [GtkChild]
-        unowned Gtk.Button button_next;
-        [GtkChild]
-        unowned Gtk.Button button_repeat;
-        [GtkChild]
-        unowned Gtk.Image button_repeat_img;
+        Gtk.Button button_shuffle;
+        Gtk.Button button_prev;
+        Gtk.Button button_play_pause;
+        Gtk.Image button_play_pause_img;
+        Gtk.Button button_next;
+        Gtk.Button button_repeat;
+        Gtk.Image button_repeat_img;
 
         public MprisSource source { construct; get; }
+        public string css_class_name { construct; get; }
 
         private const double UNSELECTED_OPACITY = 0.5;
 
@@ -34,15 +24,110 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         public const string ICON_PLAY = "media-playback-start-symbolic";
         public const string ICON_PAUSE = "media-playback-pause-symbolic";
 
+        private const string[] BUTTON_CSS_CLASSES = { "circular", "image-button", "flat" };
+
         private Cancellable album_art_cancellable = new Cancellable ();
         private string prev_art_url;
         private DesktopAppInfo ? desktop_entry = null;
 
-        private unowned Config mpris_config;
+        private int album_art_size = 96;
 
-        public MprisPlayer (MprisSource source, Config mpris_config) {
-            Object (source: source);
-            this.mpris_config = mpris_config;
+        construct {
+            set_orientation (Gtk.Orientation.VERTICAL);
+            this.hexpand = true;
+            add_css_class ("%s-player".printf (css_class_name));
+
+            var top_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 12);
+            append (top_box);
+
+            top_box.append (album_art = new ScaledImage () {
+                css_classes = { "%s-album-art".printf (css_class_name) },
+            });
+
+            var info_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 4);
+            info_box.append (title = new Gtk.Label (null) {
+                wrap = true,
+                ellipsize = Pango.EllipsizeMode.END,
+                css_classes = { "%s-title".printf (css_class_name) },
+                halign = Gtk.Align.FILL,
+                xalign = 0,
+                yalign = 0,
+                width_chars = 0,
+                max_width_chars = 0,
+            });
+            info_box.append (sub_title = new Gtk.Label (null) {
+                wrap = true,
+                ellipsize = Pango.EllipsizeMode.END,
+                css_classes = { "%s-subtitle".printf (css_class_name) },
+                halign = Gtk.Align.FILL,
+                xalign = 0,
+                yalign = 0,
+                width_chars = 0,
+                max_width_chars = 0,
+            });
+            top_box.append (info_box);
+
+            // Add all of the buttons
+            var button_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 6) {
+                homogeneous = true,
+                halign = Gtk.Align.CENTER,
+            };
+            append (button_box);
+            button_box.append (button_shuffle = new Gtk.Button () {
+                css_classes = BUTTON_CSS_CLASSES,
+                child = new Gtk.Image () {
+                    icon_name = "media-playlist-shuffle-symbolic",
+                    margin_start = 4,
+                    margin_end = 4,
+                    margin_top = 4,
+                    margin_bottom = 4,
+                },
+            });
+            button_box.append (button_prev = new Gtk.Button () {
+                css_classes = BUTTON_CSS_CLASSES,
+                child = new Gtk.Image () {
+                    icon_name = "media-seek-backward-symbolic",
+                    margin_start = 4,
+                    margin_end = 4,
+                    margin_top = 4,
+                    margin_bottom = 4,
+                },
+            });
+            button_box.append (button_play_pause = new Gtk.Button () {
+                css_classes = BUTTON_CSS_CLASSES,
+                child = (button_play_pause_img = new Gtk.Image () {
+                    icon_name = ICON_PAUSE,
+                    margin_start = 4,
+                    margin_end = 4,
+                    margin_top = 4,
+                    margin_bottom = 4,
+                }),
+            });
+            button_box.append (button_next = new Gtk.Button () {
+                css_classes = BUTTON_CSS_CLASSES,
+                child = new Gtk.Image () {
+                    icon_name = "media-seek-forward-symbolic",
+                    margin_start = 4,
+                    margin_end = 4,
+                    margin_top = 4,
+                    margin_bottom = 4,
+                },
+            });
+            button_box.append (button_repeat = new Gtk.Button () {
+                css_classes = BUTTON_CSS_CLASSES,
+                child = (button_repeat_img = new Gtk.Image () {
+                    icon_name = ICON_REPEAT,
+                    margin_start = 4,
+                    margin_end = 4,
+                    margin_top = 4,
+                    margin_bottom = 4,
+                }),
+            });
+        }
+
+        public MprisPlayer (MprisSource source, int album_art_size, string css_class_name) {
+            Object (source: source, css_class_name: css_class_name);
+            this.album_art_size = album_art_size;
 
             source.properties_changed.connect (properties_changed);
 
@@ -239,12 +324,11 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         }
 
         private async void update_album_art (HashTable<string, Variant> metadata) {
+            album_art.set_pixel_size (album_art_size);
             if ("mpris:artUrl" in metadata) {
                 string url = metadata["mpris:artUrl"].get_string ();
                 if (url == prev_art_url) return;
                 prev_art_url = url;
-
-                int scale = get_style_context ().get_scale ();
 
                 Gdk.Pixbuf ? pixbuf = null;
                 // Cancel previous download, reset the state and download again
@@ -252,9 +336,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 album_art_cancellable.reset ();
                 try {
                     File file = File.new_for_uri (url);
-                    InputStream stream = yield file.read_async (Priority.DEFAULT,
-                                                                album_art_cancellable);
-
+                    InputStream stream = yield file.read_async (
+                        Priority.DEFAULT, album_art_cancellable);
                     pixbuf = yield new Gdk.Pixbuf.from_stream_async (
                         stream, album_art_cancellable);
                 } catch (Error e) {
@@ -262,27 +345,20 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                            source.media_player.identity);
                 }
                 if (pixbuf != null) {
-                    pixbuf = Functions.scale_round_pixbuf (pixbuf,
-                                                           mpris_config.image_size,
-                                                           mpris_config.image_size,
-                                                           scale,
-                                                           mpris_config.image_radius);
                     album_art.set_from_pixbuf (pixbuf);
-                    album_art.get_style_context ().set_scale (1);
                     return;
                 }
             }
             // Get the app icon
-            Icon ? icon = null;
+            unowned Icon ? icon = null;
             if (desktop_entry is DesktopAppInfo) {
                 icon = desktop_entry.get_icon ();
             }
             if (icon != null) {
-                album_art.set_from_gicon (icon, mpris_config.image_size);
+                album_art.set_from_gicon (icon);
             } else {
                 // Default icon
-                album_art.set_from_icon_name ("audio-x-generic-symbolic",
-                                              mpris_config.image_size);
+                album_art.set_from_icon_name ("audio-x-generic-symbolic");
             }
         }
 
@@ -368,9 +444,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                             icon_name = ICON_REPEAT_SONG;
                             break;
                     }
-                    unowned Gtk.StyleContext ctx = button_repeat.get_style_context ();
-                    if (remove_flat_css_class) ctx.remove_class ("flat");
-                    else ctx.add_class ("flat");
+                    if (remove_flat_css_class) remove_css_class ("flat");
+                    else add_css_class ("flat");
                     button_repeat.get_child ().opacity = opacity;
                     button_repeat.sensitive = true;
                     button_repeat_img.icon_name = icon_name;

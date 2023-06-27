@@ -56,10 +56,8 @@ namespace SwayNotificationCenter.Widgets {
                 slider.tooltip_text = ((int) slider.get_value ()).to_string ();
             });
 
-            add (label_widget);
-            pack_start (slider, true, true, 0);
-
-            show_all ();
+            append (label_widget);
+            prepend (slider);
         }
 
         public override void on_cc_visibility_change (bool val) {

@@ -33,7 +33,9 @@ namespace SwayNotificationCenter.Widgets {
             }
 
             title_widget = new Gtk.Label (title);
-            add (title_widget);
+            title_widget.halign = Gtk.Align.START;
+            title_widget.hexpand = true;
+            prepend (title_widget);
 
             if (has_clear_all_button) {
                 clear_all_button = new Gtk.Button.with_label (button_text);
@@ -47,11 +49,9 @@ namespace SwayNotificationCenter.Widgets {
                 clear_all_button.set_can_focus (false);
                 clear_all_button.valign = Gtk.Align.CENTER;
                 // Backwards compatible towards older CSS stylesheets
-                clear_all_button.get_style_context ().add_class ("control-center-clear-all");
-                pack_end (clear_all_button, false);
+                clear_all_button.add_css_class ("control-center-clear-all");
+                append (clear_all_button);
             }
-
-            show_all ();
         }
     }
 }

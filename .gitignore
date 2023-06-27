@@ -8,3 +8,4 @@ SwayNotificationCenter
 ./src/swaync
 ./src/swaync*
 swaync-git*
+subprojects

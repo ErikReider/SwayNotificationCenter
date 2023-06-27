@@ -23,8 +23,11 @@ namespace SwayNotificationCenter.Widgets {
             }
 
             // Title
-            title_widget = new Gtk.Label (title);
-            add (title_widget);
+            title_widget = new Gtk.Label (title) {
+                halign = Gtk.Align.START,
+                hexpand = true,
+            };
+            prepend (title_widget);
 
             // Dnd button
             dnd_button = new Gtk.Switch () {
@@ -40,10 +43,9 @@ namespace SwayNotificationCenter.Widgets {
             dnd_button.set_can_focus (false);
             dnd_button.valign = Gtk.Align.CENTER;
             // Backwards compatible towards older CSS stylesheets
-            dnd_button.get_style_context ().add_class ("control-center-dnd");
-            pack_end (dnd_button, false);
+            dnd_button.add_css_class ("control-center-dnd");
+            append (dnd_button);
 
-            show_all ();
         }
 
         private bool state_set (Gtk.Widget widget, bool state) {

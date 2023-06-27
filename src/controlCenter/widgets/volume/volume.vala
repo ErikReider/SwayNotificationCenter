@@ -10,7 +10,8 @@ namespace SwayNotificationCenter.Widgets {
         Gtk.Label label_widget = new Gtk.Label (null);
         Gtk.Scale slider = new Gtk.Scale.with_range (Gtk.Orientation.HORIZONTAL, 0, 100, 1);
 
-        // Per app volume controll
+        // Per app volume control
+        List<SinkInputRow> rows = new List<SinkInputRow> ();
         Gtk.ListBox levels_listbox;
         Gtk.Button reveal_button;
         Gtk.Revealer revealer;
@@ -87,9 +88,9 @@ namespace SwayNotificationCenter.Widgets {
 
             slider.draw_value = false;
 
-            main_volume_slider_container.add (label_widget);
-            main_volume_slider_container.pack_start (slider, true, true, 0);
-            add (main_volume_slider_container);
+            main_volume_slider_container.append (label_widget);
+            main_volume_slider_container.append (slider);
+            append (main_volume_slider_container);
 
             if (show_per_app) {
                 reveal_button = new Gtk.Button.with_label (expand_label);
@@ -97,16 +98,18 @@ namespace SwayNotificationCenter.Widgets {
                 revealer.transition_type = revealer_type;
                 revealer.transition_duration = revealer_duration;
                 levels_listbox = new Gtk.ListBox ();
-                levels_listbox.get_style_context ().add_class ("per-app-volume");
-                revealer.add (levels_listbox);
+                levels_listbox.add_css_class ("per-app-volume");
+                revealer.set_child (levels_listbox);
 
                 if (this.client.active_sinks.size == 0) {
                     no_sink_inputs_label = new Gtk.Label (empty_label);
-                    levels_listbox.add (no_sink_inputs_label);
+                    levels_listbox.append (no_sink_inputs_label);
                 }
 
                 foreach (var item in this.client.active_sinks.values) {
-                    levels_listbox.add (new SinkInputRow (item, client, icon_size));
+                    var row = new SinkInputRow (item, client, icon_size);
+                    rows.append (row);
+                    levels_listbox.append (rows.last ().data);
                 }
 
                 this.client.change_active_sink.connect (active_sink_change);
@@ -123,11 +126,11 @@ namespace SwayNotificationCenter.Widgets {
                     }
                 });
 
-                main_volume_slider_container.pack_end (reveal_button, false, false, 0);
-                add (revealer);
+                main_volume_slider_container.append (reveal_button);
+                append (revealer);
             }
 
-            show_all ();
+            // show_all ();
         }
 
         public override void on_cc_visibility_change (bool val) {
@@ -147,11 +150,9 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         private void active_sink_change (PulseSinkInput sink) {
-            foreach (var row in levels_listbox.get_children ()) {
-                if (row == null) continue;
-                var s = (SinkInputRow) row;
-                if (s.sink_input.cmp (sink)) {
-                    s.update (sink);
+            foreach (var row in rows) {
+                if (row.sink_input.cmp (sink)) {
+                    row.update (sink);
                     break;
                 }
             }
@@ -160,25 +161,22 @@ namespace SwayNotificationCenter.Widgets {
         private void active_sink_added (PulseSinkInput sink) {
             // one element added -> remove the empty label
             if (this.client.active_sinks.size == 1) {
-                var label = levels_listbox.get_children ().first ().data;
+                var label = rows.first ().data;
                 levels_listbox.remove ((Gtk.Widget) label);
             }
-            levels_listbox.add (new SinkInputRow (sink, client, icon_size));
-            show_all ();
+            levels_listbox.append (new SinkInputRow (sink, client, icon_size));
+            // show_all ();
         }
 
         private void active_sink_removed (PulseSinkInput sink) {
-            foreach (var row in levels_listbox.get_children ()) {
-                if (row == null) continue;
-                var s = (SinkInputRow) row;
-                if (s.sink_input.cmp (sink)) {
+            foreach (var row in rows) {
+                if (row.sink_input.cmp (sink)) {
                     levels_listbox.remove (row);
                     break;
                 }
             }
-            if (levels_listbox.get_children ().length () == 0) {
-                levels_listbox.add (no_sink_inputs_label);
-                show_all ();
+            if (rows.is_empty ()) {
+                levels_listbox.append (no_sink_inputs_label);
             }
         }
     }

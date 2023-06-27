@@ -50,17 +50,16 @@ namespace SwayNotificationCenter.Widgets {
             menus_container = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
 
             topbar_container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
-            topbar_container.get_style_context ().add_class ("menu-button-bar");
+            topbar_container.add_css_class ("menu-button-bar");
 
-            menus_container.add (topbar_container);
+            menus_container.append (topbar_container);
 
             for (int i = 0; i < menu_objects.length (); i++) {
                 unowned ConfigObject ? obj = menu_objects.nth_data (i);
                 add_menu (ref obj);
             }
 
-            pack_start (menus_container, true, true, 0);
-            show_all ();
+            prepend (menus_container);
 
             foreach (var obj in menu_objects) {
                 obj.revealer ?.set_reveal_child (false);
@@ -71,21 +70,21 @@ namespace SwayNotificationCenter.Widgets {
             switch (obj.type) {
                 case MenuType.BUTTONS:
                     Gtk.Box container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
-                    if (obj.name != null) container.get_style_context ().add_class (obj.name);
+                    if (obj.name != null) container.add_css_class (obj.name);
 
                     foreach (Action a in obj.actions) {
                         Gtk.Button b = new Gtk.Button.with_label (a.label);
 
                         b.clicked.connect (() => execute_command (a.command));
 
-                        container.add (b);
+                        container.append (b);
                     }
                     switch (obj.position) {
                         case Position.LEFT:
-                            topbar_container.pack_start (container, false, false, 0);
+                            topbar_container.prepend (container);
                             break;
                         case Position.RIGHT:
-                            topbar_container.pack_end (container, false, false, 0);
+                            topbar_container.append (container);
                             break;
                     }
                     break;
@@ -93,10 +92,10 @@ namespace SwayNotificationCenter.Widgets {
                     Gtk.Button show_button = new Gtk.Button.with_label (obj.label);
 
                     Gtk.Box menu = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
-                    if (obj.name != null) menu.get_style_context ().add_class (obj.name);
+                    if (obj.name != null) menu.add_css_class (obj.name);
 
                     Gtk.Revealer r = new Gtk.Revealer ();
-                    r.add (menu);
+                    r.set_child (menu);
                     r.set_transition_duration (obj.animation_duration);
                     r.set_transition_type (obj.animation_type);
                     obj.revealer = r;
@@ -112,19 +111,19 @@ namespace SwayNotificationCenter.Widgets {
                     foreach (var a in obj.actions) {
                         Gtk.Button b = new Gtk.Button.with_label (a.label);
                         b.clicked.connect (() => execute_command (a.command));
-                        menu.pack_start (b, true, true, 0);
+                        menu.prepend (b);
                     }
 
                     switch (obj.position) {
                         case Position.RIGHT:
-                            topbar_container.pack_end (show_button, false, false, 0);
+                            topbar_container.append (show_button);
                             break;
                         case Position.LEFT:
-                            topbar_container.pack_start (show_button, false, false, 0);
+                            topbar_container.prepend (show_button);
                             break;
                     }
 
-                    menus_container.add (r);
+                    menus_container.append (r);
                     break;
             }
         }

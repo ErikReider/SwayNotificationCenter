@@ -71,8 +71,7 @@
       "text": "Label Text"
     },
     "mpris": {
-      "image-size": 96,
-      "image-radius": 12
+      "image-size": 96
     }
   }
 }

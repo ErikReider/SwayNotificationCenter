@@ -18,11 +18,17 @@
 @define-color bg-selected rgb(0, 128, 255);
 
 .notification-row {
+  transition: all 200ms ease;
   outline: none;
+  background: transparent;
+}
+.notification-row:hover {
+  background: transparent;
 }
 
-.notification-row:focus,
-.notification-row:hover {
+.control-center .notification-row:focus,
+.control-center .notification-row:hover {
+  /* TODO: Check that focus bg works */
   background: @noti-bg-focus;
 }
 
@@ -94,7 +100,7 @@
 
 .notification-default-action:hover,
 .notification-action:hover {
-  -gtk-icon-effect: none;
+  -gtk-icon-filter: none;
   background: @noti-bg-hover;
 }
 
@@ -202,7 +208,8 @@
 
 /* Window behind control center and on all other monitors */
 .blank-window {
-  background: alpha(black, 0.25);
+  /* background: alpha(black, 0.25); */
+  background: transparent;
 }
 
 /*** Widgets ***/
@@ -260,6 +267,9 @@
 .widget-mpris-player {
   padding: 8px;
   margin: 8px;
+}
+.widget-mpris-album-art {
+  border-radius: 12px;
 }
 .widget-mpris-title {
   font-weight: bold;

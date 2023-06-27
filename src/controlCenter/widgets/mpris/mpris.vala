@@ -1,9 +1,4 @@
 namespace SwayNotificationCenter.Widgets.Mpris {
-    public struct Config {
-        int image_size;
-        int image_radius;
-    }
-
     public class Mpris : BaseWidget {
         public override string widget_name {
             get {
@@ -19,14 +14,13 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         Gtk.Button button_prev;
         Gtk.Button button_next;
         Gtk.Box carousel_box;
-        Hdy.Carousel carousel;
-        Hdy.CarouselIndicatorDots carousel_dots;
+        Adw.Carousel carousel;
+        Adw.CarouselIndicatorDots carousel_dots;
+
+        bool starting = true;
 
         // Default config values
-        Config mpris_config = Config () {
-            image_size = 96,
-            image_radius = 12,
-        };
+        int image_size = 96;
 
         public Mpris (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             base (suffix, swaync_daemon, noti_daemon);
@@ -34,63 +28,48 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             set_valign (Gtk.Align.START);
             set_vexpand (false);
 
-            carousel_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0) {
-                visible = true,
-            };
+            carousel_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
 
-            button_prev = new Gtk.Button.from_icon_name ("go-previous", Gtk.IconSize.BUTTON) {
-                relief = Gtk.ReliefStyle.NONE,
+            button_prev = new Gtk.Button.from_icon_name ("go-previous") {
                 visible = false,
             };
             button_prev.clicked.connect (() => change_carousel_position (-1));
 
-            button_next = new Gtk.Button.from_icon_name ("go-next", Gtk.IconSize.BUTTON) {
-                relief = Gtk.ReliefStyle.NONE,
+            button_next = new Gtk.Button.from_icon_name ("go-next") {
                 visible = false,
             };
             button_next.clicked.connect (() => change_carousel_position (1));
 
-            carousel = new Hdy.Carousel () {
-                visible = true,
+            carousel = new Adw.Carousel () {
+                allow_scroll_wheel = true,
+                hexpand = true,
             };
-#if HAVE_LATEST_LIBHANDY
-            carousel.allow_scroll_wheel = true;
-#endif
             carousel.page_changed.connect ((index) => {
-                GLib.List<weak Gtk.Widget> children = carousel.get_children ();
-                int children_length = (int) children.length ();
-                if (children_length <= 1) {
+                if (carousel.n_pages <= 1) {
                     button_prev.sensitive = false;
                     button_next.sensitive = false;
                     return;
                 }
                 button_prev.sensitive = index > 0;
-                button_next.sensitive = index < children_length - 1;
+                button_next.sensitive = index < carousel.n_pages - 1;
             });
 
-            carousel_box.add (button_prev);
-            carousel_box.add (carousel);
-            carousel_box.add (button_next);
-            add (carousel_box);
+            carousel_box.append (button_prev);
+            carousel_box.append (carousel);
+            carousel_box.append (button_next);
+            append (carousel_box);
 
-            carousel_dots = new Hdy.CarouselIndicatorDots ();
+            carousel_dots = new Adw.CarouselIndicatorDots ();
             carousel_dots.set_carousel (carousel);
             carousel_dots.show ();
-            add (carousel_dots);
+            append (carousel_dots);
 
             // Config
             Json.Object ? config = get_config (this);
             if (config != null) {
                 // Get image-size
                 int? image_size = get_prop<int> (config, "image-size");
-                if (image_size != null) mpris_config.image_size = image_size;
-
-                // Get image-border-radius
-                int? image_radius = get_prop<int> (config, "image-radius");
-                if (image_radius != null) mpris_config.image_radius = image_radius;
-                // Clamp the radius
-                mpris_config.image_radius = mpris_config.image_radius.clamp (
-                    0, (int) (mpris_config.image_size * 0.5));
+                if (image_size != null) this.image_size = image_size;
             }
 
             hide ();
@@ -99,19 +78,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             } catch (Error e) {
                 error ("MPRIS Widget error: %s", e.message);
             }
-        }
-
-        /**
-         * Forces the carousel to reload its style_context.
-         * Fixes carousel items not redrawing when window isn't visible.
-         * Probably related to: https://gitlab.gnome.org/GNOME/libhandy/-/issues/363
-         */
-        public override void on_cc_visibility_change (bool value) {
-            if (!value) return;
-            carousel.get_style_context ().changed ();
-            foreach (var child in carousel.get_children ()) {
-                child.get_style_context ().changed ();
-            }
+            starting = false;
         }
 
         private void setup_mpris () throws Error {
@@ -147,17 +114,17 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         }
 
         private void add_player (string name, MprisSource source) {
-            MprisPlayer player = new MprisPlayer (source, mpris_config);
-            player.get_style_context ().add_class ("%s-player".printf (css_class_name));
+            MprisPlayer player = new MprisPlayer (source, image_size, css_class_name);
             carousel.prepend (player);
             players.set (name, player);
 
             if (!visible) show ();
 
             // Scroll to the new player
-            carousel.scroll_to (player);
-            uint children_length = carousel.get_children ().length ();
-            if (children_length > 1) {
+            // TODO: Open issue about scroll_to not being run before the window is shown
+            // Also affects notifications
+            carousel.scroll_to (player, !starting);
+            if (carousel.n_pages > 1) {
                 button_prev.show ();
                 button_next.show ();
             }
@@ -171,24 +138,21 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             player.before_destroy ();
             player.destroy ();
             players.remove (name);
+            carousel.remove (player);
 
-            uint children_length = carousel.get_children ().length ();
-            if (children_length == 0) {
+            if (carousel.n_pages == 0) {
                 hide ();
-            }
-            if (children_length <= 1) {
+            } else if (carousel.n_pages <= 1) {
                 button_prev.hide ();
                 button_next.hide ();
             }
         }
 
         private void change_carousel_position (int delta) {
-            GLib.List<weak Gtk.Widget> children = carousel.get_children ();
-            int children_length = (int) children.length ();
-            if (children_length == 0) return;
+            if (carousel.n_pages == 0) return;
             int position = ((int) carousel.position + delta).clamp (
-                0, children_length - 1);
-            carousel.scroll_to (children.nth_data (position));
+                0, (int) carousel.n_pages - 1);
+            carousel.scroll_to (carousel.get_nth_page (position), true);
         }
     }
 }

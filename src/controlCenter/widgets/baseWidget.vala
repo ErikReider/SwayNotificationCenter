@@ -1,7 +1,7 @@
 using Posix;
 
 namespace SwayNotificationCenter.Widgets {
-    public abstract class BaseWidget : Gtk.Box {
+    public abstract class BaseWidget : IterBox {
         public abstract string widget_name { get; }
 
         public weak string css_class_name {
@@ -17,13 +17,17 @@ namespace SwayNotificationCenter.Widgets {
         public unowned NotiDaemon noti_daemon;
 
         protected BaseWidget (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
+            base (Gtk.Orientation.HORIZONTAL, 0);
             this.suffix = suffix;
             this.key = widget_name + (suffix.length > 0 ? "#%s".printf (suffix) : "");
             this.swaync_daemon = swaync_daemon;
             this.noti_daemon = noti_daemon;
 
-            get_style_context ().add_class (css_class_name);
-            if (suffix.length > 0) get_style_context ().add_class (suffix);
+            this.hexpand = true;
+            this.halign = Gtk.Align.FILL;
+
+            this.add_css_class (css_class_name);
+            if (suffix.length > 0) this.add_css_class (suffix);
         }
 
         protected Json.Object ? get_config (Gtk.Widget widget) {
@@ -33,7 +37,7 @@ namespace SwayNotificationCenter.Widgets {
             Json.Object ? props = null;
             bool result = config.lookup_extended (key, out orig_key, out props);
             if (!result || orig_key == null || props == null) {
-                critical ("%s: Config not found! Using default config...\n", key);
+                warning ("%s: Config not found! Using default config...\n", key);
                 return null;
             }
             return props;

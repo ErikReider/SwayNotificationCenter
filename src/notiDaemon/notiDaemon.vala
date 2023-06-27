@@ -9,6 +9,7 @@ namespace SwayNotificationCenter {
             new HashTable<string, uint32> (str_hash, str_equal);
 
         public ControlCenter control_center;
+        public NotificationWindow notification_window;
 
         public unowned SwayncDaemon swaync_daemon;
 
@@ -18,8 +19,8 @@ namespace SwayNotificationCenter {
             this.notify["dnd"].connect (() => on_dnd_toggle (dnd));
 
             on_dnd_toggle.connect ((dnd) => {
-                if (!dnd || NotificationWindow.is_null) return;
-                NotificationWindow.instance.close_all_notifications ((noti) => {
+                if (!dnd) return;
+                notification_window.close_all_notifications ((noti) => {
                     return noti.param.urgency != UrgencyLevels.CRITICAL;
                 });
             });
@@ -27,6 +28,7 @@ namespace SwayNotificationCenter {
             // Init dnd from gsettings
             self_settings.bind ("dnd-state", this, "dnd", SettingsBindFlags.DEFAULT);
 
+            this.notification_window = new NotificationWindow (swaync_daemon, this);
             this.control_center = new ControlCenter (swaync_daemon, this);
         }
 
@@ -34,12 +36,13 @@ namespace SwayNotificationCenter {
          * Changes the popup-notification window visibility.
          * Closes all notifications and hides window if `value` is false
          */
-        public void set_noti_window_visibility (bool value)
-        throws DBusError, IOError {
-            NotificationWindow.instance.change_visibility (value);
+        [DBus (visible = false)]
+        public void hide_notification_window (bool value) throws DBusError, IOError {
+            notification_window.change_visibility (value);
         }
 
         /** Toggles the current Do Not Disturb state */
+        [DBus (visible = false)]
         public bool toggle_dnd () throws DBusError, IOError {
             return dnd = !dnd;
         }
@@ -62,7 +65,7 @@ namespace SwayNotificationCenter {
         /** Method to close notification and send DISMISSED signal */
         public void manually_close_notification (uint32 id, bool timeout)
         throws DBusError, IOError {
-            NotificationWindow.instance.close_notification (id, false);
+            notification_window.close_notification (id, false);
             if (!timeout) {
                 control_center.close_notification (id);
                 NotificationClosed (id, ClosedReasons.DISMISSED);
@@ -76,14 +79,14 @@ namespace SwayNotificationCenter {
 
         /** Closes all popup and controlcenter notifications */
         public void close_all_notifications () throws DBusError, IOError {
-            NotificationWindow.instance.close_all_notifications ();
+            notification_window.close_all_notifications ();
             control_center.close_all_notifications ();
         }
 
         /** Closes latest popup notification */
         public void hide_latest_notification (bool close)
         throws DBusError, IOError {
-            uint32 ? id = NotificationWindow.instance.get_latest_notification ();
+            uint32 ? id = notification_window.get_latest_notification ();
             if (id == null) return;
             manually_close_notification (id, !close);
         }
@@ -173,7 +176,7 @@ namespace SwayNotificationCenter {
             // Replace notification logic
             if (id == replaces_id) {
                 param.replaces = true;
-                NotificationWindow.instance.close_notification (id, true);
+                notification_window.close_notification (id, true);
                 control_center.close_notification (id, true);
             } else if (param.synchronous != null
                        && param.synchronous.length > 0) {
@@ -184,7 +187,7 @@ namespace SwayNotificationCenter {
                         param.synchronous, null, out r_id)) {
                     param.replaces = true;
                     // Close the notification
-                    NotificationWindow.instance.close_notification (r_id, true);
+                    notification_window.close_notification (r_id, true);
                     control_center.close_notification (r_id, true);
                 }
                 synchronous_ids.set (param.synchronous, id);
@@ -197,7 +200,7 @@ namespace SwayNotificationCenter {
                 if (param.urgency == UrgencyLevels.CRITICAL ||
                     (!dnd && !swaync_daemon.inhibited
                      && param.urgency != UrgencyLevels.CRITICAL)) {
-                    NotificationWindow.instance.add_notification (param, this);
+                    notification_window.add_notification (param, this);
                 }
             }
             // Only add notification to CC if it isn't IGNORED and not transient/TRANSIENT
@@ -292,7 +295,7 @@ namespace SwayNotificationCenter {
          */
         [DBus (name = "CloseNotification")]
         public void close_notification (uint32 id) throws DBusError, IOError {
-            NotificationWindow.instance.close_notification (id, false);
+            notification_window.close_notification (id, false);
             control_center.close_notification (id);
             NotificationClosed (id, ClosedReasons.CLOSED_BY_CLOSENOTIFICATION);
         }

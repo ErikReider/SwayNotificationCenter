@@ -304,17 +304,13 @@ config file to be able to detect config errors
 				widget-mpris-player ++
 				widget-mpris-title ++
 				widget-mpris-subtitle ++
+				widget-mpris-album-art ++
 			properties: ++
 				image-size: ++
 					type: integer ++
 					optional: true ++
 					default: 96 ++
 					description: The size of the album art. ++
-				image-radius: ++
-					type: integer ++
-					optional: true ++
-					default: 12 ++
-					description: The border radius of the album art. ++
 			description: A widget that displays multiple music players. ++
 		*menubar*++
 			type: object ++

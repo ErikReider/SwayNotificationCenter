@@ -556,16 +556,15 @@ namespace SwayNotificationCenter {
         }
 
         public void set_time () {
-            if(ConfigModel.instance.relative_timestamps) {
+            if (ConfigModel.instance.relative_timestamps) {
                 this.time.set_text (get_relative_time ());
-            }
-            else {
+            } else {
                 this.time.set_text (get_iso8601_time ());
             }
         }
 
         private string get_relative_time () {
-            string value = "";
+            string value = "";if 
 
             double diff = (get_real_time () * 0.000001) - param.time;
             double secs = diff / 60;

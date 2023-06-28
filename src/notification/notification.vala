@@ -564,7 +564,7 @@ namespace SwayNotificationCenter {
         }
 
         private string get_relative_time () {
-            string value = "";if 
+            string value = "";
 
             double diff = (get_real_time () * 0.000001) - param.time;
             double secs = diff / 60;

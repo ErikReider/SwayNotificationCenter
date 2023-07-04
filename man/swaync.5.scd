@@ -387,7 +387,9 @@ config file to be able to detect config errors
 					description: A list of buttons to be displayed in the menu-button-bar ++
 		*buttons-grid*++
 			type: object ++
-			css class: widget-buttons (access buttons with >flowbox>flowboxchild>button) ++
+			css class: ++
+				widget-buttons ++
+				widget-buttons-grid-button ++
 			properties: ++
 				actions: ++
 					type: array ++

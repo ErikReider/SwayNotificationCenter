@@ -287,12 +287,11 @@
   background-color: @noti-bg;
 }
 
-.widget-buttons-grid>flowbox>flowboxchild>button{
-  background: @noti-bg;
+.widget-buttons-grid-button {
   border-radius: 12px;
 }
 
-.widget-buttons-grid>flowbox>flowboxchild>button:hover {
+.widget-buttons-grid-button:hover {
   background: @noti-bg-hover;
 }
 

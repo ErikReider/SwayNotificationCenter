@@ -20,19 +20,27 @@ namespace SwayNotificationCenter.Widgets {
                 if (a != null) actions = parse_actions (a);
             }
 
-            Gtk.FlowBox container = new Gtk.FlowBox ();
-            container.set_selection_mode (Gtk.SelectionMode.NONE);
+            if (actions.length == 0) {
+                hide ();
+                return;
+            }
+
+            Gtk.FlowBox container = new Gtk.FlowBox () {
+                selection_mode = Gtk.SelectionMode.NONE,
+                hexpand = true,
+            };
             prepend (container);
 
             // add action to container
             foreach (var act in actions) {
-                Gtk.Button b = new Gtk.Button.with_label (act.label);
+                Gtk.Button button = new Gtk.Button.with_label (act.label) {
+                    css_classes = { "widget-buttons-grid-button" },
+                };
 
-                b.clicked.connect (() => execute_command (act.command));
+                button.clicked.connect (() => execute_command (act.command));
 
-                container.insert (b, -1);
+                container.append (button);
             }
-
         }
     }
 }

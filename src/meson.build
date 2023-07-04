@@ -186,7 +186,7 @@ endif
 # endif
 
 args = [
-  '--target-glib=2.50',
+  '--target-glib=2.74',
   # '--pkg=GtkLayerShell-0.1',
   '--library=gtk4',
   '--library=libadwaita-1',

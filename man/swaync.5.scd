@@ -316,8 +316,12 @@ config file to be able to detect config errors
 			type: object ++
 			css classes: ++
 				widget-menubar ++
-				.widget-menubar>box>.menu-button-bar ++
-				name of element given after menu or buttons with # ++
+				widget-menubar-container (with additional classes "start" and "end") ++
+				widget-menubar-child (direct child of the container) ++
+				widget-menubar-buttons (group of buttons, "buttons" widget) ++
+				widget-menubar-button (each individual button) ++
+				widget-menubar-menu (the animated menu for the "menu" widget) ++
+				Name of individual buttons, ex: "button#power" would be "power" ++
 			patternProperties: ++
 				menu#<name>: ++
 					type: object ++
@@ -543,16 +547,16 @@ config file to be able to detect config errors
 					},
 					...
 				]
+			},
+			"buttons": {
+				"actions": [
+					{
+						"label": "wifi",
+						"command": "rofi-wifi-menu"
+					},
+					...
+				]
 			}
-		},
-		"buttons": {
-			"actions": [
-				{
-					"label": "wifi",
-					"command": "rofi-wifi-menu"
-				},
-				...
-			]
 		}
 	}
 }

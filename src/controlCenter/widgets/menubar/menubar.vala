@@ -34,32 +34,43 @@ namespace SwayNotificationCenter.Widgets {
             }
         }
 
-        Gtk.Box menus_container;
-        Gtk.Box topbar_container;
+        Gtk.Box left_container;
+        Gtk.Box right_container;
 
         List<ConfigObject ?> menu_objects;
 
         public Menubar (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             base (suffix, swaync_daemon, noti_daemon);
+            set_orientation (Gtk.Orientation.VERTICAL);
 
             Json.Object ? config = get_config (this);
             if (config != null) {
                 parse_config_objects (config);
             }
 
-            menus_container = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
 
-            topbar_container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
-            topbar_container.add_css_class ("menu-button-bar");
+            Gtk.Box topbar_container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
+            append (topbar_container);
 
-            menus_container.append (topbar_container);
+            left_container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0) {
+                css_classes = { "widget-menubar-container", "start" },
+                overflow = Gtk.Overflow.HIDDEN,
+                hexpand = true,
+                halign = Gtk.Align.START,
+            };
+            topbar_container.append (left_container);
+            right_container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0) {
+                css_classes = { "widget-menubar-container", "end" },
+                overflow = Gtk.Overflow.HIDDEN,
+                hexpand = true,
+                halign = Gtk.Align.END,
+            };
+            topbar_container.append (right_container);
 
             for (int i = 0; i < menu_objects.length (); i++) {
                 unowned ConfigObject ? obj = menu_objects.nth_data (i);
                 add_menu (ref obj);
             }
-
-            prepend (menus_container);
 
             foreach (var obj in menu_objects) {
                 obj.revealer ?.set_reveal_child (false);
@@ -69,43 +80,62 @@ namespace SwayNotificationCenter.Widgets {
         void add_menu (ref unowned ConfigObject ? obj) {
             switch (obj.type) {
                 case MenuType.BUTTONS:
-                    Gtk.Box container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
+                    Gtk.Box container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0) {
+                        css_classes = { "widget-menubar-buttons", "widget-menubar-child" },
+                        overflow = Gtk.Overflow.HIDDEN,
+                    };
                     if (obj.name != null) container.add_css_class (obj.name);
 
-                    foreach (Action a in obj.actions) {
-                        Gtk.Button b = new Gtk.Button.with_label (a.label);
+                    foreach (Action action in obj.actions) {
+                        Gtk.Button button = new Gtk.Button.with_label (action.label);
+                        button.add_css_class ("widget-menubar-button");
 
-                        b.clicked.connect (() => execute_command (a.command));
+                        button.clicked.connect (() => execute_command (action.command));
 
-                        container.append (b);
+                        container.append (button);
                     }
                     switch (obj.position) {
                         case Position.LEFT:
-                            topbar_container.prepend (container);
+                            left_container.prepend (container);
                             break;
                         case Position.RIGHT:
-                            topbar_container.append (container);
+                            right_container.append (container);
                             break;
                     }
                     break;
                 case MenuType.MENU:
-                    Gtk.Button show_button = new Gtk.Button.with_label (obj.label);
+                    Gtk.ToggleButton show_button = new Gtk.ToggleButton.with_label (obj.label);
+                    show_button.add_css_class ("widget-menubar-button");
+                    show_button.add_css_class ("widget-menubar-child");
+                    if (obj.name != null) show_button.add_css_class (obj.name);
 
                     Gtk.Box menu = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
-                    if (obj.name != null) menu.add_css_class (obj.name);
+                    print ("NAME: %s\n", obj.name);
 
-                    Gtk.Revealer r = new Gtk.Revealer ();
-                    r.set_child (menu);
-                    r.set_transition_duration (obj.animation_duration);
-                    r.set_transition_type (obj.animation_type);
-                    obj.revealer = r;
+                    Gtk.Revealer revealer = new Gtk.Revealer () {
+                        child = menu,
+                        css_classes = { "widget-menubar-menu" },
+                        hexpand = true,
+                        transition_duration = obj.animation_duration,
+                        transition_type = obj.animation_type
+                    };
+                    obj.revealer = revealer;
 
                     show_button.clicked.connect (() => {
-                        bool visible = !r.get_reveal_child ();
+                        bool visible = !revealer.get_reveal_child ();
                         foreach (var o in menu_objects) {
                             o.revealer ?.set_reveal_child (false);
                         }
-                        r.set_reveal_child (visible);
+                        if (visible) {
+                            // revealer.show ();
+                            revealer.set_reveal_child (true);
+                        } else {
+                            revealer.set_reveal_child (false);
+                            Timeout.add_once (revealer.transition_duration, () => {
+                                // revealer.hide ();
+                                return Source.REMOVE;
+                            });
+                        }
                     });
 
                     foreach (var a in obj.actions) {
@@ -116,14 +146,16 @@ namespace SwayNotificationCenter.Widgets {
 
                     switch (obj.position) {
                         case Position.RIGHT:
-                            topbar_container.append (show_button);
+                            show_button.halign = Gtk.Align.START;
+                            right_container.append (show_button);
                             break;
                         case Position.LEFT:
-                            topbar_container.prepend (show_button);
+                            show_button.halign = Gtk.Align.END;
+                            left_container.prepend (show_button);
                             break;
                     }
 
-                    menus_container.append (r);
+                    append (revealer);
                     break;
             }
         }
@@ -139,21 +171,35 @@ namespace SwayNotificationCenter.Widgets {
                 if (obj == null) continue;
 
                 string[] key = e.split ("#");
-                string t = key[0];
                 MenuType type = MenuType.BUTTONS;
-                if (t == "buttons") type = MenuType.BUTTONS;
-                else if (t == "menu") type = MenuType.MENU;
-                else info ("Invalid type for menu-object - valid options: 'menu' || 'buttons' using default");
+                switch (key[0]) {
+                    case "buttons":
+                        type = MenuType.BUTTONS;
+                        break;
+                    case "menu":
+                        type = MenuType.MENU;
+                        break;
+                    default:
+                        info ("Invalid type for menu-object - valid options: 'menu' || 'buttons' using default");
+                        break;
+                }
 
                 string name = key[1];
 
-                string ? p = get_prop<string> (obj, "position");
-                Position pos;
-                if (p != "left" && p != "right") {
-                    pos = Position.RIGHT;
-                    info ("No position for menu-object given using default");
-                } else if (p == "right") pos = Position.RIGHT;
-                else pos = Position.LEFT;
+                string ? config_pos = get_prop<string> (obj, "position");
+                Position pos = Position.RIGHT;
+                switch (config_pos) {
+                    case "right":
+                        pos = Position.RIGHT;
+                        break;
+                    case "left":
+                        pos = Position.LEFT;
+                        break;
+                    default:
+                        pos = Position.RIGHT;
+                        info ("No position for menu-object given using default");
+                        break;
+                }
 
                 Json.Array ? actions = get_prop_array (obj, "actions");
                 if (actions == null) {

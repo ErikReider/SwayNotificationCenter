@@ -7,7 +7,6 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         Gtk.Label title_widget;
-        Gtk.Button clear_all_button;
 
         // Default config values
         string title = "Inhibitors";
@@ -41,12 +40,15 @@ namespace SwayNotificationCenter.Widgets {
                 if (button_text != null) this.button_text = button_text;
             }
 
-            title_widget = new Gtk.Label (title);
-            title_widget.show ();
+            title_widget = new Gtk.Label (title) {
+                hexpand = true,
+                xalign = 0.0f,
+                yalign = 0.0f,
+            };
             append (title_widget);
 
             if (has_clear_all_button) {
-                clear_all_button = new Gtk.Button.with_label (button_text);
+                Gtk.Button clear_all_button = new Gtk.Button.with_label (button_text);
                 clear_all_button.clicked.connect (() => {
                     try {
                         swaync_daemon.clear_inhibitors ();

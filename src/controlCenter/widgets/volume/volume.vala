@@ -11,11 +11,10 @@ namespace SwayNotificationCenter.Widgets {
         Gtk.Scale slider = new Gtk.Scale.with_range (Gtk.Orientation.HORIZONTAL, 0, 100, 1);
 
         // Per app volume control
-        List<SinkInputRow> rows = new List<SinkInputRow> ();
-        Gtk.ListBox levels_listbox;
+        List<unowned Gtk.Widget> levels_rows = new List<unowned Gtk.Widget> ();
+        Gtk.ListBox levels_listbox = new Gtk.ListBox ();
         Gtk.Button reveal_button;
         Gtk.Revealer revealer;
-        Gtk.Label no_sink_inputs_label;
         string empty_label = "No active sink input";
 
         string expand_label = "⇧";
@@ -87,6 +86,7 @@ namespace SwayNotificationCenter.Widgets {
             this.orientation = Gtk.Orientation.VERTICAL;
 
             slider.draw_value = false;
+            slider.hexpand = true;
 
             main_volume_slider_container.append (label_widget);
             main_volume_slider_container.append (slider);
@@ -97,19 +97,14 @@ namespace SwayNotificationCenter.Widgets {
                 revealer = new Gtk.Revealer ();
                 revealer.transition_type = revealer_type;
                 revealer.transition_duration = revealer_duration;
-                levels_listbox = new Gtk.ListBox ();
                 levels_listbox.add_css_class ("per-app-volume");
+                levels_listbox.set_placeholder (new Gtk.Label (empty_label));
                 revealer.set_child (levels_listbox);
-
-                if (this.client.active_sinks.size == 0) {
-                    no_sink_inputs_label = new Gtk.Label (empty_label);
-                    levels_listbox.append (no_sink_inputs_label);
-                }
 
                 foreach (var item in this.client.active_sinks.values) {
                     var row = new SinkInputRow (item, client, icon_size);
-                    rows.append (row);
-                    levels_listbox.append (rows.last ().data);
+                    levels_rows.append (row);
+                    levels_listbox.append (levels_rows.last ().data);
                 }
 
                 this.client.change_active_sink.connect (active_sink_change);
@@ -129,8 +124,6 @@ namespace SwayNotificationCenter.Widgets {
                 main_volume_slider_container.append (reveal_button);
                 append (revealer);
             }
-
-            // show_all ();
         }
 
         public override void on_cc_visibility_change (bool val) {
@@ -150,7 +143,9 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         private void active_sink_change (PulseSinkInput sink) {
-            foreach (var row in rows) {
+            foreach (var widget in levels_rows) {
+                if (!(widget is SinkInputRow)) continue;
+                var row = (SinkInputRow) widget;
                 if (row.sink_input.cmp (sink)) {
                     row.update (sink);
                     break;
@@ -159,24 +154,20 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         private void active_sink_added (PulseSinkInput sink) {
-            // one element added -> remove the empty label
-            if (this.client.active_sinks.size == 1) {
-                var label = rows.first ().data;
-                levels_listbox.remove ((Gtk.Widget) label);
-            }
-            levels_listbox.append (new SinkInputRow (sink, client, icon_size));
-            // show_all ();
+            var row = new SinkInputRow (sink, client, icon_size);
+            levels_rows.append (row);
+            levels_listbox.append (row);
         }
 
         private void active_sink_removed (PulseSinkInput sink) {
-            foreach (var row in rows) {
+            foreach (var widget in levels_rows) {
+                if (!(widget is SinkInputRow)) continue;
+                var row = (SinkInputRow) widget;
                 if (row.sink_input.cmp (sink)) {
+                    levels_rows.remove (row);
                     levels_listbox.remove (row);
                     break;
                 }
-            }
-            if (rows.is_empty ()) {
-                levels_listbox.append (no_sink_inputs_label);
             }
         }
     }

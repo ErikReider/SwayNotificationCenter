@@ -15,14 +15,14 @@ namespace SwayNotificationCenter.Widgets {
             update (sink_input);
 
             scale.draw_value = false;
+            scale.hexpand = true;
 
             icon.pixel_size = icon_size;
+            icon.set_tooltip_text (sink_input.get_display_name ());
 
             container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
-
             container.append (icon);
-
-            container.prepend (scale);
+            container.append (scale);
 
             set_child (container);
 
@@ -41,8 +41,6 @@ namespace SwayNotificationCenter.Widgets {
 
             scale.set_value (sink_input.volume);
             scale.tooltip_text = ((int) scale.get_value ()).to_string ();
-
-            // this.show_all ();
         }
     }
 }

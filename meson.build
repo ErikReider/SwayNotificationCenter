@@ -9,6 +9,9 @@ add_project_arguments(['--enable-gobject-tracing'], language: 'vala')
 add_project_arguments(['--enable-checking'], language: 'vala')
 
 i18n = import('i18n')
+gnome = import('gnome')
+
+app_resources = []
 
 subdir('data')
 subdir('src')

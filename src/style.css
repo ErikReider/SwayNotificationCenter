@@ -18,11 +18,17 @@
 @define-color bg-selected rgb(0, 128, 255);
 
 .notification-row {
+  transition: all 200ms ease;
   outline: none;
+  background: transparent;
+}
+.notification-row:hover {
+  background: transparent;
 }
 
-.notification-row:focus,
-.notification-row:hover {
+.control-center .notification-row:focus,
+.control-center .notification-row:hover {
+  /* TODO: Check that focus bg works */
   background: @noti-bg-focus;
 }
 
@@ -94,7 +100,7 @@
 
 .notification-default-action:hover,
 .notification-action:hover {
-  -gtk-icon-effect: none;
+  -gtk-icon-filter: none;
   background: @noti-bg-hover;
 }
 
@@ -202,7 +208,8 @@
 
 /* Window behind control center and on all other monitors */
 .blank-window {
-  background: alpha(black, 0.25);
+  /* background: alpha(black, 0.25); */
+  background: transparent;
 }
 
 /*** Widgets ***/
@@ -261,6 +268,9 @@
   padding: 8px;
   margin: 8px;
 }
+.widget-mpris-album-art {
+  border-radius: 12px;
+}
 .widget-mpris-title {
   font-weight: bold;
   font-size: 1.25rem;
@@ -277,40 +287,67 @@
   background-color: @noti-bg;
 }
 
-.widget-buttons-grid>flowbox>flowboxchild>button{
-  background: @noti-bg;
+.widget-buttons-grid-button {
   border-radius: 12px;
 }
 
-.widget-buttons-grid>flowbox>flowboxchild>button:hover {
+.widget-buttons-grid-button:hover {
   background: @noti-bg-hover;
 }
 
 /* Menubar widget */
-.widget-menubar>box>.menu-button-bar>button {
-  border: none;
-  background: transparent;
-}
-
-/* .AnyName { Name defined in config after #
-  background-color: @noti-bg;
-  padding: 8px;
+.widget-menubar {
   margin: 8px;
+  background: @noti-bg;
   border-radius: 12px;
 }
-
-.AnyName>button {
-  background: transparent;
-  border: none;
+.widget-menubar > box {
+  padding: 8px 0;
 }
-
-.AnyName>button:hover {
-  background-color: @noti-bg-hover;
-} */
-
-.topbar-buttons>button { /* Name defined in config after # */
-  border: none;
-  background: transparent;
+/* The left/right button container */
+.widget-menubar-container {
+}
+/* The left button container */
+.widget-menubar-container.start {
+  margin-left: 8px;
+}
+/* The right button container */
+.widget-menubar-container.end {
+  margin-right: 8px;
+}
+/* Each child element of the container (buttons box/toggle button) */
+.widget-menubar-child {
+  margin: 0 4px;
+  border-radius: 12px;
+}
+.widget-menubar-child:first-child {
+  margin-left: 0;
+}
+.widget-menubar-child:last-child {
+  margin-right: 0;
+}
+/* Each clickable button */
+.widget-menubar-button {
+}
+.widget-menubar-button:hover {
+  background: @noti-bg-hover;
+}
+.widget-menubar-button:checked {
+  background: @noti-bg-darker;
+}
+/* The container for each menubar "buttons" widget */
+.widget-menubar-buttons {
+}
+.widget-menubar-buttons > * {
+  border-radius: 0;
+}
+/* The menu revealer widget */
+.widget-menubar-menu {
+  padding: 0px 8px;
+}
+/* Each button in the revealer */
+.widget-menubar-menu > box > * {
+  margin-bottom: 8px;
 }
 
 /* Volume widget */

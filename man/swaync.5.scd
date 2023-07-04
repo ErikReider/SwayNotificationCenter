@@ -304,24 +304,24 @@ config file to be able to detect config errors
 				widget-mpris-player ++
 				widget-mpris-title ++
 				widget-mpris-subtitle ++
+				widget-mpris-album-art ++
 			properties: ++
 				image-size: ++
 					type: integer ++
 					optional: true ++
 					default: 96 ++
 					description: The size of the album art. ++
-				image-radius: ++
-					type: integer ++
-					optional: true ++
-					default: 12 ++
-					description: The border radius of the album art. ++
 			description: A widget that displays multiple music players. ++
 		*menubar*++
 			type: object ++
 			css classes: ++
 				widget-menubar ++
-				.widget-menubar>box>.menu-button-bar ++
-				name of element given after menu or buttons with # ++
+				widget-menubar-container (with additional classes "start" and "end") ++
+				widget-menubar-child (direct child of the container) ++
+				widget-menubar-buttons (group of buttons, "buttons" widget) ++
+				widget-menubar-button (each individual button) ++
+				widget-menubar-menu (the animated menu for the "menu" widget) ++
+				Name of individual buttons, ex: "button#power" would be "power" ++
 			patternProperties: ++
 				menu#<name>: ++
 					type: object ++
@@ -391,7 +391,9 @@ config file to be able to detect config errors
 					description: A list of buttons to be displayed in the menu-button-bar ++
 		*buttons-grid*++
 			type: object ++
-			css class: widget-buttons (access buttons with >flowbox>flowboxchild>button) ++
+			css class: ++
+				widget-buttons ++
+				widget-buttons-grid-button ++
 			properties: ++
 				actions: ++
 					type: array ++
@@ -545,16 +547,16 @@ config file to be able to detect config errors
 					},
 					...
 				]
+			},
+			"buttons": {
+				"actions": [
+					{
+						"label": "wifi",
+						"command": "rofi-wifi-menu"
+					},
+					...
+				]
 			}
-		},
-		"buttons": {
-			"actions": [
-				{
-					"label": "wifi",
-					"command": "rofi-wifi-menu"
-				},
-				...
-			]
 		}
 	}
 }

@@ -10,7 +10,6 @@ namespace SwayNotificationCenter.Widgets {
         string path_current;
         string path_max;
         File fd;
-        FileMonitor monitor = null;
 
         int max;
 
@@ -31,21 +30,16 @@ namespace SwayNotificationCenter.Widgets {
             fd = File.new_for_path (path_current);
             if (fd.query_exists ()) {
                 set_max_value ();
-                try {
-                    monitor = fd.monitor (FileMonitorFlags.NONE, null);
-                } catch (Error e) {
-                    error ("Error %s\n", e.message);
-                }
             } else {
                 this.brightness_change (-1);
                 warning ("Could not find device %s\n", path_current);
-                close ();
             }
 
             try {
                 // setup DBus for setting brightness
                 login1 = Bus.get_proxy_sync (BusType.SYSTEM,
-                                             "org.freedesktop.login1", "/org/freedesktop/login1/session/auto");
+                                             "org.freedesktop.login1",
+                                             "/org/freedesktop/login1/session/auto");
             } catch (Error e) {
                 error ("Error %s\n", e.message);
             }
@@ -55,30 +49,13 @@ namespace SwayNotificationCenter.Widgets {
             if (fd.query_exists ()) {
                 // get changes made while controlCenter not shown
                 get_brightness ();
-
-                connect_monitor ();
             } else {
                 this.brightness_change (-1);
                 warning ("Could not find device %s\n", path_current);
-                close ();
             }
-        }
-
-        private void connect_monitor () {
-            if (monitor != null) {
-                // connect monitor to monitor changes
-                monitor.changed.connect ((src, dest, event) => {
-                    get_brightness ();
-                });
-            }
-        }
-
-        public void close () {
-            if (monitor != null) monitor.cancel ();
         }
 
         public void set_brightness (float percent) {
-            this.close ();
             try {
                 if (subsystem == "backlight") {
                     int actual = calc_actual (percent);
@@ -89,14 +66,13 @@ namespace SwayNotificationCenter.Widgets {
             } catch (Error e) {
                 error ("Error %s\n", e.message);
             }
-            connect_monitor ();
         }
 
         // get current brightness and emit signal
         private void get_brightness () {
             try {
-                var dis = new DataInputStream (fd.read (null));
-                string data = dis.read_line (null);
+                var dis = new DataInputStream (fd.read ());
+                string data = dis.read_line ();
                 if (subsystem == "backlight") {
                     int val = calc_percent (int.parse (data));
                     this.brightness_change (val);

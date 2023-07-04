@@ -15,7 +15,7 @@ namespace SwayNotificationCenter {
         [DBus (visible = false)]
         public signal void inhibited_changed (uint length);
 
-        private Array<BlankWindow> blank_windows = new Array<BlankWindow> ();
+        private Array<EmptyWindow> empty_windows = new Array<EmptyWindow> ();
         private unowned Gdk.Display ? display = Gdk.Display.get_default ();
 
         [DBus (visible = false)]
@@ -65,26 +65,13 @@ namespace SwayNotificationCenter {
             /// Blank windows
 
             if (display == null) return;
-            init_blank_windows (false);
+            unowned ListModel monitors = display.get_monitors ();
 
-            display.closed.connect ((is_error) => {
-                clear_blank_windows ();
-                if (is_error) stderr.printf ("Display closed due to error!\n");
-            });
+            init_empty_windows (monitors, false);
 
-            display.opened.connect ((d) => {
+            monitors.items_changed.connect (() => {
                 bool visibility = noti_daemon.control_center.get_visibility ();
-                init_blank_windows (visibility);
-            });
-
-            display.monitor_added.connect ((d, m) => {
-                bool visibility = noti_daemon.control_center.get_visibility ();
-                add_blank_window (d, m, visibility);
-            });
-
-            display.monitor_removed.connect ((monitor) => {
-                bool visibility = noti_daemon.control_center.get_visibility ();
-                init_blank_windows (visibility);
+                init_empty_windows (monitors, visibility);
             });
         }
 
@@ -98,45 +85,46 @@ namespace SwayNotificationCenter {
             }
         }
 
-        private void add_blank_window (Gdk.Display display,
-                                       Gdk.Monitor monitor,
+        private void add_empty_window (Gdk.Monitor monitor,
                                        bool visible) {
-            var win = new BlankWindow (display, monitor, this);
+            var win = new EmptyWindow (monitor, this);
             win.set_visible (visible);
-            blank_windows.append_val (win);
+            empty_windows.append_val (win);
         }
 
-        private void init_blank_windows (bool visible) {
-            clear_blank_windows ();
+        private void init_empty_windows (ListModel monitors, bool visible) {
+            clear_empty_windows ();
             // Add a window to all monitors
-            for (int i = 0; i < display.get_n_monitors (); i++) {
-                unowned Gdk.Monitor ? monitor = display.get_monitor (i);
+            for (int i = 0; i < monitors.get_n_items (); i++) {
+                GLib.Object ? obj = monitors.get_item (i);
+                if (obj == null || !(obj is Gdk.Monitor)) continue;
+                unowned Gdk.Monitor monitor = (Gdk.Monitor) obj;
                 if (monitor == null) continue;
-                add_blank_window (display, monitor, visible);
+                add_empty_window (monitor, visible);
             }
         }
 
-        private void clear_blank_windows () {
-            while (blank_windows.length > 0) {
-                uint i = blank_windows.length - 1;
-                unowned BlankWindow ? win = blank_windows.index (i);
+        private void clear_empty_windows () {
+            while (empty_windows.length > 0) {
+                uint i = empty_windows.length - 1;
+                unowned EmptyWindow ? win = empty_windows.index (i);
                 win.close ();
-                blank_windows.remove_index (i);
+                empty_windows.remove_index (i);
             }
         }
 
         [DBus (visible = false)]
-        public void show_blank_windows (Gdk.Monitor ? monitor) {
+        public void show_empty_windows (Gdk.Monitor ? monitor) {
             if (!use_layer_shell) return;
-            foreach (unowned BlankWindow win in blank_windows.data) {
+            foreach (unowned EmptyWindow win in empty_windows.data) {
                 if (win.monitor != monitor) win.show ();
             }
         }
 
         [DBus (visible = false)]
-        public void hide_blank_windows () {
+        public void hide_empty_windows () {
             if (!use_layer_shell) return;
-            foreach (unowned BlankWindow win in blank_windows.data) {
+            foreach (unowned EmptyWindow win in empty_windows.data) {
                 win.hide ();
             }
         }
@@ -224,14 +212,14 @@ namespace SwayNotificationCenter {
         /** Toggles the visibility of the controlcenter */
         public void toggle_visibility () throws DBusError, IOError {
             if (noti_daemon.control_center.toggle_visibility ()) {
-                noti_daemon.set_noti_window_visibility (false);
+                noti_daemon.hide_notification_window (false);
             }
         }
 
         /** Sets the visibility of the controlcenter */
         public void set_visibility (bool visibility) throws DBusError, IOError {
             noti_daemon.control_center.set_visibility (visibility);
-            if (visibility) noti_daemon.set_noti_window_visibility (false);
+            if (visibility) noti_daemon.hide_notification_window (false);
         }
 
         /** Toggles the current Do Not Disturb state */

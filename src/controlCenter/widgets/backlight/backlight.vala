@@ -8,7 +8,7 @@ namespace SwayNotificationCenter.Widgets {
             }
         }
 
-        BacklightUtil client;
+        BacklightUtil ? client;
 
         Gtk.Label label_widget = new Gtk.Label (null);
         Gtk.Scale slider = new Gtk.Scale.with_range (Gtk.Orientation.HORIZONTAL, 0, 100, 1);
@@ -27,10 +27,11 @@ namespace SwayNotificationCenter.Widgets {
                 switch (subsystem) {
                     default:
                     case "backlight":
-                        if (subsystem != "backlight")
+                        if (subsystem != "backlight") {
                             info ("Invalid subsystem %s for device %s. " +
                                   "Use 'backlight' or 'leds'. Using default: 'backlight'",
                                   subsystem, device);
+                        }
                         client = new BacklightUtil ("backlight", device);
                         slider.set_range (min, 100);
                         break;
@@ -39,6 +40,11 @@ namespace SwayNotificationCenter.Widgets {
                         slider.set_range (min, this.client.get_max_value ());
                         break;
                 }
+            }
+
+            if (client == null) {
+                hide ();
+                return;
             }
 
             this.client.brightness_change.connect ((percent) => {
@@ -50,6 +56,7 @@ namespace SwayNotificationCenter.Widgets {
             });
 
             slider.set_draw_value (false);
+            slider.set_hexpand (true);
             slider.set_round_digits (0);
             slider.value_changed.connect (() => {
                 this.client.set_brightness ((float) slider.get_value ());
@@ -60,11 +67,10 @@ namespace SwayNotificationCenter.Widgets {
             prepend (slider);
         }
 
-        public override void on_cc_visibility_change (bool val) {
-            if (val) {
+        public override void on_cc_visibility_change (bool visible) {
+            if (client == null) return;
+            if (visible) {
                 this.client.start ();
-            } else {
-                this.client.close ();
             }
         }
     }

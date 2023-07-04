@@ -133,7 +133,7 @@ namespace SwayNotificationCenter {
 
                 Gtk.Allocation allocation;
                 double x, y;
-            
+
                 default_action.get_allocation (out allocation);
                 gesture.get_point (sequence, out x, out y);
                 bool in_button = (x >= 0 && y >= 0 && x < allocation.width && y < allocation.height);

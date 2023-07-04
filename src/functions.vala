@@ -57,12 +57,14 @@ namespace SwayNotificationCenter {
             int css_priority = ConfigModel.instance.cssPriority.get_priority ();
 
             // Load packaged CSS as backup
-            string system_css = get_style_path (null, true);
-            system_css_provider.load_from_path (system_css);
-            Gtk.StyleContext.add_provider_for_display (
-                Gdk.Display.get_default (),
-                system_css_provider,
-                css_priority);
+            if (!no_base_css) {
+                string system_css = get_style_path (null, true);
+                system_css_provider.load_from_path (system_css);
+                Gtk.StyleContext.add_provider_for_display (
+                    Gdk.Display.get_default (),
+                    system_css_provider,
+                    css_priority);
+            }
 
             // Load user CSS
             string user_css = get_style_path (style_path);

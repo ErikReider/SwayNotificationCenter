@@ -1,7 +1,10 @@
 namespace SwayNotificationCenter {
     static SwayncDaemon swaync_daemon;
+    // Args
     static string ? style_path;
     static string ? config_path;
+    // Dev args
+    static bool no_base_css = false;
 
     static uint layer_shell_protocol_version = 3;
 
@@ -15,6 +18,16 @@ namespace SwayNotificationCenter {
                     case "-s":
                     case "--style":
                         style_path = args[++i];
+                        break;
+                    case "-D":
+                        string dev_arg = args[++i];
+                        switch (dev_arg) {
+                            case "no-base-css":
+                                no_base_css = true;
+                                break;
+                            default:
+                                break;
+                        }
                         break;
                     case "-c":
                     case "--config":

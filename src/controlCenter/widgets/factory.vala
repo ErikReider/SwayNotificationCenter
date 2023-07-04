@@ -7,6 +7,7 @@ namespace SwayNotificationCenter.Widgets {
         if (key_seperated.length > 0) key = key_seperated[0];
         if (key_seperated.length > 1) suffix = key_seperated[1];
         BaseWidget widget;
+        message ("Loading widget: %s", key);
         switch (key) {
             case "title":
                 widget = new Title (suffix, swaync_daemon, noti_daemon);
@@ -39,7 +40,7 @@ namespace SwayNotificationCenter.Widgets {
                 warning ("Could not find widget: \"%s\"!", key);
                 return null;
         }
-        message ("Loading widget: %s", widget.widget_name);
+        message ("Finished loading widget: %s", widget.widget_name);
         return widget;
     }
 }

@@ -44,6 +44,21 @@ namespace SwayNotificationCenter.Widgets {
             };
             stack.set_parent (this);
 
+            // Placeholder
+            Gtk.CenterBox placeholder = new Gtk.CenterBox () {
+                valign = Gtk.Align.CENTER,
+            };
+            stack.add_named (placeholder, STACK_PLACEHOLDER_PAGE);
+            Gtk.Box placeholder_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 12) {
+                css_classes = { "control-center-list-placeholder" }
+            };
+            placeholder.set_center_widget (placeholder_box);
+            placeholder_box.append (new Gtk.Image () {
+                icon_name = "notifications-placeholder-symbolic",
+                pixel_size = 96
+            });
+            placeholder_box.append (new Gtk.Label ("No Notifications"));
+
             // Notifications
             stack.add_named (scrolled_window = new Gtk.ScrolledWindow () {
                 hexpand = true,
@@ -61,21 +76,6 @@ namespace SwayNotificationCenter.Widgets {
             };
             notification_list.add_css_class ("control-center-list");
             scrolled_window.set_child (notification_list);
-
-            // Placeholder
-            Gtk.CenterBox placeholder = new Gtk.CenterBox () {
-                valign = Gtk.Align.CENTER,
-            };
-            stack.add_named (placeholder, STACK_PLACEHOLDER_PAGE);
-            Gtk.Box placeholder_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 12) {
-                css_classes = { "control-center-list-placeholder" }
-            };
-            placeholder.set_center_widget (placeholder_box);
-            placeholder_box.append (new Gtk.Image () {
-                icon_name = "notifications-placeholder-symbolic",
-                pixel_size = 96
-            });
-            placeholder_box.append (new Gtk.Label ("No Notifications"));
 
             // Switches the stack page depending on the
             list_model.items_changed.connect (list_model_items_changed_cb);

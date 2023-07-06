@@ -72,32 +72,36 @@ namespace SwayNotificationCenter {
         public static bool load_css (string ? style_path) {
             int css_priority = ConfigModel.instance.cssPriority.get_priority ();
 
+            // Load packaged CSS as backup
+            string system_css = get_style_path (null, true);
+            system_css = File.new_for_path (system_css).get_path () ?? system_css;
+            message ("Loading CSS: \"%s\"", system_css);
             try {
-                // Load packaged CSS as backup
-                string system_css = get_style_path (null, true);
                 system_css_provider.load_from_path (system_css);
                 Gtk.StyleContext.add_provider_for_screen (
                     Gdk.Screen.get_default (),
                     system_css_provider,
                     css_priority);
             } catch (Error e) {
-                print ("Load packaged CSS Error: %s\n", e.message);
-                return false;
+                critical ("Load packaged CSS Error (\"%s\"):\n\t%s\n", system_css, e.message);
             }
 
+            // Load user CSS
+            string user_css = get_style_path (style_path);
+            user_css = File.new_for_path (user_css).get_path () ?? user_css;
+            message ("Loading CSS: \"%s\"", user_css);
             try {
-                // Load user CSS
-                string user_css = get_style_path (style_path);
                 user_css_provider.load_from_path (user_css);
                 Gtk.StyleContext.add_provider_for_screen (
                     Gdk.Screen.get_default (),
                     user_css_provider,
                     css_priority);
-                return true;
             } catch (Error e) {
-                print ("Load user CSS Error: %s\n", e.message);
+                critical ("Load user CSS Error (\"%s\"):\n\t%s\n", user_css, e.message);
                 return false;
             }
+
+            return true;
         }
 
         public static string get_style_path (owned string ? custom_path,

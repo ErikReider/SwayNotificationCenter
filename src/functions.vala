@@ -106,10 +106,7 @@ namespace SwayNotificationCenter {
 
         public static string get_style_path (owned string ? custom_path,
                                              bool only_system = false) {
-            string[] paths = {
-                // Fallback location. Specified in postinstall.py
-                "/usr/local/etc/xdg/swaync/style.css"
-            };
+            string[] paths = {};
             if (custom_path != null && custom_path.length > 0) {
                 // Replaces the home directory relative path with a absolute path
                 if (custom_path.get (0) == '~') {
@@ -127,6 +124,8 @@ namespace SwayNotificationCenter {
                 paths += Path.build_path (Path.DIR_SEPARATOR.to_string (),
                                           path, "swaync/style.css");
             }
+            // Fallback location. Specified in postinstall.py. Mostly for Debian
+            paths += "/usr/local/etc/xdg/swaync/style.css";
 
             string path = "";
             foreach (string try_path in paths) {
@@ -144,10 +143,7 @@ namespace SwayNotificationCenter {
         }
 
         public static string get_config_path (owned string ? custom_path) {
-            string[] paths = {
-                // Fallback location. Specified in postinstall.py
-                "/usr/local/etc/xdg/swaync/config.json"
-            };
+            string[] paths = {};
             if (custom_path != null && (custom_path = custom_path.strip ()).length > 0) {
                 // Replaces the home directory relative path with a absolute path
                 if (custom_path.get (0) == '~') {
@@ -167,6 +163,8 @@ namespace SwayNotificationCenter {
                 paths += Path.build_path (Path.DIR_SEPARATOR.to_string (),
                                           path, "swaync/config.json");
             }
+            // Fallback location. Specified in postinstall.py. Mostly for Debian
+            paths += "/usr/local/etc/xdg/swaync/config.json";
 
             string path = "";
             foreach (string try_path in paths) {

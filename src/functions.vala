@@ -127,6 +127,9 @@ namespace SwayNotificationCenter {
             // Fallback location. Specified in postinstall.py. Mostly for Debian
             paths += "/usr/local/etc/xdg/swaync/style.css";
 
+            info ("Looking for CSS file in these directories:\n\t- %s",
+                  string.joinv ("\n\t- ", paths));
+
             string path = "";
             foreach (string try_path in paths) {
                 if (File.new_for_path (try_path).query_exists ()) {
@@ -165,6 +168,9 @@ namespace SwayNotificationCenter {
             }
             // Fallback location. Specified in postinstall.py. Mostly for Debian
             paths += "/usr/local/etc/xdg/swaync/config.json";
+
+            info ("Looking for config file in these directories:\n\t- %s",
+                  string.joinv ("\n\t- ", paths));
 
             string path = "";
             foreach (string try_path in paths) {

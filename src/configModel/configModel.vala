@@ -524,6 +524,12 @@ namespace SwayNotificationCenter {
         public bool fit_to_screen { get; set; default = true; }
 
         /**
+         * Display notification timestamp relative to now e.g. "26 minutes ago".
+         * If false, a local iso8601-formatted absolute timestamp is displayed.
+         */
+        public bool relative_timestamps { get; set; default = true; }
+
+        /**
          * Notification center's height, in pixels.
          * Set `fit_to_screen` to true to ignore the height setting.
          */

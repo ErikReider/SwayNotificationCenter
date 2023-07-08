@@ -40,12 +40,6 @@ widget_sources = [
   'controlCenter/widgets/menubar/menubar.vala',
   # Widget: Buttons Grid
   'controlCenter/widgets/buttonsGrid/buttonsGrid.vala',
-  # Widget: Volume
-  'controlCenter/widgets/volume/volume.vala',
-  'controlCenter/widgets/volume/pulseDaemon.vala',
-  'controlCenter/widgets/volume/pulseDevice.vala',
-  'controlCenter/widgets/volume/pulseSinkInput.vala',
-  'controlCenter/widgets/volume/sinkInputRow.vala',
   # Widget: Backlight Slider
   'controlCenter/widgets/backlight/backlight.vala',
   'controlCenter/widgets/backlight/backlightUtil.vala',
@@ -79,19 +73,34 @@ app_deps = [
   meson.get_compiler('c').find_library('m', required : true),
   meson.get_compiler('vala').find_library('posix'),
   dependency('gee-0.8'),
-  dependency('libpulse'),
-  dependency('libpulse-mainloop-glib'),
 ]
 
 # Checks if the user wants scripting enabled
 if get_option('scripting')
-    add_project_arguments('-D', 'WANT_SCRIPTING', language: 'vala')
+  add_project_arguments('-D', 'WANT_SCRIPTING', language: 'vala')
+endif
+
+# Checks if the user wants to compile with the PulseAudio dependency
+if get_option('pulse-audio')
+  add_project_arguments('-D', 'HAVE_PULSE_AUDIO', language: 'vala')
+  app_deps += [
+    dependency('libpulse'),
+    dependency('libpulse-mainloop-glib'),
+  ]
+  app_sources += [
+    # Widget: Volume
+    'controlCenter/widgets/volume/volume.vala',
+    'controlCenter/widgets/volume/pulseDaemon.vala',
+    'controlCenter/widgets/volume/pulseDevice.vala',
+    'controlCenter/widgets/volume/pulseSinkInput.vala',
+    'controlCenter/widgets/volume/sinkInputRow.vala',
+  ]
 endif
 
 # Detect libhandy version
 libhandy = dependency('libhandy-1')
 if libhandy.version() >= '1.3.9'
-    add_project_arguments('-D', 'HAVE_LATEST_LIBHANDY', language: 'vala')
+  add_project_arguments('-D', 'HAVE_LATEST_LIBHANDY', language: 'vala')
 endif
 
 # Detect gtk-layer-shell version

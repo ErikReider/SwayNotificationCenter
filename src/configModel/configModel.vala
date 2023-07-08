@@ -311,6 +311,8 @@ namespace SwayNotificationCenter {
         public static void reload_config (ModifyNode modify_cb = () => {}) {
             // Re-check if config file path still exists
             string path = Functions.get_config_path (_path);
+            path = File.new_for_path (path).get_path () ?? path;
+            message ("Loading Config: \"%s\"", path);
 
             ConfigModel m = null;
             try {
@@ -331,7 +333,7 @@ namespace SwayNotificationCenter {
                 }
                 m = model;
             } catch (Error e) {
-                stderr.printf (e.message + "\n");
+                critical (e.message);
             }
             _instance = m ?? new ConfigModel ();
             _path = path;

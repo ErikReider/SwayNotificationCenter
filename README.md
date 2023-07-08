@@ -114,7 +114,7 @@ dnf install SwayNotificationCenter
 The package can be layered over the base image after adding the Copr repo as an ostree repo:
 
 ```zsh
-ostree remote add SwayNotificationCenter https://download.copr.fedorainfracloud.org/results/erikreider/SwayNotificationCenter/fedora-$releasever-$basearch/
+sudo curl -sL -o /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:erikreider:SwayNotificationCenter.repo https://copr.fedorainfracloud.org/coprs/erikreider/SwayNotificationCenter/repo/fedora-$(rpm -E %fedora)/erikreider-SwayNotificationCenter-fedora-$(rpm -E %fedora).repo 
 rpm-ostree install SwayNotificationCenter
 ```
 

@@ -72,40 +72,41 @@ namespace SwayNotificationCenter {
         public static bool load_css (string ? style_path) {
             int css_priority = ConfigModel.instance.cssPriority.get_priority ();
 
+            // Load packaged CSS as backup
+            string system_css = get_style_path (null, true);
+            system_css = File.new_for_path (system_css).get_path () ?? system_css;
+            message ("Loading CSS: \"%s\"", system_css);
             try {
-                // Load packaged CSS as backup
-                string system_css = get_style_path (null, true);
                 system_css_provider.load_from_path (system_css);
                 Gtk.StyleContext.add_provider_for_screen (
                     Gdk.Screen.get_default (),
                     system_css_provider,
                     css_priority);
             } catch (Error e) {
-                print ("Load packaged CSS Error: %s\n", e.message);
-                return false;
+                critical ("Load packaged CSS Error (\"%s\"):\n\t%s\n", system_css, e.message);
             }
 
+            // Load user CSS
+            string user_css = get_style_path (style_path);
+            user_css = File.new_for_path (user_css).get_path () ?? user_css;
+            message ("Loading CSS: \"%s\"", user_css);
             try {
-                // Load user CSS
-                string user_css = get_style_path (style_path);
                 user_css_provider.load_from_path (user_css);
                 Gtk.StyleContext.add_provider_for_screen (
                     Gdk.Screen.get_default (),
                     user_css_provider,
                     css_priority);
-                return true;
             } catch (Error e) {
-                print ("Load user CSS Error: %s\n", e.message);
+                critical ("Load user CSS Error (\"%s\"):\n\t%s\n", user_css, e.message);
                 return false;
             }
+
+            return true;
         }
 
         public static string get_style_path (owned string ? custom_path,
                                              bool only_system = false) {
-            string[] paths = {
-                // Fallback location. Specified in postinstall.py
-                "/usr/local/etc/xdg/swaync/style.css"
-            };
+            string[] paths = {};
             if (custom_path != null && custom_path.length > 0) {
                 // Replaces the home directory relative path with a absolute path
                 if (custom_path.get (0) == '~') {
@@ -123,6 +124,11 @@ namespace SwayNotificationCenter {
                 paths += Path.build_path (Path.DIR_SEPARATOR.to_string (),
                                           path, "swaync/style.css");
             }
+            // Fallback location. Specified in postinstall.py. Mostly for Debian
+            paths += "/usr/local/etc/xdg/swaync/style.css";
+
+            info ("Looking for CSS file in these directories:\n\t- %s",
+                  string.joinv ("\n\t- ", paths));
 
             string path = "";
             foreach (string try_path in paths) {
@@ -140,10 +146,7 @@ namespace SwayNotificationCenter {
         }
 
         public static string get_config_path (owned string ? custom_path) {
-            string[] paths = {
-                // Fallback location. Specified in postinstall.py
-                "/usr/local/etc/xdg/swaync/config.json"
-            };
+            string[] paths = {};
             if (custom_path != null && (custom_path = custom_path.strip ()).length > 0) {
                 // Replaces the home directory relative path with a absolute path
                 if (custom_path.get (0) == '~') {
@@ -163,6 +166,11 @@ namespace SwayNotificationCenter {
                 paths += Path.build_path (Path.DIR_SEPARATOR.to_string (),
                                           path, "swaync/config.json");
             }
+            // Fallback location. Specified in postinstall.py. Mostly for Debian
+            paths += "/usr/local/etc/xdg/swaync/config.json";
+
+            info ("Looking for config file in these directories:\n\t- %s",
+                  string.joinv ("\n\t- ", paths));
 
             string path = "";
             foreach (string try_path in paths) {

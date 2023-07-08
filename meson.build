@@ -98,8 +98,21 @@ endif
 # Man pages
 if get_option('man-pages')
   scdoc = dependency('scdoc', version: '>=1.9.2', native: true, required: true)
-  if scdoc.found()
+  sed = find_program(['sed', '/usr/bin/sed'], required : true)
+  if scdoc.found() and sed.found()
     scdoc_prog = find_program(scdoc.get_variable(pkgconfig :'scdoc'), native: true)
+
+    # Remove parts of man page if necessary
+    sed_command = []
+    foreach option : ['pulse-audio', 'scripting']
+      if get_option(option) == false
+        # Removes all lines between the #START and #END lines (inclusive)
+        sed_command += ['-e', '/#START @0@/,/#END @0@/d'.format(option)]
+      else
+        # Removes the #START and #END lines
+        sed_command += ['-e', '/#START @0@/d;/#END @0@/d'.format(option)]
+      endif
+    endforeach
 
     mandir = get_option('mandir')
     man_files = [
@@ -111,17 +124,36 @@ if get_option('man-pages')
     foreach filename : man_files
       topic = filename.split('.')[-3].split('/')[-1]
       section = filename.split('.')[-2]
+      input = join_paths('man', filename)
       output = '@0@.@1@'.format(topic, section)
       message(mandir, section, '@0@/man@1@'.format(mandir, section))
 
+      # Remove parts of man page if necessary
+      if sed_command.length() > 0
+        output_stripped = '.stripped-@0@.@1@'.format(topic, section)
+        input = custom_target(
+          output_stripped,
+          input: input,
+          output: output_stripped,
+          command: [sed, sed_command],
+          install: false,
+          feed: true,
+          capture: true,
+          build_by_default: true,
+          build_always_stale: true
+        )
+      endif
+
       custom_target(
         output,
-        input: join_paths('man', filename),
+        input: input,
         output: output,
         command: scdoc_prog,
         install: true,
         feed: true,
         capture: true,
+        build_by_default: true,
+        build_always_stale: true,
         install_dir: '@0@/man@1@'.format(mandir, section)
       )
     endforeach

@@ -224,8 +224,10 @@ config file to be able to detect config errors
 			optional: true ++
 		*buttons-grid*++
 			optional: true ++
+#START pulse-audio
 		*volume*++
 			optional: true ++
+#END pulse-audio
 		*backlight*++
 			optional: true ++
 		*inhibitors*++
@@ -415,6 +417,7 @@ config file to be able to detect config errors
 								description: "Command to be executed on click" ++
 					description: A list of actions containing a label and a command ++
 			description: A grid of buttons that execute shell commands ++
+#START pulse-audio
 		*volume*++
 			type: object ++
 			css class: ++
@@ -463,6 +466,7 @@ config file to be able to detect config errors
 					default: 250 ++
 					description: Duration of animation in milliseconds ++
 			description: Slider to control pulse volume ++
+#END pulse-audio
 		*backlight*++
 			type: object ++
 			css class: widget-backlight ++
@@ -565,8 +569,9 @@ config file to be able to detect config errors
 	}
 }
 ```
+#START scripting
 
-# IF BUILT WITH SCRIPTING
+# Scripts
 
 *script-fail-notify* ++
 	type: bool ++
@@ -646,3 +651,4 @@ SWAYNC_REPLACES_ID="ID of notification to replace"
 SWAYNC_ID="SwayNC notification ID"
 SWAYNC_SUMMARY="Notification summary"
 ```
+#END scripting

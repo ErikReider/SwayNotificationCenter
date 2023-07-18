@@ -290,7 +290,7 @@
       "default": ["inhibitors", "title", "dnd", "notifications"],
       "items": {
         "type": "string",
-        // Sadly can't use regex and enums at the same time. Fix in the future?
+        "$comment": "Sadly can't use regex and enums at the same time. Fix in the future?",
         "pattern": "^[a-zA-Z0-9_-]{1,}(#[a-zA-Z0-9_-]{1,}){0,1}?$"
       }
     },
@@ -298,10 +298,10 @@
       "type": "object",
       "description": "Configure specific widget properties.",
       "additionalProperties": false,
+      "$comment": "New widgets go here in \"patternProperties\" ↓",
       "patternProperties": {
-        // New widgets go here
         "^title(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
-          // References the widget structure from "widgets" below
+          "$comment": "References the widget structure from \"widgets\" below",
           "$ref": "#/widgets/title"
         },
         "^dnd(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
@@ -326,14 +326,14 @@
           "$ref": "#/widgets/backlight"
         },
         "^inhibitors(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
-          // References the widget structure from "widgets" below
+          "$comment": "References the widget structure from \"widgets\" below",
           "$ref": "#/widgets/inhibitors"
         }
       }
     }
   },
   "widgets": {
-    // New widgets go here
+    "$comment": "New widgets go here",
     "title": {
       "type": "object",
       "description": "Control Center Title Widget",

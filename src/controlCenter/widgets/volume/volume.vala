@@ -28,6 +28,7 @@ namespace SwayNotificationCenter.Widgets {
         private PulseDaemon client = new PulseDaemon ();
 
         private bool show_per_app;
+        private bool show_per_app_label;
 
         construct {
             this.client.change_default_device.connect (default_device_changed);
@@ -51,6 +52,7 @@ namespace SwayNotificationCenter.Widgets {
                 label_widget.set_label (label ?? "Volume");
 
                 show_per_app = get_prop<bool> (config, "show-per-app") ? true : false;
+                show_per_app_label = get_prop<bool> (config, "show-per-app-label") ? true : false;
 
                 string ? el = get_prop<string> (config, "empty-list-label");
                 if (el != null) empty_label = el;
@@ -106,7 +108,7 @@ namespace SwayNotificationCenter.Widgets {
                 }
 
                 foreach (var item in this.client.active_sinks.values) {
-                    levels_listbox.add (new SinkInputRow (item, client, icon_size));
+                    levels_listbox.add (new SinkInputRow (item, client, icon_size, show_per_app_label));
                 }
 
                 this.client.change_active_sink.connect (active_sink_change);
@@ -163,7 +165,7 @@ namespace SwayNotificationCenter.Widgets {
                 var label = levels_listbox.get_children ().first ().data;
                 levels_listbox.remove ((Gtk.Widget) label);
             }
-            levels_listbox.add (new SinkInputRow (sink, client, icon_size));
+            levels_listbox.add (new SinkInputRow (sink, client, icon_size, show_per_app_label));
             show_all ();
         }
 

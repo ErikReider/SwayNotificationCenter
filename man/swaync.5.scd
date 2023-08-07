@@ -434,6 +434,11 @@ config file to be able to detect config errors
 					optional: true ++
 					default: false ++
 					description: Show per app volume control ++
+				show-per-app-label: ++
+					type: bool ++
+					optional: true ++
+					default: false ++
+					description: Show application name instead of icon ++
 				empty-list-label: ++
 					type: string ++
 					optional: true ++

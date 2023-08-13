@@ -498,6 +498,16 @@
           "default": false,
           "description": "Show per app volume control"
         },
+        "show-per-app-icon": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show application icon in per app control"
+        },
+        "show-per-app-label": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show application name in per app control"
+        },
         "empty-list-label": {
           "type": "string",
           "default": "No active sink input",

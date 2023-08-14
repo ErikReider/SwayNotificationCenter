@@ -26,6 +26,7 @@ widget_sources = [
   # Helpers
   'controlCenter/widgets/baseWidget.vala',
   'controlCenter/widgets/factory.vala',
+  'controlCenter/widgets/shared/toggleButton.vala',
   # Widget: Title
   'controlCenter/widgets/title/title.vala',
   # Widget: Dnd

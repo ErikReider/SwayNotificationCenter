@@ -25,6 +25,8 @@ namespace SwayNotificationCenter.Widgets {
     public struct Action {
         string ? label;
         string ? command;
+        BaseWidget.ButtonType ? type;
+        bool ? active;
     }
 
     public class Menubar : BaseWidget {
@@ -69,16 +71,19 @@ namespace SwayNotificationCenter.Widgets {
 
         void add_menu (ref unowned ConfigObject ? obj) {
             switch (obj.type) {
-                case MenuType.BUTTONS:
+                case MenuType.BUTTONS :
                     Gtk.Box container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
                     if (obj.name != null) container.get_style_context ().add_class (obj.name);
 
                     foreach (Action a in obj.actions) {
-                        Gtk.Button b = new Gtk.Button.with_label (a.label);
-
-                        b.clicked.connect (() => execute_command (a.command));
-
-                        container.add (b);
+                        if (a.type == ButtonType.TOGGLE) {
+                            ToggleButton tb = new ToggleButton (a.label, a.command, a.active);
+                            container.add (tb);
+                        } else {
+                            Gtk.Button b = new Gtk.Button.with_label (a.label);
+                            b.clicked.connect (() => execute_command (a.command));
+                            container.add (b);
+                        }
                     }
                     switch (obj.position) {
                         case Position.LEFT:

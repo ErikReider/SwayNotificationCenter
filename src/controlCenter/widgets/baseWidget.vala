@@ -16,6 +16,16 @@ namespace SwayNotificationCenter.Widgets {
         public unowned SwayncDaemon swaync_daemon;
         public unowned NotiDaemon noti_daemon;
 
+        public enum ButtonType {
+            TOGGLE,
+            NORMAL;
+
+            public static ButtonType parse (string value) {
+                if (value == "toggle") return ButtonType.TOGGLE;
+                return ButtonType.NORMAL;
+            }
+        }
+
         protected BaseWidget (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             this.suffix = suffix;
             this.key = widget_name + (suffix.length > 0 ? "#%s".printf (suffix) : "");
@@ -93,15 +103,20 @@ namespace SwayNotificationCenter.Widgets {
             for (int i = 0; i < actions.get_length (); i++) {
                 string label = actions.get_object_element (i).get_string_member_with_default ("label", "label");
                 string command = actions.get_object_element (i).get_string_member_with_default ("command", "");
+                string t = actions.get_object_element (i).get_string_member_with_default ("type", "normal");
+                ButtonType type = ButtonType.parse (t);
+                bool active = actions.get_object_element (i).get_boolean_member_with_default ("active", false);
                 res[i] = Action () {
                     label = label,
-                    command = command
+                    command = command,
+                    type = type,
+                    active = active
                 };
             }
             return res;
         }
 
-        protected void execute_command (string cmd) {
+        public static void execute_command (string cmd) {
             pid_t pid;
             int status;
             if ((pid = fork ()) < 0) {

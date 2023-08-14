@@ -26,11 +26,14 @@ namespace SwayNotificationCenter.Widgets {
 
             // add action to container
             foreach (var act in actions) {
-                Gtk.Button b = new Gtk.Button.with_label (act.label);
-
-                b.clicked.connect (() => execute_command (act.command));
-
-                container.insert (b, -1);
+                if (act.type == ButtonType.TOGGLE) {
+                    Gtk.ToggleButton tb = new ToggleButton (act.label, act.command, act.active);
+                    container.insert (tb, -1);
+                } else {
+                    Gtk.Button b = new Gtk.Button.with_label (act.label);
+                    b.clicked.connect (() => execute_command (act.command));
+                    container.insert (b, -1);
+                }
             }
 
             show_all ();

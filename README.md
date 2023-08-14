@@ -31,6 +31,8 @@ Table of Contents
      * [OpenSUSE Tumbleweed](#opensuse-tumbleweed)
      * [Ubuntu](#ubuntu)
      * [Debian](#debian)
+     * [Guix](#guix)
+     * [rde](#rde)
      * [Other](#other)
   * [Sway Usage](#sway-usage)
   * [Run](#run)

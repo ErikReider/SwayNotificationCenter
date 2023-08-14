@@ -31,6 +31,8 @@ Table of Contents
      * [OpenSUSE Tumbleweed](#opensuse-tumbleweed)
      * [Ubuntu](#ubuntu)
      * [Debian](#debian)
+     * [Guix](#guix)
+     * [rde](#rde)
      * [Other](#other)
   * [Sway Usage](#sway-usage)
   * [Run](#run)
@@ -149,6 +151,23 @@ Bookworm and later:
 
 ```
 sudo apt install sway-notification-center
+```
+
+### Guix
+
+The simplest way is to install it to user's profile:
+```
+guix install swaynotificationcenter
+```
+
+But we recommend to use [Guix Home](https://guix.gnu.org/manual/devel/en/html_node/Home-Configuration.html) to manage packages and their configurations declaratively.
+
+### rde
+```
+(use-modules (rde features wm))
+
+;; Include the following code into the list of your rde features:
+(feature-swaynotificationcenter)
 ```
 
 ### Other

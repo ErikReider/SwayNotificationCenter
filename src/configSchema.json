@@ -422,6 +422,17 @@
                 "type": "string",
                 "description": "Command to be executed on click",
                 "default": ""
+              },
+              "type": {
+                "type": "string",
+                "description": "Type of the button; toggle buttons receive the .active css class",
+                "default": "normal",
+                "enum": ["normal", "toggle"]
+              },
+              "active": {
+                  "type": "bool",
+                  "description": "Wether the toggle button is active as default or not",
+                  "default": false
               }
             }
           }

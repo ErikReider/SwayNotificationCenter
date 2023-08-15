@@ -214,7 +214,7 @@ namespace SwayNotificationCenter {
                     }
                     navigate_list (list_position);
                 }
-                // Return true to override the builtin list navigation
+                // Override the builtin list navigation
                 return true;
             });
 

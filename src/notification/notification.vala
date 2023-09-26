@@ -374,22 +374,29 @@ namespace SwayNotificationCenter {
 
             // Markup
             try {
-                // Escapes all characters
-                string escaped = Markup.escape_text (text);
-                // Replace all valid tags brackets with <,</,> so that the
-                // markup parser only parses valid tags
-                // Ex: &lt;b&gt;BOLD&lt;/b&gt; -> <b>BOLD</b>
-                escaped = tag_regex.replace (escaped, escaped.length, 0, "<\\1>");
-
-                // Unescape a few characters that may have been double escaped
-                // Sending "<" in Discord would result in "&amp;lt;" without this
-                // &amp;lt; -> &lt;
-                escaped = tag_unescape_regex.replace_literal (escaped, escaped.length, 0, "&");
-
-                // Turns it back to markdown, defaults to original if not valid
                 Pango.AttrList ? attr = null;
                 string ? buf = null;
-                Pango.parse_markup (escaped, -1, 0, out attr, out buf, null);
+                try {
+                    // Try parsing without any hacks
+                    Pango.parse_markup (text, -1, 0, out attr, out buf, null);
+                } catch (Error e) {
+                    // Default to hack if the initial markup couldn't be parsed
+
+                    // Escapes all characters
+                    string escaped = Markup.escape_text (text);
+                    // Replace all valid tags brackets with <,</,> so that the
+                    // markup parser only parses valid tags
+                    // Ex: &lt;b&gt;BOLD&lt;/b&gt; -> <b>BOLD</b>
+                    escaped = tag_regex.replace (escaped, escaped.length, 0, "<\\1>");
+
+                    // Unescape a few characters that may have been double escaped
+                    // Sending "<" in Discord would result in "&amp;lt;" without this
+                    // &amp;lt; -> &lt;
+                    escaped = tag_unescape_regex.replace_literal (escaped, escaped.length, 0, "&");
+
+                    // Turns it back to markup, defaults to original if not valid
+                    Pango.parse_markup (escaped, -1, 0, out attr, out buf, null);
+                }
 
                 this.body.set_text (buf);
                 if (attr != null) this.body.set_attributes (attr);

@@ -76,7 +76,7 @@ namespace SwayNotificationCenter.Widgets {
                     foreach (Action a in obj.actions) {
                         Gtk.Button b = new Gtk.Button.with_label (a.label);
 
-                        b.clicked.connect (() => execute_command (a.command));
+                        b.clicked.connect (() => execute_command.begin (a.command));
 
                         container.add (b);
                     }
@@ -111,7 +111,7 @@ namespace SwayNotificationCenter.Widgets {
 
                     foreach (var a in obj.actions) {
                         Gtk.Button b = new Gtk.Button.with_label (a.label);
-                        b.clicked.connect (() => execute_command (a.command));
+                        b.clicked.connect (() => execute_command.begin (a.command));
                         menu.pack_start (b, true, true, 0);
                     }
 

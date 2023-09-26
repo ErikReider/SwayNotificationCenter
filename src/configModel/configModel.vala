@@ -237,44 +237,18 @@ namespace SwayNotificationCenter {
         public ScriptRunOnType run_on { get; set; default = ScriptRunOnType.RECEIVE; }
 
         public async bool run_script (NotifyParams param, out string msg) {
-            msg = "";
-            try {
-                string[] spawn_env = Environ.get ();
-                // Export env variables
-                spawn_env += "SWAYNC_APP_NAME=%s".printf (param.app_name);
-                spawn_env += "SWAYNC_SUMMARY=%s".printf (param.summary);
-                spawn_env += "SWAYNC_BODY=%s".printf (param.body);
-                spawn_env += "SWAYNC_URGENCY=%s".printf (param.urgency.to_string ());
-                spawn_env += "SWAYNC_CATEGORY=%s".printf (param.category);
-                spawn_env += "SWAYNC_ID=%s".printf (param.applied_id.to_string ());
-                spawn_env += "SWAYNC_REPLACES_ID=%s".printf (param.replaces_id.to_string ());
-                spawn_env += "SWAYNC_TIME=%s".printf (param.time.to_string ());
-                spawn_env += "SWAYNC_DESKTOP_ENTRY=%s".printf (param.desktop_entry ?? "");
+            string[] spawn_env = {};
+            spawn_env += "SWAYNC_APP_NAME=%s".printf (param.app_name);
+            spawn_env += "SWAYNC_SUMMARY=%s".printf (param.summary);
+            spawn_env += "SWAYNC_BODY=%s".printf (param.body);
+            spawn_env += "SWAYNC_URGENCY=%s".printf (param.urgency.to_string ());
+            spawn_env += "SWAYNC_CATEGORY=%s".printf (param.category);
+            spawn_env += "SWAYNC_ID=%s".printf (param.applied_id.to_string ());
+            spawn_env += "SWAYNC_REPLACES_ID=%s".printf (param.replaces_id.to_string ());
+            spawn_env += "SWAYNC_TIME=%s".printf (param.time.to_string ());
+            spawn_env += "SWAYNC_DESKTOP_ENTRY=%s".printf (param.desktop_entry ?? "");
 
-                Pid child_pid;
-                Process.spawn_async (
-                    "/",
-                    exec.split (" "),
-                    spawn_env,
-                    SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD,
-                    null,
-                    out child_pid);
-
-                // Close the child when the spawned process is idling
-                int end_status = 0;
-                ChildWatch.add (child_pid, (pid, status) => {
-                    Process.close_pid (pid);
-                    end_status = status;
-                    run_script.callback ();
-                });
-                // Waits until `run_script.callback()` is called above
-                yield;
-                return end_status == 0;
-            } catch (Error e) {
-                stderr.printf ("Run_Script Error: %s\n", e.message);
-                msg = e.message;
-                return false;
-            }
+            return yield Functions.execute_command (exec, spawn_env, out msg);
         }
 
         public override bool matches_notification (NotifyParams param) {

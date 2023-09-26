@@ -251,7 +251,7 @@ namespace SwayNotificationCenter {
 
         /** Closes a specific notification with the `id` */
         public void close_notification (uint32 id) throws DBusError, IOError {
-            noti_daemon.control_center.close_notification (id);
+            noti_daemon.control_center.close_notification (id, true);
         }
 
         /**

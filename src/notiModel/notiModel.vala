@@ -112,9 +112,6 @@ namespace SwayNotificationCenter {
 
         public Array<Action> actions { get; set; }
 
-        /** If the notification replaces another */
-        public bool replaces { get; set; }
-
         public NotifyParams (uint32 applied_id,
                              string app_name,
                              uint32 replaces_id,
@@ -134,7 +131,6 @@ namespace SwayNotificationCenter {
             this.expire_timeout = expire_timeout;
             this.time = (int64) (get_real_time () * 0.000001);
 
-            this.replaces = false;
             this.has_synch = false;
 
             parse_hints ();

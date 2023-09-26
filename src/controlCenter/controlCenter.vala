@@ -214,7 +214,8 @@ namespace SwayNotificationCenter {
                     }
                     navigate_list (list_position);
                 }
-                return false;
+                // Override the builtin list navigation
+                return true;
             });
 
             // Switches the stack page depending on the

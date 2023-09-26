@@ -174,7 +174,7 @@ namespace SwayNotificationCenter {
                                 } else if (children.last ().data == noti) {
                                     if (list_position > 0) list_position--;
                                 }
-                                close_notification (noti.param.applied_id);
+                                close_notification (noti.param.applied_id, true);
                             }
                             break;
                         case "C":
@@ -458,11 +458,11 @@ namespace SwayNotificationCenter {
             on_visibility_change ();
         }
 
-        public void close_notification (uint32 id, bool replaces = false) {
+        public void close_notification (uint32 id, bool dismiss) {
             foreach (var w in list_box.get_children ()) {
                 var noti = (Notification) w;
                 if (noti != null && noti.param.applied_id == id) {
-                    if (replaces) {
+                    if (!dismiss) {
                         noti.remove_noti_timeout ();
                         noti.destroy ();
                     } else {
@@ -474,8 +474,20 @@ namespace SwayNotificationCenter {
             }
         }
 
-        public void add_notification (NotifyParams param,
-                                      NotiDaemon noti_daemon) {
+        public void replace_notification (uint32 id, NotifyParams new_params) {
+            foreach (var w in list_box.get_children ()) {
+                var noti = (Notification) w;
+                if (noti != null && noti.param.applied_id == id) {
+                    noti.replace_notification (new_params);
+                    return;
+                }
+            }
+
+            // Add a new notification if the old one isn't visible
+            add_notification (new_params);
+        }
+
+        public void add_notification (NotifyParams param) {
             var noti = new Notification.regular (param,
                                                  noti_daemon,
                                                  NotificationType.CONTROL_CENTER);

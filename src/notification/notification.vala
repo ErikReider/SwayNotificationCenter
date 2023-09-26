@@ -70,8 +70,8 @@ namespace SwayNotificationCenter {
 
         public bool is_timed { get; construct; default = false; }
 
-        public NotifyParams param { get; construct; }
-        public NotiDaemon noti_daemon { get; construct; }
+        public NotifyParams param { get; private set; }
+        public unowned NotiDaemon noti_daemon { get; construct; }
 
         public NotificationType notification_type {
             get;
@@ -112,8 +112,9 @@ namespace SwayNotificationCenter {
                                      NotiDaemon noti_daemon,
                                      NotificationType notification_type) {
             Object (noti_daemon: noti_daemon,
-                    param: param,
                     notification_type: notification_type);
+            this.param = param;
+            build_noti ();
         }
 
         /** Show a timed notification */
@@ -124,7 +125,6 @@ namespace SwayNotificationCenter {
                                    uint timeout_low,
                                    uint timeout_critical) {
             Object (noti_daemon: noti_daemon,
-                    param: param,
                     notification_type: notification_type,
                     is_timed: true,
                     timeout_delay: timeout,
@@ -132,6 +132,8 @@ namespace SwayNotificationCenter {
                     timeout_critical_delay: timeout_critical,
                     number_of_body_lines: 5
             );
+            this.param = param;
+            build_noti ();
         }
 
         construct {
@@ -196,12 +198,6 @@ namespace SwayNotificationCenter {
             });
 
             this.transition_time = ConfigModel.instance.transition_time;
-            build_noti ();
-
-            if (is_timed) {
-                add_notification_timeout ();
-                this.size_allocate.connect (on_size_allocation);
-            }
         }
 
         private void default_action_update_state () {
@@ -322,13 +318,15 @@ namespace SwayNotificationCenter {
 
             this.show ();
 
-            if (param.replaces) {
+            Timeout.add (0, () => {
                 this.revealer.set_reveal_child (true);
-            } else {
-                Timeout.add (0, () => {
-                    this.revealer.set_reveal_child (true);
-                    return Source.REMOVE;
-                });
+                return Source.REMOVE;
+            });
+
+            remove_noti_timeout ();
+            if (is_timed) {
+                add_notification_timeout ();
+                this.size_allocate.connect (on_size_allocation);
             }
         }
 
@@ -619,6 +617,11 @@ namespace SwayNotificationCenter {
                 }
                 return Source.REMOVE;
             });
+        }
+
+        public void replace_notification (NotifyParams new_params) {
+            this.param = new_params;
+            build_noti ();
         }
 
         private void set_icon () {

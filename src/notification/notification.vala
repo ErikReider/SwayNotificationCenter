@@ -30,7 +30,7 @@ namespace SwayNotificationCenter {
         [GtkChild]
         unowned Gtk.Button close_button;
 
-        private Gtk.ButtonBox alt_actions_box = new Gtk.ButtonBox (Gtk.Orientation.HORIZONTAL);
+        private Gtk.ButtonBox ? alt_actions_box = null;
 
         [GtkChild]
         unowned Gtk.Label summary;
@@ -198,6 +198,80 @@ namespace SwayNotificationCenter {
             });
 
             this.transition_time = ConfigModel.instance.transition_time;
+
+            ///
+            /// Signals
+            ///
+
+            this.button_press_event.connect ((event) => {
+                if (event.button != Gdk.BUTTON_SECONDARY) return false;
+                // Right click
+                this.close_notification ();
+                return true;
+            });
+
+            // Adds CSS :hover selector to EventBox
+            default_action.enter_notify_event.connect ((event) => {
+                if (event.detail != Gdk.NotifyType.INFERIOR
+                    && event.window == default_action.get_window ()) {
+                    default_action_in = true;
+                    default_action_update_state ();
+                }
+                return true;
+            });
+            default_action.leave_notify_event.connect ((event) => {
+                if (event.detail != Gdk.NotifyType.INFERIOR
+                    && event.window == default_action.get_window ()) {
+                    default_action_in = false;
+                    default_action_update_state ();
+                }
+                return true;
+            });
+            default_action.unmap.connect (() => default_action_in = false);
+
+            close_button.clicked.connect (() => close_notification ());
+
+            this.event_box.enter_notify_event.connect ((event) => {
+                close_revealer.set_reveal_child (true);
+                remove_noti_timeout ();
+                return false;
+            });
+            this.event_box.leave_notify_event.connect ((event) => {
+                if (event.detail == Gdk.NotifyType.INFERIOR) return true;
+                close_revealer.set_reveal_child (false);
+                add_notification_timeout ();
+                return false;
+            });
+
+            this.carousel.page_changed.connect ((_, i) => {
+                if (i != this.carousel_empty_widget_index) return;
+                remove_noti_timeout ();
+                try {
+                    noti_daemon.manually_close_notification (
+                        param.applied_id, false);
+                } catch (Error e) {
+                    print ("Error: %s\n", e.message);
+                    this.destroy ();
+                }
+            });
+
+            inline_reply_entry.key_release_event.connect ((w, event_key) => {
+                switch (Gdk.keyval_name (event_key.keyval)) {
+                    case "Return":
+                        inline_reply_button.clicked ();
+                        return true;
+                    default:
+                        return false;
+                }
+            });
+            inline_reply_button.clicked.connect (() => {
+                string text = inline_reply_entry.get_text ().strip ();
+                if (text.length == 0) return;
+                noti_daemon.NotificationReplied (param.applied_id, text);
+                // Dismiss notification without activating Action
+                action_clicked (null);
+            });
+
         }
 
         private void default_action_update_state () {
@@ -231,49 +305,7 @@ namespace SwayNotificationCenter {
             this.summary.set_text (param.summary ?? param.app_name);
             this.summary.set_ellipsize (Pango.EllipsizeMode.END);
 
-            this.button_press_event.connect ((event) => {
-                if (event.button != Gdk.BUTTON_SECONDARY) return false;
-                // Right click
-                this.close_notification ();
-                return true;
-            });
-
-            // Adds CSS :hover selector to EventBox
-            default_action.enter_notify_event.connect ((event) => {
-                if (event.detail != Gdk.NotifyType.INFERIOR
-                    && event.window == default_action.get_window ()) {
-                    default_action_in = true;
-                    default_action_update_state ();
-                }
-                return true;
-            });
-            default_action.leave_notify_event.connect ((event) => {
-                if (event.detail != Gdk.NotifyType.INFERIOR
-                    && event.window == default_action.get_window ()) {
-                    default_action_in = false;
-                    default_action_update_state ();
-                }
-                return true;
-            });
-
-            default_action.unmap.connect (() => default_action_in = false);
-
             close_revealer.set_transition_duration (this.transition_time);
-
-            close_button.clicked.connect (() => close_notification ());
-
-            this.event_box.enter_notify_event.connect ((event) => {
-                close_revealer.set_reveal_child (true);
-                remove_noti_timeout ();
-                return false;
-            });
-
-            this.event_box.leave_notify_event.connect ((event) => {
-                if (event.detail == Gdk.NotifyType.INFERIOR) return true;
-                close_revealer.set_reveal_child (false);
-                add_notification_timeout ();
-                return false;
-            });
 
             this.revealer.set_transition_duration (this.transition_time);
 
@@ -291,17 +323,8 @@ namespace SwayNotificationCenter {
                     this.carousel_empty_widget_index = 0;
                     break;
             }
-            this.carousel.page_changed.connect ((_, i) => {
-                if (i != this.carousel_empty_widget_index) return;
-                remove_noti_timeout ();
-                try {
-                    noti_daemon.manually_close_notification (
-                        param.applied_id, false);
-                } catch (Error e) {
-                    print ("Error: %s\n", e.message);
-                    this.destroy ();
-                }
-            });
+            // Reset state
+            this.carousel.scroll_to (event_box);
 #if HAVE_LATEST_LIBHANDY
             this.carousel.allow_scroll_wheel = false;
 #endif
@@ -324,6 +347,7 @@ namespace SwayNotificationCenter {
             });
 
             remove_noti_timeout ();
+            this.size_allocate.disconnect (on_size_allocation);
             if (is_timed) {
                 add_notification_timeout ();
                 this.size_allocate.connect (on_size_allocation);
@@ -334,6 +358,9 @@ namespace SwayNotificationCenter {
             string text = param.body ?? "";
 
             this.body.set_lines (this.number_of_body_lines);
+
+            // Reset state
+            this.body_image.hide ();
 
             // Removes all image tags and adds them to an array
             if (text.length > 0) {
@@ -426,6 +453,7 @@ namespace SwayNotificationCenter {
         }
 
         public void click_alt_action (uint index) {
+            if (alt_actions_box == null) return;
             List<weak Gtk.Widget> ? children = alt_actions_box.get_children ();
             uint length = children.length ();
             if (length == 0 || index >= length) return;
@@ -457,6 +485,11 @@ namespace SwayNotificationCenter {
         }
 
         private void set_style_urgency () {
+            // Reset state
+            base_box.get_style_context ().remove_class ("low");
+            base_box.get_style_context ().remove_class ("normal");
+            base_box.get_style_context ().remove_class ("critical");
+
             switch (param.urgency) {
                 case UrgencyLevels.LOW:
                     base_box.get_style_context ().add_class ("low");
@@ -472,6 +505,8 @@ namespace SwayNotificationCenter {
         }
 
         private void set_inline_reply () {
+            // Reset state
+            inline_reply_box.hide ();
             // Only show inline replies in popup notifications if the compositor
             // supports ON_DEMAND layer shell keyboard interactivity
             if (!ConfigModel.instance.notification_inline_replies
@@ -499,32 +534,23 @@ namespace SwayNotificationCenter {
             },
                 null);
 
-            inline_reply_entry.key_release_event.connect ((w, event_key) => {
-                switch (Gdk.keyval_name (event_key.keyval)) {
-                    case "Return":
-                        inline_reply_button.clicked ();
-                        return true;
-                    default:
-                        return false;
-                }
-            });
-
             inline_reply_button.set_label (param.inline_reply.name ?? "Reply");
-            inline_reply_button.clicked.connect (() => {
-                string text = inline_reply_entry.get_text ().strip ();
-                if (text.length == 0) return;
-                noti_daemon.NotificationReplied (param.applied_id, text);
-                // Dismiss notification without activating Action
-                action_clicked (null);
-            });
         }
 
         private void set_actions () {
+            // Reset state
+            foreach (Gtk.Widget child in base_box.get_children ()) {
+                if (child is Gtk.ScrolledWindow) {
+                    child.destroy ();
+                }
+            }
+
             // Check for security codes
             string ? code = parse_body_codes ();
             if (param.actions.length > 0 || code != null) {
                 var viewport = new Gtk.Viewport (null, null);
                 var scroll = new Gtk.ScrolledWindow (null, null);
+                alt_actions_box = new Gtk.ButtonBox (Gtk.Orientation.HORIZONTAL);
                 alt_actions_box.set_homogeneous (true);
                 alt_actions_box.set_layout (Gtk.ButtonBoxStyle.EXPAND);
 

@@ -248,6 +248,8 @@ namespace SwayNotificationCenter {
                 var noti = (Notification) w;
                 if (noti != null && noti.param.applied_id == id) {
                     noti.replace_notification (new_params);
+                    // Position the notification in the beginning of the list
+                    box.reorder_child (noti, (int) box.get_children ().length ());
                     return;
                 }
             }

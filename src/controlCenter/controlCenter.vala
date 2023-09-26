@@ -3,6 +3,8 @@ namespace SwayNotificationCenter {
     public class ControlCenter : Gtk.ApplicationWindow {
 
         [GtkChild]
+        unowned Gtk.Box notifications_box;
+        [GtkChild]
         unowned Gtk.ScrolledWindow scrolled_window;
         [GtkChild]
         unowned Gtk.Viewport viewport;
@@ -243,11 +245,11 @@ namespace SwayNotificationCenter {
             if (w.length == 0) w = DEFAULT_WIDGETS;
             bool has_notification = false;
             foreach (string key in w) {
-                // Reposition the scrolled_window
+                // Reposition the notifications_box
                 if (key == "notifications") {
                     has_notification = true;
                     uint pos = box.get_children ().length ();
-                    box.reorder_child (scrolled_window, (int) (pos > 0 ? --pos : 0));
+                    box.reorder_child (notifications_box, (int) (pos > 0 ? --pos : 0));
                     continue;
                 }
                 // Add the widget if it is valid
@@ -261,7 +263,7 @@ namespace SwayNotificationCenter {
             if (!has_notification) {
                 warning ("Notification widget not included in \"widgets\" config. Using default bottom position");
                 uint pos = box.get_children ().length ();
-                box.reorder_child (scrolled_window, (int) (pos > 0 ? --pos : 0));
+                box.reorder_child (notifications_box, (int) (pos > 0 ? --pos : 0));
             }
         }
 

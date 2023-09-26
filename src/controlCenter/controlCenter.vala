@@ -270,6 +270,9 @@ namespace SwayNotificationCenter {
         /** Resets the UI positions */
         private void set_anchor () {
             if (swaync_daemon.use_layer_shell) {
+                // Set the exlusive zone
+                int exclusive_zone = ConfigModel.instance.control_center_exclusive_zone ? 0 : 100;
+                GtkLayerShell.set_exclusive_zone (this, exclusive_zone);
                 // Grabs the keyboard input until closed
                 bool keyboard_shortcuts = ConfigModel.instance.keyboard_shortcuts;
 #if HAVE_LATEST_GTK_LAYER_SHELL

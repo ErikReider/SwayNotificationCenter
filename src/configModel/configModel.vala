@@ -467,6 +467,10 @@ namespace SwayNotificationCenter {
             get; set; default = Layer.TOP;
         }
 
+        public bool control_center_exclusive_zone {
+            get; set; default = true;
+        }
+
         /** Categories settings */
         public OrderedHashTable<Category> categories_settings {
             get;

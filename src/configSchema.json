@@ -75,6 +75,11 @@
       "default": "none",
       "enum": ["background", "bottom", "top", "overlay", "none"]
     },
+    "control-center-exclusive-zone": {
+      "type": "boolean",
+      "description": "Whether or not the control center should follow the compositors exclusive zones. An example would be setting it to \"false\" to cover your panel/dock.",
+      "default": true
+    },
     "notification-2fa-action": {
       "type": "boolean",
       "description": "If each notification should display a 'COPY \"1234\"' action",

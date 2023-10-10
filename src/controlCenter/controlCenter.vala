@@ -3,6 +3,8 @@ namespace SwayNotificationCenter {
     public class ControlCenter : Gtk.ApplicationWindow {
 
         [GtkChild]
+        unowned Gtk.Box notifications_box;
+        [GtkChild]
         unowned Gtk.ScrolledWindow scrolled_window;
         [GtkChild]
         unowned Gtk.Viewport viewport;
@@ -172,7 +174,7 @@ namespace SwayNotificationCenter {
                                 } else if (children.last ().data == noti) {
                                     if (list_position > 0) list_position--;
                                 }
-                                close_notification (noti.param.applied_id);
+                                close_notification (noti.param.applied_id, true);
                             }
                             break;
                         case "C":
@@ -214,7 +216,8 @@ namespace SwayNotificationCenter {
                     }
                     navigate_list (list_position);
                 }
-                return false;
+                // Override the builtin list navigation
+                return true;
             });
 
             // Switches the stack page depending on the
@@ -242,11 +245,11 @@ namespace SwayNotificationCenter {
             if (w.length == 0) w = DEFAULT_WIDGETS;
             bool has_notification = false;
             foreach (string key in w) {
-                // Reposition the scrolled_window
+                // Reposition the notifications_box
                 if (key == "notifications") {
                     has_notification = true;
                     uint pos = box.get_children ().length ();
-                    box.reorder_child (scrolled_window, (int) (pos > 0 ? --pos : 0));
+                    box.reorder_child (notifications_box, (int) (pos > 0 ? --pos : 0));
                     continue;
                 }
                 // Add the widget if it is valid
@@ -260,13 +263,16 @@ namespace SwayNotificationCenter {
             if (!has_notification) {
                 warning ("Notification widget not included in \"widgets\" config. Using default bottom position");
                 uint pos = box.get_children ().length ();
-                box.reorder_child (scrolled_window, (int) (pos > 0 ? --pos : 0));
+                box.reorder_child (notifications_box, (int) (pos > 0 ? --pos : 0));
             }
         }
 
         /** Resets the UI positions */
         private void set_anchor () {
             if (swaync_daemon.use_layer_shell) {
+                // Set the exlusive zone
+                int exclusive_zone = ConfigModel.instance.control_center_exclusive_zone ? 0 : 100;
+                GtkLayerShell.set_exclusive_zone (this, exclusive_zone);
                 // Grabs the keyboard input until closed
                 bool keyboard_shortcuts = ConfigModel.instance.keyboard_shortcuts;
 #if HAVE_LATEST_GTK_LAYER_SHELL
@@ -455,11 +461,11 @@ namespace SwayNotificationCenter {
             on_visibility_change ();
         }
 
-        public void close_notification (uint32 id, bool replaces = false) {
+        public void close_notification (uint32 id, bool dismiss) {
             foreach (var w in list_box.get_children ()) {
                 var noti = (Notification) w;
                 if (noti != null && noti.param.applied_id == id) {
-                    if (replaces) {
+                    if (!dismiss) {
                         noti.remove_noti_timeout ();
                         noti.destroy ();
                     } else {
@@ -471,8 +477,22 @@ namespace SwayNotificationCenter {
             }
         }
 
-        public void add_notification (NotifyParams param,
-                                      NotiDaemon noti_daemon) {
+        public void replace_notification (uint32 id, NotifyParams new_params) {
+            foreach (var w in list_box.get_children ()) {
+                var noti = (Notification) w;
+                if (noti != null && noti.param.applied_id == id) {
+                    noti.replace_notification (new_params);
+                    // Position the notification in the beginning of the list
+                    list_box.invalidate_sort ();
+                    return;
+                }
+            }
+
+            // Add a new notification if the old one isn't visible
+            add_notification (new_params);
+        }
+
+        public void add_notification (NotifyParams param) {
             var noti = new Notification.regular (param,
                                                  noti_daemon,
                                                  NotificationType.CONTROL_CENTER);

@@ -299,5 +299,43 @@ namespace SwayNotificationCenter {
             }
             return result;
         }
+
+        public static async bool execute_command (string cmd, string[] env_additions = {}, out string msg) {
+            msg = "";
+            try {
+                string[] spawn_env = Environ.get ();
+                // Export env variables
+                foreach (string additions in env_additions) {
+                    spawn_env += additions;
+                }
+
+                string[] argvp = {};
+                Shell.parse_argv (cmd, out argvp);
+
+                Pid child_pid;
+                Process.spawn_async (
+                    "/",
+                    argvp,
+                    spawn_env,
+                    SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD,
+                    null,
+                    out child_pid);
+
+                // Close the child when the spawned process is idling
+                int end_status = 0;
+                ChildWatch.add (child_pid, (pid, status) => {
+                    Process.close_pid (pid);
+                    end_status = status;
+                    execute_command.callback ();
+                });
+                // Waits until `run_script.callback()` is called above
+                yield;
+                return end_status == 0;
+            } catch (Error e) {
+                stderr.printf ("Run_Script Error: %s\n", e.message);
+                msg = e.message;
+                return false;
+            }
+        }
     }
 }

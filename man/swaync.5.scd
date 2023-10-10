@@ -68,6 +68,13 @@ config file to be able to detect config errors
 	description: Layer of control center window relative to normal windows. ++
 		background is below all windows, overlay is above all windows.
 
+*control-center-exclusive-zone* ++
+	type: bool ++
+	default: true ++
+	description: Whether or not the control center should follow the ++
+		compositors exclusive zones. An example would be setting it to ++
+		*false* to cover your panel/dock.
+
 *notification-2fa-action* ++
 	type: bool ++
 	default: true ++

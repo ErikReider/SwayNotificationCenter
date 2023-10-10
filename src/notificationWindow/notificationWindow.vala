@@ -170,7 +170,7 @@ namespace SwayNotificationCenter {
             }
         }
 
-        private void remove_notification (Notification ? noti, bool replaces) {
+        private void remove_notification (Notification ? noti, bool dismiss) {
             // Remove notification and its destruction timeout
             if (noti != null) {
 #if HAVE_LATEST_GTK_LAYER_SHELL
@@ -188,7 +188,7 @@ namespace SwayNotificationCenter {
                 noti.destroy ();
             }
 
-            if (!replaces
+            if (dismiss
                 && (!get_realized ()
                     || !get_mapped ()
                     || !(get_child () is Gtk.Widget)
@@ -198,10 +198,9 @@ namespace SwayNotificationCenter {
             }
         }
 
-        public void add_notification (NotifyParams param,
-                                      NotiDaemon noti_daemon) {
+        public void add_notification (NotifyParams param) {
             var noti = new Notification.timed (param,
-                                               noti_daemon,
+                                               swaync_daemon.noti_daemon,
                                                NotificationType.POPUP,
                                                ConfigModel.instance.timeout,
                                                ConfigModel.instance.timeout_low,
@@ -234,14 +233,29 @@ namespace SwayNotificationCenter {
             scroll_to_start (list_reverse);
         }
 
-        public void close_notification (uint32 id, bool replaces) {
+        public void close_notification (uint32 id, bool dismiss) {
             foreach (var w in box.get_children ()) {
                 var noti = (Notification) w;
                 if (noti != null && noti.param.applied_id == id) {
-                    remove_notification (noti, replaces);
+                    remove_notification (noti, dismiss);
                     break;
                 }
             }
+        }
+
+        public void replace_notification (uint32 id, NotifyParams new_params) {
+            foreach (var w in box.get_children ()) {
+                var noti = (Notification) w;
+                if (noti != null && noti.param.applied_id == id) {
+                    noti.replace_notification (new_params);
+                    // Position the notification in the beginning of the list
+                    box.reorder_child (noti, (int) box.get_children ().length ());
+                    return;
+                }
+            }
+
+            // Display a new notification if the old one isn't visible
+            add_notification (new_params);
         }
 
         public uint32 ? get_latest_notification () {

@@ -1,5 +1,3 @@
-using Posix;
-
 namespace SwayNotificationCenter.Widgets {
     public abstract class BaseWidget : Gtk.Box {
         public abstract string widget_name { get; }
@@ -120,17 +118,10 @@ namespace SwayNotificationCenter.Widgets {
             return res;
         }
 
-        public static void execute_command (string cmd) {
-            pid_t pid;
-            int status;
-            if ((pid = fork ()) < 0) {
-                perror ("fork()");
-            }
-            if (pid == 0) { // Child process
-                execl ("/bin/sh", "sh", "-c", cmd);
-                exit (EXIT_FAILURE); // should not return from execl
-            }
-            waitpid (pid, out status, 1);
+
+        protected async void execute_command (string cmd, string[] env_additions = {}) {
+            string msg = "";
+            yield Functions.execute_command (cmd, env_additions, out msg);
         }
     }
 }

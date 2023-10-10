@@ -31,7 +31,7 @@ namespace SwayNotificationCenter.Widgets {
                     container.insert (tb, -1);
                 } else {
                     Gtk.Button b = new Gtk.Button.with_label (act.label);
-                    b.clicked.connect (() => execute_command (act.command));
+                    b.clicked.connect (() => execute_command.begin (act.command));
                     container.insert (b, -1);
                 }
             }

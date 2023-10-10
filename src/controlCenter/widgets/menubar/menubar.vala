@@ -71,7 +71,7 @@ namespace SwayNotificationCenter.Widgets {
 
         void add_menu (ref unowned ConfigObject ? obj) {
             switch (obj.type) {
-                case MenuType.BUTTONS :
+              case MenuType.BUTTONS:
                     Gtk.Box container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
                     if (obj.name != null) container.get_style_context ().add_class (obj.name);
 

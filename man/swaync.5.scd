@@ -416,7 +416,9 @@ config file to be able to detect config errors
 										type: string ++
 										default: "normal" ++
 										description: Type of the button ++
-											Toggle buttons receive the '.active' css class ++
+											Toggle buttons receive the '.active' css class and an env ++
+											variable "SWAYNC_TOGGLE_STATE" is set. See example usage in the ++
+											default config.json ++
 										enum: ["normal", "toggle"] ++
 									active: ++
 										type: bool ++
@@ -446,7 +448,9 @@ config file to be able to detect config errors
 								type: string ++
 								default: "normal" ++
 								description: Type of the button ++
-									Toggle buttons receive the '.active' css class ++
+									Toggle buttons receive the '.active' css class and an env ++
+									variable "SWAYNC_TOGGLE_STATE" is set. See example usage in the ++
+									default config.json ++
 								enum: ["normal", "toggle"] ++
 							active: ++
 								type: bool ++

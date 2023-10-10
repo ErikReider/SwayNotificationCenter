@@ -74,6 +74,16 @@
     "mpris": {
       "image-size": 96,
       "image-radius": 12
+    },
+    "buttons-grid": {
+      "actions": [
+        {
+          "label": "直",
+          "type": "toggle",
+          "active": true,
+          "command": "sh -c '[[ $SWAYNC_TOGGLE_STATE == true ]] && nmcli radio wifi on || nmcli radio wifi off'"
+        }
+      ]
     }
   }
 }

@@ -19,7 +19,7 @@ namespace SwayNotificationCenter.Widgets {
             NORMAL;
 
             public static ButtonType parse (string value) {
-              switch(value) {
+              switch (value) {
                 case "toggle":
                   return ButtonType.TOGGLE;
                 default:

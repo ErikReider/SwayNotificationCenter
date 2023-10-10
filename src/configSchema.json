@@ -430,7 +430,7 @@
               },
               "type": {
                 "type": "string",
-                "description": "Type of the button; toggle buttons receive the .active css class",
+                "description": "Type of the button; toggle buttons receive the .active css class and an env variable 'SWAYNC_TOGGLE_STATE' is set. See example in the default config.json",
                 "default": "normal",
                 "enum": ["normal", "toggle"]
               },

@@ -26,6 +26,7 @@ namespace SwayNotificationCenter.Widgets {
         string ? label;
         string ? command;
         BaseWidget.ButtonType ? type;
+        string ? update_command;
         bool ? active;
     }
 
@@ -40,6 +41,7 @@ namespace SwayNotificationCenter.Widgets {
         Gtk.Box topbar_container;
 
         List<ConfigObject ?> menu_objects;
+        List<ToggleButton> toggle_buttons;
 
         public Menubar (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             base (suffix, swaync_daemon, noti_daemon);
@@ -71,14 +73,15 @@ namespace SwayNotificationCenter.Widgets {
 
         void add_menu (ref unowned ConfigObject ? obj) {
             switch (obj.type) {
-              case MenuType.BUTTONS:
+                case MenuType.BUTTONS :
                     Gtk.Box container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
                     if (obj.name != null) container.get_style_context ().add_class (obj.name);
 
                     foreach (Action a in obj.actions) {
                         if (a.type == ButtonType.TOGGLE) {
-                            ToggleButton tb = new ToggleButton (a.label, a.command, a.active);
+                            ToggleButton tb = new ToggleButton (a.label, a.command, a.update_command, a.active);
                             container.add (tb);
+                            toggle_buttons.append (tb);
                         } else {
                             Gtk.Button b = new Gtk.Button.with_label (a.label);
                             b.clicked.connect (() => execute_command.begin (a.command));
@@ -107,12 +110,12 @@ namespace SwayNotificationCenter.Widgets {
                     obj.revealer = r;
 
                     show_button.clicked.connect (() => {
-                        bool visible = !r.get_reveal_child ();
-                        foreach (var o in menu_objects) {
-                            o.revealer ?.set_reveal_child (false);
-                        }
-                        r.set_reveal_child (visible);
-                    });
+                    bool visible = !r.get_reveal_child ();
+                    foreach (var o in menu_objects) {
+                        o.revealer ?.set_reveal_child (false);
+                    }
+                    r.set_reveal_child (visible);
+                });
 
                     foreach (var a in obj.actions) {
                         Gtk.Button b = new Gtk.Button.with_label (a.label);
@@ -214,6 +217,9 @@ namespace SwayNotificationCenter.Widgets {
             if (!val) {
                 foreach (var obj in menu_objects) {
                     obj.revealer ?.set_reveal_child (false);
+                }
+                foreach (var tb in toggle_buttons) {
+                    tb.on_update.begin ();
                 }
             }
         }

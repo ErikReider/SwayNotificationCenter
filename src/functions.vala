@@ -110,7 +110,7 @@ namespace SwayNotificationCenter {
             if (custom_path != null && custom_path.length > 0) {
                 // Replaces the home directory relative path with a absolute path
                 if (custom_path.get (0) == '~') {
-                    custom_path = Environment.get_home_dir () + custom_path[1:];
+                    custom_path = Environment.get_home_dir () + custom_path[1 :];
                 }
                 paths += custom_path;
             }
@@ -150,7 +150,7 @@ namespace SwayNotificationCenter {
             if (custom_path != null && (custom_path = custom_path.strip ()).length > 0) {
                 // Replaces the home directory relative path with a absolute path
                 if (custom_path.get (0) == '~') {
-                    custom_path = Environment.get_home_dir () + custom_path[1:];
+                    custom_path = Environment.get_home_dir () + custom_path[1 :];
                 }
 
                 if (File.new_for_path (custom_path).query_exists ()) {
@@ -313,13 +313,38 @@ namespace SwayNotificationCenter {
                 Shell.parse_argv (cmd, out argvp);
 
                 Pid child_pid;
-                Process.spawn_async (
+                int std_input;
+                int std_output;
+                int std_err;
+                Process.spawn_async_with_pipes (
                     "/",
                     argvp,
                     spawn_env,
                     SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD,
                     null,
-                    out child_pid);
+                    out child_pid,
+                    out std_input,
+                    out std_output,
+                    out std_err);
+
+                // stdout:
+                string res = "";
+                IOChannel output = new IOChannel.unix_new (std_output);
+                output.add_watch (IOCondition.IN | IOCondition.HUP, (channel, condition) => {
+                    if (condition == IOCondition.HUP) {
+                        return false;
+                    }
+                    try {
+                        channel.read_line (out res, null, null);
+                        return true;
+                    } catch (IOChannelError e) {
+                        stderr.printf ("stdout: IOChannelError: %s\n", e.message);
+                        return false;
+                    } catch (ConvertError e) {
+                        stderr.printf ("stdout: ConvertError: %s\n", e.message);
+                        return false;
+                    }
+                });
 
                 // Close the child when the spawned process is idling
                 int end_status = 0;
@@ -330,6 +355,7 @@ namespace SwayNotificationCenter {
                 });
                 // Waits until `run_script.callback()` is called above
                 yield;
+                msg = res;
                 return end_status == 0;
             } catch (Error e) {
                 stderr.printf ("Run_Script Error: %s\n", e.message);

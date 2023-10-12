@@ -434,6 +434,11 @@
                 "default": "normal",
                 "enum": ["normal", "toggle"]
               },
+              "update-command": {
+                "type": "string",
+                "description": "Command to be executed on visibility change of cc to update the active state of the toggle button (should echo true or false)",
+                "default": ""
+              },
               "active": {
                   "type": "bool",
                   "description": "Wether the toggle button is active as default or not",

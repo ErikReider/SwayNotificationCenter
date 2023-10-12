@@ -107,11 +107,14 @@ namespace SwayNotificationCenter.Widgets {
                 string command = actions.get_object_element (i).get_string_member_with_default ("command", "");
                 string t = actions.get_object_element (i).get_string_member_with_default ("type", "normal");
                 ButtonType type = ButtonType.parse (t);
+                string update_command =
+                  actions.get_object_element (i).get_string_member_with_default ("update-command", "");
                 bool active = actions.get_object_element (i).get_boolean_member_with_default ("active", false);
                 res[i] = Action () {
                     label = label,
                     command = command,
                     type = type,
+                    update_command = update_command,
                     active = active
                 };
             }

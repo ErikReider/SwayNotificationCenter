@@ -383,6 +383,12 @@ config file to be able to detect config errors
 										description: Type of the button. ++
 											Toggle buttons receive the '.active' css class ++
 										enum: ["normal", "toggle"] ++
+									update-command: ++
+										type: string ++
+										default: "" ++
+										description: "Command to be executed on visibility change of ++
+											cc to update the active state of the toggle button (should ++
+											echo true or false)" ++
 									active: ++
 										type: bool ++
 										default: false ++
@@ -420,6 +426,12 @@ config file to be able to detect config errors
 											variable "SWAYNC_TOGGLE_STATE" is set. See example usage in the ++
 											default config.json ++
 										enum: ["normal", "toggle"] ++
+									update-command: ++
+										type: string ++
+										default: "" ++
+										description: "Command to be executed on visibility change of ++
+											cc to update the active state of the toggle button (should ++
+											echo true or false)" ++
 									active: ++
 										type: bool ++
 										default: false ++

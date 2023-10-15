@@ -77,8 +77,9 @@ private void print_help (string[] args) {
 
 private void on_subscribe (uint count, bool dnd, bool cc_open, bool inhibited) {
     stdout.printf (
-        "{ \"count\": %u, \"dnd\": %s, \"visible\": %s, \"inhibited\": %s }\n"
-         .printf (count, dnd.to_string (), cc_open.to_string (), inhibited.to_string ()));
+        "{ \"count\": %u, \"dnd\": %s, \"visible\": %s, \"inhibited\": %s }\n",
+         count, dnd.to_string (), cc_open.to_string (), inhibited.to_string ());
+    stdout.flush ();
 }
 
 private void print_subscribe () {

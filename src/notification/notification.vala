@@ -138,7 +138,7 @@ namespace SwayNotificationCenter {
 
         construct {
             try {
-                code_regex = new Regex ("(?<= |^)(\\d{3}(-| )\\d{3}|\\d{4,7})(?= |$|\\.|,)",
+                code_regex = new Regex ("(?<= |^)(\\d{3}(-| )\\d{3}|\\d{4,8})(?= |$|\\.|,)",
                                         RegexCompileFlags.MULTILINE);
                 string joined_tags = string.joinv ("|", TAGS);
                 tag_regex = new Regex ("&lt;(/?(?:%s))&gt;".printf (joined_tags));

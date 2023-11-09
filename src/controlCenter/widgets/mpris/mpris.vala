@@ -2,6 +2,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
     public struct Config {
         int image_size;
         int image_radius;
+        string[] blacklist;
     }
 
     public class Mpris : BaseWidget {
@@ -91,6 +92,24 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 // Clamp the radius
                 mpris_config.image_radius = mpris_config.image_radius.clamp (
                     0, (int) (mpris_config.image_size * 0.5));
+
+                // Blacklist
+                if (config.has_member("blacklist")) {
+                    Json.Object? blacklist_object = config.get_object_member("blacklist");
+                    if (blacklist_object != null) {
+                        var blacklisted_apps = new Gee.ArrayList<string>();
+                        foreach (var key in blacklist_object.get_members()) {
+                            Json.Object? app_object = blacklist_object.get_object_member(key);
+                            if (app_object != null && app_object.has_member("state") && app_object.has_member("app-name")) {
+                                string? state = app_object.get_string_member("state");
+                                if (state == "blacklisted") {
+                                    blacklisted_apps.add(app_object.get_string_member("app-name"));
+                                }
+                            }
+                        }
+                        mpris_config.blacklist = blacklisted_apps.to_array();
+                    }
+                }
             }
 
             hide ();
@@ -117,10 +136,11 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         private void setup_mpris () throws Error {
             dbus_iface = Bus.get_proxy_sync (BusType.SESSION,
                                              "org.freedesktop.DBus",
-                                             "/org/freedesktop/DBus");
+                                             "/org/freedesktop/DBus");                              
             string[] names = dbus_iface.list_names ();
             foreach (string name in names) {
                 if (!name.has_prefix (MPRIS_PREFIX)) continue;
+                if (is_blacklisted(name)) continue;
                 if (check_player_exists (name)) return;
                 MprisSource ? source = MprisSource.get_player (name);
                 if (source != null) add_player (name, source);
@@ -189,6 +209,16 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             int position = ((int) carousel.position + delta).clamp (
                 0, children_length - 1);
             carousel.scroll_to (children.nth_data (position));
+        }
+
+        private bool is_blacklisted (string name) {
+            foreach (string blacklistedPattern in mpris_config.blacklist) {
+                string fullPattern = MPRIS_PREFIX + blacklistedPattern;
+                if (GLib.Regex.match_simple(fullPattern, name, GLib.RegexCompileFlags.JAVASCRIPT_COMPAT, 0)) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

@@ -110,7 +110,7 @@ namespace SwayNotificationCenter {
             if (custom_path != null && custom_path.length > 0) {
                 // Replaces the home directory relative path with a absolute path
                 if (custom_path.get (0) == '~') {
-                    custom_path = Environment.get_home_dir () + custom_path[1 :];
+                    custom_path = Environment.get_home_dir () + custom_path[1:];
                 }
                 paths += custom_path;
             }
@@ -150,7 +150,7 @@ namespace SwayNotificationCenter {
             if (custom_path != null && (custom_path = custom_path.strip ()).length > 0) {
                 // Replaces the home directory relative path with a absolute path
                 if (custom_path.get (0) == '~') {
-                    custom_path = Environment.get_home_dir () + custom_path[1 :];
+                    custom_path = Environment.get_home_dir () + custom_path[1:];
                 }
 
                 if (File.new_for_path (custom_path).query_exists ()) {

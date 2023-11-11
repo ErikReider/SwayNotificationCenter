@@ -110,6 +110,9 @@ namespace SwayNotificationCenter {
         /** Disables scripting for notification */
         public bool swaync_no_script { get; set; }
 
+        /** Always show the notification, regardless of dnd/inhibit state */
+        public bool swaync_bypass_dnd { get; set; }
+
         public Array<Action> actions { get; set; }
 
         public NotifyParams (uint32 applied_id,
@@ -145,6 +148,11 @@ namespace SwayNotificationCenter {
                     case "SWAYNC_NO_SCRIPT":
                         if (hint_value.is_of_type (VariantType.BOOLEAN)) {
                             swaync_no_script = hint_value.get_boolean ();
+                        }
+                        break;
+                    case "SWAYNC_BYPASS_DND":
+                        if (hint_value.is_of_type (VariantType.BOOLEAN)) {
+                            swaync_bypass_dnd = hint_value.get_boolean ();
                         }
                         break;
                     case "value":

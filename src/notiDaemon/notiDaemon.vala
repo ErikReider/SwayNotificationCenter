@@ -186,12 +186,20 @@ namespace SwayNotificationCenter {
                 synchronous_ids.set (param.synchronous, id);
             }
 
-            // Only show popup notification if it is ENABLED or TRANSIENT
-            if ((state == NotificationStatusEnum.ENABLED || state == NotificationStatusEnum.TRANSIENT)
-                && !control_center.get_visibility ()
-                // Also check if urgency is Critical and not inhibited and dnd
-                && (param.urgency == UrgencyLevels.CRITICAL
-                    || (!dnd && !swaync_daemon.inhibited && param.urgency != UrgencyLevels.CRITICAL))) {
+            bool show_notification = state == NotificationStatusEnum.ENABLED
+                                     || state == NotificationStatusEnum.TRANSIENT;
+            // Don't show the notification window if the control center is open
+            if (control_center.get_visibility ()) {
+                show_notification = false;
+            }
+
+            bool bypass_dnd = param.urgency == UrgencyLevels.CRITICAL || param.swaync_bypass_dnd;
+            // Don't show the notification window if dnd or inhibited
+            if (!bypass_dnd && (dnd || swaync_daemon.inhibited)) {
+                show_notification = false;
+            }
+
+            if (show_notification) {
                 if (replace_notification > 0) {
                     NotificationWindow.instance.replace_notification (replace_notification, param);
                 } else {
@@ -201,6 +209,7 @@ namespace SwayNotificationCenter {
                 // Remove the old notification due to it not being replaced
                 NotificationWindow.instance.close_notification (replace_notification, false);
             }
+
             // Only add notification to CC if it isn't IGNORED and not transient/TRANSIENT
             if (state != NotificationStatusEnum.IGNORED
                 && state != NotificationStatusEnum.TRANSIENT

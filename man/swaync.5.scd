@@ -377,6 +377,22 @@ config file to be able to detect config errors
 										type: string ++
 										default: "" ++
 										description: "Command to be executed on click" ++
+									type: ++
+										type: string ++
+										default: "normal" ++
+										description: Type of the button. ++
+											Toggle buttons receive the '.active' css class ++
+										enum: ["normal", "toggle"] ++
+									update-command: ++
+										type: string ++
+										default: "" ++
+										description: "Command to be executed on visibility change of ++
+											cc to update the active state of the toggle button (should ++
+											echo true or false)" ++
+									active: ++
+										type: bool ++
+										default: false ++
+										description: Wether the toggle button is active as default or not ++
 							description: A list of actions containing a label and a command ++
 					description: A button to reveal a dropdown with action-buttons ++
 				buttons#<name>: ++
@@ -402,6 +418,24 @@ config file to be able to detect config errors
 										type: string ++
 										default: "" ++
 										description: "Command to be executed on click" ++
+									type: ++
+										type: string ++
+										default: "normal" ++
+										description: Type of the button ++
+											Toggle buttons receive the '.active' css class and an env ++
+											variable "SWAYNC_TOGGLE_STATE" is set. See example usage in the ++
+											default config.json ++
+										enum: ["normal", "toggle"] ++
+									update-command: ++
+										type: string ++
+										default: "" ++
+										description: "Command to be executed on visibility change of ++
+											cc to update the active state of the toggle button (should ++
+											echo true or false)" ++
+									active: ++
+										type: bool ++
+										default: false ++
+										description: Wether the toggle button is active as default or not ++
 							description: A list of actions containing a label and a command ++
 					description: A list of buttons to be displayed in the menu-button-bar ++
 		*buttons-grid*++
@@ -422,6 +456,18 @@ config file to be able to detect config errors
 								type: string ++
 								default: "" ++
 								description: "Command to be executed on click" ++
+							type: ++
+								type: string ++
+								default: "normal" ++
+								description: Type of the button ++
+									Toggle buttons receive the '.active' css class and an env ++
+									variable "SWAYNC_TOGGLE_STATE" is set. See example usage in the ++
+									default config.json ++
+								enum: ["normal", "toggle"] ++
+							active: ++
+								type: bool ++
+								default: false ++
+								description: Wether the toggle button is active as default or not ++
 					description: A list of actions containing a label and a command ++
 			description: A grid of buttons that execute shell commands ++
 #START pulse-audio

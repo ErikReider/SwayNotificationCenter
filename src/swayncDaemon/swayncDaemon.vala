@@ -41,6 +41,19 @@ namespace SwayNotificationCenter {
                 Process.exit (1);
             });
 
+            Timeout.add (200, () => {
+                HashTable<string, Variant> table = new HashTable<string, Variant> (str_hash, str_equal);
+                try {
+                    // TODO: TEST WITH LARGE BODIES (stacked look)
+                    noti_daemon.new_notification ("System", 0, "", "First", "body", {}, table, 10);
+                    noti_daemon.new_notification ("System", 0, "", "Second", "body", {}, table, 10);
+                    noti_daemon.new_notification ("System", 0, "", "Third", "Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis.", {}, table, 10);
+                    noti_daemon.new_notification ("System", 0, "", "Forth", "body", {}, table, 10);
+                    noti_daemon.new_notification ("System", 0, "", "Fith", "body", { "action", "command" }, table, 10);
+                    noti_daemon.new_notification ("System", 0, "", "Sixth", "Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis.", {}, table, 10);
+                } catch (Error e) {}
+                return false;
+            }, Priority.DEFAULT);
             noti_daemon.on_dnd_toggle.connect ((dnd) => {
                 try {
                     subscribe_v2 (noti_daemon.control_center.notification_count (),

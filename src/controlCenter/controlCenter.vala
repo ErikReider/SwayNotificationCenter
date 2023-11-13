@@ -15,6 +15,8 @@ namespace SwayNotificationCenter {
         [GtkChild]
         unowned Gtk.Box box;
 
+        NotificationGroup noti_group;
+
         const string STACK_NOTIFICATIONS_PAGE = "notifications-list";
         const string STACK_PLACEHOLDER_PAGE = "notifications-placeholder";
 
@@ -155,6 +157,7 @@ namespace SwayNotificationCenter {
             });
 
             this.key_press_event.connect ((w, event_key) => {
+                return false;
                 if (this.get_focus () is Gtk.Entry) return false;
                 if (event_key.type == Gdk.EventType.KEY_PRESS) {
                     var children = list_box.get_children ();
@@ -462,7 +465,20 @@ namespace SwayNotificationCenter {
         }
 
         public void close_notification (uint32 id, bool dismiss) {
-            foreach (var w in list_box.get_children ()) {
+            // foreach (var w in list_box.get_children ()) {
+            //     var noti = (Notification) w;
+            //     if (noti != null && noti.param.applied_id == id) {
+            //         if (!dismiss) {
+            //             noti.remove_noti_timeout ();
+            //             noti.destroy ();
+            //         } else {
+            //             noti.close_notification (false);
+            //             list_box.remove (w);
+            //         }
+            //         break;
+            //     }
+            // }
+            foreach (var w in noti_group.get_notifications ()) {
                 var noti = (Notification) w;
                 if (noti != null && noti.param.applied_id == id) {
                     if (!dismiss) {
@@ -470,7 +486,7 @@ namespace SwayNotificationCenter {
                         noti.destroy ();
                     } else {
                         noti.close_notification (false);
-                        list_box.remove (w);
+                        noti_group.remove_notification (noti);
                     }
                     break;
                 }
@@ -503,7 +519,11 @@ namespace SwayNotificationCenter {
                 }
             });
             noti.set_time ();
-            list_box.add (noti);
+
+            if (noti_group == null) {
+                list_box.add (noti_group = new NotificationGroup(param.app_name));
+            }
+            noti_group.add_notification (noti);
             scroll_to_start (list_reverse);
             try {
                 swaync_daemon.subscribe_v2 (notification_count (),

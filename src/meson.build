@@ -49,6 +49,7 @@ widget_sources = [
 
 app_sources = [
   'main.vala',
+  'animation/animation.vala',
   'orderedHashTable/orderedHashTable.vala',
   'configModel/configModel.vala',
   'swayncDaemon/swayncDaemon.vala',
@@ -56,6 +57,7 @@ app_sources = [
   'notiModel/notiModel.vala',
   'notificationWindow/notificationWindow.vala',
   'notification/notification.vala',
+  'notificationGroup/notificationGroup.vala',
   'controlCenter/controlCenter.vala',
   widget_sources,
   'blankWindow/blankWindow.vala',

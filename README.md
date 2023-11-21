@@ -390,8 +390,9 @@ Waybar config
     "return-type": "json",
     "exec-if": "which swaync-client",
     "exec": "swaync-client -swb",
-    "on-click": "swaync-client -t -sw",
+    "on-click": "sleep 0.1; swaync-client -t -sw",
     "on-click-right": "swaync-client -d -sw",
+    "on-click-released": "swaync-client -t -sw"
     "escape": true
   },
 ```

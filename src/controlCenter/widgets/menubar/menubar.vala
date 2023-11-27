@@ -230,6 +230,7 @@ namespace SwayNotificationCenter.Widgets {
                 foreach (var obj in menu_objects) {
                     obj.revealer ?.set_reveal_child (false);
                 }
+            } else {
                 foreach (var tb in toggle_buttons) {
                     tb.on_update.begin ();
                 }

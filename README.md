@@ -247,8 +247,8 @@ window that'll allow you to see all of the CSS classes + other information.
 
 To add toggle buttons to your control center you can set the "type" in any acton to "toggle".
 The toggle button supports different commands depending on the state of the button and
-an "update_command" to update the state in case of changes from outside swaync. The update_command
-is called every time the control center is opened/closed.
+an "update-command" to update the state in case of changes from outside swaync. The update-command
+is called every time the control center is opened.
 The active toggle button also gains the css-class ".toggle:checked"
 
 `config.json` example:
@@ -262,7 +262,7 @@ The active toggle button also gains the css-class ".toggle:checked"
         "type": "toggle",
         "active": true,
         "command": "sh -c '[[ $SWAYNC_TOGGLE_STATE == true ]] && nmcli radio wifi on || nmcli radio wifi off'",
-        "update_command": "sh -c '[[ $(nmcli radio wifi) == \"enabled\" ]] && echo true || echo false'"
+        "update-command": "sh -c '[[ $(nmcli radio wifi) == \"enabled\" ]] && echo true || echo false'"
       }
     ]
   }

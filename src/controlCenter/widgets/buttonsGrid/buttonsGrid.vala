@@ -45,7 +45,7 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         public override void on_cc_visibility_change (bool value) {
-            if (!value) {
+            if (value) {
                 foreach (var tb in toggle_buttons) {
                     tb.on_update.begin ();
                 }

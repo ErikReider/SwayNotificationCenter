@@ -255,7 +255,7 @@ The active toggle button also gains the css-class ".toggle:checked"
 
 ```json
 {
-  "buttons-gird": { // also works with actions in menubar widget
+  "buttons-grid": { // also works with actions in menubar widget
     "actions": [
       {
         "label": "WiFi",

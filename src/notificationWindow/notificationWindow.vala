@@ -151,6 +151,7 @@ namespace SwayNotificationCenter {
         public void change_visibility (bool value) {
             if (!value) {
                 close_all_notifications ();
+                close ();
             } else {
                 this.set_anchor ();
             }

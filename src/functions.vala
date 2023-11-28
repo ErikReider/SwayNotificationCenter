@@ -313,13 +313,38 @@ namespace SwayNotificationCenter {
                 Shell.parse_argv (cmd, out argvp);
 
                 Pid child_pid;
-                Process.spawn_async (
+                int std_input;
+                int std_output;
+                int std_err;
+                Process.spawn_async_with_pipes (
                     "/",
                     argvp,
                     spawn_env,
                     SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD,
                     null,
-                    out child_pid);
+                    out child_pid,
+                    out std_input,
+                    out std_output,
+                    out std_err);
+
+                // stdout:
+                string res = "";
+                IOChannel output = new IOChannel.unix_new (std_output);
+                output.add_watch (IOCondition.IN | IOCondition.HUP, (channel, condition) => {
+                    if (condition == IOCondition.HUP) {
+                        return false;
+                    }
+                    try {
+                        channel.read_line (out res, null, null);
+                        return true;
+                    } catch (IOChannelError e) {
+                        stderr.printf ("stdout: IOChannelError: %s\n", e.message);
+                        return false;
+                    } catch (ConvertError e) {
+                        stderr.printf ("stdout: ConvertError: %s\n", e.message);
+                        return false;
+                    }
+                });
 
                 // Close the child when the spawned process is idling
                 int end_status = 0;
@@ -330,6 +355,7 @@ namespace SwayNotificationCenter {
                 });
                 // Waits until `run_script.callback()` is called above
                 yield;
+                msg = res;
                 return end_status == 0;
             } catch (Error e) {
                 stderr.printf ("Run_Script Error: %s\n", e.message);

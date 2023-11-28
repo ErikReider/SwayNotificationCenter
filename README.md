@@ -38,6 +38,7 @@ Table of Contents
   * [Run](#run)
   * [Control Center Shortcuts](#control-center-shortcuts)
   * [Configuring](#configuring)
+    * [Toggle Buttons](#toggle-buttons)
   * [Notification Inhibition](#notification-inhibition)
   * [Scripting](#scripting)
      * [Disable scripting](#disable-scripting)
@@ -241,6 +242,32 @@ to your `~/.config/swaync/` folder to customize without needing root access.
 
 **Tip**: running swaync with `GTK_DEBUG=interactive swaync` will open a inspector 
 window that'll allow you to see all of the CSS classes + other information.
+
+## Toggle Buttons
+
+To add toggle buttons to your control center you can set the "type" in any acton to "toggle".
+The toggle button supports different commands depending on the state of the button and
+an "update-command" to update the state in case of changes from outside swaync. The update-command
+is called every time the control center is opened.
+The active toggle button also gains the css-class ".toggle:checked"
+
+`config.json` example:
+
+```json
+{
+  "buttons-grid": { // also works with actions in menubar widget
+    "actions": [
+      {
+        "label": "WiFi",
+        "type": "toggle",
+        "active": true,
+        "command": "sh -c '[[ $SWAYNC_TOGGLE_STATE == true ]] && nmcli radio wifi on || nmcli radio wifi off'",
+        "update-command": "sh -c '[[ $(nmcli radio wifi) == \"enabled\" ]] && echo true || echo false'"
+      }
+    ]
+  }
+}
+```
 
 ## Notification Inhibition
 

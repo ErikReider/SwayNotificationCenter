@@ -282,8 +282,11 @@
   border-radius: 12px;
 }
 
+/* style given to the active toggle button */
+.widget-buttons-grid>flowbox>flowboxchild>button.toggle:checked {
+}
+
 .widget-buttons-grid>flowbox>flowboxchild>button:hover {
-  background: @noti-bg-hover;
 }
 
 /* Menubar widget */

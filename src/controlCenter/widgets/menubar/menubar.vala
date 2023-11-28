@@ -25,6 +25,9 @@ namespace SwayNotificationCenter.Widgets {
     public struct Action {
         string ? label;
         string ? command;
+        BaseWidget.ButtonType ? type;
+        string ? update_command;
+        bool ? active;
     }
 
     public class Menubar : BaseWidget {
@@ -38,6 +41,7 @@ namespace SwayNotificationCenter.Widgets {
         Gtk.Box topbar_container;
 
         List<ConfigObject ?> menu_objects;
+        List<ToggleButton> toggle_buttons;
 
         public Menubar (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             base (suffix, swaync_daemon, noti_daemon);
@@ -74,11 +78,18 @@ namespace SwayNotificationCenter.Widgets {
                     if (obj.name != null) container.get_style_context ().add_class (obj.name);
 
                     foreach (Action a in obj.actions) {
-                        Gtk.Button b = new Gtk.Button.with_label (a.label);
-
-                        b.clicked.connect (() => execute_command.begin (a.command));
-
-                        container.add (b);
+                        switch (a.type) {
+                            case ButtonType.TOGGLE:
+                                ToggleButton tb = new ToggleButton (a.label, a.command, a.update_command, a.active);
+                                container.add (tb);
+                                toggle_buttons.append (tb);
+                                break;
+                            default:
+                                Gtk.Button b = new Gtk.Button.with_label (a.label);
+                                b.clicked.connect (() => execute_command.begin (a.command));
+                                container.add (b);
+                                break;
+                        }
                     }
                     switch (obj.position) {
                         case Position.LEFT:
@@ -110,9 +121,18 @@ namespace SwayNotificationCenter.Widgets {
                     });
 
                     foreach (var a in obj.actions) {
-                        Gtk.Button b = new Gtk.Button.with_label (a.label);
-                        b.clicked.connect (() => execute_command.begin (a.command));
-                        menu.pack_start (b, true, true, 0);
+                        switch (a.type) {
+                            case ButtonType.TOGGLE:
+                                ToggleButton tb = new ToggleButton (a.label, a.command, a.update_command, a.active);
+                                menu.pack_start (tb, true, true, 0);
+                                toggle_buttons.append (tb);
+                                break;
+                            default:
+                                Gtk.Button b = new Gtk.Button.with_label (a.label);
+                                b.clicked.connect (() => execute_command.begin (a.command));
+                                menu.pack_start (b, true, true, 0);
+                                break;
+                        }
                     }
 
                     switch (obj.position) {
@@ -209,6 +229,10 @@ namespace SwayNotificationCenter.Widgets {
             if (!val) {
                 foreach (var obj in menu_objects) {
                     obj.revealer ?.set_reveal_child (false);
+                }
+            } else {
+                foreach (var tb in toggle_buttons) {
+                    tb.on_update.begin ();
                 }
             }
         }

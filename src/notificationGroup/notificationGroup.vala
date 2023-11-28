@@ -27,6 +27,7 @@ namespace SwayNotificationCenter {
             collapse_button.get_style_context ().add_class ("notification-group-collapse-button");
             collapse_button.set_relief (Gtk.ReliefStyle.NORMAL);
             collapse_button.set_halign (Gtk.Align.END);
+            collapse_button.set_valign (Gtk.Align.CENTER);
             collapse_button.clicked.connect (() => {
                 group.set_expanded (false);
             });

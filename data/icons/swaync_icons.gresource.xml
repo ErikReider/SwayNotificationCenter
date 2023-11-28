@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/org/erikreider/swaync/icons/scalable/actions">
+    <file preprocess="xml-stripblanks">swaync-collapse.svg</file>
+  </gresource>
+</gresources>

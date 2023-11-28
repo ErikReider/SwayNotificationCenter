@@ -8,6 +8,10 @@ namespace SwayNotificationCenter {
         public static void init () {
             system_css_provider = new Gtk.CssProvider ();
             user_css_provider = new Gtk.CssProvider ();
+
+            // Init resources
+            var theme = Gtk.IconTheme.get_default ();
+            theme.add_resource_path ("/org/erikreider/swaync/icons");
         }
 
         public static void set_image_path (owned string path,

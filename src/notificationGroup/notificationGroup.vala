@@ -15,13 +15,14 @@ namespace SwayNotificationCenter {
             Gtk.Box box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
 
             revealer.set_transition_type (Gtk.RevealerTransitionType.SLIDE_UP);
-            revealer.reveal_child = false;
+            revealer.set_reveal_child (false);
             revealer.set_transition_duration (ANIMATION_DURATION);
 
             // Add top controls
             Gtk.Box controls_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 4);
             Gtk.Button collapse_button = new Gtk.Button.from_icon_name (
-                "view-restore-symbolic", Gtk.IconSize.BUTTON);
+                "swaync-collapse", Gtk.IconSize.BUTTON);
+            collapse_button.get_style_context ().add_class ("flat");
             collapse_button.get_style_context ().add_class ("circular");
             collapse_button.get_style_context ().add_class ("notification-group-collapse-button");
             collapse_button.set_relief (Gtk.ReliefStyle.NORMAL);

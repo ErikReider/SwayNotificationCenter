@@ -121,9 +121,18 @@ namespace SwayNotificationCenter.Widgets {
                     });
 
                     foreach (var a in obj.actions) {
-                        Gtk.Button b = new Gtk.Button.with_label (a.label);
-                        b.clicked.connect (() => execute_command.begin (a.command));
-                        menu.pack_start (b, true, true, 0);
+                        switch (a.type) {
+                            case ButtonType.TOGGLE:
+                                ToggleButton tb = new ToggleButton (a.label, a.command, a.update_command, a.active);
+                                menu.pack_start (tb, true, true, 0);
+                                toggle_buttons.append (tb);
+                                break;
+                            default:
+                                Gtk.Button b = new Gtk.Button.with_label (a.label);
+                                b.clicked.connect (() => execute_command.begin (a.command));
+                                menu.pack_start (b, true, true, 0);
+                                break;
+                        }
                     }
 
                     switch (obj.position) {
@@ -221,6 +230,7 @@ namespace SwayNotificationCenter.Widgets {
                 foreach (var obj in menu_objects) {
                     obj.revealer ?.set_reveal_child (false);
                 }
+            } else {
                 foreach (var tb in toggle_buttons) {
                     tb.on_update.begin ();
                 }

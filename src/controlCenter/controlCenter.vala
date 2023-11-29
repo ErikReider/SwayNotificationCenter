@@ -7,8 +7,6 @@ namespace SwayNotificationCenter {
         [GtkChild]
         unowned Gtk.ScrolledWindow scrolled_window;
         [GtkChild]
-        unowned Gtk.Viewport viewport;
-        [GtkChild]
         unowned Gtk.Stack stack;
         [GtkChild]
         unowned Gtk.ListBox list_box;
@@ -21,6 +19,7 @@ namespace SwayNotificationCenter {
 
         HashTable<uint32, unowned NotificationGroup> noti_groups_id =
             new HashTable<uint32, unowned NotificationGroup> (direct_hash, direct_equal);
+        /** NOTE: Only includes groups with ids with length of > 0 */
         HashTable<string, unowned NotificationGroup> noti_groups_name =
             new HashTable<string, unowned NotificationGroup> (str_hash, str_equal);
 
@@ -535,7 +534,9 @@ namespace SwayNotificationCenter {
                 }
             }
             if (group.is_empty ()) {
-                noti_groups_name.remove (group.app_name);
+                if (group.name_id.length > 0) {
+                    noti_groups_name.remove (group.name_id);
+                }
                 if (expanded_group == group) {
                     expanded_group = null;
                     animate (1);
@@ -576,10 +577,12 @@ namespace SwayNotificationCenter {
             });
             noti.set_time ();
 
-            NotificationGroup group;
-            // TODO: Use desktop-entry if exists instead
-            if (!noti_groups_name.lookup_extended (param.app_name, null, out group)) {
-                group = new NotificationGroup (param.app_name);
+            NotificationGroup ? group = null;
+            if (param.name_id.length > 0) {
+                noti_groups_name.lookup_extended (param.name_id, null, out group);
+            }
+            if (group == null) {
+                group = new NotificationGroup (param.name_id, param.display_name);
                 // Collapse other groups on expand
                 group.on_expand_change.connect ((expanded) => {
                     if (!expanded) {
@@ -593,7 +596,9 @@ namespace SwayNotificationCenter {
                         if (g != null && g != group) g.set_expanded (false);
                     }
                 });
-                noti_groups_name.set (param.app_name, group);
+                if (param.name_id.length > 0) {
+                    noti_groups_name.set (param.name_id, group);
+                }
                 list_box.add (group);
             }
             noti_groups_id.set (param.applied_id, group);

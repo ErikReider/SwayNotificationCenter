@@ -115,6 +115,24 @@ namespace SwayNotificationCenter {
 
         public Array<Action> actions { get; set; }
 
+        public DesktopAppInfo ? desktop_app_info = null;
+
+        public string name_id {
+            get {
+                return this.desktop_entry ?? this.app_name ?? "";
+            }
+        }
+
+        public string display_name {
+            owned get {
+                string display_name = app_name ?? "";
+                if (desktop_app_info != null) {
+                    display_name = desktop_app_info.get_display_name ();
+                }
+                return display_name;
+            }
+        }
+
         public NotifyParams (uint32 applied_id,
                              string app_name,
                              uint32 replaces_id,
@@ -139,6 +157,19 @@ namespace SwayNotificationCenter {
             parse_hints ();
 
             parse_actions (actions);
+
+            // Try to get the desktop file
+            string[] entries = {};
+            if (desktop_entry != null) entries += desktop_entry.replace (".desktop", "");
+            if (app_name != null) entries += app_name.replace (".desktop", "");
+            foreach (string entry in entries) {
+                var app_info = new DesktopAppInfo ("%s.desktop".printf (entry));
+                // Checks if the .desktop file actually exists or not
+                if (app_info is DesktopAppInfo) {
+                    desktop_app_info = app_info;
+                    break;
+                }
+            }
         }
 
         private void parse_hints () {

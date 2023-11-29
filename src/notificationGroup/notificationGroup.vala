@@ -1,6 +1,6 @@
 namespace SwayNotificationCenter {
     public class NotificationGroup : Gtk.ListBoxRow {
-        public string app_name;
+        public string name_id;
 
         private ExpandableGroup group;
         private Gtk.Revealer revealer = new Gtk.Revealer ();
@@ -11,8 +11,8 @@ namespace SwayNotificationCenter {
 
         public signal void on_expand_change (bool state);
 
-        public NotificationGroup (string app_name) {
-            this.app_name = app_name;
+        public NotificationGroup (string name_id, string display_name) {
+            this.name_id = name_id;
             get_style_context ().add_class ("notification-group");
 
             Gtk.Box box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
@@ -57,7 +57,7 @@ namespace SwayNotificationCenter {
             button_box.add (close_all_button);
 
             // Group name label
-            Gtk.Label app_label = new Gtk.Label (app_name);
+            Gtk.Label app_label = new Gtk.Label (display_name);
             app_label.xalign = 0;
             app_label.get_style_context ().add_class ("title-1");
             app_label.get_style_context ().add_class ("notification-group-header");
@@ -201,7 +201,7 @@ namespace SwayNotificationCenter {
 
         private unowned on_expand_change change_cb;
 
-        public List<unowned Gtk.Widget> widgets = new List<unowned Gtk.Widget>();
+        public List<unowned Gtk.Widget> widgets = new List<unowned Gtk.Widget> ();
 
         public delegate void on_expand_change (bool state);
 

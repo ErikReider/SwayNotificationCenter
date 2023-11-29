@@ -1,6 +1,6 @@
 namespace SwayNotificationCenter {
     public class NotificationGroup : Gtk.ListBoxRow {
-        const uint ANIMATION_DURATION = 400;
+        public string app_name;
 
         private ExpandableGroup group;
         private Gtk.Revealer revealer = new Gtk.Revealer ();
@@ -9,14 +9,17 @@ namespace SwayNotificationCenter {
         private bool gesture_down = false;
         private bool gesture_in = false;
 
+        public signal void on_expand_change (bool state);
+
         public NotificationGroup (string app_name) {
+            this.app_name = app_name;
             get_style_context ().add_class ("notification-group");
 
             Gtk.Box box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
 
             revealer.set_transition_type (Gtk.RevealerTransitionType.SLIDE_UP);
             revealer.set_reveal_child (false);
-            revealer.set_transition_duration (ANIMATION_DURATION);
+            revealer.set_transition_duration (Constants.ANIMATION_DURATION);
 
             // Add top controls
             Gtk.Box controls_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 4);
@@ -29,7 +32,9 @@ namespace SwayNotificationCenter {
             collapse_button.set_halign (Gtk.Align.END);
             collapse_button.set_valign (Gtk.Align.CENTER);
             collapse_button.clicked.connect (() => {
-                group.set_expanded (false);
+                set_expanded (false);
+                on_expand_change (false);
+                group.set_sensitive (single_notification () || group.is_expanded);
             });
             Gtk.Label app_label = new Gtk.Label (app_name);
             app_label.xalign = 0;
@@ -43,7 +48,7 @@ namespace SwayNotificationCenter {
 
             set_activatable (false);
 
-            group = new ExpandableGroup (ANIMATION_DURATION, (state) => {
+            group = new ExpandableGroup (Constants.ANIMATION_DURATION, (state) => {
                 revealer.set_reveal_child (state);
             });
             box.add (group);
@@ -52,7 +57,7 @@ namespace SwayNotificationCenter {
             show_all ();
 
             /*
-             * Handling of bank window presses (pressing outside of ControlCenter)
+             * Handling of group presses
              */
             gesture = new Gtk.GestureMultiPress (this);
             gesture.set_touch_only (false);
@@ -68,9 +73,12 @@ namespace SwayNotificationCenter {
                 if (!gesture_down) return;
                 gesture_down = false;
                 if (gesture_in) {
-                    if (!group.is_expanded) {
+                    bool single_noti = single_notification ();
+                    if (!group.is_expanded && !single_noti) {
                         group.set_expanded (true);
+                        on_expand_change (true);
                     }
+                    group.set_sensitive (single_noti || group.is_expanded);
                 }
 
                 Gdk.EventSequence ? sequence = gesture.get_current_sequence ();
@@ -99,16 +107,59 @@ namespace SwayNotificationCenter {
             });
         }
 
+        /// Returns if there's more than one notification
+        private bool single_notification () {
+            unowned Gtk.Widget ? widget = group.widgets.nth_data (1);
+            return widget == null;
+        }
+
+        public void set_expanded (bool state) {
+            group.set_expanded (state);
+        }
+
         public void add_notification (Notification noti) {
             group.add (noti);
+            if (!single_notification ()) {
+                group.set_sensitive (false);
+            }
         }
 
         public void remove_notification (Notification noti) {
             group.remove (noti);
+            if (single_notification ()) {
+                set_expanded (false);
+            }
         }
 
         public List<weak Gtk.Widget> get_notifications () {
-            return group.get_notifications ();
+            return group.widgets.copy ();
+        }
+
+        public int64 get_time () {
+            if (group.widgets.is_empty ()) return -1;
+            return ((Notification) group.widgets.last ().data).param.time;
+        }
+
+        public uint get_num_notifications () {
+            return group.widgets.length ();
+        }
+
+        public bool is_empty () {
+            return group.widgets.is_empty ();
+        }
+
+        public void close_all_notifications () {
+            foreach (unowned Gtk.Widget widget in group.widgets) {
+                var noti = (Notification) widget;
+                if (noti != null) noti.close_notification (false);
+            }
+        }
+
+        public void update_time () {
+            foreach (unowned Gtk.Widget widget in group.widgets) {
+                var noti = (Notification) widget;
+                if (noti != null) noti.set_time ();
+            }
         }
     }
 
@@ -128,7 +179,7 @@ namespace SwayNotificationCenter {
 
         private unowned on_expand_change change_cb;
 
-        private List<unowned Gtk.Widget> widgets = new List<unowned Gtk.Widget>();
+        public List<unowned Gtk.Widget> widgets = new List<unowned Gtk.Widget>();
 
         public delegate void on_expand_change (bool state);
 
@@ -148,18 +199,9 @@ namespace SwayNotificationCenter {
             set_expanded (false);
         }
 
-        public List<weak Gtk.Widget> get_notifications () {
-            return widgets.copy ();
-        }
-
-        public uint get_num_notifications () {
-            return widgets.length ();
-        }
-
         public void set_expanded (bool value) {
             if (is_expanded == value) return;
             is_expanded = value;
-            set_sensitive (is_expanded);
 
             animate (is_expanded ? 1 : 0);
 
@@ -429,8 +471,3 @@ namespace SwayNotificationCenter {
         }
     }
 }
-
-
-
-
-

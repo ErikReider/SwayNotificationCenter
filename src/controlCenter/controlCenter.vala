@@ -15,7 +15,14 @@ namespace SwayNotificationCenter {
         [GtkChild]
         unowned Gtk.Box box;
 
-        NotificationGroup noti_group;
+        unowned NotificationGroup ? expanded_group = null;
+        private double fade_animation_progress = 1.0;
+        private Animation ? notification_fade_animation;
+
+        HashTable<uint32, unowned NotificationGroup> noti_groups_id =
+            new HashTable<uint32, unowned NotificationGroup> (direct_hash, direct_equal);
+        HashTable<string, unowned NotificationGroup> noti_groups_name =
+            new HashTable<string, unowned NotificationGroup> (str_hash, str_equal);
 
         const string STACK_NOTIFICATIONS_PAGE = "notifications-list";
         const string STACK_PLACEHOLDER_PAGE = "notifications-placeholder";
@@ -29,7 +36,6 @@ namespace SwayNotificationCenter {
 
         private uint list_position = 0;
 
-        private double last_upper = 0;
         private bool list_reverse = false;
         private Gtk.Align list_align = Gtk.Align.START;
 
@@ -57,8 +63,6 @@ namespace SwayNotificationCenter {
                 GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
                 GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
             }
-
-            viewport.size_allocate.connect (size_alloc);
 
             this.map.connect (() => {
                 set_anchor ();
@@ -234,6 +238,58 @@ namespace SwayNotificationCenter {
             });
 
             add_widgets ();
+
+            notification_fade_animation = new Animation (this, Constants.ANIMATION_DURATION,
+                                                         Animation.ease_in_out_cubic,
+                                                         animation_value_cb,
+                                                         animation_done_cb);
+            list_box.draw.connect (list_box_draw_cb);
+        }
+
+        void animation_value_cb (double progress) {
+            this.fade_animation_progress = progress;
+
+            this.queue_draw ();
+        }
+
+        void animation_done_cb () {
+            notification_fade_animation.dispose ();
+        }
+
+        void animate (double to) {
+            notification_fade_animation.stop ();
+            notification_fade_animation.start (fade_animation_progress, to);
+        }
+
+        /// Fade non-expanded groups when one group is expanded
+        private bool list_box_draw_cb (Cairo.Context cr) {
+            Cairo.Pattern fade_gradient = new Cairo.Pattern.linear (0, 0, 0, 1);
+            fade_gradient.add_color_stop_rgba (0, 1, 1, 1, 1 - fade_animation_progress - 0.5);
+
+            foreach (unowned Gtk.Widget widget in list_box.get_children ()) {
+                Gtk.Allocation alloc;
+                widget.get_allocated_size (out alloc, null);
+
+                cr.save ();
+                cr.translate (0, alloc.y);
+
+                cr.push_group ();
+                widget.draw (cr);
+
+                cr.scale (alloc.width, alloc.height);
+                if (widget != expanded_group) {
+                    cr.set_source (fade_gradient);
+                    cr.rectangle (0, 0, alloc.width, alloc.height);
+                    cr.set_operator (Cairo.Operator.DEST_OUT);
+                    cr.fill ();
+                }
+
+                cr.pop_group_to_source ();
+                cr.paint ();
+
+                cr.restore ();
+            }
+            return true;
         }
 
         /** Adds all custom widgets. Removes previous widgets */
@@ -361,27 +417,18 @@ namespace SwayNotificationCenter {
 
             list_box.set_valign (list_align);
             list_box.set_sort_func ((w1, w2) => {
-                var a = (Notification) w1;
-                var b = (Notification) w2;
-                if (a == null || b == null) return 0;
+                var a_time = ((NotificationGroup) w1).get_time ();
+                var b_time = ((NotificationGroup) w2).get_time ();
+                if (a_time < 0 || b_time < 0)return 0;
                 // Sort the list in reverse if needed
-                if (a.param.time == b.param.time) return 0;
+                if (a_time == b_time)return 0;
                 int val = list_reverse ? 1 : -1;
-                return a.param.time > b.param.time ? val : val * -1;
+                return a_time > b_time ? val : val * -1;
             });
 
             // Always set the size request in all events.
             box.set_size_request (ConfigModel.instance.control_center_width,
                                   ConfigModel.instance.control_center_height);
-        }
-
-        private void size_alloc () {
-            var adj = viewport.vadjustment;
-            double upper = adj.get_upper ();
-            if (last_upper < upper) {
-                scroll_to_start (list_reverse);
-            }
-            last_upper = upper;
         }
 
         private void scroll_to_start (bool reverse) {
@@ -393,20 +440,26 @@ namespace SwayNotificationCenter {
         }
 
         public uint notification_count () {
-            return list_box.get_children ().length ();
+            uint count = 0;
+            foreach (unowned Gtk.Widget widget in list_box.get_children ()) {
+                if (widget is NotificationGroup) {
+                    count += ((NotificationGroup) widget).get_num_notifications ();
+                }
+            }
+            return count;
         }
 
         public void close_all_notifications () {
             foreach (var w in list_box.get_children ()) {
-                Notification noti = (Notification) w;
-                if (noti != null) noti.close_notification (false);
+                NotificationGroup group = (NotificationGroup) w;
+                if (group != null)group.close_all_notifications ();
             }
 
             try {
                 swaync_daemon.subscribe_v2 (notification_count (),
-                                         swaync_daemon.get_dnd (),
-                                         get_visibility (),
-                                         swaync_daemon.inhibited);
+                                            swaync_daemon.get_dnd (),
+                                            get_visibility (),
+                                            swaync_daemon.inhibited);
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }
@@ -439,14 +492,14 @@ namespace SwayNotificationCenter {
                 list_box.grab_focus ();
                 navigate_list (list_position);
                 foreach (var w in list_box.get_children ()) {
-                    var noti = (Notification) w;
-                    if (noti != null) noti.set_time ();
+                    var group = (NotificationGroup) w;
+                    if (group != null)group.update_time ();
                 }
             }
             swaync_daemon.subscribe_v2 (notification_count (),
-                                     noti_daemon.dnd,
-                                     this.visible,
-                                     swaync_daemon.inhibited);
+                                        noti_daemon.dnd,
+                                        this.visible,
+                                        swaync_daemon.inhibited);
         }
 
         public bool toggle_visibility () {
@@ -465,20 +518,9 @@ namespace SwayNotificationCenter {
         }
 
         public void close_notification (uint32 id, bool dismiss) {
-            // foreach (var w in list_box.get_children ()) {
-            //     var noti = (Notification) w;
-            //     if (noti != null && noti.param.applied_id == id) {
-            //         if (!dismiss) {
-            //             noti.remove_noti_timeout ();
-            //             noti.destroy ();
-            //         } else {
-            //             noti.close_notification (false);
-            //             list_box.remove (w);
-            //         }
-            //         break;
-            //     }
-            // }
-            foreach (var w in noti_group.get_notifications ()) {
+            unowned NotificationGroup group = null;
+            if (!noti_groups_id.lookup_extended (id, null, out group))return;
+            foreach (var w in group.get_notifications ()) {
                 var noti = (Notification) w;
                 if (noti != null && noti.param.applied_id == id) {
                     if (!dismiss) {
@@ -486,15 +528,26 @@ namespace SwayNotificationCenter {
                         noti.destroy ();
                     } else {
                         noti.close_notification (false);
-                        noti_group.remove_notification (noti);
+                        group.remove_notification (noti);
                     }
+                    noti_groups_id.remove (id);
                     break;
                 }
+            }
+            if (group.is_empty ()) {
+                noti_groups_name.remove (group.app_name);
+                if (expanded_group == group) {
+                    expanded_group = null;
+                    animate (1);
+                }
+                group.destroy ();
             }
         }
 
         public void replace_notification (uint32 id, NotifyParams new_params) {
-            foreach (var w in list_box.get_children ()) {
+            unowned NotificationGroup group = null;
+            if (!noti_groups_id.lookup_extended (id, null, out group))return;
+            foreach (var w in group.get_notifications ()) {
                 var noti = (Notification) w;
                 if (noti != null && noti.param.applied_id == id) {
                     noti.replace_notification (new_params);
@@ -520,16 +573,36 @@ namespace SwayNotificationCenter {
             });
             noti.set_time ();
 
-            if (noti_group == null) {
-                list_box.add (noti_group = new NotificationGroup(param.app_name));
+            NotificationGroup group;
+            // TODO: Use desktop-entry if exists instead
+            if (!noti_groups_name.lookup_extended (param.app_name, null, out group)) {
+                group = new NotificationGroup (param.app_name);
+                // Collapse other groups on expand
+                group.on_expand_change.connect ((expanded) => {
+                    if (!expanded) {
+                        animate (1);
+                        return;
+                    }
+                    expanded_group = group;
+                    animate (0);
+                    foreach (unowned Gtk.Widget child in list_box.get_children ()) {
+                        NotificationGroup g = (NotificationGroup) child;
+                        if (g != null && g != group)g.set_expanded (false);
+                    }
+                });
+                noti_groups_name.set (param.app_name, group);
+                list_box.add (group);
             }
-            noti_group.add_notification (noti);
+            noti_groups_id.set (param.applied_id, group);
+
+            group.add_notification (noti);
+            list_box.invalidate_sort ();
             scroll_to_start (list_reverse);
             try {
                 swaync_daemon.subscribe_v2 (notification_count (),
-                                         swaync_daemon.get_dnd (),
-                                         get_visibility (),
-                                         swaync_daemon.inhibited);
+                                            swaync_daemon.get_dnd (),
+                                            get_visibility (),
+                                            swaync_daemon.inhibited);
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }
@@ -546,8 +619,13 @@ namespace SwayNotificationCenter {
         /** Forces each notification EventBox to reload its style_context #27 */
         private void reload_notifications_style () {
             foreach (var c in list_box.get_children ()) {
-                Notification noti = (Notification) c;
-                if (noti != null) noti.reload_style_context ();
+                NotificationGroup group = (NotificationGroup) c;
+                if (group != null) {
+                    group.forall ((widget) => {
+                        Notification noti = (Notification) c;
+                        noti.reload_style_context ();
+                    });
+                }
             }
         }
     }

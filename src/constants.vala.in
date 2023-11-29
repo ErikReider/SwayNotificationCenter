@@ -1,4 +1,5 @@
 public class Constants {
     public const string VERSION = @VERSION@;
     public const string VERSIONNUM = @VERSION_NUM@;
+    public const uint ANIMATION_DURATION = 400;
 }

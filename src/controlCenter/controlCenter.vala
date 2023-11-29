@@ -546,14 +546,17 @@ namespace SwayNotificationCenter {
 
         public void replace_notification (uint32 id, NotifyParams new_params) {
             unowned NotificationGroup group = null;
-            if (!noti_groups_id.lookup_extended (id, null, out group))return;
-            foreach (var w in group.get_notifications ()) {
-                var noti = (Notification) w;
-                if (noti != null && noti.param.applied_id == id) {
-                    noti.replace_notification (new_params);
-                    // Position the notification in the beginning of the list
-                    list_box.invalidate_sort ();
-                    return;
+            if (noti_groups_id.lookup_extended (id, null, out group)) {
+                foreach (var w in group.get_notifications ()) {
+                    var noti = (Notification) w;
+                    if (noti != null && noti.param.applied_id == id) {
+                        noti_groups_id.remove (id);
+                        noti_groups_id.set (new_params.applied_id, group);
+                        noti.replace_notification (new_params);
+                        // Position the notification in the beginning of the list
+                        list_box.invalidate_sort ();
+                        return;
+                    }
                 }
             }
 

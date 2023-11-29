@@ -23,8 +23,13 @@ namespace SwayNotificationCenter {
 
             // Add top controls
             Gtk.Box controls_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 4);
+            Gtk.Box button_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 4);
+            button_box.set_halign (Gtk.Align.END);
+            button_box.get_style_context ().add_class ("notification-group-buttons");
+
+            // Collapse button
             Gtk.Button collapse_button = new Gtk.Button.from_icon_name (
-                "swaync-collapse", Gtk.IconSize.BUTTON);
+                "swaync-collapse-symbolic", Gtk.IconSize.BUTTON);
             collapse_button.get_style_context ().add_class ("flat");
             collapse_button.get_style_context ().add_class ("circular");
             collapse_button.get_style_context ().add_class ("notification-group-collapse-button");
@@ -36,13 +41,30 @@ namespace SwayNotificationCenter {
                 on_expand_change (false);
                 group.set_sensitive (single_notification () || group.is_expanded);
             });
+            button_box.add (collapse_button);
+
+            // Close all button
+            Gtk.Button close_all_button = new Gtk.Button.from_icon_name (
+                "swaync-close-symbolic", Gtk.IconSize.BUTTON);
+            close_all_button.get_style_context ().add_class ("flat");
+            close_all_button.get_style_context ().add_class ("circular");
+            close_all_button.get_style_context ().add_class ("notification-group-close-all-button");
+            close_all_button.set_relief (Gtk.ReliefStyle.NORMAL);
+            close_all_button.set_halign (Gtk.Align.END);
+            close_all_button.set_valign (Gtk.Align.CENTER);
+            close_all_button.clicked.connect (() => {
+                close_all_notifications ();
+            });
+            button_box.add (close_all_button);
+
+            // Group name label
             Gtk.Label app_label = new Gtk.Label (app_name);
             app_label.xalign = 0;
             app_label.get_style_context ().add_class ("title-1");
             app_label.get_style_context ().add_class ("notification-group-header");
 
             controls_box.pack_start (app_label);
-            controls_box.pack_end (collapse_button);
+            controls_box.pack_end (button_box);
             revealer.add (controls_box);
             box.add (revealer);
 

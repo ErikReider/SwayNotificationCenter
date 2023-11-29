@@ -39,7 +39,6 @@ namespace SwayNotificationCenter {
             collapse_button.clicked.connect (() => {
                 set_expanded (false);
                 on_expand_change (false);
-                group.set_sensitive (single_notification () || group.is_expanded);
             });
             button_box.add (collapse_button);
 
@@ -137,6 +136,7 @@ namespace SwayNotificationCenter {
 
         public void set_expanded (bool state) {
             group.set_expanded (state);
+            group.set_sensitive (single_notification () || group.is_expanded);
         }
 
         public void add_notification (Notification noti) {

@@ -590,7 +590,7 @@ namespace SwayNotificationCenter {
                     animate (0);
                     foreach (unowned Gtk.Widget child in list_box.get_children ()) {
                         NotificationGroup g = (NotificationGroup) child;
-                        if (g != null && g != group)g.set_expanded (false);
+                        if (g != null && g != group) g.set_expanded (false);
                     }
                 });
                 noti_groups_name.set (param.app_name, group);

@@ -117,21 +117,9 @@ namespace SwayNotificationCenter {
 
         public DesktopAppInfo ? desktop_app_info = null;
 
-        public string name_id {
-            get {
-                return this.desktop_entry ?? this.app_name ?? "";
-            }
-        }
+        public string name_id;
 
-        public string display_name {
-            owned get {
-                string display_name = app_name ?? "";
-                if (desktop_app_info != null) {
-                    display_name = desktop_app_info.get_display_name ();
-                }
-                return display_name;
-            }
-        }
+        public string display_name;
 
         public NotifyParams (uint32 applied_id,
                              string app_name,
@@ -170,6 +158,19 @@ namespace SwayNotificationCenter {
                     break;
                 }
             }
+
+            // Set name_id
+            this.name_id = this.desktop_entry ?? this.app_name ?? "";
+
+            // Set display_name and make the first letter upper case
+            string ? display_name = this.desktop_entry ?? this.app_name;
+            if (desktop_app_info != null) {
+                display_name = desktop_app_info.get_display_name ();
+            }
+            if (display_name == null || display_name.length == 0) {
+                display_name = "Unknown";
+            }
+            this.display_name = display_name.splice (0, 1, display_name.up (1));
         }
 
         private void parse_hints () {

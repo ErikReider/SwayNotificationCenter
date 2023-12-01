@@ -187,7 +187,7 @@ namespace SwayNotificationCenter {
 
     private class ExpandableGroup : Gtk.Container {
         const int NUM_STACKED_NOTIFICATIONS = 3;
-        const int COLLAPSED_NOTIFICATION_OFFSET = 5;
+        const int COLLAPSED_NOTIFICATION_OFFSET = 6;
 
         public bool is_expanded { get; private set; default = true; }
 

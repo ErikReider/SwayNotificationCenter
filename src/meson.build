@@ -56,6 +56,7 @@ app_sources = [
   'swayncDaemon/swayncDaemon.vala',
   'notiDaemon/notiDaemon.vala',
   'notiModel/notiModel.vala',
+  'fadedViewport/fadedViewport.vala',
   'notificationWindow/notificationWindow.vala',
   'notification/notification.vala',
   'notificationGroup/notificationGroup.vala',

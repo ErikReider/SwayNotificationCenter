@@ -1,15 +1,15 @@
 namespace SwayNotificationCenter {
     [GtkTemplate (ui = "/org/erikreider/sway-notification-center/controlCenter/controlCenter.ui")]
     public class ControlCenter : Gtk.ApplicationWindow {
-
         [GtkChild]
         unowned Gtk.Box notifications_box;
         [GtkChild]
-        unowned Gtk.ScrolledWindow scrolled_window;
-        [GtkChild]
         unowned Gtk.Stack stack;
         [GtkChild]
-        unowned Gtk.ListBox list_box;
+        unowned Gtk.ScrolledWindow scrolled_window;
+        FadedViewport viewport = new FadedViewport (60);
+        Gtk.ListBox list_box = new Gtk.ListBox ();
+
         [GtkChild]
         unowned Gtk.Box box;
 
@@ -46,6 +46,18 @@ namespace SwayNotificationCenter {
             this.noti_daemon = noti_daemon;
 
             this.swaync_daemon.reloading_css.connect (reload_notifications_style);
+
+            viewport.set_visible (true);
+            viewport.set_vexpand (true);
+            viewport.set_shadow_type (Gtk.ShadowType.NONE);
+            scrolled_window.add (viewport);
+
+            list_box.set_visible (true);
+            list_box.set_valign (Gtk.Align.END);
+            list_box.set_selection_mode (Gtk.SelectionMode.NONE);
+            list_box.set_activate_on_single_click (false);
+            list_box.get_style_context ().add_class ("control-center-list");
+            viewport.add (list_box);
 
             if (swaync_daemon.use_layer_shell) {
                 if (!GtkLayerShell.is_supported ()) {

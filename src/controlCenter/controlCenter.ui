@@ -35,24 +35,7 @@
                     <property name="can-focus">True</property>
                     <property name="hscrollbar-policy">never</property>
                     <child>
-                      <object class="GtkViewport" id="viewport">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="vexpand">True</property>
-                        <property name="shadow-type">none</property>
-                        <child>
-                          <object class="GtkListBox" id="list_box">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="valign">end</property>
-                            <property name="selection-mode">none</property>
-                            <property name="activate-on-single-click">False</property>
-                            <style>
-                              <class name="control-center-list"/>
-                            </style>
-                          </object>
-                        </child>
-                      </object>
+                      <placeholder/>
                     </child>
                   </object>
                   <packing>

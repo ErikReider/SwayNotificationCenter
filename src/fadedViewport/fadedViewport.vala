@@ -1,41 +1,22 @@
 namespace SwayNotificationCenter {
     public class FadedViewport : Gtk.Viewport {
-        private int fade_height;
+        private int fade_height = 30;
+
+        private FadedViewportChild container;
 
         public FadedViewport (int fade_height) {
-            this.fade_height = fade_height;
+            if (fade_height > 0) this.fade_height = fade_height;
+            this.container = new FadedViewportChild (this.fade_height);
+
+            base.add (container);
         }
 
-        public override void size_allocate (Gtk.Allocation allocation) {
-            base.size_allocate (allocation);
+        public override void add (Gtk.Widget widget) {
+            container.add (widget);
+        }
 
-            unowned Gtk.Widget ? child = get_child ();
-
-            if (child == null) return;
-
-            uint border_width = get_border_width ();
-
-            if (child.get_visible ()) {
-                int height;
-                child.get_preferred_height_for_width (allocation.width,
-                                                       out height, null);
-
-                // TODO: Compensate for fade offset
-                Gtk.Allocation alloc = Gtk.Allocation ();
-                alloc.x = allocation.x + (int) border_width;
-                alloc.y = (int) (allocation.y + border_width);
-                alloc.width = allocation.width - 2 * (int) border_width;
-                alloc.height = height - 2 * (int) border_width;
-
-                child.size_allocate (alloc);
-
-                if (get_realized ()) {
-                    child.show ();
-                }
-            }
-            if (get_realized ()) {
-                child.set_child_visible (true);
-            }
+        public override void remove (Gtk.Widget widget) {
+            container.remove (widget);
         }
 
         public override bool draw (Cairo.Context cr) {
@@ -74,11 +55,103 @@ namespace SwayNotificationCenter {
             cr.set_operator (Cairo.Operator.DEST_OUT);
             cr.fill ();
             cr.restore ();
-            
+
             cr.pop_group_to_source ();
             cr.paint ();
             cr.restore ();
             return true;
         }
+    }
+}
+
+private class FadedViewportChild : Gtk.Container {
+    private int y_padding;
+
+    private unowned Gtk.Widget _child;
+
+    public FadedViewportChild (int y_padding) {
+        base.set_has_window (false);
+        base.set_can_focus (true);
+        base.set_redraw_on_allocate (false);
+
+        this.y_padding = (int) (y_padding * 0.5);
+        this._child = null;
+
+        this.show ();
+    }
+
+    public override void add (Gtk.Widget widget) {
+        if (this._child == null) {
+            widget.set_parent (this);
+            this._child = widget;
+        }
+    }
+
+    public override void remove (Gtk.Widget widget) {
+        if (this._child == widget) {
+            widget.unparent ();
+            this._child = null;
+            if (this.get_visible () && widget.get_visible ()) {
+                this.queue_resize_no_redraw ();
+            }
+        }
+    }
+
+    public override void forall_internal (bool include_internals, Gtk.Callback callback) {
+        if (this._child != null) {
+            callback (this._child);
+        }
+    }
+
+    public override Gtk.SizeRequestMode get_request_mode () {
+        if (this._child != null) {
+            return this._child.get_request_mode ();
+        } else {
+            return Gtk.SizeRequestMode.HEIGHT_FOR_WIDTH;
+        }
+    }
+
+    public override void size_allocate (Gtk.Allocation allocation) {
+        Gtk.Allocation child_allocation = Gtk.Allocation ();
+        uint border_width = this.get_border_width ();
+        if (this._child != null && this._child.get_visible ()) {
+            child_allocation.x = allocation.x + (int) border_width;
+            child_allocation.y = allocation.y + y_padding + (int) border_width;
+            child_allocation.width = allocation.width - 2 * (int) border_width;
+            child_allocation.height = allocation.height + y_padding * 2
+                                      - 2 * (int) border_width;
+            this._child.size_allocate (child_allocation);
+            if (this.get_realized ()) {
+                this._child.show ();
+            }
+        }
+        if (this.get_realized ()) {
+            if (this._child != null) {
+                this._child.set_child_visible (true);
+            }
+        }
+        base.size_allocate (allocation);
+    }
+
+    public override void get_preferred_height_for_width (int width,
+                                                         out int minimum_height,
+                                                         out int natural_height) {
+        minimum_height = 0;
+        natural_height = 0;
+
+        if (_child != null && _child.get_visible ()) {
+            _child.get_preferred_height_for_width (width,
+                                                   out minimum_height,
+                                                   out natural_height);
+
+            minimum_height += y_padding * 2;
+            natural_height += y_padding * 2;
+        }
+
+    }
+
+    public override bool draw (Cairo.Context cr) {
+        base.draw (cr);
+        return false;
     }
 }

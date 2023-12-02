@@ -7,7 +7,7 @@ namespace SwayNotificationCenter {
         unowned Gtk.Stack stack;
         [GtkChild]
         unowned Gtk.ScrolledWindow scrolled_window;
-        FadedViewport viewport = new FadedViewport (60);
+        FadedViewport viewport = new FadedViewport (20);
         Gtk.ListBox list_box = new Gtk.ListBox ();
 
         [GtkChild]

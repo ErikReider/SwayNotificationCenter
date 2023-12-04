@@ -427,19 +427,37 @@ namespace SwayNotificationCenter {
             box.set_valign (align_y);
 
             list_box.set_valign (list_align);
-            list_box.set_sort_func ((w1, w2) => {
-                var a_time = ((NotificationGroup) w1).get_time ();
-                var b_time = ((NotificationGroup) w2).get_time ();
-                if (a_time < 0 || b_time < 0)return 0;
-                // Sort the list in reverse if needed
-                if (a_time == b_time)return 0;
-                int val = list_reverse ? 1 : -1;
-                return a_time > b_time ? val : val * -1;
-            });
+            list_box.set_sort_func (list_box_sort_func);
 
             // Always set the size request in all events.
             box.set_size_request (ConfigModel.instance.control_center_width,
                                   ConfigModel.instance.control_center_height);
+        }
+
+        /**
+         * Returns < 0 if row1 should be before row2, 0 if they are equal
+         * and > 0 otherwise
+         */
+        private int list_box_sort_func (Gtk.ListBoxRow row1, Gtk.ListBoxRow row2) {
+            int val = list_reverse ? 1 : -1;
+
+            var a_group = (NotificationGroup) row1;
+            var b_group = (NotificationGroup) row2;
+
+            // Check urgency before time
+            var a_urgency = a_group.get_is_urgent ();
+            var b_urgency = b_group.get_is_urgent ();
+            if (a_urgency != b_urgency) {
+                return a_urgency ? val : val * -1;
+            }
+
+            // Check time
+            var a_time = a_group.get_time ();
+            var b_time = b_group.get_time ();
+            if (a_time < 0 || b_time < 0) return 0;
+            // Sort the list in reverse if needed
+            if (a_time == b_time) return 0;
+            return a_time > b_time ? val : val * -1;
         }
 
         private void scroll_to_start (bool reverse) {

@@ -35,19 +35,37 @@
 }
 
 /* Uncomment to enable specific urgency colors
-.low {
+.notification.low {
   background: yellow;
   padding: 6px;
   border-radius: 12px;
 }
 
-.normal {
+.notification.normal {
   background: green;
   padding: 6px;
   border-radius: 12px;
 }
 
-.critical {
+.notification.critical {
+  background: red;
+  padding: 6px;
+  border-radius: 12px;
+}
+
+.notification-group.low {
+  background: yellow;
+  padding: 6px;
+  border-radius: 12px;
+}
+
+.notification-group.normal {
+  background: green;
+  padding: 6px;
+  border-radius: 12px;
+}
+
+.notification-group.critical {
   background: red;
   padding: 6px;
   border-radius: 12px;

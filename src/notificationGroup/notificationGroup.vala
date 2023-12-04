@@ -1,5 +1,7 @@
 namespace SwayNotificationCenter {
     public class NotificationGroup : Gtk.ListBoxRow {
+        const string STYLE_CLASS_URGENT = "critical";
+
         public string name_id;
 
         private ExpandableGroup group;
@@ -8,6 +10,9 @@ namespace SwayNotificationCenter {
         private Gtk.GestureMultiPress gesture;
         private bool gesture_down = false;
         private bool gesture_in = false;
+
+        private HashTable<uint32, bool> urgent_notifications
+            = new HashTable<uint32, bool> (direct_hash, direct_equal);
 
         public signal void on_expand_change (bool state);
 
@@ -141,6 +146,13 @@ namespace SwayNotificationCenter {
         }
 
         public void add_notification (Notification noti) {
+            if (noti.param.urgency == UrgencyLevels.CRITICAL) {
+                urgent_notifications.insert (noti.param.applied_id, true);
+                unowned Gtk.StyleContext ctx = get_style_context ();
+                if (!ctx.has_class (STYLE_CLASS_URGENT)) {
+                    ctx.add_class (STYLE_CLASS_URGENT);
+                }
+            }
             group.add (noti);
             if (!single_notification ()) {
                 group.set_sensitive (false);
@@ -148,6 +160,10 @@ namespace SwayNotificationCenter {
         }
 
         public void remove_notification (Notification noti) {
+            urgent_notifications.remove (noti.param.applied_id);
+            if (urgent_notifications.length == 0) {
+                get_style_context ().remove_class (STYLE_CLASS_URGENT);
+            }
             group.remove (noti);
             if (single_notification ()) {
                 set_expanded (false);
@@ -163,6 +179,10 @@ namespace SwayNotificationCenter {
             return ((Notification) group.widgets.last ().data).param.time;
         }
 
+        public bool get_is_urgent () {
+            return urgent_notifications.length > 0;
+        }
+
         public uint get_num_notifications () {
             return group.widgets.length ();
         }
@@ -172,6 +192,7 @@ namespace SwayNotificationCenter {
         }
 
         public void close_all_notifications () {
+            urgent_notifications.remove_all ();
             foreach (unowned Gtk.Widget widget in group.widgets) {
                 var noti = (Notification) widget;
                 if (noti != null) noti.close_notification (false);

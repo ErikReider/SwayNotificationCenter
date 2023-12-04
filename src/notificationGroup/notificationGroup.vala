@@ -53,6 +53,7 @@ namespace SwayNotificationCenter {
             close_all_button.set_valign (Gtk.Align.CENTER);
             close_all_button.clicked.connect (() => {
                 close_all_notifications ();
+                on_expand_change (false);
             });
             button_box.add (close_all_button);
 

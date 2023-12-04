@@ -57,6 +57,7 @@ Post your setup here: [Config flex 💪](https://github.com/ErikReider/SwayNotif
 
 ## Features
 
+- Grouped notifications
 - Keyboard shortcuts
 - Notification body markup with image support
 - Inline replies

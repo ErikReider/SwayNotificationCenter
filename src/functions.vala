@@ -36,10 +36,6 @@ namespace SwayNotificationCenter {
             } else if (Gtk.IconTheme.get_default ().has_icon (path)) {
                 // Try as a freedesktop.org-compliant icon theme
                 img.set_from_icon_name (path, Notification.icon_size);
-            } else {
-                img.set_from_icon_name (
-                    "image-missing",
-                    Notification.icon_size);
             }
         }
 

@@ -651,6 +651,8 @@ namespace SwayNotificationCenter {
         }
 
         private void set_icon () {
+            img.clear ();
+
             var image_visibility = ConfigModel.instance.image_visibility;
             if (image_visibility == ImageVisibility.NEVER) {
                 img.set_visible (false);
@@ -682,7 +684,9 @@ namespace SwayNotificationCenter {
             } else if (param.icon_data.is_initialized) {
                 Functions.set_image_data (param.icon_data, img,
                                           notification_icon_size);
-            } else {
+            }
+
+            if (img.storage_type == Gtk.ImageType.EMPTY) {
                 // Get the app icon
                 Icon ? icon = null;
                 if (param.desktop_entry != null) {

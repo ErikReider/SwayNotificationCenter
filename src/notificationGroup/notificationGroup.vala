@@ -1,6 +1,7 @@
 namespace SwayNotificationCenter {
     public class NotificationGroup : Gtk.ListBoxRow {
         const string STYLE_CLASS_URGENT = "critical";
+        const string STYLE_CLASS_COLLAPSED = "collapsed";
 
         public string name_id;
 
@@ -89,7 +90,13 @@ namespace SwayNotificationCenter {
 
             group = new ExpandableGroup (Constants.ANIMATION_DURATION, (state) => {
                 revealer.set_reveal_child (state);
+
+                // Change CSS Class
+                if (parent != null) {
+                    set_classes ();
+                }
             });
+            set_classes ();
             box.add (group);
             add (box);
 
@@ -144,6 +151,16 @@ namespace SwayNotificationCenter {
                     gesture_down = false;
                 }
             });
+        }
+
+        private void set_classes () {
+            unowned Gtk.StyleContext ctx = get_style_context ();
+            ctx.remove_class (STYLE_CLASS_COLLAPSED);
+            if (!group.is_expanded) {
+                if (!ctx.has_class (STYLE_CLASS_COLLAPSED)) {
+                    ctx.add_class (STYLE_CLASS_COLLAPSED);
+                }
+            }
         }
 
         /// Returns if there's more than one notification
@@ -255,7 +272,7 @@ namespace SwayNotificationCenter {
 
     private class ExpandableGroup : Gtk.Container {
         const int NUM_STACKED_NOTIFICATIONS = 3;
-        const int COLLAPSED_NOTIFICATION_OFFSET = 6;
+        const int COLLAPSED_NOTIFICATION_OFFSET = 8;
 
         public bool is_expanded { get; private set; default = true; }
 

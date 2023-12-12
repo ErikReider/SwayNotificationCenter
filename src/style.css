@@ -20,6 +20,13 @@
 .notification-group {
 }
 
+/* Set lower stacked notifications opacity to 0 */
+.notification-group.collapsed .notification-row:not(:last-child) .notification-action *,
+.notification-group.collapsed .notification-row:not(:last-child) .notification-default-action * {
+  transition: opacity 400ms ease-in-out;
+  opacity: 0;
+}
+
 .notification-group-buttons,
 .notification-group-headers {
   margin: 0 16px;

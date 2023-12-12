@@ -83,6 +83,7 @@ namespace SwayNotificationCenter {
             this.value_from = from;
             this.value_to = to;
             this.value = from;
+            this.is_done = false;
 
             unowned Gtk.Settings ? gsettings = Gtk.Settings.get_default ();
             bool animations_enabled =

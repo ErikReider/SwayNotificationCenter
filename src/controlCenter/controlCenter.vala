@@ -16,6 +16,8 @@ namespace SwayNotificationCenter {
         unowned NotificationGroup ? expanded_group = null;
         private double fade_animation_progress = 1.0;
         private Animation ? notification_fade_animation;
+        private double scroll_animation_progress = 1.0;
+        private Animation ? scroll_animation;
 
         HashTable<uint32, unowned NotificationGroup> noti_groups_id =
             new HashTable<uint32, unowned NotificationGroup> (direct_hash, direct_equal);
@@ -187,24 +189,47 @@ namespace SwayNotificationCenter {
 
             notification_fade_animation = new Animation (this, Constants.ANIMATION_DURATION,
                                                          Animation.ease_in_out_cubic,
-                                                         animation_value_cb,
-                                                         animation_done_cb);
+                                                         fade_animation_value_cb,
+                                                         fade_animation_done_cb);
+            scroll_animation = new Animation (this, Constants.ANIMATION_DURATION,
+                                              Animation.ease_in_out_cubic,
+                                              scroll_animation_value_cb,
+                                              scroll_animation_done_cb);
             list_box.draw.connect (list_box_draw_cb);
         }
 
-        void animation_value_cb (double progress) {
+        void fade_animation_value_cb (double progress) {
             this.fade_animation_progress = progress;
 
             this.queue_draw ();
         }
 
-        void animation_done_cb () {
-            notification_fade_animation.dispose ();
-        }
+        void fade_animation_done_cb () {}
 
-        void animate (double to) {
+        void fade_animate (double to) {
             notification_fade_animation.stop ();
             notification_fade_animation.start (fade_animation_progress, to);
+        }
+
+        void scroll_animation_value_cb (double progress) {
+            this.scroll_animation_progress = progress;
+
+            // Scroll to the top of the group
+            if (scroll_animation_progress > 0) {
+                scrolled_window.vadjustment.set_value (scroll_animation_progress);
+            }
+        }
+
+        void scroll_animation_done_cb () {
+            int y = expanded_group.get_relative_Y (list_box);
+            if (y > 0) {
+                scrolled_window.vadjustment.set_value (y);
+            }
+        }
+
+        void scroll_animate (double to) {
+            scroll_animation.stop ();
+            scroll_animation.start (scroll_animation_progress, to);
         }
 
         /// Fade non-expanded groups when one group is expanded
@@ -603,7 +628,7 @@ namespace SwayNotificationCenter {
                 }
                 if (expanded_group == group) {
                     expanded_group = null;
-                    animate (1);
+                    fade_animate (1);
                 }
                 group.destroy ();
             }
@@ -650,11 +675,15 @@ namespace SwayNotificationCenter {
                 // Collapse other groups on expand
                 group.on_expand_change.connect ((expanded) => {
                     if (!expanded) {
-                        animate (1);
+                        fade_animate (1);
                         return;
                     }
                     expanded_group = group;
-                    animate (0);
+                    fade_animate (0);
+                    int y = expanded_group.get_relative_Y (list_box);
+                    if (y > 0) {
+                        scroll_animate (y);
+                    }
                     foreach (unowned Gtk.Widget child in list_box.get_children ()) {
                         NotificationGroup g = (NotificationGroup) child;
                         if (g != null && g != group) g.set_expanded (false);

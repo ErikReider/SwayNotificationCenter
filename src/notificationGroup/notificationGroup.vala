@@ -232,7 +232,8 @@ namespace SwayNotificationCenter {
                     app_icon.set_from_gicon (icon, Gtk.IconSize.LARGE_TOOLBAR);
                     app_icon.show ();
                 } else {
-                    app_icon.set_from_icon_name ("application-x-executable-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
+                    app_icon.set_from_icon_name ("application-x-executable-symbolic",
+                                                 Gtk.IconSize.LARGE_TOOLBAR);
                     // app_icon.hide ();
                 }
             } else {
@@ -242,6 +243,12 @@ namespace SwayNotificationCenter {
                 var noti = (Notification) widget;
                 if (noti != null) noti.set_time ();
             }
+        }
+
+        public int get_relative_Y (Gtk.Widget parent) {
+            int dest_y;
+            translate_coordinates (parent, 0, 0, null, out dest_y);
+            return dest_y;
         }
     }
 

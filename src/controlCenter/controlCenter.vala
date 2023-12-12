@@ -731,10 +731,10 @@ namespace SwayNotificationCenter {
             foreach (var c in list_box.get_children ()) {
                 NotificationGroup group = (NotificationGroup) c;
                 if (group != null) {
-                    group.forall ((widget) => {
-                        Notification noti = (Notification) c;
+                    foreach (unowned var widget in group.get_notifications ()) {
+                        Notification noti = (Notification) widget;
                         noti.reload_style_context ();
-                    });
+                    }
                 }
             }
         }

@@ -17,6 +17,38 @@
 
 @define-color bg-selected rgb(0, 128, 255);
 
+.notification-group {
+}
+
+/* Set lower stacked notifications opacity to 0 */
+.notification-group.collapsed
+  .notification-row:not(:last-child)
+  .notification-action
+  *,
+.notification-group.collapsed
+  .notification-row:not(:last-child)
+  .notification-default-action
+  * {
+  transition: opacity 400ms ease-in-out;
+  opacity: 0;
+}
+
+.notification-group-buttons,
+.notification-group-headers {
+  margin: 0 16px;
+  color: @text-color;
+}
+
+.notification-group-icon {
+}
+
+.notification-group > widget {
+}
+.notification-group.collapsed:hover .notification-default-action,
+.notification-group.collapsed:hover .notification-action {
+  background-color: @noti-bg-hover;
+}
+
 .notification-row {
   outline: none;
 }
@@ -35,19 +67,37 @@
 }
 
 /* Uncomment to enable specific urgency colors
-.low {
+.notification.low {
   background: yellow;
   padding: 6px;
   border-radius: 12px;
 }
 
-.normal {
+.notification.normal {
   background: green;
   padding: 6px;
   border-radius: 12px;
 }
 
-.critical {
+.notification.critical {
+  background: red;
+  padding: 6px;
+  border-radius: 12px;
+}
+
+.notification-group.low {
+  background: yellow;
+  padding: 6px;
+  border-radius: 12px;
+}
+
+.notification-group.normal {
+  background: green;
+  padding: 6px;
+  border-radius: 12px;
+}
+
+.notification-group.critical {
   background: red;
   padding: 6px;
   border-radius: 12px;
@@ -151,6 +201,7 @@
 }
 
 .image {
+  -gtk-icon-effect: none;
 }
 
 .body-image {

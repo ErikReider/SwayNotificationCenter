@@ -689,17 +689,8 @@ namespace SwayNotificationCenter {
             if (img.storage_type == Gtk.ImageType.EMPTY) {
                 // Get the app icon
                 Icon ? icon = null;
-                if (param.desktop_entry != null) {
-                    string entry = param.desktop_entry;
-                    entry = entry.replace (".desktop", "");
-                    DesktopAppInfo entry_info = new DesktopAppInfo (
-                        "%s.desktop".printf (entry));
-                    // Checks if the .desktop file actually exists or not
-                    if (entry_info is DesktopAppInfo) {
-                        icon = entry_info.get_icon ();
-                    }
-                }
-                if (icon != null) {
+                if (param.desktop_app_info != null
+                    && (icon = param.desktop_app_info.get_icon ()) != null) {
                     img.set_from_gicon (icon, icon_size);
                 } else if (image_visibility == ImageVisibility.ALWAYS) {
                     // Default icon

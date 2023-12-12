@@ -115,6 +115,12 @@ namespace SwayNotificationCenter {
 
         public Array<Action> actions { get; set; }
 
+        public DesktopAppInfo ? desktop_app_info = null;
+
+        public string name_id;
+
+        public string display_name;
+
         public NotifyParams (uint32 applied_id,
                              string app_name,
                              uint32 replaces_id,
@@ -139,6 +145,32 @@ namespace SwayNotificationCenter {
             parse_hints ();
 
             parse_actions (actions);
+
+            // Try to get the desktop file
+            string[] entries = {};
+            if (desktop_entry != null) entries += desktop_entry.replace (".desktop", "");
+            if (app_name != null) entries += app_name.replace (".desktop", "");
+            foreach (string entry in entries) {
+                var app_info = new DesktopAppInfo ("%s.desktop".printf (entry));
+                // Checks if the .desktop file actually exists or not
+                if (app_info is DesktopAppInfo) {
+                    desktop_app_info = app_info;
+                    break;
+                }
+            }
+
+            // Set name_id
+            this.name_id = this.desktop_entry ?? this.app_name ?? "";
+
+            // Set display_name and make the first letter upper case
+            string ? display_name = this.desktop_entry ?? this.app_name;
+            if (desktop_app_info != null) {
+                display_name = desktop_app_info.get_display_name ();
+            }
+            if (display_name == null || display_name.length == 0) {
+                display_name = "Unknown";
+            }
+            this.display_name = display_name.splice (0, 1, display_name.up (1));
         }
 
         private void parse_hints () {

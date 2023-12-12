@@ -175,7 +175,8 @@ namespace SwayNotificationCenter {
 
             key_press_event.connect (key_press_event_cb);
 
-            // Switches the stack page depending on the
+            stack.set_visible_child_name (STACK_PLACEHOLDER_PAGE);
+            // Switches the stack page depending on the amount of notifications
             list_box.add.connect (() => {
                 stack.set_visible_child_name (STACK_NOTIFICATIONS_PAGE);
             });

@@ -112,7 +112,7 @@ namespace SwayNotificationCenter {
                 if (!gesture_down) return;
                 gesture_down = false;
                 if (gesture_in) {
-                    bool single_noti = single_notification ();
+                    bool single_noti = only_single_notification ();
                     if (!group.is_expanded && !single_noti) {
                         group.set_expanded (true);
                         on_expand_change (true);
@@ -147,14 +147,20 @@ namespace SwayNotificationCenter {
         }
 
         /// Returns if there's more than one notification
-        private bool single_notification () {
+        public bool only_single_notification () {
             unowned Gtk.Widget ? widget = group.widgets.nth_data (1);
             return widget == null;
         }
 
         public void set_expanded (bool state) {
             group.set_expanded (state);
-            group.set_sensitive (single_notification () || group.is_expanded);
+            group.set_sensitive (only_single_notification () || group.is_expanded);
+        }
+
+        public bool toggle_expanded () {
+            bool state = !group.is_expanded;
+            set_expanded (state);
+            return state;
         }
 
         public void add_notification (Notification noti) {
@@ -166,7 +172,7 @@ namespace SwayNotificationCenter {
                 }
             }
             group.add (noti);
-            if (!single_notification ()) {
+            if (!only_single_notification ()) {
                 group.set_sensitive (false);
             }
         }
@@ -177,13 +183,17 @@ namespace SwayNotificationCenter {
                 get_style_context ().remove_class (STYLE_CLASS_URGENT);
             }
             group.remove (noti);
-            if (single_notification ()) {
+            if (only_single_notification ()) {
                 set_expanded (false);
             }
         }
 
         public List<weak Gtk.Widget> get_notifications () {
             return group.widgets.copy ();
+        }
+
+        public unowned Notification ? get_latest_notification () {
+            return (Notification ?) group.widgets.last ().data;
         }
 
         public int64 get_time () {

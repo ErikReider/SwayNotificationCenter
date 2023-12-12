@@ -21,8 +21,14 @@
 }
 
 /* Set lower stacked notifications opacity to 0 */
-.notification-group.collapsed .notification-row:not(:last-child) .notification-action *,
-.notification-group.collapsed .notification-row:not(:last-child) .notification-default-action * {
+.notification-group.collapsed
+  .notification-row:not(:last-child)
+  .notification-action
+  *,
+.notification-group.collapsed
+  .notification-row:not(:last-child)
+  .notification-default-action
+  * {
   transition: opacity 400ms ease-in-out;
   opacity: 0;
 }
@@ -37,6 +43,10 @@
 }
 
 .notification-group > widget {
+}
+.notification-group.collapsed:hover .notification-default-action,
+.notification-group.collapsed:hover .notification-action {
+  background-color: @noti-bg-hover;
 }
 
 .notification-row {

@@ -185,6 +185,7 @@ namespace SwayNotificationCenter {
             group.remove (noti);
             if (only_single_notification ()) {
                 set_expanded (false);
+                on_expand_change (false);
             }
         }
 

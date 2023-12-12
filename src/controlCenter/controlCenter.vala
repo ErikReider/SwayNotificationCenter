@@ -676,9 +676,13 @@ namespace SwayNotificationCenter {
                 group.on_expand_change.connect ((expanded) => {
                     if (!expanded) {
                         fade_animate (1);
+                        foreach (unowned Gtk.Widget child in list_box.get_children ()) {
+                            child.set_sensitive (true);
+                        }
                         return;
                     }
                     expanded_group = group;
+                    expanded_group.set_sensitive (true);
                     fade_animate (0);
                     int y = expanded_group.get_relative_Y (list_box);
                     if (y > 0) {
@@ -686,7 +690,12 @@ namespace SwayNotificationCenter {
                     }
                     foreach (unowned Gtk.Widget child in list_box.get_children ()) {
                         NotificationGroup g = (NotificationGroup) child;
-                        if (g != null && g != group) g.set_expanded (false);
+                        if (g != null && g != group) {
+                            g.set_expanded (false);
+                            if (g.only_single_notification ()) {
+                                g.set_sensitive (false);
+                            }
+                        }
                     }
                 });
                 if (param.name_id.length > 0) {

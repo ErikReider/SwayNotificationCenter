@@ -221,7 +221,7 @@ namespace SwayNotificationCenter {
         }
 
         void scroll_animation_done_cb () {
-            int y = expanded_group.get_relative_Y (list_box);
+            int y = expanded_group.get_relative_y (list_box);
             if (y > 0) {
                 scrolled_window.vadjustment.set_value (y);
             }
@@ -684,7 +684,7 @@ namespace SwayNotificationCenter {
                     expanded_group = group;
                     expanded_group.set_sensitive (true);
                     fade_animate (0);
-                    int y = expanded_group.get_relative_Y (list_box);
+                    int y = expanded_group.get_relative_y (list_box);
                     if (y > 0) {
                         scroll_animate (y);
                     }

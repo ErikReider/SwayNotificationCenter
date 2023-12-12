@@ -246,7 +246,7 @@ namespace SwayNotificationCenter {
             }
         }
 
-        public int get_relative_Y (Gtk.Widget parent) {
+        public int get_relative_y (Gtk.Widget parent) {
             int dest_y;
             translate_coordinates (parent, 0, 0, null, out dest_y);
             return dest_y;

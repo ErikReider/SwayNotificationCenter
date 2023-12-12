@@ -17,6 +17,21 @@
 
 @define-color bg-selected rgb(0, 128, 255);
 
+.notification-group {
+}
+
+.notification-group-buttons,
+.notification-group-headers {
+  margin: 0 16px;
+  color: @text-color;
+}
+
+.notification-group-icon {
+}
+
+.notification-group > widget {
+}
+
 .notification-row {
   outline: none;
 }
@@ -169,6 +184,7 @@
 }
 
 .image {
+  -gtk-icon-effect: none;
 }
 
 .body-image {

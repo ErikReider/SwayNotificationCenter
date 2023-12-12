@@ -6,6 +6,8 @@ namespace SwayNotificationCenter {
 
         private ExpandableGroup group;
         private Gtk.Revealer revealer = new Gtk.Revealer ();
+        private Gtk.Image app_icon;
+        private Gtk.Label app_label;
 
         private Gtk.GestureMultiPress gesture;
         private bool gesture_down = false;
@@ -28,9 +30,9 @@ namespace SwayNotificationCenter {
 
             // Add top controls
             Gtk.Box controls_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 4);
-            Gtk.Box button_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 4);
-            button_box.set_halign (Gtk.Align.END);
-            button_box.get_style_context ().add_class ("notification-group-buttons");
+            Gtk.Box end_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 4);
+            end_box.set_halign (Gtk.Align.END);
+            end_box.get_style_context ().add_class ("notification-group-buttons");
 
             // Collapse button
             Gtk.Button collapse_button = new Gtk.Button.from_icon_name (
@@ -45,7 +47,7 @@ namespace SwayNotificationCenter {
                 set_expanded (false);
                 on_expand_change (false);
             });
-            button_box.add (collapse_button);
+            end_box.add (collapse_button);
 
             // Close all button
             Gtk.Button close_all_button = new Gtk.Button.from_icon_name (
@@ -60,16 +62,26 @@ namespace SwayNotificationCenter {
                 close_all_notifications ();
                 on_expand_change (false);
             });
-            button_box.add (close_all_button);
+            end_box.add (close_all_button);
 
             // Group name label
-            Gtk.Label app_label = new Gtk.Label (display_name);
+            Gtk.Box start_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 4);
+            start_box.set_halign (Gtk.Align.START);
+            start_box.get_style_context ().add_class ("notification-group-headers");
+            // App Icon
+            app_icon = new Gtk.Image ();
+            app_icon.set_valign (Gtk.Align.CENTER);
+            app_icon.get_style_context ().add_class ("notification-group-icon");
+            start_box.add (app_icon);
+            // App Label
+            app_label = new Gtk.Label (display_name);
             app_label.xalign = 0;
             app_label.get_style_context ().add_class ("title-1");
             app_label.get_style_context ().add_class ("notification-group-header");
+            start_box.add (app_label);
 
-            controls_box.pack_start (app_label);
-            controls_box.pack_end (button_box);
+            controls_box.pack_start (start_box);
+            controls_box.pack_end (end_box);
             revealer.add (controls_box);
             box.add (revealer);
 
@@ -199,7 +211,23 @@ namespace SwayNotificationCenter {
             }
         }
 
-        public void update_time () {
+        public void update () {
+            if (!is_empty ()) {
+                unowned Notification first = (Notification) group.widgets.first ().data;
+                unowned NotifyParams param = first.param;
+                // Get the app icon
+                Icon ? icon = null;
+                if (param.desktop_app_info != null
+                    && (icon = param.desktop_app_info.get_icon ()) != null) {
+                    app_icon.set_from_gicon (icon, Gtk.IconSize.LARGE_TOOLBAR);
+                    app_icon.show ();
+                } else {
+                    app_icon.set_from_icon_name ("application-x-executable-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
+                    // app_icon.hide ();
+                }
+            } else {
+                // app_icon.hide ();
+            }
             foreach (unowned Gtk.Widget widget in group.widgets) {
                 var noti = (Notification) widget;
                 if (noti != null) noti.set_time ();

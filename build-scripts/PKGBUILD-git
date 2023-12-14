@@ -2,8 +2,8 @@
 # Maintainer: Erik Reider <erik.reider@protonmail.com>
 pkgname=swaync-git
 _pkgname=swaync
-pkgver=r448.ba4a266
-pkgrel=2
+pkgver=r488.624e467
+pkgrel=3
 pkgdesc="A simple notification daemon with a GTK panel for checking previous notifications like other DEs"
 url="https://github.com/ErikReider/SwayNotificationCenter"
 arch=(
@@ -12,7 +12,7 @@ arch=(
     'armv7h'  # ARM v7 hardfloat
 )
 license=('GPL3')
-depends=("gtk3" "gtk-layer-shell" "dbus" "glib2" "gobject-introspection" "libgee" "json-glib" "libhandy" "libpulse" )
+depends=("gtk3" "gtk-layer-shell" "dbus" "glib2" "gobject-introspection" "libgee" "json-glib" "libhandy" "libpulse" "gvfs" "libnotify")
 conflicts=("swaync" "swaync-client")
 provides=("swaync" "swaync-client" "notification-daemon")
 makedepends=(vala meson git scdoc sassc)

@@ -3,7 +3,7 @@
 
 Name:       {{{ git_dir_name }}}
 Version:    0.9.0
-Release:    1%{?dist}
+Release:    2%{?dist}
 Summary:    Notification daemon with GTK GUI
 Provides:   desktop-notification-daemon
 Provides:   sway-notification-center = %{version}-%{release}
@@ -30,6 +30,8 @@ BuildRequires:  systemd-devel
 BuildRequires:  systemd
 BuildRequires:  sassc
 
+Requires:       gvfs
+Requires:       libnotify
 Requires:       dbus
 %{?systemd_requires}
 

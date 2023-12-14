@@ -17,21 +17,19 @@ namespace SwayNotificationCenter {
         public static void set_image_path (owned string path,
                                            Gtk.Image img,
                                            int icon_size,
+                                           int radius,
                                            bool file_exists) {
             if ((path.length > 6 && path.slice (0, 7) == "file://") || file_exists) {
                 // Try as a URI (file:// is the only URI schema supported right now)
                 try {
                     if (!file_exists) path = path.slice (7, path.length);
 
-                    var pixbuf = new Gdk.Pixbuf.from_file_at_scale (
-                        path,
-                        icon_size * img.scale_factor,
-                        icon_size * img.scale_factor,
-                        true);
-                    var surface = Gdk.cairo_surface_create_from_pixbuf (
-                        pixbuf,
-                        img.scale_factor,
-                        img.get_window ());
+                    var pixbuf = new Gdk.Pixbuf.from_file (path);
+                    var surface = scale_round_pixbuf (pixbuf,
+                                                      icon_size,
+                                                      icon_size,
+                                                      img.scale_factor,
+                                                      radius);
                     img.set_from_surface (surface);
                     return;
                 } catch (Error e) {
@@ -43,7 +41,10 @@ namespace SwayNotificationCenter {
             }
         }
 
-        public static void set_image_data (ImageData data, Gtk.Image img, int icon_size) {
+        public static void set_image_data (ImageData data,
+                                           Gtk.Image img,
+                                           int icon_size,
+                                           int radius) {
             // Rebuild and scale the image
             var pixbuf = new Gdk.Pixbuf.with_unowned_data (data.data,
                                                            Gdk.Colorspace.RGB,
@@ -54,14 +55,11 @@ namespace SwayNotificationCenter {
                                                            data.rowstride,
                                                            null);
 
-            pixbuf = pixbuf.scale_simple (
-                icon_size * img.scale_factor,
-                icon_size * img.scale_factor,
-                Gdk.InterpType.BILINEAR);
-            var surface = Gdk.cairo_surface_create_from_pixbuf (
-                pixbuf,
-                img.scale_factor,
-                img.get_window ());
+            var surface = scale_round_pixbuf (pixbuf,
+                                              icon_size,
+                                              icon_size,
+                                              img.scale_factor,
+                                              radius);
             img.set_from_surface (surface);
         }
 
@@ -212,11 +210,14 @@ namespace SwayNotificationCenter {
         }
 
         /** Scales the pixbuf to fit the given dimensions */
-        public static Gdk.Pixbuf scale_round_pixbuf (Gdk.Pixbuf pixbuf,
+        public static Cairo.Surface scale_round_pixbuf (Gdk.Pixbuf pixbuf,
                                                      int buffer_width,
                                                      int buffer_height,
                                                      int img_scale,
                                                      int radius) {
+            // Limit radii size
+            radius = int.min (radius, int.min (buffer_width / 2, buffer_height / 2));
+
             Cairo.Surface surface = new Cairo.ImageSurface (Cairo.Format.ARGB32,
                                                             buffer_width,
                                                             buffer_height);
@@ -230,7 +231,7 @@ namespace SwayNotificationCenter {
             cr.arc (radius, buffer_height - radius, radius, 90 * DEGREES, 180 * DEGREES);
             cr.arc (radius, radius, radius, 180 * DEGREES, 270 * DEGREES);
             cr.close_path ();
-            cr.set_source_rgb (0, 0, 0);
+            cr.set_source_rgba (0, 0, 0, 0);
             cr.clip ();
             cr.paint ();
 
@@ -261,7 +262,7 @@ namespace SwayNotificationCenter {
             cr.restore ();
 
             scale_surf.finish ();
-            return Gdk.pixbuf_get_from_surface (surface, 0, 0, buffer_width, buffer_height);
+            return surface;
         }
 
         private static void draw_scale_tall (int buffer_width,

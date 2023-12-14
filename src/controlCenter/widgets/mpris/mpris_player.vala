@@ -262,11 +262,15 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                            source.media_player.identity);
                 }
                 if (pixbuf != null) {
-                    pixbuf = Functions.scale_round_pixbuf (pixbuf,
+                    var surface = Functions.scale_round_pixbuf (pixbuf,
                                                            mpris_config.image_size,
                                                            mpris_config.image_size,
                                                            scale,
                                                            mpris_config.image_radius);
+                    pixbuf = Gdk.pixbuf_get_from_surface (surface,
+                                                          0, 0,
+                                                          mpris_config.image_size,
+                                                          mpris_config.image_size);
                     album_art.set_from_pixbuf (pixbuf);
                     album_art.get_style_context ().set_scale (1);
                     return;

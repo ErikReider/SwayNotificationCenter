@@ -98,6 +98,7 @@
           .image {
             /* Notification Primary Image */
             -gtk-icon-effect: none;
+            border-radius: 10px; /* Size in px */
           }
           .summary {
             /* Notification summary/title */

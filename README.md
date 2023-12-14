@@ -238,10 +238,12 @@ See `swaync(5)` man page for more information
 
 To reload the config, you'll need to run `swaync-client --reload-config`
 
-The main CSS style file is located in `/etc/xdg/swaync/style.css`. Copy it over 
-to your `~/.config/swaync/` folder to customize without needing root access. 
+The main CSS style file is located in `/etc/xdg/swaync/style.css`. Copy it over
+to your `~/.config/swaync/` folder to customize without needing root access. For
+more advanced/larger themes, I recommend that you use the SCSS files from source
+and customize them instead. To use the SCSS files, compile with `sassc`.
 
-**Tip**: running swaync with `GTK_DEBUG=interactive swaync` will open a inspector 
+**Tip**: running swaync with `GTK_DEBUG=interactive swaync` will open a inspector
 window that'll allow you to see all of the CSS classes + other information.
 
 ## Toggle Buttons

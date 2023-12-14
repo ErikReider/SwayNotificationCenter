@@ -13,6 +13,8 @@ gnome = import('gnome')
 
 app_resources = []
 
+config_path = join_paths(get_option('sysconfdir'), 'xdg', 'swaync')
+
 subdir('data')
 subdir('src')
 

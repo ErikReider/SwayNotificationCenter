@@ -10,3 +10,26 @@ if compile_schemas.found()
     args: ['--strict', '--dry-run', meson.current_source_dir()]
   )
 endif
+
+# SCSS Dependency
+sassc = find_program('sassc')
+assert(sassc.found())
+
+# SCSS Compilation
+style_css = custom_target(
+  'SCSS Compilation',
+  build_by_default: true,
+  input : 'style/style.scss',
+  output : 'style.css',
+  install: true,
+  install_dir: config_path,
+  command : [
+    sassc,
+    '-t',
+    'expanded',
+    '@INPUT@',
+    '@OUTPUT@'
+  ],
+)
+
+message(style_css.full_path())

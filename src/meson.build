@@ -121,8 +121,6 @@ args = [
   '--pkg=GtkLayerShell-0.1',
 ]
 
-sysconfdir = get_option('sysconfdir')
-
 app_resources += gnome.compile_resources('sway_notification_center-resources',
   'sway_notification_center.gresource.xml',
   c_name: 'sway_notification_center'
@@ -142,8 +140,6 @@ executable('swaync-client',
   install: true,
 )
 
-config_path = join_paths(sysconfdir, 'xdg/swaync')
-
 config_data = configuration_data()
 config_data.set_quoted('JSONPATH', join_paths('/', config_path, 'configSchema.json'))
 config_json = configure_file(
@@ -152,6 +148,5 @@ config_json = configure_file(
   configuration : config_data
 )
 
-install_data('style.css', install_dir : config_path)
 install_data(config_json, install_dir : config_path)
 install_data('configSchema.json', install_dir : config_path)

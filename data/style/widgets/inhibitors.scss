@@ -1,0 +1,16 @@
+.widget-inhibitors {
+  margin: 8px;
+  font-size: 1.5rem;
+}
+.widget-inhibitors > button {
+  font-size: initial;
+  color: #{"@text-color"};
+  text-shadow: none;
+  background: #{"@noti-bg"};
+  border: 1px solid #{"@noti-border-color"};
+  box-shadow: none;
+  border-radius: 12px;
+}
+.widget-inhibitors > button:hover {
+  background: #{"@noti-bg-hover"};
+}

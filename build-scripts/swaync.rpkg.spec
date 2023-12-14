@@ -28,6 +28,7 @@ BuildRequires:  pkgconfig(fish)
 BuildRequires:  pkgconfig(libpulse)
 BuildRequires:  systemd-devel
 BuildRequires:  systemd
+BuildRequires:  sassc
 
 Requires:       dbus
 %{?systemd_requires}

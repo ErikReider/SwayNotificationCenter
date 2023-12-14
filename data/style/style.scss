@@ -1,0 +1,290 @@
+@define-color cc-bg rgba(0, 0, 0, 0.7);
+
+@define-color noti-border-color rgba(255, 255, 255, 0.15);
+@define-color noti-bg rgb(48, 48, 48);
+@define-color noti-bg-darker rgb(38, 38, 38);
+@define-color noti-bg-hover rgb(56, 56, 56);
+@define-color noti-bg-focus rgba(68, 68, 68, 0.6);
+@define-color noti-close-bg rgba(255, 255, 255, 0.1);
+@define-color noti-close-bg-hover rgba(255, 255, 255, 0.15);
+
+@define-color text-color rgb(255, 255, 255);
+@define-color text-color-disabled rgb(150, 150, 150);
+
+@define-color bg-selected rgb(0, 128, 255);
+
+.notification-row {
+  outline: none;
+
+  &:focus,
+  &:hover {
+    background: #{"@noti-bg-focus"};
+  }
+  .notification-background {
+    .close-button {
+      /* The notification Close Button */
+      background: #{"@noti-close-bg"};
+      color: #{"@text-color"};
+      text-shadow: none;
+      padding: 0;
+      border-radius: 100%;
+      margin-top: 10px;
+      margin-right: 16px;
+      box-shadow: none;
+      border: none;
+      min-width: 24px;
+      min-height: 24px;
+
+      &:hover {
+        box-shadow: none;
+        background: #{"@noti-close-bg-hover"};
+        transition: all 0.15s ease-in-out;
+        border: none;
+      }
+    }
+
+    .notification {
+      /* The actual notification */
+      border-radius: 12px;
+      margin: 6px 12px;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.7),
+        0 2px 6px 2px rgba(0, 0, 0, 0.3);
+      padding: 0;
+
+      &.low {
+        /* Low Priority Notification */
+      }
+      &.normal {
+        /* Normal Priority Notification */
+      }
+      &.critical {
+        /* Critical Priority Notification */
+      }
+
+      %action {
+        padding: 4px;
+        margin: 0;
+        box-shadow: none;
+        background: #{"@noti-bg"};
+        border: 1px solid #{"@noti-border-color"};
+        color: #{"@text-color"};
+        transition: all 0.15s ease-in-out;
+      }
+      %action-hover {
+        -gtk-icon-effect: none;
+        background: #{"@noti-bg-hover"};
+      }
+
+      .notification-default-action {
+        /* The large action that also displays the notification summary and body */
+        @extend %action;
+        border-radius: 12px;
+
+        &:hover {
+          @extend %action-hover;
+        }
+
+        .notification-content {
+          background: transparent;
+          padding: 6px;
+          border-radius: 12px;
+
+          .image {
+            /* Notification Primary Image */
+            -gtk-icon-effect: none;
+          }
+          .summary {
+            /* Notification summary/title */
+            font-size: 16px;
+            font-weight: bold;
+            background: transparent;
+            color: #{"@text-color"};
+            text-shadow: none;
+          }
+          .time {
+            /* Notification time-ago */
+            font-size: 16px;
+            font-weight: bold;
+            background: transparent;
+            color: #{"@text-color"};
+            text-shadow: none;
+            margin-right: 18px;
+          }
+          .body {
+            /* Notification body */
+            font-size: 15px;
+            font-weight: normal;
+            background: transparent;
+            color: #{"@text-color"};
+            text-shadow: none;
+          }
+
+          progressbar {
+            /* The optional notification progress bar */
+          }
+
+          .body-image {
+            /* The "extra" optional bottom notification image */
+            margin-top: 6px;
+            background-color: white;
+            border-radius: 12px;
+          }
+
+          .inline-reply {
+            /* The inline reply section */
+            margin-top: 8px;
+
+            .inline-reply-entry {
+              background: #{"@noti-bg-darker"};
+              color: #{"@text-color"};
+              caret-color: #{"@text-color"};
+              border: 1px solid #{"@noti-border-color"};
+              border-radius: 12px;
+            }
+            .inline-reply-button {
+              margin-left: 4px;
+              background: #{"@noti-bg"};
+              border: 1px solid #{"@noti-border-color"};
+              border-radius: 12px;
+              color: #{"@text-color"};
+
+              &:disabled {
+                background: initial;
+                color: #{"@text-color-disabled"};
+                border: 1px solid transparent;
+              }
+              &:hover {
+                background: #{"@noti-bg-hover"};
+              }
+            }
+          }
+        }
+      }
+
+      .notification-action {
+        /* The sub actions below the default action */
+        @extend %action;
+        border-radius: 0px;
+        border-top: none;
+        border-right: none;
+
+        &:not(:only-child) {
+          /* When alternative actions are visible */
+          border-bottom-left-radius: 0px;
+          border-bottom-right-radius: 0px;
+        }
+
+        &:first-child {
+          /* add bottom border radius to eliminate clipping */
+          border-bottom-left-radius: 10px;
+        }
+        &:last-child {
+          border-bottom-right-radius: 10px;
+          border-right: 1px solid #{"@noti-border-color"};
+        }
+
+        &:hover {
+          @extend %action-hover;
+        }
+      }
+    }
+  }
+}
+
+.notification-group {
+  /* Styling only for Grouped Notifications */
+
+  &.low {
+    /* Low Priority Group */
+  }
+  &.normal {
+    /* Low Priority Group */
+  }
+  &.critical {
+    /* Low Priority Group */
+  }
+
+  %header {
+    margin: 0 16px;
+    color: #{"@text-color"};
+  }
+
+  .notification-group-headers {
+    /* Notification Group Headers */
+    @extend %header;
+
+    .notification-group-icon {
+      color: #{"@text-color"};
+    }
+    .notification-group-header {
+      color: #{"@text-color"};
+    }
+  }
+  .notification-group-buttons {
+    /* Notification Group Buttons */
+    @extend %header;
+  }
+
+  &.collapsed {
+    /* Set lower stacked notifications opacity to 0 */
+    .notification-row:not(:last-child) {
+      /* Top notification in stack */
+      .notification-action *,
+      .notification-default-action * {
+        transition: opacity 400ms ease-in-out;
+        opacity: 0;
+      }
+    }
+
+    &:hover {
+      .notification-default-action,
+      .notification-action {
+        background-color: #{"@noti-bg-hover"};
+      }
+    }
+  }
+}
+
+.control-center {
+  /* The Control Center which contains the old notifications + widgets */
+  background: #{"@cc-bg"};
+
+  .control-center-list-placeholder {
+    /* The placeholder when there are no notifications */
+    opacity: 0.5;
+  }
+
+  .control-center-list {
+    /* List of notifications */
+    background: transparent;
+  }
+}
+
+.blank-window {
+  /* Window behind control center and on all other monitors */
+  background: #{"alpha(black, 0.25)"};
+}
+
+.floating-notifications {
+  background: transparent;
+}
+
+/*** Widgets ***/
+/* Title widget */
+@import "widgets/title";
+/* DND widget */
+@import "widgets/dnd";
+/* Label widget */
+@import "widgets/label";
+/* Mpris widget */
+@import "widgets/mpris";
+/* Buttons widget */
+@import "widgets/buttons";
+/* Menubar widget */
+@import "widgets/menubar";
+/* Volume widget */
+@import "widgets/volume";
+/* Backlight widget */
+@import "widgets/backlight";
+/* Inhibitors widget */
+@import "widgets/inhibitors";

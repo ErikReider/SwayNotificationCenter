@@ -84,6 +84,12 @@
           @extend %action-hover;
         }
 
+        &:not(:only-child) {
+          /* When alternative actions are visible */
+          border-bottom-left-radius: 0px;
+          border-bottom-right-radius: 0px;
+        }
+
         .notification-content {
           background: transparent;
           padding: 6px;
@@ -167,12 +173,6 @@
         border-radius: 0px;
         border-top: none;
         border-right: none;
-
-        &:not(:only-child) {
-          /* When alternative actions are visible */
-          border-bottom-left-radius: 0px;
-          border-bottom-right-radius: 0px;
-        }
 
         &:first-child {
           /* add bottom border radius to eliminate clipping */

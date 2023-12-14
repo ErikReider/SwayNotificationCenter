@@ -163,6 +163,23 @@ namespace SwayNotificationCenter {
             }
         }
 
+        private void set_icon () {
+            if (is_empty ()) return;
+
+            unowned Notification first = (Notification) group.widgets.first ().data;
+            unowned NotifyParams param = first.param;
+            // Get the app icon
+            Icon ? icon = null;
+            if (param.desktop_app_info != null
+                && (icon = param.desktop_app_info.get_icon ()) != null) {
+                app_icon.set_from_gicon (icon, Gtk.IconSize.LARGE_TOOLBAR);
+                app_icon.show ();
+            } else {
+                app_icon.set_from_icon_name ("application-x-executable-symbolic",
+                                             Gtk.IconSize.LARGE_TOOLBAR);
+            }
+        }
+
         /// Returns if there's more than one notification
         public bool only_single_notification () {
             unowned Gtk.Widget ? widget = group.widgets.nth_data (1);
@@ -190,7 +207,11 @@ namespace SwayNotificationCenter {
             }
             group.add (noti);
             if (!only_single_notification ()) {
-                group.set_sensitive (false);
+                if (!group.is_expanded) {
+                    group.set_sensitive (false);
+                }
+            } else {
+                set_icon ();
             }
         }
 
@@ -240,23 +261,7 @@ namespace SwayNotificationCenter {
         }
 
         public void update () {
-            if (!is_empty ()) {
-                unowned Notification first = (Notification) group.widgets.first ().data;
-                unowned NotifyParams param = first.param;
-                // Get the app icon
-                Icon ? icon = null;
-                if (param.desktop_app_info != null
-                    && (icon = param.desktop_app_info.get_icon ()) != null) {
-                    app_icon.set_from_gicon (icon, Gtk.IconSize.LARGE_TOOLBAR);
-                    app_icon.show ();
-                } else {
-                    app_icon.set_from_icon_name ("application-x-executable-symbolic",
-                                                 Gtk.IconSize.LARGE_TOOLBAR);
-                    // app_icon.hide ();
-                }
-            } else {
-                // app_icon.hide ();
-            }
+            set_icon ();
             foreach (unowned Gtk.Widget widget in group.widgets) {
                 var noti = (Notification) widget;
                 if (noti != null) noti.set_time ();

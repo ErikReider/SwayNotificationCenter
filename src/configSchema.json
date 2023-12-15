@@ -92,7 +92,7 @@
     },
     "notification-icon-size": {
       "type": "integer",
-      "description": "The notification icon size (in pixels)",
+      "description": "The notification icon size (in pixels). The app icon size is 1/3",
       "default": 64,
       "minimum": 16
     },
@@ -157,7 +157,7 @@
     },
     "image-visibility": {
       "type": "string",
-      "description": "An explanation about the purpose of this instance.",
+      "description": "The notification image visibility when no icon is available.",
       "default": "when-available",
       "enum": ["always", "when-available", "never"]
     },

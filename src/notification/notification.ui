@@ -60,15 +60,37 @@
                                         <property name="visible">True</property>
                                         <property name="can-focus">False</property>
                                         <child>
-                                          <object class="GtkImage" id="img">
+                                          <object class="GtkOverlay">
                                             <property name="visible">True</property>
                                             <property name="can-focus">False</property>
+                                            <property name="halign">center</property>
                                             <property name="valign">center</property>
-                                            <property name="margin-end">12</property>
-                                            <property name="icon_size">6</property>
-                                            <style>
-                                              <class name="image"/>
-                                            </style>
+                                            <child>
+                                              <object class="GtkImage" id="img">
+                                                <property name="visible">True</property>
+                                                <property name="can-focus">False</property>
+                                                <property name="valign">center</property>
+                                                <property name="icon_size">6</property>
+                                                <style>
+                                                  <class name="image"/>
+                                                </style>
+                                              </object>
+                                              <packing>
+                                                <property name="index">-1</property>
+                                              </packing>
+                                            </child>
+                                            <child type="overlay">
+                                              <object class="GtkImage" id="img_app_icon">
+                                                <property name="visible">True</property>
+                                                <property name="can-focus">False</property>
+                                                <property name="halign">end</property>
+                                                <property name="valign">end</property>
+                                                <property name="icon_size">6</property>
+                                                <style>
+                                                  <class name="app-icon"/>
+                                                </style>
+                                              </object>
+                                            </child>
                                           </object>
                                           <packing>
                                             <property name="expand">False</property>

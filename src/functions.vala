@@ -14,30 +14,30 @@ namespace SwayNotificationCenter {
             theme.add_resource_path ("/org/erikreider/swaync/icons");
         }
 
-        public static void set_image_path (owned string path,
-                                           Gtk.Image img,
-                                           int icon_size,
-                                           int radius,
-                                           bool file_exists) {
-            if ((path.length > 6 && path.slice (0, 7) == "file://") || file_exists) {
+        public static void set_image_uri (owned string uri,
+                                          Gtk.Image img,
+                                          int icon_size,
+                                          int radius,
+                                          bool file_exists) {
+            const string URI_PREFIX = "file://";
+            const uint PREFIX_SIZE = 7;
+            bool is_uri = (uri.length >= PREFIX_SIZE
+                           && uri.slice (0, PREFIX_SIZE) == URI_PREFIX);
+            if (is_uri || file_exists) {
                 // Try as a URI (file:// is the only URI schema supported right now)
                 try {
-                    if (!file_exists) path = path.slice (7, path.length);
+                    if (is_uri) uri = uri.slice (PREFIX_SIZE, uri.length);
 
-                    var pixbuf = new Gdk.Pixbuf.from_file (path);
+                    var pixbuf = new Gdk.Pixbuf.from_file (uri);
                     var surface = scale_round_pixbuf (pixbuf,
                                                       icon_size,
                                                       icon_size,
                                                       img.scale_factor,
                                                       radius);
                     img.set_from_surface (surface);
-                    return;
                 } catch (Error e) {
                     stderr.printf (e.message + "\n");
                 }
-            } else if (Gtk.IconTheme.get_default ().has_icon (path)) {
-                // Try as a freedesktop.org-compliant icon theme
-                img.set_from_icon_name (path, Notification.icon_size);
             }
         }
 

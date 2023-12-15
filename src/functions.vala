@@ -19,14 +19,14 @@ namespace SwayNotificationCenter {
                                           int icon_size,
                                           int radius,
                                           bool file_exists) {
-            const string uri_prefix = "file://";
-            const uint prefix_size = 7;
-            bool is_uri = (uri.length >= prefix_size
-                           && uri.slice (0, prefix_size) == uri_prefix);
+            const string URI_PREFIX = "file://";
+            const uint PREFIX_SIZE = 7;
+            bool is_uri = (uri.length >= PREFIX_SIZE
+                           && uri.slice (0, PREFIX_SIZE) == URI_PREFIX);
             if (is_uri || file_exists) {
                 // Try as a URI (file:// is the only URI schema supported right now)
                 try {
-                    if (is_uri) uri = uri.slice (prefix_size, uri.length);
+                    if (is_uri) uri = uri.slice (PREFIX_SIZE, uri.length);
 
                     var pixbuf = new Gdk.Pixbuf.from_file (uri);
                     var surface = scale_round_pixbuf (pixbuf,

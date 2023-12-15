@@ -668,22 +668,33 @@ namespace SwayNotificationCenter {
             var app_icon_exists = File.new_for_path (
                 param.app_icon ?? "").query_exists ();
 
+            // Get the image CSS corner radius in pixels
+            int radius = 0;
+            unowned var ctx = img.get_style_context ();
+            var value = ctx.get_property (Gtk.STYLE_PROPERTY_BORDER_RADIUS,
+                                          ctx.get_state ());
+            if (value.type () == Type.INT) {
+                radius = value.get_int ();
+            }
+
             if (param.image_data.is_initialized) {
                 Functions.set_image_data (param.image_data, img,
-                                          notification_icon_size);
+                                          notification_icon_size, radius);
             } else if (param.image_path != null &&
                        param.image_path != "" &&
                        img_path_exists) {
                 Functions.set_image_path (param.image_path, img,
                                           notification_icon_size,
+                                          radius,
                                           img_path_exists);
             } else if (param.app_icon != null && param.app_icon != "") {
                 Functions.set_image_path (param.app_icon, img,
                                           notification_icon_size,
+                                          radius,
                                           app_icon_exists);
             } else if (param.icon_data.is_initialized) {
                 Functions.set_image_data (param.icon_data, img,
-                                          notification_icon_size);
+                                          notification_icon_size, radius);
             }
 
             if (img.storage_type == Gtk.ImageType.EMPTY) {

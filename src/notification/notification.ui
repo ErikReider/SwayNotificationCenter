@@ -81,7 +81,6 @@
                                             <property name="visible">True</property>
                                             <property name="can-focus">False</property>
                                             <property name="valign">center</property>
-                                            <property name="margin-end">14</property>
                                             <property name="hexpand">True</property>
                                             <property name="vexpand">True</property>
                                             <property name="orientation">vertical</property>
@@ -153,6 +152,9 @@
                                                 <property name="position">1</property>
                                               </packing>
                                             </child>
+                                            <style>
+                                              <class name="text-box"/>
+                                            </style>
                                           </object>
                                           <packing>
                                             <property name="expand">True</property>

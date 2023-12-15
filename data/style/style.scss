@@ -109,15 +109,14 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
 
         .notification-content {
           background: transparent;
-          $padding: 6px;
-          padding: $padding;
           border-radius: $border-radius;
+          $margin: 8px;
 
           .image {
             /* Notification Primary Image */
             -gtk-icon-effect: none;
             border-radius: 100px; /* Size in px */
-            margin: 4px;
+            margin: $margin;
           }
           .app-icon {
             /* Notification app icon (only visible when the primary image is set) */
@@ -127,7 +126,8 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
           }
 
           .text-box {
-            margin: 0 8px;
+            margin: $margin;
+
             .summary {
               /* Notification summary/title */
               font-size: $font-size-summary;

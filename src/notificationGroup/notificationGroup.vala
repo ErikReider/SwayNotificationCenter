@@ -452,7 +452,7 @@ namespace SwayNotificationCenter {
             // Fades from the bottom at 0.5 -> top at 0.0 opacity
             Cairo.Pattern fade_gradient = new Cairo.Pattern.linear (0, 0, 0, 1);
             fade_gradient.add_color_stop_rgba (0, 1, 1, 1, animation_progress_inv);
-            fade_gradient.add_color_stop_rgba (1, 1, 1, 1, animation_progress_inv - 0.5);
+            fade_gradient.add_color_stop_rgba (1, 1, 1, 1, 0);
             // Cross-fades in the non visible stacked notifications when expanded
             Cairo.Pattern cross_fade_pattern =
                 new Cairo.Pattern.rgba (1, 1, 1, 1.5 * animation_progress_inv);
@@ -512,9 +512,9 @@ namespace SwayNotificationCenter {
                     // Draw Fade Gradient
                     cr.save ();
                     cr.translate (0, lerped_y);
-                    cr.scale (1, lerped_height * 0.75);
+                    cr.scale (1, lerped_height * 0.5);
                     cr.set_source (fade_gradient);
-                    cr.rectangle (0, 0, width, lerped_height * 0.75);
+                    cr.rectangle (0, 0, width, lerped_height * 0.5);
                     cr.set_operator (Cairo.Operator.DEST_OUT);
                     cr.fill ();
                     cr.restore ();

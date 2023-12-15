@@ -75,6 +75,7 @@ app_deps = [
   dependency('gtk+-3.0', version: '>= 3.22'),
   dependency('json-glib-1.0', version: '>= 1.0'),
   dependency('libhandy-1', version: '>= 1.2.3'),
+  dependency('granite', version: '>= 6.2.0'),
   meson.get_compiler('c').find_library('gtk-layer-shell'),
   meson.get_compiler('c').find_library('m', required : true),
   meson.get_compiler('vala').find_library('posix'),

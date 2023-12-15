@@ -209,12 +209,12 @@ namespace SwayNotificationCenter {
             return type;
         }
 
-        /** Scales the pixbuf to fit the given dimensions */
-        public static Cairo.Surface scale_round_pixbuf (Gdk.Pixbuf pixbuf,
-                                                     int buffer_width,
-                                                     int buffer_height,
-                                                     int img_scale,
-                                                     int radius) {
+        /** Roundes the Cairo Surface to the given radii */
+        public static Cairo.Surface round_surface (Cairo.Surface base_surf,
+                                                   int buffer_width,
+                                                   int buffer_height,
+                                                   int img_scale,
+                                                   int radius) {
             // Limit radii size
             radius = int.min (radius, int.min (buffer_width / 2, buffer_height / 2));
 
@@ -236,7 +236,26 @@ namespace SwayNotificationCenter {
             cr.paint ();
 
             cr.save ();
-            Cairo.Surface scale_surf = Gdk.cairo_surface_create_from_pixbuf (pixbuf,
+            cr.set_source_surface (base_surf, 0, 0);
+            cr.paint ();
+            cr.restore ();
+
+            return surface;
+        }
+
+        /** Scales the pixbuf to fit the given dimensions */
+        public static Cairo.Surface scale_pixbuf (Gdk.Pixbuf pixbuf,
+                                                  int buffer_width,
+                                                  int buffer_height,
+                                                  int img_scale) {
+
+            Cairo.Surface surface = new Cairo.ImageSurface (Cairo.Format.ARGB32,
+                                                            buffer_width,
+                                                            buffer_height);
+            var cr = new Cairo.Context (surface);
+
+            cr.save ();
+            Cairo.Surface base_surf = Gdk.cairo_surface_create_from_pixbuf (pixbuf,
                                                                              img_scale,
                                                                              null);
             int width = pixbuf.width / img_scale;
@@ -246,22 +265,40 @@ namespace SwayNotificationCenter {
             if (window_ratio > bg_ratio) { // Taller wallpaper than monitor
                 double scale = (double) buffer_width / width;
                 if (scale * height < buffer_height) {
-                    draw_scale_wide (buffer_width, width, buffer_height, height, cr, scale_surf);
+                    draw_scale_wide (buffer_width, width, buffer_height, height, cr, base_surf);
                 } else {
-                    draw_scale_tall (buffer_width, width, buffer_height, height, cr, scale_surf);
+                    draw_scale_tall (buffer_width, width, buffer_height, height, cr, base_surf);
                 }
             } else { // Wider wallpaper than monitor
                 double scale = (double) buffer_height / height;
                 if (scale * width < buffer_width) {
-                    draw_scale_tall (buffer_width, width, buffer_height, height, cr, scale_surf);
+                    draw_scale_tall (buffer_width, width, buffer_height, height, cr, base_surf);
                 } else {
-                    draw_scale_wide (buffer_width, width, buffer_height, height, cr, scale_surf);
+                    draw_scale_wide (buffer_width, width, buffer_height, height, cr, base_surf);
                 }
             }
             cr.paint ();
             cr.restore ();
 
-            scale_surf.finish ();
+            base_surf.finish ();
+            return surface;
+        }
+
+        /** Scales the pixbuf to fit the given dimensions */
+        public static Cairo.Surface scale_round_pixbuf (Gdk.Pixbuf pixbuf,
+                                                        int buffer_width,
+                                                        int buffer_height,
+                                                        int img_scale,
+                                                        int radius) {
+            var surface = Functions.scale_pixbuf (pixbuf,
+                                                  buffer_width,
+                                                  buffer_height,
+                                                  img_scale);
+            surface = Functions.round_surface (surface,
+                                               buffer_width,
+                                               buffer_height,
+                                               img_scale,
+                                               radius);
             return surface;
         }
 

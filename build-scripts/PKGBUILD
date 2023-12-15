@@ -15,7 +15,7 @@ license=(GPL3)
 depends=("gtk3" "gtk-layer-shell" "dbus" "glib2" "gobject-introspection" "libgee" "json-glib" "libhandy" "libpulse" "gvfs" "libnotify")
 conflicts=("swaync" "swaync-client")
 provides=("swaync" "swaync-client" "notification-daemon")
-makedepends=(vala meson git scdoc sassc)
+makedepends=("vala>=0.56" meson git scdoc sassc)
 source=("${_pkgfoldername}-${pkgver}.tar.gz::${url}/archive/v${pkgver}.tar.gz")
 sha256sums=('3f00bc858b7b3610e88ef0f6ee64d727892dd82f280f1dfc01dde863c2ea3376')
 

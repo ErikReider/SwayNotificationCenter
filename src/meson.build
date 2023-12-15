@@ -67,6 +67,8 @@ app_sources = [
   constants,
 ]
 
+assert(meson.get_compiler('vala').version() >= '0.56')
+
 app_deps = [
   dependency('gio-2.0', version: '>= 2.50'),
   dependency('gio-unix-2.0', version: '>= 2.50'),

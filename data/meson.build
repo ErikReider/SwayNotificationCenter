@@ -19,6 +19,7 @@ assert(sassc.found())
 style_css = custom_target(
   'SCSS Compilation',
   build_by_default: true,
+  build_always_stale: true,
   input : 'style/style.scss',
   output : 'style.css',
   install: true,

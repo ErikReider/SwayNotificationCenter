@@ -29,6 +29,7 @@ BuildRequires:  pkgconfig(libpulse)
 BuildRequires:  systemd-devel
 BuildRequires:  systemd
 BuildRequires:  sassc
+BuildRequires:  granite-devel
 
 Requires:       gvfs
 Requires:       libnotify

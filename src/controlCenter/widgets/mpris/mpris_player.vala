@@ -38,6 +38,9 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         private string prev_art_url;
         private DesktopAppInfo ? desktop_entry = null;
 
+        private Gdk.Pixbuf ? album_art_pixbuf = null;
+        private Granite.Drawing.BufferSurface ? blurred_cover_surface = null;
+
         private unowned Config mpris_config;
 
         public MprisPlayer (MprisSource source, Config mpris_config) {
@@ -97,6 +100,77 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
         public void before_destroy () {
             source.properties_changed.disconnect (properties_changed);
+        }
+
+        public override bool draw (Cairo.Context cr) {
+            unowned Gdk.Window ? window = get_window ();
+            if (!mpris_config.blur || window == null ||
+                !(album_art_pixbuf is Gdk.Pixbuf)) {
+                return base.draw (cr);
+            }
+
+            const double DEGREES = Math.PI / 180.0;
+            unowned Gtk.StyleContext style_ctx = this.get_style_context ();
+            unowned Gtk.StateFlags state = style_ctx.get_state ();
+            Gtk.Border border = style_ctx.get_border (state);
+            Gtk.Border margin = style_ctx.get_margin (state);
+            Value radius_value = style_ctx.get_property (
+                Gtk.STYLE_PROPERTY_BORDER_RADIUS, state);
+            int radius = 0;
+            if (!radius_value.holds (Type.INT) ||
+                (radius = radius_value.get_int ()) == 0) {
+                radius = mpris_config.image_radius;
+            }
+            int scale = style_ctx.get_scale ();
+            int width = get_allocated_width ()
+                        - margin.left - margin.right
+                        - border.left - border.right;
+            int height = get_allocated_height ()
+                        - margin.top - margin.bottom
+                        - border.top - border.bottom;
+
+            cr.save ();
+            cr.new_sub_path ();
+            // Top Right
+            cr.arc (width - radius + margin.right,
+                    radius + margin.top,
+                    radius, -90 * DEGREES, 0 * DEGREES);
+            // Bottom Right
+            cr.arc (width - radius + margin.right,
+                    height - radius + margin.bottom,
+                    radius, 0 * DEGREES, 90 * DEGREES);
+            // Bottom Left
+            cr.arc (radius + margin.left,
+                    height - radius + margin.bottom,
+                    radius, 90 * DEGREES, 180 * DEGREES);
+            // Top Left
+            cr.arc (radius + margin.left,
+                    radius + margin.top,
+                    radius, 180 * DEGREES, 270 * DEGREES);
+            cr.close_path ();
+
+            cr.set_source_rgba (0, 0, 0, 0);
+            cr.clip ();
+
+            // Draw blurred player background
+            if (blurred_cover_surface == null
+                || blurred_cover_surface.width != width
+                || blurred_cover_surface.height != height) {
+                var buffer = new Granite.Drawing.BufferSurface (width, height);
+                Cairo.Surface surface = Functions.scale_pixbuf (
+                    album_art_pixbuf, width, height, scale);
+
+                buffer.context.set_source_surface (surface, 0, 0);
+                buffer.context.paint ();
+                buffer.fast_blur (8, 2);
+                blurred_cover_surface = buffer;
+            }
+            cr.set_source_surface (blurred_cover_surface.surface, margin.left, margin.top);
+            cr.paint ();
+
+            cr.restore ();
+
+            return base.draw (cr);
         }
 
         private void properties_changed (string iface,
@@ -246,7 +320,6 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
                 int scale = get_style_context ().get_scale ();
 
-                Gdk.Pixbuf ? pixbuf = null;
                 // Cancel previous download, reset the state and download again
                 album_art_cancellable.cancel ();
                 album_art_cancellable.reset ();
@@ -255,24 +328,45 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                     InputStream stream = yield file.read_async (Priority.DEFAULT,
                                                                 album_art_cancellable);
 
-                    pixbuf = yield new Gdk.Pixbuf.from_stream_async (
+                    this.album_art_pixbuf = yield new Gdk.Pixbuf.from_stream_async (
                         stream, album_art_cancellable);
                 } catch (Error e) {
                     debug ("Could not download album art for %s. Using fallback...",
                            source.media_player.identity);
                 }
-                if (pixbuf != null) {
-                    var surface = Functions.scale_round_pixbuf (pixbuf,
-                                                           mpris_config.image_size,
-                                                           mpris_config.image_size,
-                                                           scale,
-                                                           mpris_config.image_radius);
-                    pixbuf = Gdk.pixbuf_get_from_surface (surface,
-                                                          0, 0,
+                if (this.album_art_pixbuf != null) {
+                    unowned Gtk.StyleContext style_ctx = album_art.get_style_context ();
+                    Value br_value =
+                        style_ctx.get_property (Gtk.STYLE_PROPERTY_BORDER_RADIUS,
+                                                style_ctx.get_state ());
+                    int radius = 0;
+                    if (!br_value.holds (Type.INT) ||
+                        (radius = br_value.get_int ()) == 0) {
+                        radius = mpris_config.image_radius;
+                    }
+                    var surface = Functions.scale_pixbuf (this.album_art_pixbuf,
                                                           mpris_config.image_size,
-                                                          mpris_config.image_size);
-                    album_art.set_from_pixbuf (pixbuf);
+                                                          mpris_config.image_size,
+                                                          scale);
+                    this.album_art_pixbuf = Gdk.pixbuf_get_from_surface (surface,
+                                                                         0, 0,
+                                                                         mpris_config.image_size,
+                                                                         mpris_config.image_size);
+                    this.blurred_cover_surface = null;
+                    surface = Functions.round_surface (surface,
+                                                       mpris_config.image_size,
+                                                       mpris_config.image_size,
+                                                       scale,
+                                                       radius);
+                    var pix_buf = Gdk.pixbuf_get_from_surface (surface,
+                                                               0, 0,
+                                                               mpris_config.image_size,
+                                                               mpris_config.image_size);
+                    surface.finish ();
+                    album_art.set_from_pixbuf (pix_buf);
                     album_art.get_style_context ().set_scale (1);
+                    this.queue_draw ();
+
                     return;
                 }
             }

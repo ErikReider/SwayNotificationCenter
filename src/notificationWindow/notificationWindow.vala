@@ -174,7 +174,6 @@ namespace SwayNotificationCenter {
         private void remove_notification (Notification ? noti, bool dismiss) {
             // Remove notification and its destruction timeout
             if (noti != null) {
-#if HAVE_LATEST_GTK_LAYER_SHELL
                 if (noti.has_inline_reply) {
                     inline_reply_notifications.remove (noti.param.applied_id);
                     if (inline_reply_notifications.size == 0
@@ -184,7 +183,6 @@ namespace SwayNotificationCenter {
                             this, GtkLayerShell.KeyboardMode.NONE);
                     }
                 }
-#endif
                 noti.remove_noti_timeout ();
                 noti.destroy ();
             }
@@ -206,7 +204,6 @@ namespace SwayNotificationCenter {
                                                ConfigModel.instance.timeout,
                                                ConfigModel.instance.timeout_low,
                                                ConfigModel.instance.timeout_critical);
-#if HAVE_LATEST_GTK_LAYER_SHELL
             if (noti.has_inline_reply) {
                 inline_reply_notifications.add (param.applied_id);
 
@@ -216,7 +213,6 @@ namespace SwayNotificationCenter {
                         this, GtkLayerShell.KeyboardMode.ON_DEMAND);
                 }
             }
-#endif
 
             if (list_reverse) {
                 box.pack_start (noti);

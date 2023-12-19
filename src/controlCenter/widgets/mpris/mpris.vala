@@ -57,9 +57,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             carousel = new Hdy.Carousel () {
                 visible = true,
             };
-#if HAVE_LATEST_LIBHANDY
             carousel.allow_scroll_wheel = true;
-#endif
             carousel.draw.connect (carousel_draw_cb);
             carousel.page_changed.connect ((index) => {
                 GLib.List<weak Gtk.Widget> children = carousel.get_children ();

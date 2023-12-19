@@ -74,9 +74,12 @@ app_deps = [
   dependency('gio-unix-2.0', version: '>= 2.50'),
   dependency('gtk+-3.0', version: '>= 3.22'),
   dependency('json-glib-1.0', version: '>= 1.0'),
-  dependency('libhandy-1', version: '>= 1.2.3'),
+  dependency('libhandy-1', version: '>= 1.8.0'),
   dependency('granite', version: '>= 6.2.0'),
-  meson.get_compiler('c').find_library('gtk-layer-shell'),
+  dependency('gtk-layer-shell-0',
+    fallback: ['gtk-layer-shell-0', 'gtk-layer-shell'],
+    version: '>= 0.8.0'
+  ),
   meson.get_compiler('c').find_library('m', required : true),
   meson.get_compiler('vala').find_library('posix'),
   dependency('gee-0.8'),
@@ -102,21 +105,6 @@ if get_option('pulse-audio')
     'controlCenter/widgets/volume/pulseSinkInput.vala',
     'controlCenter/widgets/volume/sinkInputRow.vala',
   ]
-endif
-
-# Detect libhandy version
-libhandy = dependency('libhandy-1')
-if libhandy.version() >= '1.3.9'
-  add_project_arguments('-D', 'HAVE_LATEST_LIBHANDY', language: 'vala')
-endif
-
-# Detect gtk-layer-shell version
-gtk_layer_shell = dependency(
-  'gtk-layer-shell-0',
-  fallback: ['gtk-layer-shell-0', 'gtk-layer-shell'],
-)
-if gtk_layer_shell.version() >= '0.6.0'
-    add_project_arguments('-D', 'HAVE_LATEST_GTK_LAYER_SHELL', language: 'vala')
 endif
 
 args = [

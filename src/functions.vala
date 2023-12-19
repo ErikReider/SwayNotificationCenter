@@ -39,6 +39,11 @@ namespace SwayNotificationCenter {
                     stderr.printf (e.message + "\n");
                 }
             }
+
+            // Try as icon name
+            if (img.storage_type == Gtk.ImageType.EMPTY) {
+                img.set_from_icon_name (uri, Gtk.IconSize.INVALID);
+            }
         }
 
         public static void set_image_data (ImageData data,

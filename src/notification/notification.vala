@@ -327,9 +327,7 @@ namespace SwayNotificationCenter {
             }
             // Reset state
             this.carousel.scroll_to (event_box);
-#if HAVE_LATEST_LIBHANDY
             this.carousel.allow_scroll_wheel = false;
-#endif
 
             if (this.progress_bar.visible = param.has_synch) {
                 this.progress_bar.set_fraction (param.value * 0.01);

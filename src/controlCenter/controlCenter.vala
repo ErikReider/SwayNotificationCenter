@@ -396,14 +396,10 @@ namespace SwayNotificationCenter {
                 GtkLayerShell.set_exclusive_zone (this, exclusive_zone);
                 // Grabs the keyboard input until closed
                 bool keyboard_shortcuts = ConfigModel.instance.keyboard_shortcuts;
-#if HAVE_LATEST_GTK_LAYER_SHELL
                 var mode = keyboard_shortcuts ?
                            GtkLayerShell.KeyboardMode.EXCLUSIVE :
                            GtkLayerShell.KeyboardMode.NONE;
                 GtkLayerShell.set_keyboard_mode (this, mode);
-#else
-                GtkLayerShell.set_keyboard_interactivity (this, keyboard_shortcuts);
-#endif
 
                 // Set layer
                 GtkLayerShell.Layer layer;

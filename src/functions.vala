@@ -28,7 +28,12 @@ namespace SwayNotificationCenter {
                 try {
                     if (is_uri) uri = uri.slice (PREFIX_SIZE, uri.length);
 
-                    var pixbuf = new Gdk.Pixbuf.from_file (uri);
+                    var pixbuf = new Gdk.Pixbuf.from_file_at_scale (
+                        uri,
+                        icon_size * img.scale_factor,
+                        icon_size * img.scale_factor,
+                        true);
+                    // Scale and round the image. Scales to fit the size
                     var surface = scale_round_pixbuf (pixbuf,
                                                       icon_size,
                                                       icon_size,

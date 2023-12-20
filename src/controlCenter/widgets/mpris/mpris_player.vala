@@ -333,6 +333,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 } catch (Error e) {
                     debug ("Could not download album art for %s. Using fallback...",
                            source.media_player.identity);
+                    this.album_art_pixbuf = null;
                 }
                 if (this.album_art_pixbuf != null) {
                     unowned Gtk.StyleContext style_ctx = album_art.get_style_context ();
@@ -370,6 +371,9 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                     return;
                 }
             }
+
+            this.album_art_pixbuf = null;
+            this.blurred_cover_surface = null;
             // Get the app icon
             Icon ? icon = null;
             if (desktop_entry is DesktopAppInfo) {

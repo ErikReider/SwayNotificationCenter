@@ -174,8 +174,31 @@ But we recommend to use [Guix Home](https://guix.gnu.org/manual/devel/en/html_no
 
 ### Other
 
+#### Dependencies
+
+- `vala >= 0.56`
+- `meson`
+- `git`
+- `scdoc`
+- `sassc`
+- `gtk3`
+- `gtk-layer-shell`
+- `dbus`
+- `glib2`
+- `gobject-introspection`
+- `libgee`
+- `json-glib`
+- `libhandy`
+- `gvfs`
+- `granite`
+
+##### Optional Dependencies
+
+- `libpulse` (requires meson build options change)
+- `libnotify`
+
 ```zsh
-meson build
+meson build --prefix=/usr
 ninja -C build
 meson install -C build
 ```

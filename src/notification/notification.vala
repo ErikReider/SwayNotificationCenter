@@ -680,8 +680,18 @@ namespace SwayNotificationCenter {
 
             var img_path_exists = File.new_for_uri (
                 param.image_path ?? "").query_exists ();
+            if (param.image_path != null && !img_path_exists) {
+                // Check if it's not a URI
+                img_path_exists = File.new_for_path (
+                    param.image_path ?? "").query_exists ();
+            }
             var app_icon_exists = File.new_for_uri (
                 app_icon_uri ?? "").query_exists ();
+            if (app_icon_uri != null && !img_path_exists) {
+                // Check if it's not a URI
+                app_icon_exists = File.new_for_path (
+                    app_icon_uri ?? "").query_exists ();
+            }
 
             // Get the image CSS corner radius in pixels
             int radius = 0;

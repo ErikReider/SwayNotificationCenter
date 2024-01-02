@@ -286,6 +286,7 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
 .control-center {
   /* The Control Center which contains the old notifications + widgets */
   background: #{"@cc-bg"};
+  color: #{"@text-color"};
   border-radius: $border-radius;
 
   .control-center-list-placeholder {

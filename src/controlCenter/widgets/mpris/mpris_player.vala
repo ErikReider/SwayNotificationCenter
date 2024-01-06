@@ -96,6 +96,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                     update_buttons (source.media_player.metadata);
                 });
             });
+            album_art.set_pixel_size(mpris_config.image_size);
         }
 
         public void before_destroy () {
@@ -380,11 +381,11 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 icon = desktop_entry.get_icon ();
             }
             if (icon != null) {
-                album_art.set_from_gicon (icon, mpris_config.image_size);
+                album_art.set_from_gicon (icon, Gtk.IconSize.DIALOG);
             } else {
                 // Default icon
                 album_art.set_from_icon_name ("audio-x-generic-symbolic",
-                                              mpris_config.image_size);
+                                              Gtk.IconSize.DIALOG);
             }
         }
 

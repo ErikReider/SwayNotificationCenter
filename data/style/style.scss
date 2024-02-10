@@ -111,6 +111,7 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
           background: transparent;
           border-radius: $border-radius;
           $margin: 4px;
+          padding: $margin;
 
           .image {
             /* Notification Primary Image */
@@ -126,8 +127,6 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
           }
 
           .text-box {
-            margin: $margin;
-
             .summary {
               /* Notification summary/title */
               font-size: $font-size-summary;
@@ -157,11 +156,12 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
 
           progressbar {
             /* The optional notification progress bar */
+            margin-top: $margin;
           }
 
           .body-image {
             /* The "extra" optional bottom notification image */
-            margin-top: 6px;
+            margin-top: $margin;
             background-color: white;
             border-radius: $border-radius;
             -gtk-icon-effect: none;
@@ -169,7 +169,7 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
 
           .inline-reply {
             /* The inline reply section */
-            margin-top: 8px;
+            margin-top: $margin;
 
             .inline-reply-entry {
               background: #{"@noti-bg-darker"};

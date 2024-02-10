@@ -2,8 +2,8 @@
 %global alt_pkg_name swaync
 
 Name:       {{{ git_dir_name }}}
-Version:    0.9.0
-Release:    2%{?dist}
+Version:    0.10.0
+Release:    1%{?dist}
 Summary:    Notification daemon with GTK GUI
 Provides:   desktop-notification-daemon
 Provides:   sway-notification-center = %{version}-%{release}
@@ -26,6 +26,7 @@ BuildRequires:  pkgconfig(gee-0.8) >= 0.20
 BuildRequires:  pkgconfig(bash-completion)
 BuildRequires:  pkgconfig(fish)
 BuildRequires:  pkgconfig(libpulse)
+BuildRequires:  pkgconfig(granite)
 BuildRequires:  systemd-devel
 BuildRequires:  systemd
 BuildRequires:  sassc

@@ -71,6 +71,7 @@ namespace SwayNotificationCenter {
             start_box.get_style_context ().add_class ("notification-group-headers");
             // App Icon
             app_icon = new Gtk.Image ();
+            app_icon.set_pixel_size (32);
             app_icon.set_valign (Gtk.Align.CENTER);
             app_icon.get_style_context ().add_class ("notification-group-icon");
             start_box.add (app_icon);
@@ -172,11 +173,11 @@ namespace SwayNotificationCenter {
             Icon ? icon = null;
             if (param.desktop_app_info != null
                 && (icon = param.desktop_app_info.get_icon ()) != null) {
-                app_icon.set_from_gicon (icon, Gtk.IconSize.LARGE_TOOLBAR);
+                app_icon.set_from_gicon (icon, Gtk.IconSize.INVALID);
                 app_icon.show ();
             } else {
                 app_icon.set_from_icon_name ("application-x-executable-symbolic",
-                                             Gtk.IconSize.LARGE_TOOLBAR);
+                                             Gtk.IconSize.INVALID);
             }
         }
 

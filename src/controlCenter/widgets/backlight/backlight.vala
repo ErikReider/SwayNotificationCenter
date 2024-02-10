@@ -52,7 +52,7 @@ namespace SwayNotificationCenter.Widgets {
             slider.set_draw_value (false);
             slider.set_round_digits (0);
             slider.value_changed.connect (() => {
-                this.client.set_brightness ((float) slider.get_value ());
+                this.client.set_brightness.begin ((float) slider.get_value ());
                 slider.tooltip_text = ((int) slider.get_value ()).to_string ();
             });
 

@@ -82,9 +82,9 @@ namespace SwayNotificationCenter.Widgets {
             try {
                 if (subsystem == "backlight") {
                     int actual = calc_actual (percent);
-                    login1.set_brightness (subsystem, device, actual);
+                    login1.set_brightness.begin (subsystem, device, actual);
                 } else {
-                    login1.set_brightness (subsystem, device, (uint32) percent);
+                    login1.set_brightness.begin (subsystem, device, (uint32) percent);
                 }
             } catch (Error e) {
                 error ("Error %s\n", e.message);

@@ -580,6 +580,10 @@ namespace SwayNotificationCenter {
                     var group = (NotificationGroup) w;
                     if (group != null) group.update ();
                 }
+                this.get_style_context ().add_class ("open");
+            }
+            else {
+                this.get_style_context ().remove_class ("open");
             }
             swaync_daemon.subscribe_v2 (notification_count (),
                                         noti_daemon.dnd,

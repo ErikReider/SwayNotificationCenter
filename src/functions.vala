@@ -361,9 +361,7 @@ namespace SwayNotificationCenter {
                 Shell.parse_argv (cmd, out argvp);
 
                 Pid child_pid;
-                int std_input;
                 int std_output;
-                int std_err;
                 Process.spawn_async_with_pipes (
                     "/",
                     argvp,
@@ -371,9 +369,9 @@ namespace SwayNotificationCenter {
                     SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD,
                     null,
                     out child_pid,
-                    out std_input,
+                    null,
                     out std_output,
-                    out std_err);
+                    null);
 
                 // stdout:
                 string res = "";
@@ -398,6 +396,7 @@ namespace SwayNotificationCenter {
                 int end_status = 0;
                 ChildWatch.add (child_pid, (pid, status) => {
                     Process.close_pid (pid);
+                    GLib.FileUtils.close (std_output);
                     end_status = status;
                     execute_command.callback ();
                 });

@@ -4,6 +4,8 @@ install_data('org.erikreider.swaync.gschema.xml',
 
 subdir('icons')
 
+gnome.compile_schemas()
+
 compile_schemas = find_program('glib-compile-schemas', required: false)
 if compile_schemas.found()
   test('Validate schema file', compile_schemas,

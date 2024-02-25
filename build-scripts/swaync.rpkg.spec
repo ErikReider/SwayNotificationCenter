@@ -2,7 +2,7 @@
 %global alt_pkg_name swaync
 
 Name:       {{{ git_dir_name }}}
-Version:    0.9.0
+Version:    0.10.0
 Release:    1%{?dist}
 Summary:    Notification daemon with GTK GUI
 Provides:   desktop-notification-daemon
@@ -14,7 +14,7 @@ VCS:        {{{ git_dir_vcs }}}
 Source:     {{{ git_dir_pack }}}
 
 BuildRequires:  meson >= 0.51.0
-BuildRequires:  vala
+BuildRequires:  vala >= 0.56
 BuildRequires:  scdoc
 BuildRequires:  pkgconfig(gtk+-3.0) >= 3.22
 BuildRequires:  pkgconfig(gtk-layer-shell-0) >= 0.1
@@ -26,9 +26,14 @@ BuildRequires:  pkgconfig(gee-0.8) >= 0.20
 BuildRequires:  pkgconfig(bash-completion)
 BuildRequires:  pkgconfig(fish)
 BuildRequires:  pkgconfig(libpulse)
+BuildRequires:  pkgconfig(granite)
 BuildRequires:  systemd-devel
 BuildRequires:  systemd
+BuildRequires:  sassc
+BuildRequires:  granite-devel
 
+Requires:       gvfs
+Requires:       libnotify
 Requires:       dbus
 %{?systemd_requires}
 

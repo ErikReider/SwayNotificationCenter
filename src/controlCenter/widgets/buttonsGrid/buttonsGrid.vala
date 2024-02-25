@@ -10,6 +10,7 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         Action[] actions;
+        List<ToggleButton> toggle_buttons;
 
         public ButtonsGrid (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             base (suffix, swaync_daemon, noti_daemon);
@@ -26,14 +27,29 @@ namespace SwayNotificationCenter.Widgets {
 
             // add action to container
             foreach (var act in actions) {
-                Gtk.Button b = new Gtk.Button.with_label (act.label);
-
-                b.clicked.connect (() => execute_command.begin (act.command));
-
-                container.insert (b, -1);
+                switch (act.type) {
+                    case ButtonType.TOGGLE:
+                        ToggleButton tb = new ToggleButton (act.label, act.command, act.update_command, act.active);
+                        container.insert (tb, -1);
+                        toggle_buttons.append (tb);
+                        break;
+                    default:
+                        Gtk.Button b = new Gtk.Button.with_label (act.label);
+                        b.clicked.connect (() => execute_command.begin (act.command));
+                        container.insert (b, -1);
+                        break;
+                }
             }
 
             show_all ();
+        }
+
+        public override void on_cc_visibility_change (bool value) {
+            if (value) {
+                foreach (var tb in toggle_buttons) {
+                    tb.on_update.begin ();
+                }
+            }
         }
     }
 }

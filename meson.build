@@ -1,5 +1,5 @@
 project('sway-notificaton-center', ['c', 'vala'],
-  version: '0.9.0',
+  version: '0.10.0',
   meson_version: '>= 0.59.0',
   default_options: [ 'warning_level=2' ],
 )
@@ -9,6 +9,11 @@ add_project_arguments(['--enable-gobject-tracing'], language: 'vala')
 add_project_arguments(['--enable-checking'], language: 'vala')
 
 i18n = import('i18n')
+gnome = import('gnome')
+
+app_resources = []
+
+config_path = join_paths(get_option('sysconfdir'), 'xdg', 'swaync')
 
 subdir('data')
 subdir('src')

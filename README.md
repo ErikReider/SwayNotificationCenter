@@ -15,10 +15,15 @@ support `wlr_layer_shell_unstable_v1` like Sway or anything wlroots based*
 only tested with the default GTK **Adwaita** theme. Usage of any third-party
 theme might require extra tweaks to the default CSS style file*
 
+## Demo
+
+https://github.com/ErikReider/SwayNotificationCenter/assets/35975961/93ff072f-e653-4064-8200-1c90590b83ef
+
+![Screenshot of panel](./assets/panel.png)
+
 Table of Contents
 =================
 
-  * [Screenshots](#screenshots)
   * [Want to show off your sick config?](#want-to-show-off-your-sick-config)
   * [Features](#features)
   * [Available Widgets](#available-widgets)
@@ -38,17 +43,12 @@ Table of Contents
   * [Run](#run)
   * [Control Center Shortcuts](#control-center-shortcuts)
   * [Configuring](#configuring)
+    * [Toggle Buttons](#toggle-buttons)
   * [Notification Inhibition](#notification-inhibition)
   * [Scripting](#scripting)
      * [Disable scripting](#disable-scripting)
   * [i3status-rs Example](#i3status-rs-example)
   * [Waybar Example](#waybar-example)
-
-## Screenshots
-
-![Screenshot of desktop notification](./assets/desktop.png)
-
-![Screenshot of panel](./assets/panel.png)
 
 ## Want to show off your sick config?
 
@@ -56,6 +56,7 @@ Post your setup here: [Config flex 💪](https://github.com/ErikReider/SwayNotif
 
 ## Features
 
+- Grouped notifications
 - Keyboard shortcuts
 - Notification body markup with image support
 - Inline replies
@@ -172,8 +173,31 @@ But we recommend to use [Guix Home](https://guix.gnu.org/manual/devel/en/html_no
 
 ### Other
 
+#### Dependencies
+
+- `vala >= 0.56`
+- `meson`
+- `git`
+- `scdoc`
+- `sassc`
+- `gtk3`
+- `gtk-layer-shell`
+- `dbus`
+- `glib2`
+- `gobject-introspection`
+- `libgee`
+- `json-glib`
+- `libhandy`
+- `gvfs`
+- `granite`
+
+##### Optional Dependencies
+
+- `libpulse` (requires meson build options change)
+- `libnotify`
+
 ```zsh
-meson build
+meson build --prefix=/usr
 ninja -C build
 meson install -C build
 ```
@@ -236,11 +260,39 @@ See `swaync(5)` man page for more information
 
 To reload the config, you'll need to run `swaync-client --reload-config`
 
-The main CSS style file is located in `/etc/xdg/swaync/style.css`. Copy it over 
-to your `~/.config/swaync/` folder to customize without needing root access. 
+The main CSS style file is located in `/etc/xdg/swaync/style.css`. Copy it over
+to your `~/.config/swaync/` folder to customize without needing root access. For
+more advanced/larger themes, I recommend that you use the SCSS files from source
+and customize them instead. To use the SCSS files, compile with `sassc`.
 
-**Tip**: running swaync with `GTK_DEBUG=interactive swaync` will open a inspector 
+**Tip**: running swaync with `GTK_DEBUG=interactive swaync` will open a inspector
 window that'll allow you to see all of the CSS classes + other information.
+
+## Toggle Buttons
+
+To add toggle buttons to your control center you can set the "type" in any acton to "toggle".
+The toggle button supports different commands depending on the state of the button and
+an "update-command" to update the state in case of changes from outside swaync. The update-command
+is called every time the control center is opened.
+The active toggle button also gains the css-class ".toggle:checked"
+
+`config.json` example:
+
+```json
+{
+  "buttons-grid": { // also works with actions in menubar widget
+    "actions": [
+      {
+        "label": "WiFi",
+        "type": "toggle",
+        "active": true,
+        "command": "sh -c '[[ $SWAYNC_TOGGLE_STATE == true ]] && nmcli radio wifi on || nmcli radio wifi off'",
+        "update-command": "sh -c '[[ $(nmcli radio wifi) == \"enabled\" ]] && echo true || echo false'"
+      }
+    ]
+  }
+}
+```
 
 ## Notification Inhibition
 

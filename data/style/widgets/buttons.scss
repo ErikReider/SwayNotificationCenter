@@ -1,0 +1,18 @@
+.widget-buttons-grid {
+  padding: 8px;
+  margin: 8px;
+  border-radius: 12px;
+  background-color: #{"@noti-bg"};
+}
+
+.widget-buttons-grid > flowbox > flowboxchild > button {
+  background: #{"@noti-bg"};
+  border-radius: 12px;
+}
+
+.widget-buttons-grid > flowbox > flowboxchild > button.toggle:checked {
+  /* style given to the active toggle button */
+}
+
+.widget-buttons-grid > flowbox > flowboxchild > button:hover {
+}

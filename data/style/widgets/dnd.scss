@@ -1,0 +1,19 @@
+.widget-dnd {
+  color: #{"@text-color"};
+  margin: 8px;
+  font-size: 1.1rem;
+}
+.widget-dnd > switch {
+  font-size: initial;
+  border-radius: 12px;
+  background: #{"@noti-bg"};
+  border: 1px solid #{"@noti-border-color"};
+  box-shadow: none;
+}
+.widget-dnd > switch:checked {
+  background: #{"@bg-selected"};
+}
+.widget-dnd > switch slider {
+  background: #{"@noti-bg-hover"};
+  border-radius: 12px;
+}

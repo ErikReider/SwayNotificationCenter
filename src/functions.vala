@@ -8,42 +8,53 @@ namespace SwayNotificationCenter {
         public static void init () {
             system_css_provider = new Gtk.CssProvider ();
             user_css_provider = new Gtk.CssProvider ();
+
+            // Init resources
+            var theme = Gtk.IconTheme.get_default ();
+            theme.add_resource_path ("/org/erikreider/swaync/icons");
         }
 
-        public static void set_image_path (owned string path,
-                                           Gtk.Image img,
-                                           int icon_size,
-                                           bool file_exists) {
-            if ((path.length > 6 && path.slice (0, 7) == "file://") || file_exists) {
+        public static void set_image_uri (owned string uri,
+                                          Gtk.Image img,
+                                          int icon_size,
+                                          int radius,
+                                          bool file_exists) {
+            const string URI_PREFIX = "file://";
+            const uint PREFIX_SIZE = 7;
+            bool is_uri = (uri.length >= PREFIX_SIZE
+                           && uri.slice (0, PREFIX_SIZE) == URI_PREFIX);
+            if (is_uri || file_exists) {
                 // Try as a URI (file:// is the only URI schema supported right now)
                 try {
-                    if (!file_exists) path = path.slice (7, path.length);
+                    if (is_uri) uri = uri.slice (PREFIX_SIZE, uri.length);
 
                     var pixbuf = new Gdk.Pixbuf.from_file_at_scale (
-                        path,
+                        uri,
                         icon_size * img.scale_factor,
                         icon_size * img.scale_factor,
                         true);
-                    var surface = Gdk.cairo_surface_create_from_pixbuf (
-                        pixbuf,
-                        img.scale_factor,
-                        img.get_window ());
+                    // Scale and round the image. Scales to fit the size
+                    var surface = scale_round_pixbuf (pixbuf,
+                                                      icon_size,
+                                                      icon_size,
+                                                      img.scale_factor,
+                                                      radius);
                     img.set_from_surface (surface);
-                    return;
                 } catch (Error e) {
                     stderr.printf (e.message + "\n");
                 }
-            } else if (Gtk.IconTheme.get_default ().has_icon (path)) {
-                // Try as a freedesktop.org-compliant icon theme
-                img.set_from_icon_name (path, Notification.icon_size);
-            } else {
-                img.set_from_icon_name (
-                    "image-missing",
-                    Notification.icon_size);
+            }
+
+            // Try as icon name
+            if (img.storage_type == Gtk.ImageType.EMPTY) {
+                img.set_from_icon_name (uri, Gtk.IconSize.INVALID);
             }
         }
 
-        public static void set_image_data (ImageData data, Gtk.Image img, int icon_size) {
+        public static void set_image_data (ImageData data,
+                                           Gtk.Image img,
+                                           int icon_size,
+                                           int radius) {
             // Rebuild and scale the image
             var pixbuf = new Gdk.Pixbuf.with_unowned_data (data.data,
                                                            Gdk.Colorspace.RGB,
@@ -54,14 +65,11 @@ namespace SwayNotificationCenter {
                                                            data.rowstride,
                                                            null);
 
-            pixbuf = pixbuf.scale_simple (
-                icon_size * img.scale_factor,
-                icon_size * img.scale_factor,
-                Gdk.InterpType.BILINEAR);
-            var surface = Gdk.cairo_surface_create_from_pixbuf (
-                pixbuf,
-                img.scale_factor,
-                img.get_window ());
+            var surface = scale_round_pixbuf (pixbuf,
+                                              icon_size,
+                                              icon_size,
+                                              img.scale_factor,
+                                              radius);
             img.set_from_surface (surface);
         }
 
@@ -211,12 +219,15 @@ namespace SwayNotificationCenter {
             return type;
         }
 
-        /** Scales the pixbuf to fit the given dimensions */
-        public static Gdk.Pixbuf scale_round_pixbuf (Gdk.Pixbuf pixbuf,
-                                                     int buffer_width,
-                                                     int buffer_height,
-                                                     int img_scale,
-                                                     int radius) {
+        /** Roundes the Cairo Surface to the given radii */
+        public static Cairo.Surface round_surface (Cairo.Surface base_surf,
+                                                   int buffer_width,
+                                                   int buffer_height,
+                                                   int img_scale,
+                                                   int radius) {
+            // Limit radii size
+            radius = int.min (radius, int.min (buffer_width / 2, buffer_height / 2));
+
             Cairo.Surface surface = new Cairo.ImageSurface (Cairo.Format.ARGB32,
                                                             buffer_width,
                                                             buffer_height);
@@ -230,12 +241,31 @@ namespace SwayNotificationCenter {
             cr.arc (radius, buffer_height - radius, radius, 90 * DEGREES, 180 * DEGREES);
             cr.arc (radius, radius, radius, 180 * DEGREES, 270 * DEGREES);
             cr.close_path ();
-            cr.set_source_rgb (0, 0, 0);
+            cr.set_source_rgba (0, 0, 0, 0);
             cr.clip ();
             cr.paint ();
 
             cr.save ();
-            Cairo.Surface scale_surf = Gdk.cairo_surface_create_from_pixbuf (pixbuf,
+            cr.set_source_surface (base_surf, 0, 0);
+            cr.paint ();
+            cr.restore ();
+
+            return surface;
+        }
+
+        /** Scales the pixbuf to fit the given dimensions */
+        public static Cairo.Surface scale_pixbuf (Gdk.Pixbuf pixbuf,
+                                                  int buffer_width,
+                                                  int buffer_height,
+                                                  int img_scale) {
+
+            Cairo.Surface surface = new Cairo.ImageSurface (Cairo.Format.ARGB32,
+                                                            buffer_width,
+                                                            buffer_height);
+            var cr = new Cairo.Context (surface);
+
+            cr.save ();
+            Cairo.Surface base_surf = Gdk.cairo_surface_create_from_pixbuf (pixbuf,
                                                                              img_scale,
                                                                              null);
             int width = pixbuf.width / img_scale;
@@ -245,23 +275,41 @@ namespace SwayNotificationCenter {
             if (window_ratio > bg_ratio) { // Taller wallpaper than monitor
                 double scale = (double) buffer_width / width;
                 if (scale * height < buffer_height) {
-                    draw_scale_wide (buffer_width, width, buffer_height, height, cr, scale_surf);
+                    draw_scale_wide (buffer_width, width, buffer_height, height, cr, base_surf);
                 } else {
-                    draw_scale_tall (buffer_width, width, buffer_height, height, cr, scale_surf);
+                    draw_scale_tall (buffer_width, width, buffer_height, height, cr, base_surf);
                 }
             } else { // Wider wallpaper than monitor
                 double scale = (double) buffer_height / height;
                 if (scale * width < buffer_width) {
-                    draw_scale_tall (buffer_width, width, buffer_height, height, cr, scale_surf);
+                    draw_scale_tall (buffer_width, width, buffer_height, height, cr, base_surf);
                 } else {
-                    draw_scale_wide (buffer_width, width, buffer_height, height, cr, scale_surf);
+                    draw_scale_wide (buffer_width, width, buffer_height, height, cr, base_surf);
                 }
             }
             cr.paint ();
             cr.restore ();
 
-            scale_surf.finish ();
-            return Gdk.pixbuf_get_from_surface (surface, 0, 0, buffer_width, buffer_height);
+            base_surf.finish ();
+            return surface;
+        }
+
+        /** Scales the pixbuf to fit the given dimensions */
+        public static Cairo.Surface scale_round_pixbuf (Gdk.Pixbuf pixbuf,
+                                                        int buffer_width,
+                                                        int buffer_height,
+                                                        int img_scale,
+                                                        int radius) {
+            var surface = Functions.scale_pixbuf (pixbuf,
+                                                  buffer_width,
+                                                  buffer_height,
+                                                  img_scale);
+            surface = Functions.round_surface (surface,
+                                               buffer_width,
+                                               buffer_height,
+                                               img_scale,
+                                               radius);
+            return surface;
         }
 
         private static void draw_scale_tall (int buffer_width,
@@ -313,23 +361,48 @@ namespace SwayNotificationCenter {
                 Shell.parse_argv (cmd, out argvp);
 
                 Pid child_pid;
-                Process.spawn_async (
+                int std_output;
+                Process.spawn_async_with_pipes (
                     "/",
                     argvp,
                     spawn_env,
                     SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD,
                     null,
-                    out child_pid);
+                    out child_pid,
+                    null,
+                    out std_output,
+                    null);
+
+                // stdout:
+                string res = "";
+                IOChannel output = new IOChannel.unix_new (std_output);
+                output.add_watch (IOCondition.IN | IOCondition.HUP, (channel, condition) => {
+                    if (condition == IOCondition.HUP) {
+                        return false;
+                    }
+                    try {
+                        channel.read_line (out res, null, null);
+                        return true;
+                    } catch (IOChannelError e) {
+                        stderr.printf ("stdout: IOChannelError: %s\n", e.message);
+                        return false;
+                    } catch (ConvertError e) {
+                        stderr.printf ("stdout: ConvertError: %s\n", e.message);
+                        return false;
+                    }
+                });
 
                 // Close the child when the spawned process is idling
                 int end_status = 0;
                 ChildWatch.add (child_pid, (pid, status) => {
                     Process.close_pid (pid);
+                    GLib.FileUtils.close (std_output);
                     end_status = status;
                     execute_command.callback ();
                 });
                 // Waits until `run_script.callback()` is called above
                 yield;
+                msg = res;
                 return end_status == 0;
             } catch (Error e) {
                 stderr.printf ("Run_Script Error: %s\n", e.message);

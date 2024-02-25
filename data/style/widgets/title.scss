@@ -1,0 +1,17 @@
+.widget-title {
+  color: #{"@text-color"};
+  margin: 8px;
+  font-size: 1.5rem;
+}
+.widget-title > button {
+  font-size: initial;
+  color: #{"@text-color"};
+  text-shadow: none;
+  background: #{"@noti-bg"};
+  border: 1px solid #{"@noti-border-color"};
+  box-shadow: none;
+  border-radius: 12px;
+}
+.widget-title > button:hover {
+  background: #{"@noti-bg-hover"};
+}

@@ -41,6 +41,8 @@ namespace SwayNotificationCenter {
         [GtkChild]
         unowned Gtk.Image img;
         [GtkChild]
+        unowned Gtk.Image img_app_icon;
+        [GtkChild]
         unowned Gtk.Image body_image;
 
         // Inline Reply
@@ -325,9 +327,7 @@ namespace SwayNotificationCenter {
             }
             // Reset state
             this.carousel.scroll_to (event_box);
-#if HAVE_LATEST_LIBHANDY
             this.carousel.allow_scroll_wheel = false;
-#endif
 
             if (this.progress_bar.visible = param.has_synch) {
                 this.progress_bar.set_fraction (param.value * 0.01);
@@ -651,57 +651,97 @@ namespace SwayNotificationCenter {
         }
 
         private void set_icon () {
+            img.clear ();
+            img.set_visible (true);
+            img_app_icon.clear ();
+            img_app_icon.set_visible (true);
+
+            Icon ? app_icon_name = null;
+            string ? app_icon_uri = null;
+            if (param.desktop_app_info != null) {
+                app_icon_name = param.desktop_app_info.get_icon ();
+            }
+            if (param.app_icon != null && param.app_icon != "") {
+                app_icon_uri = param.app_icon;
+            }
+
             var image_visibility = ConfigModel.instance.image_visibility;
             if (image_visibility == ImageVisibility.NEVER) {
                 img.set_visible (false);
+                img_app_icon.set_visible (false);
                 return;
             }
 
             img.set_pixel_size (notification_icon_size);
             img.height_request = notification_icon_size;
             img.width_request = notification_icon_size;
+            int app_icon_size = notification_icon_size / 3;
+            img_app_icon.set_pixel_size (app_icon_size);
 
-            var img_path_exists = File.new_for_path (
+            var img_path_exists = File.new_for_uri (
                 param.image_path ?? "").query_exists ();
-            var app_icon_exists = File.new_for_path (
-                param.app_icon ?? "").query_exists ();
+            if (param.image_path != null && !img_path_exists) {
+                // Check if it's not a URI
+                img_path_exists = File.new_for_path (
+                    param.image_path ?? "").query_exists ();
+            }
+            var app_icon_exists = File.new_for_uri (
+                app_icon_uri ?? "").query_exists ();
+            if (app_icon_uri != null && !img_path_exists) {
+                // Check if it's not a URI
+                app_icon_exists = File.new_for_path (
+                    app_icon_uri ?? "").query_exists ();
+            }
 
+            // Get the image CSS corner radius in pixels
+            int radius = 0;
+            unowned var ctx = img.get_style_context ();
+            var value = ctx.get_property (Gtk.STYLE_PROPERTY_BORDER_RADIUS,
+                                          ctx.get_state ());
+            if (value.type () == Type.INT) {
+                radius = value.get_int ();
+            }
+
+            // Set the main image to the provided image
             if (param.image_data.is_initialized) {
                 Functions.set_image_data (param.image_data, img,
-                                          notification_icon_size);
+                                          notification_icon_size, radius);
             } else if (param.image_path != null &&
                        param.image_path != "" &&
                        img_path_exists) {
-                Functions.set_image_path (param.image_path, img,
+                Functions.set_image_uri (param.image_path, img,
                                           notification_icon_size,
+                                          radius,
                                           img_path_exists);
-            } else if (param.app_icon != null && param.app_icon != "") {
-                Functions.set_image_path (param.app_icon, img,
-                                          notification_icon_size,
-                                          app_icon_exists);
             } else if (param.icon_data.is_initialized) {
                 Functions.set_image_data (param.icon_data, img,
-                                          notification_icon_size);
-            } else {
+                                          notification_icon_size, radius);
+            }
+
+            if (img.storage_type == Gtk.ImageType.EMPTY) {
                 // Get the app icon
-                Icon ? icon = null;
-                if (param.desktop_entry != null) {
-                    string entry = param.desktop_entry;
-                    entry = entry.replace (".desktop", "");
-                    DesktopAppInfo entry_info = new DesktopAppInfo (
-                        "%s.desktop".printf (entry));
-                    // Checks if the .desktop file actually exists or not
-                    if (entry_info is DesktopAppInfo) {
-                        icon = entry_info.get_icon ();
-                    }
-                }
-                if (icon != null) {
-                    img.set_from_gicon (icon, icon_size);
+                if (app_icon_uri != null) {
+                    Functions.set_image_uri (app_icon_uri, img,
+                                              notification_icon_size,
+                                              radius,
+                                              app_icon_exists);
+                } else if (app_icon_name != null) {
+                    img.set_from_gicon (app_icon_name, icon_size);
                 } else if (image_visibility == ImageVisibility.ALWAYS) {
                     // Default icon
                     img.set_from_icon_name ("image-missing", icon_size);
                 } else {
                     img.set_visible (false);
+                }
+            } else {
+                // We only set the app icon if the main image is set
+                if (app_icon_uri != null) {
+                    Functions.set_image_uri (app_icon_uri, img_app_icon,
+                                             app_icon_size,
+                                             0,
+                                             app_icon_exists);
+                } else if (app_icon_name != null) {
+                    img_app_icon.set_from_gicon (app_icon_name, Gtk.IconSize.INVALID);
                 }
             }
         }

@@ -26,6 +26,7 @@ widget_sources = [
   # Helpers
   'controlCenter/widgets/baseWidget.vala',
   'controlCenter/widgets/factory.vala',
+  'controlCenter/widgets/shared/toggleButton.vala',
   # Widget: Title
   'controlCenter/widgets/title/title.vala',
   # Widget: Dnd
@@ -49,13 +50,16 @@ widget_sources = [
 
 app_sources = [
   'main.vala',
+  'animation/animation.vala',
   'orderedHashTable/orderedHashTable.vala',
   'configModel/configModel.vala',
   'swayncDaemon/swayncDaemon.vala',
   'notiDaemon/notiDaemon.vala',
   'notiModel/notiModel.vala',
+  'fadedViewport/fadedViewport.vala',
   'notificationWindow/notificationWindow.vala',
   'notification/notification.vala',
+  'notificationGroup/notificationGroup.vala',
   'controlCenter/controlCenter.vala',
   widget_sources,
   'blankWindow/blankWindow.vala',
@@ -63,13 +67,19 @@ app_sources = [
   constants,
 ]
 
+assert(meson.get_compiler('vala').version() >= '0.56')
+
 app_deps = [
   dependency('gio-2.0', version: '>= 2.50'),
   dependency('gio-unix-2.0', version: '>= 2.50'),
   dependency('gtk+-3.0', version: '>= 3.22'),
   dependency('json-glib-1.0', version: '>= 1.0'),
-  dependency('libhandy-1', version: '>= 1.2.3'),
-  meson.get_compiler('c').find_library('gtk-layer-shell'),
+  dependency('libhandy-1', version: '>= 1.8.0'),
+  dependency('granite', version: '>= 6.2.0'),
+  dependency('gtk-layer-shell-0',
+    fallback: ['gtk-layer-shell-0', 'gtk-layer-shell'],
+    version: '>= 0.8.0'
+  ),
   meson.get_compiler('c').find_library('m', required : true),
   meson.get_compiler('vala').find_library('posix'),
   dependency('gee-0.8'),
@@ -97,36 +107,18 @@ if get_option('pulse-audio')
   ]
 endif
 
-# Detect libhandy version
-libhandy = dependency('libhandy-1')
-if libhandy.version() >= '1.3.9'
-  add_project_arguments('-D', 'HAVE_LATEST_LIBHANDY', language: 'vala')
-endif
-
-# Detect gtk-layer-shell version
-gtk_layer_shell = dependency(
-  'gtk-layer-shell-0',
-  fallback: ['gtk-layer-shell-0', 'gtk-layer-shell'],
-)
-if gtk_layer_shell.version() >= '0.6.0'
-    add_project_arguments('-D', 'HAVE_LATEST_GTK_LAYER_SHELL', language: 'vala')
-endif
-
 args = [
   '--target-glib=2.50',
   '--pkg=GtkLayerShell-0.1',
 ]
 
-sysconfdir = get_option('sysconfdir')
-gnome = import('gnome')
-
-app_sources += gnome.compile_resources('sway_notification_center-resources',
+app_resources += gnome.compile_resources('sway_notification_center-resources',
   'sway_notification_center.gresource.xml',
   c_name: 'sway_notification_center'
 )
 
 executable('swaync',
-  app_sources,
+  [ app_sources, app_resources ],
   vala_args: args,
   dependencies: app_deps,
   install: true,
@@ -139,8 +131,6 @@ executable('swaync-client',
   install: true,
 )
 
-config_path = join_paths(sysconfdir, 'xdg/swaync')
-
 config_data = configuration_data()
 config_data.set_quoted('JSONPATH', join_paths('/', config_path, 'configSchema.json'))
 config_json = configure_file(
@@ -149,6 +139,5 @@ config_json = configure_file(
   configuration : config_data
 )
 
-install_data('style.css', install_dir : config_path)
 install_data(config_json, install_dir : config_path)
 install_data('configSchema.json', install_dir : config_path)

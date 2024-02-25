@@ -15,10 +15,15 @@ support `wlr_layer_shell_unstable_v1` like Sway or anything wlroots based*
 only tested with the default GTK **Adwaita** theme. Usage of any third-party
 theme might require extra tweaks to the default CSS style file*
 
+## Demo
+
+https://github.com/ErikReider/SwayNotificationCenter/assets/35975961/93ff072f-e653-4064-8200-1c90590b83ef
+
+![Screenshot of panel](./assets/panel.png)
+
 Table of Contents
 =================
 
-  * [Screenshots](#screenshots)
   * [Want to show off your sick config?](#want-to-show-off-your-sick-config)
   * [Features](#features)
   * [Available Widgets](#available-widgets)
@@ -44,12 +49,6 @@ Table of Contents
      * [Disable scripting](#disable-scripting)
   * [i3status-rs Example](#i3status-rs-example)
   * [Waybar Example](#waybar-example)
-
-## Screenshots
-
-![Screenshot of desktop notification](./assets/desktop.png)
-
-![Screenshot of panel](./assets/panel.png)
 
 ## Want to show off your sick config?
 

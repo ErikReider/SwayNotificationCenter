@@ -381,11 +381,11 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 icon = desktop_entry.get_icon ();
             }
             if (icon != null) {
-                album_art.set_from_gicon (icon, Gtk.IconSize.DIALOG);
+                album_art.set_from_gicon (icon, Gtk.IconSize.INVALID);
             } else {
                 // Default icon
                 album_art.set_from_icon_name ("audio-x-generic-symbolic",
-                                              Gtk.IconSize.DIALOG);
+                                              Gtk.IconSize.INVALID);
             }
         }
 

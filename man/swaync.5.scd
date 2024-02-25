@@ -605,12 +605,7 @@ config file to be able to detect config errors
 		"mpris": {
 			"image-size": 96,
 			"image-radius": 12,
-			"blacklist": {
-                "firefox": {
-                    "state": "blacklisted",
-                    "app-name": "firefox.*"
-                }
-            }
+			"blacklist": ["playerctld"]
 		},
 		"menubar": {
 			"menu#power": {

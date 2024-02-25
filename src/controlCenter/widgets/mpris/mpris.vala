@@ -2,11 +2,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
     public struct Config {
         int image_size;
         int image_radius;
-<<<<<<< HEAD
-        string[] blacklist;
-=======
         bool blur;
->>>>>>> 7e4a8a1c5ec46b6d0319b8e689f326b123c87ef4
+        string[] blacklist;
     }
 
     public class Mpris : BaseWidget {

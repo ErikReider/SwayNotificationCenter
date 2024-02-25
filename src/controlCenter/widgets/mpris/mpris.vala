@@ -181,7 +181,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         private void setup_mpris () throws Error {
             dbus_iface = Bus.get_proxy_sync (BusType.SESSION,
                                              "org.freedesktop.DBus",
-                                             "/org/freedesktop/DBus");                              
+                                             "/org/freedesktop/DBus");
             string[] names = dbus_iface.list_names ();
             foreach (string name in names) {
                 if (!name.has_prefix (MPRIS_PREFIX)) continue;

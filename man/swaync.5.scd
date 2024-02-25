@@ -331,19 +331,14 @@ config file to be able to detect config errors
 					default: 12 ++
 					description: The border radius of the album art. ++
 				blacklist: ++
-					type: object ++
+					type: array ++
 					optional: true ++
+					default: [] ++
 					description: Audio sources for the mpris widget to ignore. ++
-					properties: ++
-						<name>: ++
-							type: object ++
-							properties: ++
-								state: ++
-									type: string ++
-									description: State of the source, typically "blacklisted". ++
-								app-name: ++
-									type: string ++
-									description: Hint `$ qdbus | grep mpris` to find app names. Uses regex. ++
+					Valid array values: ++
+						type: string ++
+						description: Audio source/app name. Regex alowed. Hint ++
+							`$ qdbus | grep mpris` to find source names. ++
 			description: A widget that displays multiple music players. ++
 		*menubar*++
 			type: object ++

@@ -102,21 +102,13 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 if (blur_found) mpris_config.blur = blur;
 
                 // Blacklist
-                if (config.has_member("blacklist")) {
-                    Json.Object? blacklist_object = config.get_object_member("blacklist");
-                    if (blacklist_object != null) {
-                        var blacklisted_apps = new Gee.ArrayList<string>();
-                        foreach (var key in blacklist_object.get_members()) {
-                            Json.Object? app_object = blacklist_object.get_object_member(key);
-                            if (app_object != null && app_object.has_member("state") && app_object.has_member("app-name")) {
-                                string? state = app_object.get_string_member("state");
-                                if (state == "blacklisted") {
-                                    blacklisted_apps.add(app_object.get_string_member("app-name"));
-                                }
-                            }
-                        }
-                        mpris_config.blacklist = blacklisted_apps.to_array();
+                Json.Array ? blacklist = get_prop_array (config, "blacklist");
+                if (blacklist != null) {
+                    string[] apps = new string[blacklist.get_length ()];
+                    for (int i = 0; i < blacklist.get_length (); i++) {
+                        apps[i] = blacklist.get_string_element (i);
                     }
+                    mpris_config.blacklist = apps;
                 }
             }
 
@@ -267,7 +259,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         private bool is_blacklisted (string name) {
             foreach (string blacklistedPattern in mpris_config.blacklist) {
                 string fullPattern = MPRIS_PREFIX + blacklistedPattern;
-                if (GLib.Regex.match_simple(fullPattern, name, GLib.RegexCompileFlags.JAVASCRIPT_COMPAT, 0)) {
+                if (GLib.Regex.match_simple (fullPattern, name, GLib.RegexCompileFlags.JAVASCRIPT_COMPAT, 0)) {
+                    message ("\"%s\" is blacklisted", name);
                     return true;
                 }
             }

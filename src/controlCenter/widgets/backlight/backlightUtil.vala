@@ -3,7 +3,7 @@ namespace SwayNotificationCenter.Widgets {
 
         [DBus (name = "org.freedesktop.login1.Session")]
         interface Login1 : Object {
-            public abstract void set_brightness (string subsystem,
+            public abstract async void set_brightness (string subsystem,
                                                  string name, uint32 brightness) throws GLib.Error;
         }
 
@@ -77,14 +77,14 @@ namespace SwayNotificationCenter.Widgets {
             if (monitor != null) monitor.cancel ();
         }
 
-        public void set_brightness (float percent) {
+        public async void set_brightness (float percent) {
             this.close ();
             try {
                 if (subsystem == "backlight") {
                     int actual = calc_actual (percent);
-                    login1.set_brightness (subsystem, device, actual);
+                    login1.set_brightness.begin (subsystem, device, actual);
                 } else {
-                    login1.set_brightness (subsystem, device, (uint32) percent);
+                    login1.set_brightness.begin (subsystem, device, (uint32) percent);
                 }
             } catch (Error e) {
                 error ("Error %s\n", e.message);

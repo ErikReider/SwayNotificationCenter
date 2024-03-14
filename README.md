@@ -197,7 +197,7 @@ But we recommend to use [Guix Home](https://guix.gnu.org/manual/devel/en/html_no
 - `libnotify`
 
 ```zsh
-meson build --prefix=/usr
+meson setup build --prefix=/usr
 ninja -C build
 meson install -C build
 ```

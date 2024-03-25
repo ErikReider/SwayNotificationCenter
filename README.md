@@ -141,7 +141,7 @@ sudo zypper install SwayNotificationCenter
 
 Lunar and later:
 
-```
+```zsh
 sudo apt install sway-notification-center
 ```
 
@@ -150,14 +150,14 @@ sudo apt install sway-notification-center
 
 Bookworm and later:
 
-```
+```zsh
 sudo apt install sway-notification-center
 ```
 
 ### Guix
 
 The simplest way is to install it to user's profile:
-```
+```zsh
 guix install swaynotificationcenter
 ```
 
@@ -278,7 +278,7 @@ The active toggle button also gains the css-class ".toggle:checked"
 
 `config.json` example:
 
-```json
+```jsonc
 {
   "buttons-grid": { // also works with actions in menubar widget
     "actions": [

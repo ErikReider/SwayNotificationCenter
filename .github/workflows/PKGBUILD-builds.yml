@@ -24,7 +24,7 @@ jobs:
       - name: Install packages
         run: |
           pacman-key --init
-          pacman -Sy
+          pacman -Syu --noconfirm
 
       - name: Add builduser
         run: |

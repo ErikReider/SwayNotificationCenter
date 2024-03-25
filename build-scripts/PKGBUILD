@@ -1,4 +1,4 @@
-# vim: ft=PKGBUILD
+# vim: ft=sh
 # Maintainer: Erik Reider <erik.reider@protonmail.com>
 pkgname=swaync
 pkgver=0.10.1

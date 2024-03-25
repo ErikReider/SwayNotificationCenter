@@ -329,7 +329,7 @@ Notification information can be printed into a terminal by running
 
 Config properties:
 
-```json
+```jsonc
 {
   "scripts": {
     "example-script": {
@@ -341,13 +341,13 @@ Config properties:
       "category": "Notification category Regex"
     }
   }
-  other non scripting properties...
+  // other non scripting properties...
 }
 ```
 
 `config.json` example:
 
-```json
+```jsonc
 {
   "scripts": {
     // This script will only run when Spotify sends a notification containing
@@ -359,7 +359,7 @@ Config properties:
       "body": "Rick Astley - Whenever You Need Somebody"
     }
   }
-  other non scripting properties...
+  // other non scripting properties...
 }
 ```
 
@@ -431,9 +431,9 @@ Waybar css file
 
 Alternatively, the number of notifications can be shown by adding `{}` anywhere in the `format` field in the Waybar config
 
-```json
+```jsonc
   "custom/notification": {
     "format": "{} {icon}",
-    ...
+    // ...
   },
 ```

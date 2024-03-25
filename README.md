@@ -127,7 +127,7 @@ An **unofficial** ebuild is available in [GURU](https://github.com/gentoo/guru)
 
 ```zsh
 eselect repository enable guru
-emaint sync -r guru
+emaint sync --repo guru
 emerge --ask gui-apps/swaync
 ```
 

@@ -32,13 +32,13 @@ namespace SwayNotificationCenter.Widgets {
               // remove trailing whitespaces
               Regex regex = new Regex ("\\s+$");
               string res = regex.replace (msg, msg.length, 0, "");
-			  GLib.SignalHandler.block(this, this.handler_id);
+              GLib.SignalHandler.block (this, this.handler_id);
               if (res.up () == "TRUE") {
                 this.active = true;
               } else {
                 this.active = false;
               }
-			  GLib.SignalHandler.unblock(this, this.handler_id);
+              GLib.SignalHandler.unblock (this, this.handler_id);
             } catch (RegexError e) {
               stderr.printf ("RegexError: %s\n", e.message);
             }

@@ -96,7 +96,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                     update_buttons (source.media_player.metadata);
                 });
             });
-            album_art.set_pixel_size(mpris_config.image_size);
+            album_art.set_pixel_size (mpris_config.image_size);
         }
 
         public void before_destroy () {
@@ -382,23 +382,23 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             }
             Gtk.IconInfo ? icon_info = null;
             if (icon != null) {
-                album_art.set_from_gicon (icon, Gtk.IconSize.DIALOG);
-                icon_info = Gtk.IconTheme.get_default().lookup_by_gicon(icon,
-                                                                        mpris_config.image_size,
-                                                                        Gtk.IconLookupFlags.USE_BUILTIN);
+                album_art.set_from_gicon (icon, Gtk.IconSize.INVALID);
+                icon_info = Gtk.IconTheme.get_default ().lookup_by_gicon (icon,
+                                                                          mpris_config.image_size,
+                                                                          Gtk.IconLookupFlags.USE_BUILTIN);
             } else {
                 // Default icon
                 string icon_name = "audio-x-generic-symbolic";
                 album_art.set_from_icon_name (icon_name,
-                                              Gtk.IconSize.DIALOG);
-                icon_info = Gtk.IconTheme.get_default().lookup_icon (icon_name,
-                                                                     mpris_config.image_size,
-                                                                     Gtk.IconLookupFlags.USE_BUILTIN);
+                                              Gtk.IconSize.INVALID);
+                icon_info = Gtk.IconTheme.get_default ().lookup_icon (icon_name,
+                                                                      mpris_config.image_size,
+                                                                      Gtk.IconLookupFlags.USE_BUILTIN);
             }
 
             if (icon_info != null) {
                 try {
-                    this.album_art_pixbuf = icon_info.load_icon();
+                    this.album_art_pixbuf = icon_info.load_icon ();
                 } catch (Error e) {
                     warning ("Could not load icon: %s", e.message);
                 }

@@ -207,7 +207,7 @@ namespace SwayNotificationCenter {
 
             this.button_press_event.connect ((event) => {
                 // Close notification on middle and right button click
-                switch(event.button) {
+                switch (event.button) {
                     case Gdk.BUTTON_MIDDLE:
                     case Gdk.BUTTON_SECONDARY:
                         this.close_notification ();

@@ -380,12 +380,28 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             if (desktop_entry is DesktopAppInfo) {
                 icon = desktop_entry.get_icon ();
             }
+            Gtk.IconInfo ? icon_info = null;
             if (icon != null) {
                 album_art.set_from_gicon (icon, Gtk.IconSize.INVALID);
+                icon_info = Gtk.IconTheme.get_default ().lookup_by_gicon (icon,
+                                                                          mpris_config.image_size,
+                                                                          Gtk.IconLookupFlags.USE_BUILTIN);
             } else {
                 // Default icon
-                album_art.set_from_icon_name ("audio-x-generic-symbolic",
+                string icon_name = "audio-x-generic-symbolic";
+                album_art.set_from_icon_name (icon_name,
                                               Gtk.IconSize.INVALID);
+                icon_info = Gtk.IconTheme.get_default ().lookup_icon (icon_name,
+                                                                      mpris_config.image_size,
+                                                                      Gtk.IconLookupFlags.USE_BUILTIN);
+            }
+
+            if (icon_info != null) {
+                try {
+                    this.album_art_pixbuf = icon_info.load_icon ();
+                } catch (Error e) {
+                    warning ("Could not load icon: %s", e.message);
+                }
             }
         }
 

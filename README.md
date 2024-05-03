@@ -257,7 +257,7 @@ To reload css after changes
 - Shift+D: Toggle Do Not Disturb
 - Buttons 1-9: Execute alternative actions
 - Left click button / actions: Activate notification action
-- Right click notification: Close notification
+- Middle/Right click notification: Close notification
 
 ## Configuring
 

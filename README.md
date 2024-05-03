@@ -96,12 +96,19 @@ These widgets can be customized, added, removed and even reordered
 
 ## Install
 
+### Alpine Linux
+
+```zsh
+apk add swaync
+````
+
 ### Arch
 
-The package is available on the AUR:
+```zsh
+sudo pacman -S swaync
+```
 
-- [swaync](https://aur.archlinux.org/packages/swaync/)
-- [swaync-git](https://aur.archlinux.org/packages/swaync-git/)
+Alternatively, [swaync-git](https://aur.archlinux.org/packages/swaync-git/) is available on the AUR.
 
 ### Fedora
 

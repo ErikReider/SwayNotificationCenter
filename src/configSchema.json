@@ -407,7 +407,7 @@
           "default": 12
         },
         "blur": {
-          "type": "bool",
+          "type": "boolean",
           "description": "Appy the artwork as the MPRIS background and blur it",
           "default": true
         }
@@ -446,7 +446,7 @@
                 "default": ""
               },
               "active": {
-                  "type": "bool",
+                  "type": "boolean",
                   "description": "Wether the toggle button is active as default or not",
                   "default": false
               }

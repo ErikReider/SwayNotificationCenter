@@ -197,6 +197,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                     remove_player (name);
                     return;
                 }
+                if (is_blacklisted(name)) return;
                 if (check_player_exists (name)) return;
                 MprisSource ? source = MprisSource.get_player (name);
                 if (source != null) add_player (name, source);
@@ -212,6 +213,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         }
 
         private void add_player (string name, MprisSource source) {
+            message ("Adding player \"%s\"", name);
             MprisPlayer player = new MprisPlayer (source, mpris_config);
             player.get_style_context ().add_class ("%s-player".printf (css_class_name));
             carousel.prepend (player);

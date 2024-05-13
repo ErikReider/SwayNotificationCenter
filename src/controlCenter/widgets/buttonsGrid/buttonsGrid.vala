@@ -15,14 +15,25 @@ namespace SwayNotificationCenter.Widgets {
         public ButtonsGrid (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             base (suffix, swaync_daemon, noti_daemon);
 
+            int column_min = 4;
+            int column_max = 7;
+
             Json.Object ? config = get_config (this);
             if (config != null) {
                 Json.Array a = get_prop_array (config, "actions");
                 if (a != null) actions = parse_actions (a);
+
+                int? col_min = get_prop<int> (config, "column-min");
+                if (col_min != null) column_min = col_min;
+                int? col_max = get_prop<int> (config, "column-max");
+                if (col_max != null) column_max = col_max;
             }
 
             Gtk.FlowBox container = new Gtk.FlowBox ();
             container.set_selection_mode (Gtk.SelectionMode.NONE);
+            container.set_halign(Gtk.Align.CENTER);
+            container.set_min_children_per_line(column_min);
+            container.set_max_children_per_line(column_max);
             pack_start (container, true, true, 0);
 
             // add action to container

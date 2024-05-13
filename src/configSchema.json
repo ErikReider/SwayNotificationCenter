@@ -418,6 +418,16 @@
       "description": "A widget to add a grid of buttons that execute shell commands",
       "additionalProperties": false,
       "properties": {
+        "column-min": {
+          "type": "integer",
+          "description": "minimum number of buttons per line",
+          "default": 4
+        },
+        "column-max": {
+          "type": "integer",
+          "description": "maximum number of buttons per line",
+          "default": 7
+        },
         "actions": {
           "type": "array",
           "description": "A list of actions containing a label and a command",

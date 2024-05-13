@@ -135,7 +135,7 @@ config file to be able to detect config errors
 	type: bool ++
 	default: true ++
 	description: Display notification timestamps relative to now e.g. \"26 minutes ago\". ++
-		If false, a local iso8601-formatted absolute timestamp is displayed. 
+		If false, a local iso8601-formatted absolute timestamp is displayed.
 
 *control-center-height* ++
 	type: integer ++
@@ -442,6 +442,21 @@ config file to be able to detect config errors
 			type: object ++
 			css class: widget-buttons (access buttons with >flowbox>flowboxchild>button) ++
 			properties: ++
+				center: ++
+					type: bool ++
+					optional: true ++
+					default: false ++
+					description: set buttons-grid halign to center ++
+				column-min: ++
+					type: integer ++
+					optional: true ++
+					default: 0 ++
+					description: minimum number of buttons per line ++
+				column-max: ++
+					type: integer ++
+					optional: true ++
+					default: 0 ++
+					description: maximum number of buttons per line ++
 				actions: ++
 					type: array ++
 					Default values: [] ++

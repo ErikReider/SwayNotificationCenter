@@ -418,15 +418,20 @@
       "description": "A widget to add a grid of buttons that execute shell commands",
       "additionalProperties": false,
       "properties": {
+        "center": {
+          "type": "boolean",
+          "description": "set buttons-grid halign to center",
+          "default": false
+        },
         "column-min": {
           "type": "integer",
           "description": "minimum number of buttons per line",
-          "default": 4
+          "default": 0
         },
         "column-max": {
           "type": "integer",
           "description": "maximum number of buttons per line",
-          "default": 7
+          "default": 0
         },
         "actions": {
           "type": "array",

@@ -330,6 +330,17 @@ config file to be able to detect config errors
 					optional: true ++
 					default: 12 ++
 					description: The border radius of the album art. ++
+				blur: ++
+					type: bool ++
+					optional: true ++
+					default: true ++
+					description: Appy the artwork as the MPRIS background and blur it ++
+				blacklist: ++
+					type: array ++
+					optional: true ++
+					default: [] ++
+					description: Mpris players to be ignored, without the bus name prefix. ++
+						you may check with `qdbus|grep -i mpris` ++
 			description: A widget that displays multiple music players. ++
 		*menubar*++
 			type: object ++
@@ -595,7 +606,8 @@ config file to be able to detect config errors
 		},
 		"mpris": {
 			"image-size": 96,
-			"image-radius": 12
+			"image-radius": 12,
+			"blacklist": ["playerctld"]
 		},
 		"menubar": {
 			"menu#power": {

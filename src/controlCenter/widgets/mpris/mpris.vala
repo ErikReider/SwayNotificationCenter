@@ -3,6 +3,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         int image_size;
         int image_radius;
         bool blur;
+        string[] blacklist;
     }
 
     public class Mpris : BaseWidget {
@@ -99,6 +100,13 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 bool blur_found;
                 bool? blur = get_prop<bool> (config, "blur", out blur_found);
                 if (blur_found) mpris_config.blur = blur;
+
+                Json.Array ? blacklist = get_prop_array (config, "blacklist");
+                if (blacklist != null) {
+                    mpris_config.blacklist = new string[blacklist.get_length ()];
+                    for (int i = 0; i < blacklist.get_length (); i++)
+                        mpris_config.blacklist[i] = blacklist.get_string_element (i);
+                }
             }
 
             hide ();
@@ -174,6 +182,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             string[] names = dbus_iface.list_names ();
             foreach (string name in names) {
                 if (!name.has_prefix (MPRIS_PREFIX)) continue;
+                if (is_blacklisted (name)) return;
                 if (check_player_exists (name)) return;
                 MprisSource ? source = MprisSource.get_player (name);
                 if (source != null) add_player (name, source);
@@ -185,10 +194,20 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                     remove_player (name);
                     return;
                 }
+                if (is_blacklisted (name)) return;
                 if (check_player_exists (name)) return;
                 MprisSource ? source = MprisSource.get_player (name);
                 if (source != null) add_player (name, source);
             });
+        }
+
+        private bool is_blacklisted (string name) {
+            foreach (string blacklistedPattern in mpris_config.blacklist) {
+                string fullPattern = MPRIS_PREFIX + blacklistedPattern;
+                if (GLib.Regex.match_simple (fullPattern, name))
+                    return true;
+            }
+            return false;
         }
 
         private bool check_player_exists (string name) {

@@ -410,6 +410,15 @@
           "type": "boolean",
           "description": "Appy the artwork as the MPRIS background and blur it",
           "default": true
+        },
+        "blacklist": {
+          "type": "array",
+          "description": "Mpris players to be ignored, without the bus name prefix",
+          "default": [],
+          "items": {
+            "type": "string",
+            "description": "Basename of mpris bus name, Uses Regex."
+          }
         }
       }
     },

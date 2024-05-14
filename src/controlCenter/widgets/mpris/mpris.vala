@@ -182,8 +182,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             string[] names = dbus_iface.list_names ();
             foreach (string name in names) {
                 if (!name.has_prefix (MPRIS_PREFIX)) continue;
-                if (is_blacklisted (name)) return;
-                if (check_player_exists (name)) return;
+                if (is_blacklisted (name)) continue;
+                if (check_player_exists (name)) continue;
                 MprisSource ? source = MprisSource.get_player (name);
                 if (source != null) add_player (name, source);
             }

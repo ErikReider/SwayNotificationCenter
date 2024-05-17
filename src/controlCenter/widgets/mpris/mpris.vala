@@ -213,7 +213,6 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         }
 
         private void add_player (string name, MprisSource source) {
-            message ("Adding player \"%s\"", name);
             MprisPlayer player = new MprisPlayer (source, mpris_config);
             player.get_style_context ().add_class ("%s-player".printf (css_class_name));
             carousel.prepend (player);

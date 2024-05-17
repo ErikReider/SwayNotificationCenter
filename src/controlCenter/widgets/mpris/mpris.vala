@@ -101,7 +101,6 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 bool? blur = get_prop<bool> (config, "blur", out blur_found);
                 if (blur_found) mpris_config.blur = blur;
 
-                // Blacklist
                 Json.Array ? blacklist = get_prop_array (config, "blacklist");
                 if (blacklist != null) {
                     string[] apps = new string[blacklist.get_length ()];

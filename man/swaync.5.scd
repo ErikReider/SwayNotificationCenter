@@ -330,6 +330,15 @@ config file to be able to detect config errors
 					optional: true ++
 					default: 12 ++
 					description: The border radius of the album art. ++
+				blacklist: ++
+					type: array ++
+					optional: true ++
+					default: [] ++
+					description: Audio sources for the mpris widget to ignore. ++
+					Valid array values: ++
+						type: string ++
+						description: Audio source/app name. Regex alowed. Hint ++
+							`$ qdbus | grep mpris` to find source names. ++
 			description: A widget that displays multiple music players. ++
 		*menubar*++
 			type: object ++
@@ -595,7 +604,8 @@ config file to be able to detect config errors
 		},
 		"mpris": {
 			"image-size": 96,
-			"image-radius": 12
+			"image-radius": 12,
+			"blacklist": ["playerctld"]
 		},
 		"menubar": {
 			"menu#power": {

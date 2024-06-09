@@ -12,6 +12,7 @@ namespace SwayNotificationCenter.Widgets {
         private double min_limit;
         private double max_limit;
         private double ? last_set;
+        private bool set_ing = false;
 
         private string cmd_setter;
         private string cmd_getter;
@@ -59,21 +60,33 @@ namespace SwayNotificationCenter.Widgets {
                     value = max_limit;
                 if (value < min_limit)
                     value = min_limit;
+
                 slider.set_value (value);
+                slider.tooltip_text = value.to_string ();
 
-                string value_str = value.to_string ();
-                slider.tooltip_text = value_str;
-
-                if (cmd_setter != "" && last_set != value) {
-                    last_set = value;
-                    Functions.execute_command.begin (cmd_setter + " " + value_str);
-                }
+                queue_set.begin (value);
             });
 
             add (label_widget);
             pack_start (slider, true, true, 0);
 
             show_all ();
+        }
+
+        public async void queue_set (double value) {
+            if (cmd_setter != "" && last_set != value) {
+                last_set = value;
+                if (!set_ing) {
+                    set_ing = true;
+                    yield Functions.execute_command (cmd_setter + " " + value.to_string (), {}, null);
+
+                    set_ing = false;
+
+                    // make sure the last_set is applied
+                    if (value != last_set)
+                        queue_set.begin (last_set);
+                }
+            }
         }
 
         public async void on_update () {

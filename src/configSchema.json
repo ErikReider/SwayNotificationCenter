@@ -515,7 +515,7 @@
     },
     "slider": {
       "type": "object",
-      "description": "Slider to control pulse volume",
+      "description": "general slider control",
       "additionalProperties": false,
       "properties": {
         "label": {

@@ -360,6 +360,9 @@ namespace SwayNotificationCenter {
                 string[] argvp = {};
                 Shell.parse_argv (cmd, out argvp);
 
+                if (argvp[0].has_prefix ("~"))
+                    argvp[0] = Environment.get_home_dir () + argvp[0].substring (1);
+
                 Pid child_pid;
                 int std_output;
                 Process.spawn_async_with_pipes (

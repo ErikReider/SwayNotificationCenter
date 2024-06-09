@@ -12,7 +12,7 @@ namespace SwayNotificationCenter.Widgets {
         private double min_limit;
         private double max_limit;
         private double ? last_set;
-        private bool set_ing = false;
+        private bool cmd_ing = false;
 
         private string cmd_setter;
         private string cmd_getter;
@@ -64,7 +64,10 @@ namespace SwayNotificationCenter.Widgets {
                 slider.set_value (value);
                 slider.tooltip_text = value.to_string ();
 
-                queue_set.begin (value);
+                if (cmd_setter != "" && last_set != value) {
+                    last_set = value;
+                    queue_set.begin (value);
+                }
             });
 
             add (label_widget);
@@ -74,19 +77,28 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         public async void queue_set (double value) {
-            if (cmd_setter != "" && last_set != value) {
-                last_set = value;
-                if (!set_ing) {
-                    set_ing = true;
-                    yield Functions.execute_command (cmd_setter + " " + value.to_string (), {}, null);
+            if (cmd_ing)
+                return;
 
-                    set_ing = false;
+            cmd_ing = true;
+            yield Functions.execute_command (cmd_setter + " " + value.to_string (), {}, null);
 
-                    // make sure the last_set is applied
-                    if (value != last_set)
-                        queue_set.begin (last_set);
-                }
+            cmd_ing = false;
+
+            // make sure the last_set is applied
+            if (value != last_set) {
+                yield queue_set (last_set);
             }
+        }
+
+        public async void queue_get (out string value) {
+            if (cmd_ing)
+                yield queue_get (out value);
+
+            cmd_ing = true;
+            yield Functions.execute_command (cmd_getter, {}, out value);
+
+            cmd_ing = false;
         }
 
         public async void on_update () {
@@ -94,7 +106,7 @@ namespace SwayNotificationCenter.Widgets {
                 return;
 
             string value_str = "";
-            yield Functions.execute_command (cmd_getter, {}, out value_str);
+            yield queue_get (out value_str);
 
             double value = double.parse (value_str);
             if (value <= max_limit && value >= min_limit) {

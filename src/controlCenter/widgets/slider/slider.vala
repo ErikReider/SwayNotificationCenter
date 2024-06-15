@@ -76,12 +76,23 @@ namespace SwayNotificationCenter.Widgets {
             show_all ();
         }
 
+        public string expand_cmd (string cmd, string regex, string value) {
+            try {
+                Regex _regx = new Regex (Regex.escape_string (regex));
+                return _regx.replace_literal (cmd, -1, 0, value);
+            } catch (Error e) {
+                warning ("failed to expand cmd: %s\n", e.message);
+                return cmd;
+            }
+        }
+
         public async void queue_set (double value) {
             if (cmd_ing)
                 return;
 
             cmd_ing = true;
-            yield Functions.execute_command (cmd_setter + " " + value.to_string (), {}, null);
+            var cmd = expand_cmd (cmd_setter, "$value", value.to_string ());
+            yield Functions.execute_command (cmd, {}, null);
 
             cmd_ing = false;
 

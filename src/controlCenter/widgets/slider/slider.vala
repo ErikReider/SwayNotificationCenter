@@ -91,9 +91,14 @@ namespace SwayNotificationCenter.Widgets {
             }
         }
 
-        public async void queue_get (out string value) {
-            if (cmd_ing)
-                yield queue_get (out value);
+        public async void queue_get (int retry, out string value) {
+            if (cmd_ing) {
+                if (retry <= 0) {
+                    value = "";
+                    return;
+                }
+                yield queue_get (retry - 1, out value);
+            }
 
             cmd_ing = true;
             yield Functions.execute_command (cmd_getter, {}, out value);
@@ -106,7 +111,7 @@ namespace SwayNotificationCenter.Widgets {
                 return;
 
             string value_str = "";
-            yield queue_get (out value_str);
+            yield queue_get (4, out value_str);
 
             double value = double.parse (value_str);
             if (value <= max_limit && value >= min_limit) {

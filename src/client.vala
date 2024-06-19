@@ -30,6 +30,8 @@ interface CcDaemon : Object {
 
     public abstract void set_visibility (bool value) throws DBusError, IOError;
 
+    public abstract void invoke_action (uint32 action) throws DBusError, IOError;
+
     [DBus (name = "GetSubscribeData")]
     public abstract SwayncDaemonData get_subscribe_data () throws Error;
 
@@ -69,6 +71,7 @@ private void print_help (string[] args) {
     print ("      \t --hide-latest \t\t\t Hides latest notification. Still shown in Control Center\n");
     print ("      \t --close-latest \t\t Closes latest notification\n");
     print ("  -C, \t --close-all \t\t\t Closes all notifications\n");
+    print ("  -a, \t --action [ACTION_ID]\t\t Invokes the action [ACTION_ID] of the latest notification\n");
     print ("  -sw, \t --skip-wait \t\t\t Doesn't wait when swaync hasn't been started\n");
     print ("  -s, \t --subscribe \t\t\t Subscribe to notification add and close events\n");
     print ("  -swb,  --subscribe-waybar \t\t Subscribe to notification add and close events "
@@ -190,6 +193,14 @@ public int command_line (string[] args) {
                 cc_daemon.set_dnd (false);
                 print (cc_daemon.get_dnd ().to_string ());
                 break;
+	    case "--action":
+	    case "-a":
+	        int action = 0;
+	    	if ( args.length >= 3 ) {
+			action = int.parse(args[2]);
+		}
+	    	cc_daemon.invoke_action ((uint32) action);
+	    	break;
             case "--get-inhibited":
             case "-I":
                 print (cc_daemon.is_inhibited ().to_string ());

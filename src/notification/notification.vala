@@ -206,10 +206,15 @@ namespace SwayNotificationCenter {
             ///
 
             this.button_press_event.connect ((event) => {
-                if (event.button != Gdk.BUTTON_SECONDARY) return false;
-                // Right click
-                this.close_notification ();
-                return true;
+                // Close notification on middle and right button click
+                switch (event.button) {
+                    case Gdk.BUTTON_MIDDLE:
+                    case Gdk.BUTTON_SECONDARY:
+                        this.close_notification ();
+                        return true;
+                    default:
+                        return false;
+                }
             });
 
             // Adds CSS :hover selector to EventBox

@@ -74,7 +74,8 @@ private class FadedViewportChild : Gtk.Container {
         base.set_can_focus (true);
         base.set_redraw_on_allocate (false);
 
-        this.y_padding = (int) (y_padding * 0.5);
+        // Half due to the fade basically stopping at 50% of the height
+        this.y_padding = y_padding / 2;
         this._child = null;
 
         this.show ();
@@ -116,10 +117,15 @@ private class FadedViewportChild : Gtk.Container {
         uint border_width = this.get_border_width ();
         if (this._child != null && this._child.get_visible ()) {
             child_allocation.x = allocation.x + (int) border_width;
-            child_allocation.y = allocation.y + y_padding + (int) border_width;
+            child_allocation.y = allocation.y + (int) border_width;
+            Gtk.Align align_y = _child.get_valign ();
+            if (align_y == Gtk.Align.END) {
+                child_allocation.y -= y_padding;
+            } else {
+                child_allocation.y += y_padding;
+            }
             child_allocation.width = allocation.width - 2 * (int) border_width;
-            child_allocation.height = allocation.height + y_padding * 2
-                                      - 2 * (int) border_width;
+            child_allocation.height = allocation.height - 2 * (int) border_width;
             this._child.size_allocate (child_allocation);
             if (this.get_realized ()) {
                 this._child.show ();
@@ -147,7 +153,6 @@ private class FadedViewportChild : Gtk.Container {
             minimum_height += y_padding * 2;
             natural_height += y_padding * 2;
         }
-
     }
 
     public override bool draw (Cairo.Context cr) {

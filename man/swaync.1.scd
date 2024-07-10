@@ -44,7 +44,7 @@ swaync - A simple notification daemon with a GTK gui for notifications and the c
 
 *Left click button / actions*: Activate notification action
 
-*Right click notification*: Close notification
+*Middle/Right click notification*: Close notification
 
 # CONFIGURATION
 

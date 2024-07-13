@@ -96,12 +96,19 @@ These widgets can be customized, added, removed and even reordered
 
 ## Install
 
+### Alpine Linux
+
+```zsh
+apk add swaync
+````
+
 ### Arch
 
-The package is available on the AUR:
+```zsh
+sudo pacman -S swaync
+```
 
-- [swaync](https://aur.archlinux.org/packages/swaync/)
-- [swaync-git](https://aur.archlinux.org/packages/swaync-git/)
+Alternatively, [swaync-git](https://aur.archlinux.org/packages/swaync-git/) is available on the AUR.
 
 ### Fedora
 
@@ -127,7 +134,7 @@ An **unofficial** ebuild is available in [GURU](https://github.com/gentoo/guru)
 
 ```zsh
 eselect repository enable guru
-emaint sync -r guru
+emaint sync --repo guru
 emerge --ask gui-apps/swaync
 ```
 
@@ -141,7 +148,7 @@ sudo zypper install SwayNotificationCenter
 
 Lunar and later:
 
-```
+```zsh
 sudo apt install sway-notification-center
 ```
 
@@ -150,14 +157,14 @@ sudo apt install sway-notification-center
 
 Bookworm and later:
 
-```
+```zsh
 sudo apt install sway-notification-center
 ```
 
 ### Guix
 
 The simplest way is to install it to user's profile:
-```
+```zsh
 guix install swaynotificationcenter
 ```
 
@@ -197,7 +204,7 @@ But we recommend to use [Guix Home](https://guix.gnu.org/manual/devel/en/html_no
 - `libnotify`
 
 ```zsh
-meson build --prefix=/usr
+meson setup build --prefix=/usr
 ninja -C build
 meson install -C build
 ```
@@ -250,7 +257,7 @@ To reload css after changes
 - Shift+D: Toggle Do Not Disturb
 - Buttons 1-9: Execute alternative actions
 - Left click button / actions: Activate notification action
-- Right click notification: Close notification
+- Middle/Right click notification: Close notification
 
 ## Configuring
 
@@ -278,7 +285,7 @@ The active toggle button also gains the css-class ".toggle:checked"
 
 `config.json` example:
 
-```json
+```jsonc
 {
   "buttons-grid": { // also works with actions in menubar widget
     "actions": [
@@ -329,7 +336,7 @@ Notification information can be printed into a terminal by running
 
 Config properties:
 
-```json
+```jsonc
 {
   "scripts": {
     "example-script": {
@@ -341,13 +348,13 @@ Config properties:
       "category": "Notification category Regex"
     }
   }
-  other non scripting properties...
+  // other non scripting properties...
 }
 ```
 
 `config.json` example:
 
-```json
+```jsonc
 {
   "scripts": {
     // This script will only run when Spotify sends a notification containing
@@ -359,7 +366,7 @@ Config properties:
       "body": "Rick Astley - Whenever You Need Somebody"
     }
   }
-  other non scripting properties...
+  // other non scripting properties...
 }
 ```
 
@@ -431,9 +438,9 @@ Waybar css file
 
 Alternatively, the number of notifications can be shown by adding `{}` anywhere in the `format` field in the Waybar config
 
-```json
+```jsonc
   "custom/notification": {
     "format": "{} {icon}",
-    ...
+    // ...
   },
 ```

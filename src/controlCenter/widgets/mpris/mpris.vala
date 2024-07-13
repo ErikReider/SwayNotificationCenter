@@ -101,7 +101,6 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 bool? blur = get_prop<bool> (config, "blur", out blur_found);
                 if (blur_found) mpris_config.blur = blur;
 
-                // Blacklist
                 Json.Array ? blacklist = get_prop_array (config, "blacklist");
                 if (blacklist != null) {
                     mpris_config.blacklist = new string[blacklist.get_length ()];
@@ -216,7 +215,6 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         }
 
         private void add_player (string name, MprisSource source) {
-            message ("Adding player \"%s\"", name);
             MprisPlayer player = new MprisPlayer (source, mpris_config);
             player.get_style_context ().add_class ("%s-player".printf (css_class_name));
             carousel.prepend (player);

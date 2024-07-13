@@ -3,6 +3,7 @@ namespace SwayNotificationCenter.Widgets {
 
         private string command;
         private string update_command;
+        private ulong handler_id;
 
         public ToggleButton (string label, string command, string update_command, bool active) {
             this.command = command;
@@ -13,7 +14,7 @@ namespace SwayNotificationCenter.Widgets {
                 this.active = true;
             }
 
-            this.toggled.connect (on_toggle);
+            this.handler_id = this.toggled.connect (on_toggle);
         }
 
         private async void on_toggle () {
@@ -31,11 +32,13 @@ namespace SwayNotificationCenter.Widgets {
               // remove trailing whitespaces
               Regex regex = new Regex ("\\s+$");
               string res = regex.replace (msg, msg.length, 0, "");
+              GLib.SignalHandler.block (this, this.handler_id);
               if (res.up () == "TRUE") {
                 this.active = true;
               } else {
                 this.active = false;
               }
+              GLib.SignalHandler.unblock (this, this.handler_id);
             } catch (RegexError e) {
               stderr.printf ("RegexError: %s\n", e.message);
             }

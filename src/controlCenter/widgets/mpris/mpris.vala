@@ -104,11 +104,14 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 // Blacklist
                 Json.Array ? blacklist = get_prop_array (config, "blacklist");
                 if (blacklist != null) {
-                    string[] apps = new string[blacklist.get_length ()];
+                    mpris_config.blacklist = new string[blacklist.get_length ()];
                     for (int i = 0; i < blacklist.get_length (); i++) {
-                        apps[i] = blacklist.get_string_element (i);
+                        if(blacklist.get_element (i).get_node_type () != Json.NodeType.VALUE) {
+                            warning ("Blacklist entries should be strings");
+                            continue;
+                        }
+                        mpris_config.blacklist[i] = blacklist.get_string_element (i);
                     }
-                    mpris_config.blacklist = apps;
                 }
             }
 
@@ -260,8 +263,10 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
         private bool is_blacklisted (string name) {
             foreach (string blacklistedPattern in mpris_config.blacklist) {
-                string fullPattern = MPRIS_PREFIX + blacklistedPattern;
-                if (GLib.Regex.match_simple (fullPattern, name, GLib.RegexCompileFlags.JAVASCRIPT_COMPAT, 0)) {
+                if (blacklistedPattern == null || blacklistedPattern.length == 0) {
+                    continue;
+                }
+                if (GLib.Regex.match_simple (blacklistedPattern, name, GLib.RegexCompileFlags.JAVASCRIPT_COMPAT, 0)) {
                     message ("\"%s\" is blacklisted", name);
                     return true;
                 }

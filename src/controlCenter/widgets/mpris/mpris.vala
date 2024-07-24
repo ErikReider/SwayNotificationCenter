@@ -105,7 +105,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 if (blacklist != null) {
                     mpris_config.blacklist = new string[blacklist.get_length ()];
                     for (int i = 0; i < blacklist.get_length (); i++) {
-                        if(blacklist.get_element (i).get_node_type () != Json.NodeType.VALUE) {
+                        if (blacklist.get_element (i).get_node_type () != Json.NodeType.VALUE) {
                             warning ("Blacklist entries should be strings");
                             continue;
                         }
@@ -187,7 +187,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             string[] names = dbus_iface.list_names ();
             foreach (string name in names) {
                 if (!name.has_prefix (MPRIS_PREFIX)) continue;
-                if (is_blacklisted(name)) continue;
+                if (is_blacklisted (name)) continue;
                 if (check_player_exists (name)) return;
                 MprisSource ? source = MprisSource.get_player (name);
                 if (source != null) add_player (name, source);
@@ -199,7 +199,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                     remove_player (name);
                     return;
                 }
-                if (is_blacklisted(name)) return;
+                if (is_blacklisted (name)) return;
                 if (check_player_exists (name)) return;
                 MprisSource ? source = MprisSource.get_player (name);
                 if (source != null) add_player (name, source);

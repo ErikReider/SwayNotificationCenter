@@ -148,8 +148,14 @@ namespace SwayNotificationCenter {
 
             // Try to get the desktop file
             string[] entries = {};
-            if (desktop_entry != null) entries += desktop_entry.replace (".desktop", "");
-            if (app_name != null) entries += app_name.replace (".desktop", "");
+            if (desktop_entry != null) {
+                entries += desktop_entry.replace (".desktop", "");
+                entries += desktop_entry.down ().replace (".desktop", "");
+            }
+            if (app_name != null) {
+                entries += app_name.replace (".desktop", "");
+                entries += app_name.down ().replace (".desktop", "");
+            }
             foreach (string entry in entries) {
                 var app_info = new DesktopAppInfo ("%s.desktop".printf (entry));
                 // Checks if the .desktop file actually exists or not

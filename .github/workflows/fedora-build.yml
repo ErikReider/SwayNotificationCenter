@@ -18,7 +18,7 @@ jobs:
       - name: Install tooling for source RPM build
         run: |
           microdnf -y install --nodocs --setopt=install_weak_deps=0 \
-            @development-tools @rpm-development-tools rpkg git 'dnf-command(builddep)'
+            @development-tools @rpm-development-tools rpkg git 'dnf5-command(builddep)'
 
       # It is necessary to checkout into sub-directory, because of some weird ownership problems cause by using containers
       - name: Check out sources

@@ -11,15 +11,14 @@ on:
 
 jobs:
   fedora-build:
-    container: fedora:latest
+    container: registry.fedoraproject.org/fedora-minimal:latest
     runs-on: ubuntu-latest
 
     steps:
       - name: Install tooling for source RPM build
         run: |
-          dnf -y install @development-tools @rpm-development-tools
-          dnf -y install rpkg git
-          dnf -y install 'dnf-command(builddep)'
+          microdnf -y install --nodocs --setopt=install_weak_deps=0 \
+            @development-tools @rpm-development-tools rpkg git 'dnf-command(builddep)'
 
       # It is necessary to checkout into sub-directory, because of some weird ownership problems cause by using containers
       - name: Check out sources
@@ -42,7 +41,7 @@ jobs:
       - name: Install build dependencies
         run: |
           cd swaync
-          dnf -y builddep ./specs/swaync.rpkg.spec
+          microdnf -y builddep ./specs/swaync.rpkg.spec
 
       - name: Local build
         run: |

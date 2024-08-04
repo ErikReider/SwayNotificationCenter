@@ -9,7 +9,7 @@ on:
 
 jobs:
   fedora-copr:
-    container: fedora:latest
+    container: registry.fedoraproject.org/fedora-minimal:latest
     runs-on: ubuntu-latest
 
     steps:
@@ -29,7 +29,8 @@ jobs:
 
       - name: Install tooling for source RPM build
         run: |
-          dnf -y install copr-cli rpkg git
+          microdnf -y install --nodocs --setopt=install_weak_deps=0 \
+            copr-cli rpkg git
 
       # It is necessary to checkout into sub-directory, because of some weird ownership problems cause by using containers
       - name: Check out sources

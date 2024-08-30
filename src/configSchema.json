@@ -85,6 +85,11 @@
       "description": "If each notification should display a 'COPY \"1234\"' action",
       "default": true
     },
+    "notification-ignore-left-click": {
+      "type": "boolean",
+      "description": "If notification should be closed on left click. This does not affect sliding behavior",
+      "default": false
+    },
     "notification-inline-replies": {
       "type": "boolean",
       "description": "If notifications should display a text field to reply if the sender requests it. NOTE: Replying in popup notifications is only available if the compositor supports GTK Layer-Shell ON_DEMAND keyboard interactivity.",

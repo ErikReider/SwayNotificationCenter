@@ -167,7 +167,7 @@ namespace SwayNotificationCenter {
                 // Emit released
                 if (!default_action_down) return;
                 default_action_down = false;
-                if (default_action_in) {
+                if (default_action_in && !ConfigModel.instance.notification_ignore_left_click) {
                     click_default_action ();
                 }
 

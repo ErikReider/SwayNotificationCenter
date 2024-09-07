@@ -80,6 +80,18 @@ namespace SwayNotificationCenter.Widgets {
         public async void set_brightness (float percent) {
             this.close ();
             try {
+                if (fd.query_exists()) {
+                    try {
+                        var dos = new DataOutputStream (fd.append_to (FileCreateFlags.NONE));
+                        int actual = calc_actual (percent);
+                        dos.put_string ("%d".printf(actual));
+                        connect_monitor ();
+                        return;
+                    } catch (Error e) {
+                        // pass if we don't have permission to do this directly,
+                        // and proceed to attempt through dbus
+                    }
+                }
                 if (subsystem == "backlight") {
                     int actual = calc_actual (percent);
                     login1.set_brightness.begin (subsystem, device, actual);

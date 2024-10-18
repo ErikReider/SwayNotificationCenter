@@ -126,6 +126,11 @@ config file to be able to detect config errors
 	default: true ++
 	description: Hides the control center when clicking on notification action
 
+*text-empty* ++
+	type: string ++
+	default: "No Notifications" ++
+	description: Text that appears when there are no notifications to show
+
 *fit-to-screen* ++
 	type: bool ++
 	default: true ++

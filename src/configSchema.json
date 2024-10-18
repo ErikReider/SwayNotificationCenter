@@ -176,6 +176,11 @@
       "description": "Hides the control center when clicking on notification action",
       "default": true
     },
+    "text-empty": {
+      "type": "string",
+      "description": "Text that appears when there are no notifications to show",
+      "default": "No Notifications"
+    },
     "script-fail-notify": {
       "type": "boolean",
       "description": "Sends a notification if a script fails to run",

@@ -39,7 +39,7 @@ public class XdgActivationHelper : Object {
         value->set_string (token.dup ());
     }
 
-    private const TokenListener token_listener = {
+    private const TokenListener TOKEN_LISTENER = {
         handle_done,
     };
 
@@ -60,7 +60,7 @@ public class XdgActivationHelper : Object {
         token_value.set_string (null);
 
         Token * token = xdg_activation->get_activation_token ();
-        token->add_listener (token_listener, &token_value);
+        token->add_listener (TOKEN_LISTENER, &token_value);
         token->set_surface (wl_surface);
         token->commit ();
         while (wl_display.dispatch () >= 0 && token_value.get_string () == null) {

@@ -327,7 +327,7 @@ namespace SwayNotificationCenter {
             name = "SwayNotificationCenter";
             vendor = "ErikReider";
             version = Constants.VERSIONNUM;
-            spec_version = "1.2";
+            spec_version = "1.3";
         }
 
         /**
@@ -357,6 +357,12 @@ namespace SwayNotificationCenter {
          * support the concept of being able to "invoke" a notification.
          */
         public signal void ActionInvoked (uint32 id, string action_key);
+
+        /**
+         * This signal can be emitted before a ActionInvoked signal. It
+         * carries an activation token that can be used to activate a toplevel.
+         */
+        public signal void ActivationToken (uint32 id, string activation_token);
 
         /** To be used by the non-standard "inline-reply" capability */
         public signal void NotificationReplied (uint32 id, string text);

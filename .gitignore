@@ -7,4 +7,5 @@ SwayNotificationCenter
 ./swaync*
 ./src/swaync
 ./src/swaync*
+.cache/
 swaync-git*

@@ -454,7 +454,7 @@ namespace SwayNotificationCenter {
         }
 
         public void click_default_action () {
-            action_clicked (param.default_action, true);
+            action_clicked (param.default_action);
         }
 
         public void click_alt_action (uint index) {
@@ -472,11 +472,18 @@ namespace SwayNotificationCenter {
             action_clicked (param.actions.index (index));
         }
 
-        private void action_clicked (Action ? action, bool is_default = false) {
+        private void action_clicked (Action ? action) {
             noti_daemon.run_scripts (param, ScriptRunOnType.ACTION);
             if (action != null
                 && action.identifier != null
                 && action.identifier != "") {
+                // Try getting a XDG Activation token so that the application
+                // can request compositor focus
+                string ? token = swaync_daemon.xdg_activation.get_token (this);
+                if (token != null) {
+                    noti_daemon.ActivationToken (param.applied_id, token);
+                }
+
                 noti_daemon.ActionInvoked (param.applied_id, action.identifier);
                 if (ConfigModel.instance.hide_on_action) {
                     try {

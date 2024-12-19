@@ -15,20 +15,37 @@ namespace SwayNotificationCenter.Widgets {
         public ButtonsGrid (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             base (suffix, swaync_daemon, noti_daemon);
 
-            Json.Object ? config = get_config (this);
-            if (config != null) {
-                Json.Array a = get_prop_array (config, "actions");
-                if (a != null) actions = parse_actions (a);
-            }
-
             Gtk.FlowBox container = new Gtk.FlowBox ();
             container.set_selection_mode (Gtk.SelectionMode.NONE);
             pack_start (container, true, true, 0);
 
+            Json.Object ? config = get_config (this);
+            if (config != null) {
+                Json.Array a = get_prop_array (config, "actions");
+                if (a != null) {
+                    actions = parse_actions (a);
+                }
+
+                bool ? center = get_prop<bool> (config, "center");
+                if (center != null && center) {
+                    container.set_halign (Gtk.Align.CENTER);
+                }
+
+                int ? col_min = get_prop<int> (config, "column-min");
+                if (col_min != null && col_min > 0) {
+                    container.set_min_children_per_line (col_min);
+                }
+
+                int ? col_max = get_prop<int> (config, "column-max");
+                if (col_max != null && col_max > 0) {
+                    container.set_max_children_per_line (col_max);
+                }
+            }
+
             // add action to container
             foreach (var act in actions) {
                 switch (act.type) {
-                    case ButtonType.TOGGLE:
+                    case ButtonType.TOGGLE :
                         ToggleButton tb = new ToggleButton (act.label, act.command, act.update_command, act.active);
                         container.insert (tb, -1);
                         toggle_buttons.append (tb);

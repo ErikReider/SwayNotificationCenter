@@ -1,7 +1,7 @@
 # vim: syntax=spec
 %global alt_pkg_name swaync
 
-Name:       {{{ git_repo_name }}}
+Name:       {{{ git_repo_name }}}-git
 Version:    0.10.1
 Release:    1%{?dist}
 Summary:    Notification daemon with GTK GUI

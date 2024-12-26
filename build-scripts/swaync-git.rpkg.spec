@@ -3,7 +3,7 @@
 
 Name:       {{{ git_repo_name }}}-git
 Version:    {{{ git_repo_release lead="$(git describe --tags --abbrev=0)" }}}
-Release:    1%{?dist}
+Release:    {{{ echo -n "$(git rev-list --all --count)" }}}%{?dist}
 Summary:    Notification daemon with GTK GUI
 Provides:   desktop-notification-daemon
 Provides:   sway-notification-center = %{version}-%{release}

@@ -2,7 +2,7 @@
 %global alt_pkg_name swaync
 
 Name:       {{{ git_repo_name }}}-git
-Version:    0.10.1
+Version:    {{{ git_repo_release lead="$(git describe --tags --abbrev=0)" }}}
 Release:    1%{?dist}
 Summary:    Notification daemon with GTK GUI
 Provides:   desktop-notification-daemon

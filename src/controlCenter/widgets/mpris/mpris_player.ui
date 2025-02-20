@@ -2,6 +2,11 @@
 <!-- Generated with glade 3.40.0 -->
 <interface>
   <requires lib="gtk+" version="3.24"/>
+  <object class="GtkAdjustment" id="volume_adj">
+    <property name="upper">1</property>
+    <property name="step-increment">0.0625</property>
+    <property name="page-increment">0.0625</property>
+  </object>
   <template class="SwayNotificationCenterWidgetsMprisMprisPlayer" parent="GtkBox">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
@@ -100,169 +105,231 @@
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
-        <property name="halign">center</property>
-        <property name="spacing">6</property>
-        <property name="homogeneous">True</property>
+        <property name="orientation">vertical</property>
         <child>
-          <object class="GtkButton" id="button_shuffle">
+          <object class="GtkProgressBar" id="custom_progress">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="receives-default">True</property>
-            <property name="halign">center</property>
-            <property name="valign">center</property>
-            <property name="relief">none</property>
-            <child>
-              <object class="GtkImage" id="button_shuffle_img">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="xpad">4</property>
-                <property name="ypad">4</property>
-                <property name="pixel-size">20</property>
-                <property name="icon-name">media-playlist-shuffle-symbolic</property>
-                <property name="icon_size">0</property>
-              </object>
-            </child>
+            <property name="text" translatable="yes">progress</property>
             <style>
-              <class name="circular"/>
-              <class name="image-button"/>
-              <class name="flat"/>
+              <class name="progress-bar"/>
             </style>
           </object>
           <packing>
-            <property name="expand">True</property>
+            <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">0</property>
           </packing>
         </child>
-        <child>
-          <object class="GtkButton" id="button_prev">
+        <style>
+          <class name="flat"/>
+        </style>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child type="center">
+          <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="receives-default">True</property>
             <property name="halign">center</property>
-            <property name="valign">center</property>
-            <property name="relief">none</property>
+            <property name="spacing">6</property>
+            <property name="homogeneous">True</property>
             <child>
-              <object class="GtkImage" id="button_prev_img">
+              <object class="GtkButton" id="button_shuffle">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="xpad">4</property>
-                <property name="ypad">4</property>
-                <property name="pixel-size">20</property>
-                <property name="icon-name">media-seek-backward-symbolic</property>
-                <property name="icon_size">0</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="relief">none</property>
+                <child>
+                  <object class="GtkImage" id="button_shuffle_img">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="xpad">4</property>
+                    <property name="ypad">4</property>
+                    <property name="pixel-size">20</property>
+                    <property name="icon-name">media-playlist-shuffle-symbolic</property>
+                    <property name="icon_size">0</property>
+                  </object>
+                </child>
+                <style>
+                  <class name="circular"/>
+                  <class name="image-button"/>
+                  <class name="flat"/>
+                </style>
               </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
             </child>
-            <style>
-              <class name="circular"/>
-              <class name="image-button"/>
-              <class name="flat"/>
-            </style>
+            <child>
+              <object class="GtkButton" id="button_prev">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="relief">none</property>
+                <child>
+                  <object class="GtkImage" id="button_prev_img">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="xpad">4</property>
+                    <property name="ypad">4</property>
+                    <property name="pixel-size">20</property>
+                    <property name="icon-name">media-seek-backward-symbolic</property>
+                    <property name="icon_size">0</property>
+                  </object>
+                </child>
+                <style>
+                  <class name="circular"/>
+                  <class name="image-button"/>
+                  <class name="flat"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_play_pause">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="relief">none</property>
+                <child>
+                  <object class="GtkImage" id="button_play_pause_img">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="xpad">4</property>
+                    <property name="ypad">4</property>
+                    <property name="pixel-size">20</property>
+                    <property name="icon-name">media-playback-pause-symbolic</property>
+                    <property name="icon_size">0</property>
+                  </object>
+                </child>
+                <style>
+                  <class name="circular"/>
+                  <class name="image-button"/>
+                  <class name="flat"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_next">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="relief">none</property>
+                <child>
+                  <object class="GtkImage" id="button_next_img">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="xpad">4</property>
+                    <property name="ypad">4</property>
+                    <property name="pixel-size">20</property>
+                    <property name="icon-name">media-seek-forward-symbolic</property>
+                    <property name="icon_size">0</property>
+                  </object>
+                </child>
+                <style>
+                  <class name="circular"/>
+                  <class name="image-button"/>
+                  <class name="flat"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_repeat">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="relief">none</property>
+                <child>
+                  <object class="GtkImage" id="button_repeat_img">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="xpad">4</property>
+                    <property name="ypad">4</property>
+                    <property name="pixel-size">20</property>
+                    <property name="icon-name">media-playlist-repeat-symbolic</property>
+                    <property name="icon_size">0</property>
+                  </object>
+                </child>
+                <style>
+                  <class name="circular"/>
+                  <class name="image-button"/>
+                  <class name="flat"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">4</property>
+              </packing>
+            </child>
           </object>
           <packing>
-            <property name="expand">True</property>
+            <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="button_play_pause">
+          <object class="GtkScale" id="scale_volume">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="receives-default">True</property>
-            <property name="halign">center</property>
-            <property name="valign">center</property>
-            <property name="relief">none</property>
-            <child>
-              <object class="GtkImage" id="button_play_pause_img">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="xpad">4</property>
-                <property name="ypad">4</property>
-                <property name="pixel-size">20</property>
-                <property name="icon-name">media-playback-pause-symbolic</property>
-                <property name="icon_size">0</property>
-              </object>
-            </child>
+            <property name="can-focus">True</property>
+            <property name="adjustment">volume_adj</property>
+            <property name="show-fill-level">True</property>
+            <property name="fill-level">1</property>
+            <property name="round-digits">4</property>
+            <property name="draw-value">False</property>
             <style>
-              <class name="circular"/>
-              <class name="image-button"/>
-              <class name="flat"/>
+              <class name="widget-mpris-player-volume"/>
             </style>
           </object>
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="button_next">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="receives-default">True</property>
-            <property name="halign">center</property>
-            <property name="valign">center</property>
-            <property name="relief">none</property>
-            <child>
-              <object class="GtkImage" id="button_next_img">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="xpad">4</property>
-                <property name="ypad">4</property>
-                <property name="pixel-size">20</property>
-                <property name="icon-name">media-seek-forward-symbolic</property>
-                <property name="icon_size">0</property>
-              </object>
-            </child>
-            <style>
-              <class name="circular"/>
-              <class name="image-button"/>
-              <class name="flat"/>
-            </style>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="button_repeat">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="receives-default">True</property>
-            <property name="halign">center</property>
-            <property name="valign">center</property>
-            <property name="relief">none</property>
-            <child>
-              <object class="GtkImage" id="button_repeat_img">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="xpad">4</property>
-                <property name="ypad">4</property>
-                <property name="pixel-size">20</property>
-                <property name="icon-name">media-playlist-repeat-symbolic</property>
-                <property name="icon_size">0</property>
-              </object>
-            </child>
-            <style>
-              <class name="circular"/>
-              <class name="image-button"/>
-              <class name="flat"/>
-            </style>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">4</property>
+            <property name="pack-type">end</property>
+            <property name="position">0</property>
           </packing>
         </child>
       </object>
       <packing>
         <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">2</property>
+        <property name="fill">False</property>
+        <property name="position">3</property>
       </packing>
     </child>
   </template>

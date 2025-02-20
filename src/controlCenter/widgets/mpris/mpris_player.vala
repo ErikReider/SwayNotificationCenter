@@ -10,6 +10,9 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         unowned Gtk.Image album_art;
 
         [GtkChild]
+        unowned Gtk.ProgressBar custom_progress;
+
+        [GtkChild]
         unowned Gtk.Button button_shuffle;
         [GtkChild]
         unowned Gtk.Button button_prev;
@@ -23,6 +26,10 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         unowned Gtk.Button button_repeat;
         [GtkChild]
         unowned Gtk.Image button_repeat_img;
+        [GtkChild]
+        unowned Gtk.Scale scale_volume;
+        [GtkChild]
+        unowned Gtk.Adjustment volume_adj;
 
         public MprisSource source { construct; get; }
 
@@ -33,6 +40,16 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
         public const string ICON_PLAY = "media-playback-start-symbolic";
         public const string ICON_PAUSE = "media-playback-pause-symbolic";
+
+        public const string ICON_STAR = "starred-symbolic";
+        public const string ICON_NON_STAR = "non-starred-symbolic";
+
+        public double progress_rate = 0.0;
+
+        public bool progressing = false;
+
+        public int song_length = 0;
+
 
         private Cancellable album_art_cancellable = new Cancellable ();
         private string prev_art_url;
@@ -53,6 +70,14 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             update_content ();
 
             /* Callbacks */
+
+            // progress
+            //  custom_progress.event.connect (() => {
+            //      print("rats");
+            //      return true;
+            //  });
+
+
 
             // Shuffle
             button_shuffle.clicked.connect (() => {
@@ -96,7 +121,21 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                     update_buttons (source.media_player.metadata);
                 });
             });
+
+			//  custom_progress.set_fraction (0.5);
             album_art.set_pixel_size (mpris_config.image_size);
+
+            //  scale_volume.set_value_pos(50);
+
+            //  volume_adj.set_value(50);
+
+            volume_adj.value_changed.connect (() => {
+                if (source.media_player.volume == volume_adj.get_value()) return;
+                	char[] buf = new char[double.DTOSTR_BUF_SIZE];
+                //  print (volume_adj.get_value().to_str(buf) + "\n");
+                source.media_player.volume = volume_adj.get_value();
+                //  source.media_player.volume = volume_adj.value;
+            });
         }
 
         public void before_destroy () {
@@ -187,6 +226,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                     case "CanPause":
                     case "CanPlay":
                         update_button_play_pause (metadata);
+                        update_progress(metadata);
                         break;
                     case "Metadata":
                         update_content ();
@@ -205,6 +245,20 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                         break;
                     case "CanControl":
                         update_buttons (metadata);
+                        break;
+                    case "Volume":
+                        volume_adj.set_value (source.media_player.volume);
+                        break;
+                    case "Rate":
+                        double rate = source.media_player.rate;
+                        //  print(progress_rate.to_string() + "  " + rate.to_string() + "\n");
+                        //  if ((progress_rate == 0) && (rate > 0)) {
+                        //      progress_rate = rate;
+                        //      pulse_progress.begin ();
+                        //  };
+                        progress_rate = rate;
+                        if (!progressing) pulse_progress.begin ();
+                        update_progress(metadata);
                         break;
                 }
             }
@@ -228,6 +282,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
             // Update the buttons
             update_buttons (metadata);
+
+            update_progress(metadata);
         }
 
         private void update_buttons (HashTable<string, Variant> metadata) {
@@ -300,14 +356,20 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 }
             }
 
+            //  if (artist == null || artist.length == 0) {
+            //      artist = metadata["xesam:artist"].get_string ();
+            //  }
+
             string result = "";
             if (album != null) {
                 if (artist != null && artist.length > 0) {
+                    //  print(artist);
                     result = string.joinv (" - ", { artist, album });
                 } else {
                     result = album;
                 }
             }
+	        //  result = artist;
             sub_title.set_text (result);
             // Hide if no album or artist
             sub_title.set_visible (result.length > 0);
@@ -451,6 +513,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             }
             button_play_pause_img.icon_name = icon_name;
             button_play_pause.sensitive = check && source.media_player.can_control;
+            //  print(string.parse(source.media_player.position));
         }
 
         private void update_button_forward (HashTable<string, Variant> metadata) {
@@ -478,13 +541,15 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                         case "None":
                             icon_name = ICON_REPEAT;
                             opacity = UNSELECTED_OPACITY;
-                            remove_flat_css_class = false;
+			    remove_flat_css_class = false;
                             break;
                         case "Playlist":
                             icon_name = ICON_REPEAT;
+			    opacity = 1.0;
                             break;
                         case "Track":
                             icon_name = ICON_REPEAT_SONG;
+                            opacity = 1.0;
                             break;
                     }
                     unowned Gtk.StyleContext ctx = button_repeat.get_style_context ();
@@ -498,6 +563,38 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             } else {
                 button_repeat.hide ();
             }
+        }
+
+        private void update_progress (HashTable<string, Variant> metadata) {
+            if ("mpris:length" in metadata) {
+                int position = int.parse(source.media_player.position.to_string());
+                int length = int.parse(metadata["mpris:length"].get_int64 ().to_string());
+                song_length = length;
+                float progress = ((float)position/(float)length);
+                custom_progress.set_fraction (progress);
+            }
+        }
+
+        public async void pulse_progress () {
+            progressing = true;
+            //  print ("pulse_progress \n");
+            //  print (((uint)(1000 / progress_rate)).to_string() + "\n");
+            while (true && progress_rate > 0.0) {
+                if (progress_rate == 0.0) return;
+                //  print ( "loop \n");
+                Timeout.add ((uint)(500 / progress_rate), () => {
+                    //  print ("pulse \n");
+                    double progress = custom_progress.get_fraction ();
+                    double progressAdd = ((double)500000/(double)song_length);
+                    custom_progress.set_fraction (progress + progressAdd);
+                    //  print ( "pulsed \n");
+                    pulse_progress.callback ();
+                    return false;
+                });
+                yield;
+                //  print ("endloop \n");
+            }
+            progressing = false;
         }
     }
 }

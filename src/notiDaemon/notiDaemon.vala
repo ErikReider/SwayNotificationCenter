@@ -193,6 +193,11 @@ namespace SwayNotificationCenter {
                 show_notification = false;
             }
 
+            if (param.swaync_send_quiet) {
+                // Don't show the notification window if it's quiet
+                show_notification = false;
+            }
+
             bool bypass_dnd = param.urgency == UrgencyLevels.CRITICAL || param.swaync_bypass_dnd;
             // Don't show the notification window if dnd or inhibited
             if (!bypass_dnd && (dnd || swaync_daemon.inhibited)) {

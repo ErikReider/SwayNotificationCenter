@@ -56,7 +56,7 @@
                                     <property name="orientation">vertical</property>
                                     <property name="spacing">8</property>
                                     <child>
-                                      <object class="GtkBox">
+                                      <object class="GtkBox" id="custom_action_box">
                                         <property name="visible">True</property>
                                         <property name="can-focus">False</property>
                                         <child>

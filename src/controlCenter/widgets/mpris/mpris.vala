@@ -174,9 +174,12 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             string[] names = dbus_iface.list_names ();
             foreach (string name in names) {
                 if (!name.has_prefix (MPRIS_PREFIX)) continue;
+                if (name == "org.mpris.MediaPlayer2.playerctld") continue;
                 if (check_player_exists (name)) return;
                 MprisSource ? source = MprisSource.get_player (name);
-                if (source != null) add_player (name, source);
+                //  if (source != null && name != "org.mpris.MediaPlayer2.playerctld") {
+                add_player (name, source);
+                //  };
             }
 
             dbus_iface.name_owner_changed.connect ((name, old_owner, new_owner) => {
@@ -185,6 +188,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                     remove_player (name);
                     return;
                 }
+                if (name == "org.mpris.MediaPlayer2.playerctld") return;
                 if (check_player_exists (name)) return;
                 MprisSource ? source = MprisSource.get_player (name);
                 if (source != null) add_player (name, source);

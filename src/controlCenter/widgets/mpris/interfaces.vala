@@ -83,6 +83,9 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         public abstract bool can_pause { owned get; }
         public abstract bool can_control { owned get; }
         public abstract bool can_seek { owned get; }
+        public abstract int64 position { owned get; set; }
+        public abstract double volume { owned get; set; }
+        public abstract double rate { owned get; set; }
 
         public abstract bool shuffle { owned get; set; }
         public abstract string loop_status { owned get; set; }

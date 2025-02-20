@@ -642,13 +642,72 @@ namespace SwayNotificationCenter {
                     var noti = (Notification) w;
                     if (noti != null && noti.param.applied_id == id) {
                         noti_groups_id.remove (id);
-                        noti_groups_id.set (new_params.applied_id, group);
+                        group.remove_notification (noti);
+
+                        NotificationGroup new_group = null;
+
+                        if (new_params.name_id.length > 0) {
+                            noti_groups_name.lookup_extended (new_params.name_id, null, out new_group);
+                        }
+                        if (new_group == null) {
+                            //  print ("Creating new group");
+                            new_group = new NotificationGroup (new_params.name_id, new_params.display_name);
+                            // Collapse other groups on expand
+                            new_group.on_expand_change.connect ((expanded) => {
+                                if (!expanded) {
+                                    fade_animate (1);
+                                    foreach (unowned Gtk.Widget child in list_box.get_children ()) {
+                                        child.set_sensitive (true);
+                                    }
+                                    return;
+                                }
+                                expanded_group = new_group;
+                                expanded_group.set_sensitive (true);
+                                fade_animate (0);
+                                int y = expanded_group.get_relative_y (list_box);
+                                if (y > 0) {
+                                    scroll_animate (y);
+                                }
+                                foreach (unowned Gtk.Widget child in list_box.get_children ()) {
+                                    NotificationGroup g = (NotificationGroup) child;
+                                    if (g != null && g != new_group) {
+                                        g.set_expanded (false);
+                                        if (g.only_single_notification ()) {
+                                            g.set_sensitive (false);
+                                        }
+                                    }
+                                }
+                            });
+                            if (new_params.name_id.length > 0) {
+                                noti_groups_name.set (new_params.name_id, new_group);
+                            }
+                            list_box.add (new_group);
+                        }
+
+
+                        //  noti_groups_name.lookup_extended (new_params.name_id, null, out new_group);
+                        noti_groups_id.set (new_params.applied_id, new_group);
+                        //  print (new_group.name_id);
+
+                        new_group.add_notification (noti);
                         noti.replace_notification (new_params);
                         // Position the notification in the beginning of the list
                         list_box.invalidate_sort ();
+                        //  noti.destroy ();
                         return;
                     }
                 }
+                if (group.is_empty ()) {
+                    if (group.name_id.length > 0) {
+                        noti_groups_name.remove (group.name_id);
+                    }
+                    if (expanded_group == group) {
+                        expanded_group = null;
+                        fade_animate (1);
+                    }
+                    group.destroy ();
+                }
+
             }
 
             // Add a new notification if the old one isn't visible

@@ -113,6 +113,9 @@ namespace SwayNotificationCenter {
         /** Always show the notification, regardless of dnd/inhibit state */
         public bool swaync_bypass_dnd { get; set; }
 
+        /** Always Send the notification quietly */
+        public bool swaync_send_quiet { get; set; }
+
         public Array<Action> actions { get; set; }
 
         public DesktopAppInfo ? desktop_app_info = null;
@@ -139,6 +142,8 @@ namespace SwayNotificationCenter {
             this.hints = hints;
             this.expire_timeout = expire_timeout;
             this.time = (int64) (get_real_time () * 0.000001);
+            //  print ("%" + int64.FORMAT + "\n", get_real_time());
+            //  print("%" + int64.FORMAT + "\n", this.time);
 
             this.has_synch = false;
 
@@ -254,6 +259,19 @@ namespace SwayNotificationCenter {
                             transient = hint_value.get_boolean ();
                         } else if (hint_value.is_of_type (VariantType.INT32)) {
                             transient = hint_value.get_int32 () == 1;
+                        }
+                        break;
+                    case "swaync-send-quiet":
+                    case "swaync_send_quiet":
+                        if (hint_value.is_of_type (VariantType.BOOLEAN)) {
+                            swaync_send_quiet = hint_value.get_boolean ();
+                        } else if (hint_value.is_of_type (VariantType.INT32)) {
+                            swaync_send_quiet = hint_value.get_int32 () == 1;
+                        }
+                        break;
+                    case "time":
+                        if (hint_value.is_of_type (VariantType.INT64)) {
+                            time = hint_value.get_int64 ();
                         }
                         break;
                     case "urgency":

@@ -26,6 +26,9 @@ namespace SwayNotificationCenter {
         unowned Gtk.Box base_box;
 
         [GtkChild]
+        unowned Gtk.Box custom_action_box;
+
+        [GtkChild]
         unowned Gtk.Revealer close_revealer;
         [GtkChild]
         unowned Gtk.Button close_button;
@@ -544,7 +547,8 @@ namespace SwayNotificationCenter {
 
         private void set_actions () {
             // Reset state
-            foreach (Gtk.Widget child in base_box.get_children ()) {
+            //  foreach (Gtk.Widget child in base_box.get_children ()) {
+            foreach (Gtk.Widget child in custom_action_box.get_children ()) {
                 if (child is Gtk.ScrolledWindow) {
                     child.destroy ();
                 }
@@ -552,10 +556,10 @@ namespace SwayNotificationCenter {
 
             // Check for security codes
             string ? code = parse_body_codes ();
-            if (param.actions.length > 0 || code != null) {
+            if (param.actions.length > 0 || code != null && code != "․") {
                 var viewport = new Gtk.Viewport (null, null);
                 var scroll = new Gtk.ScrolledWindow (null, null);
-                alt_actions_box = new Gtk.ButtonBox (Gtk.Orientation.HORIZONTAL);
+                alt_actions_box = new Gtk.ButtonBox (Gtk.Orientation.VERTICAL);
                 alt_actions_box.set_homogeneous (true);
                 alt_actions_box.set_layout (Gtk.ButtonBoxStyle.EXPAND);
 
@@ -584,11 +588,15 @@ namespace SwayNotificationCenter {
                     action_button.set_can_focus (false);
                     alt_actions_box.add (action_button);
                 }
-                viewport.add (alt_actions_box);
+		viewport.add (alt_actions_box);
                 scroll.add (viewport);
-                base_box.add (scroll);
+                custom_action_box.add (scroll);
                 scroll.show_all ();
-            }
+		scroll.hscrollbar_policy = Gtk.PolicyType.NEVER;
+		scroll.vscrollbar_policy  = Gtk.PolicyType.NEVER;
+            	//scroll.propagate_natural_width = true;
+		//scroll.propagate_natural_height = true;
+		}
         }
 
         public void set_time () {

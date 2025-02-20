@@ -4,6 +4,8 @@ namespace SwayNotificationCenter {
         [GtkChild]
         unowned Gtk.Box notifications_box;
         [GtkChild]
+        unowned Gtk.Label text_empty_label;
+        [GtkChild]
         unowned Gtk.Stack stack;
         [GtkChild]
         unowned Gtk.ScrolledWindow scrolled_window;
@@ -61,11 +63,13 @@ namespace SwayNotificationCenter {
             list_box.get_style_context ().add_class ("control-center-list");
             viewport.add (list_box);
 
+            text_empty_label.set_text (ConfigModel.instance.text_empty);
+
             if (swaync_daemon.use_layer_shell) {
                 if (!GtkLayerShell.is_supported ()) {
                     stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
                     stderr.printf ("Swaync only works on Wayland!\n");
-                    stderr.printf ("If running waylans session, try running:\n");
+                    stderr.printf ("If running wayland session, try running:\n");
                     stderr.printf ("\tGDK_BACKEND=wayland swaync\n");
                     Process.exit (1);
                 }

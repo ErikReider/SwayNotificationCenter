@@ -64,10 +64,13 @@ app_sources = [
   widget_sources,
   'blankWindow/blankWindow.vala',
   'functions.vala',
+  'WaylandUtils/WaylandUtils.c',
+  'WaylandUtils/WaylandUtils.vala',
+  'xdg_activation.vala',
   constants,
 ]
 
-assert(meson.get_compiler('vala').version() >= '0.56')
+assert(vala.version() >= '0.56')
 
 app_deps = [
   dependency('gio-2.0', version: '>= 2.50'),
@@ -80,9 +83,11 @@ app_deps = [
     fallback: ['gtk-layer-shell-0', 'gtk-layer-shell'],
     version: '>= 0.8.0'
   ),
-  meson.get_compiler('c').find_library('m', required : true),
-  meson.get_compiler('vala').find_library('posix'),
+  cc.find_library('m', required : true),
+  vala.find_library('posix'),
   dependency('gee-0.8'),
+  dependency('wayland-client'),
+  protocol_dep,
 ]
 
 # Checks if the user wants scripting enabled

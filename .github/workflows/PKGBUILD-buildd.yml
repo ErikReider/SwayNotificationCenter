@@ -17,9 +17,6 @@ jobs:
   PKGBUILD-build:
     container: archlinux:base-devel
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: [PKGBUILD, PKGBUILD-git]
     steps:
       - name: Install packages
         run: |
@@ -38,13 +35,12 @@ jobs:
       - name: Check out sources
         uses: actions/checkout@v3
 
-      - name: Test ${{ matrix.version }}
+      - name: Test PKGBUILD
         run: |
-          file="${{ matrix.version }}"
-          build_dir="/tmp/$file/"
+          build_dir="/tmp/PKGBUILD-git/"
           cd build-scripts
           mkdir $build_dir
-          cp ./$file $build_dir/PKGBUILD
+          cp ./PKGBUILD-git $build_dir/PKGBUILD
           cd $build_dir
           sudo chown builduser $build_dir
           sudo -H -u builduser bash -c 'makepkg -s --noconfirm'

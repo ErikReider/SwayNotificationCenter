@@ -1,9 +1,9 @@
 # vim: syntax=spec
 %global alt_pkg_name swaync
 
-Name:       {{{ git_repo_name }}}
-Version:    0.10.1
-Release:    1%{?dist}
+Name:       {{{ git_repo_name }}}-git
+Version:    {{{ git_repo_release lead="$(git describe --tags --abbrev=0)" }}}
+Release:    {{{ echo -n "$(git rev-list --all --count)" }}}%{?dist}
 Summary:    Notification daemon with GTK GUI
 Provides:   desktop-notification-daemon
 Provides:   sway-notification-center = %{version}-%{release}

@@ -25,11 +25,13 @@ jobs:
         fail: true
 
   rpmlint:
-    container: fedora:latest
+    container: registry.fedoraproject.org/fedora-minimal:latest
     runs-on: ubuntu-latest
     steps:
       - name: Install rpmlint
-        run: dnf -y install rpmlint rpkg
+        run: |
+          microdnf -y install --nodocs --setopt=install_weak_deps=0 \
+            rpmlint rpkg
 
       - name: Check out sources
         uses: actions/checkout@v3

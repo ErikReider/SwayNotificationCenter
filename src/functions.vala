@@ -18,15 +18,15 @@ namespace SwayNotificationCenter {
                                           Gtk.Image img,
                                           int icon_size,
                                           int radius,
-                                          bool file_exists) {
+                                          bool file_exists,
+                                          bool is_theme_icon = false) {
             const string URI_PREFIX = "file://";
-            const uint PREFIX_SIZE = 7;
-            bool is_uri = (uri.length >= PREFIX_SIZE
-                           && uri.slice (0, PREFIX_SIZE) == URI_PREFIX);
-            if (is_uri || file_exists) {
+            bool is_uri = (uri.length >= URI_PREFIX.length
+                           && uri.slice (0, URI_PREFIX.length) == URI_PREFIX);
+            if (!is_theme_icon && (is_uri || file_exists)) {
                 // Try as a URI (file:// is the only URI schema supported right now)
                 try {
-                    if (is_uri) uri = uri.slice (PREFIX_SIZE, uri.length);
+                    if (is_uri) uri = uri.slice (URI_PREFIX.length, uri.length);
 
                     var pixbuf = new Gdk.Pixbuf.from_file_at_scale (
                         uri,

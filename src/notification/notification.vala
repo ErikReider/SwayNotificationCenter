@@ -436,6 +436,8 @@ namespace SwayNotificationCenter {
                 // Sets the original text
                 this.body.set_text (text);
             }
+
+            this.body.set_visible (this.body.get_text ().length > 0);
         }
 
         /** Returns the first code found, else null */

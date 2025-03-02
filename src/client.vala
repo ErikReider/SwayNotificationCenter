@@ -193,14 +193,14 @@ public int command_line (string[] args) {
                 cc_daemon.set_dnd (false);
                 print (cc_daemon.get_dnd ().to_string ());
                 break;
-	    case "--action":
-	    case "-a":
-	        int action = 0;
-	    	if ( args.length >= 3 ) {
-			action = int.parse(args[2]);
-		}
-	    	cc_daemon.invoke_action ((uint32) action);
-	    	break;
+            case "--action":
+            case "-a":
+                int action = 0;
+                if ( args.length >= 3 ) {
+                    action = int.parse (args[2]);
+                }
+                cc_daemon.invoke_action ((uint32) action);
+                break;
             case "--get-inhibited":
             case "-I":
                 print (cc_daemon.is_inhibited ().to_string ());

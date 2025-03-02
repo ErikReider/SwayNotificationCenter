@@ -285,8 +285,8 @@ namespace SwayNotificationCenter {
 
             if (child == null || !(child is Notification)) return;
             Notification noti = (Notification) child;
-	    noti.click_alt_action (action);
-	    noti.close_notification ();
+            noti.click_alt_action (action);
+            noti.close_notification ();
         }
     }
 }

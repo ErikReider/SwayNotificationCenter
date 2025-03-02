@@ -88,7 +88,7 @@ namespace SwayNotificationCenter {
             manually_close_notification (id, !close);
         }
 
-	/** Activates the `noti_id` action of the latest notification */
+        /** Activates the `noti_id` action of the latest notification */
         public void invoke_action (uint32 noti_id)
         throws DBusError, IOError {
             NotificationWindow.instance.latest_notification_action (noti_id);

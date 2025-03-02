@@ -335,6 +335,12 @@ namespace SwayNotificationCenter {
          */
         public bool layer_shell { get; set; default = true; }
 
+        /**
+         * Wether or not the windows should cover the whole screen when
+         * layer-shell is used.
+         */
+        public bool layer_shell_cover_screen { get; set; default = true; }
+
         /** The CSS loading priority */
         public CssPriority cssPriority { // vala-lint=naming-convention
             get; set; default = CssPriority.APPLICATION;

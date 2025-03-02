@@ -357,8 +357,8 @@ namespace SwayNotificationCenter {
                     spawn_env += additions;
                 }
 
-                string[] argvp = {};
-                Shell.parse_argv (cmd, out argvp);
+                string[] argvp;
+                Shell.parse_argv ("/bin/sh -c %s".printf (cmd), out argvp);
 
                 Pid child_pid;
                 int std_output;

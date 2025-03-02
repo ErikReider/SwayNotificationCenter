@@ -412,6 +412,9 @@ namespace SwayNotificationCenter {
         /** Hides the control center when clicking on notification action */
         public bool hide_on_action { get; set; default = true; }
 
+        /** Text that appears when there are no notifications to show */
+        public string text_empty { get; set; default = "No Notifications"; }
+
         /** The controlcenters horizontal alignment. Supersedes `positionX` if not `NONE` */
         public PositionX control_center_positionX { // vala-lint=naming-convention
             get; set; default = PositionX.NONE;

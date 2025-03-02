@@ -9,6 +9,7 @@ namespace SwayNotificationCenter {
     [DBus (name = "org.erikreider.swaync.cc")]
     public class SwayncDaemon : Object {
         public NotiDaemon noti_daemon;
+        public XdgActivationHelper xdg_activation;
 
         private GenericSet<string> inhibitors = new GenericSet<string> (str_hash, str_equal);
         public bool inhibited { get; set; default = false; }
@@ -29,6 +30,7 @@ namespace SwayNotificationCenter {
             // Init noti_daemon
             this.use_layer_shell = ConfigModel.instance.layer_shell;
             this.noti_daemon = new NotiDaemon (this);
+            this.xdg_activation = new XdgActivationHelper ();
             Bus.own_name (BusType.SESSION, "org.freedesktop.Notifications",
                           BusNameOwnerFlags.NONE,
                           on_noti_bus_aquired,

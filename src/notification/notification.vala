@@ -436,6 +436,8 @@ namespace SwayNotificationCenter {
                 // Sets the original text
                 this.body.set_text (text);
             }
+
+            this.body.set_visible (this.body.get_text ().length > 0);
         }
 
         /** Returns the first code found, else null */
@@ -454,7 +456,7 @@ namespace SwayNotificationCenter {
         }
 
         public void click_default_action () {
-            action_clicked (param.default_action, true);
+            action_clicked (param.default_action);
         }
 
         public void click_alt_action (uint index) {
@@ -472,11 +474,18 @@ namespace SwayNotificationCenter {
             action_clicked (param.actions.index (index));
         }
 
-        private void action_clicked (Action ? action, bool is_default = false) {
+        private void action_clicked (Action ? action) {
             noti_daemon.run_scripts (param, ScriptRunOnType.ACTION);
             if (action != null
                 && action.identifier != null
                 && action.identifier != "") {
+                // Try getting a XDG Activation token so that the application
+                // can request compositor focus
+                string ? token = swaync_daemon.xdg_activation.get_token (this);
+                if (token != null) {
+                    noti_daemon.ActivationToken (param.applied_id, token);
+                }
+
                 noti_daemon.ActionInvoked (param.applied_id, action.identifier);
                 if (ConfigModel.instance.hide_on_action) {
                     try {
@@ -683,19 +692,27 @@ namespace SwayNotificationCenter {
             int app_icon_size = notification_icon_size / 3;
             img_app_icon.set_pixel_size (app_icon_size);
 
-            var img_path_exists = File.new_for_uri (
-                param.image_path ?? "").query_exists ();
+            bool img_path_is_theme_icon = false;
+            bool img_path_exists = File.new_for_uri (param.image_path ?? "").query_exists ();
             if (param.image_path != null && !img_path_exists) {
                 // Check if it's not a URI
                 img_path_exists = File.new_for_path (
                     param.image_path ?? "").query_exists ();
+
+                // Check if it's a freedesktop.org-compliant icon
+                if (!img_path_exists) {
+                    unowned Gtk.IconTheme icon_theme = Gtk.IconTheme.get_default ();
+                    Gtk.IconInfo? info = icon_theme.lookup_icon (param.image_path,
+                                                                 notification_icon_size,
+                                                                 Gtk.IconLookupFlags.USE_BUILTIN);
+                    img_path_exists = info != null;
+                    img_path_is_theme_icon = img_path_exists;
+                }
             }
-            var app_icon_exists = File.new_for_uri (
-                app_icon_uri ?? "").query_exists ();
-            if (app_icon_uri != null && !img_path_exists) {
+            bool app_icon_exists = File.new_for_uri (app_icon_uri ?? "").query_exists ();
+            if (app_icon_uri != null && !app_icon_exists) {
                 // Check if it's not a URI
-                app_icon_exists = File.new_for_path (
-                    app_icon_uri ?? "").query_exists ();
+                app_icon_exists = File.new_for_path (app_icon_uri ?? "").query_exists ();
             }
 
             // Get the image CSS corner radius in pixels
@@ -715,9 +732,10 @@ namespace SwayNotificationCenter {
                        param.image_path != "" &&
                        img_path_exists) {
                 Functions.set_image_uri (param.image_path, img,
-                                          notification_icon_size,
-                                          radius,
-                                          img_path_exists);
+                                         notification_icon_size,
+                                         radius,
+                                         img_path_exists,
+                                         img_path_is_theme_icon);
             } else if (param.icon_data.is_initialized) {
                 Functions.set_image_data (param.icon_data, img,
                                           notification_icon_size, radius);

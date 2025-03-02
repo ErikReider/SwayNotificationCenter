@@ -133,7 +133,7 @@ namespace SwayNotificationCenter {
             this.applied_id = applied_id;
             this.app_name = app_name;
             this.replaces_id = replaces_id;
-            this.app_icon = app_icon;
+            this.app_icon = Uri.unescape_string (app_icon);
             this.summary = summary;
             this.body = body;
             this.hints = hints;
@@ -148,8 +148,14 @@ namespace SwayNotificationCenter {
 
             // Try to get the desktop file
             string[] entries = {};
-            if (desktop_entry != null) entries += desktop_entry.replace (".desktop", "");
-            if (app_name != null) entries += app_name.replace (".desktop", "");
+            if (desktop_entry != null) {
+                entries += desktop_entry.replace (".desktop", "");
+                entries += desktop_entry.down ().replace (".desktop", "");
+            }
+            if (app_name != null) {
+                entries += app_name.replace (".desktop", "");
+                entries += app_name.down ().replace (".desktop", "");
+            }
             foreach (string entry in entries) {
                 var app_info = new DesktopAppInfo ("%s.desktop".printf (entry));
                 // Checks if the .desktop file actually exists or not
@@ -231,7 +237,7 @@ namespace SwayNotificationCenter {
                     case "image-path":
                     case "image_path":
                         if (hint_value.is_of_type (VariantType.STRING)) {
-                            image_path = hint_value.get_string ();
+                            image_path = Uri.unescape_string (hint_value.get_string ());
                         }
                         break;
                     case "desktop-entry":

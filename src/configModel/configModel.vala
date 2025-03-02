@@ -73,6 +73,8 @@ namespace SwayNotificationCenter {
         public string ? body { get; set; default = null; }
         public string ? urgency { get; set; default = null; }
         public string ? category { get; set; default = null; }
+        public string ? sound_name { get; set; default = null; }
+        public string ? sound_file { get; set; default = null; }
 
         private const RegexCompileFlags REGEX_COMPILE_OPTIONS =
             RegexCompileFlags.MULTILINE
@@ -124,6 +126,22 @@ namespace SwayNotificationCenter {
                 if (param.category == null) return false;
                 bool result = Regex.match_simple (
                     category, param.category,
+                    REGEX_COMPILE_OPTIONS,
+                    REGEX_MATCH_FLAGS);
+                if (!result) return false;
+            }
+            if (sound_file != null) {
+                if (param.sound_file == null) return false;
+                bool result = Regex.match_simple (
+                    sound_file, param.sound_file,
+                    REGEX_COMPILE_OPTIONS,
+                    REGEX_MATCH_FLAGS);
+                if (!result) return false;
+            }
+            if (sound_name != null) {
+                if (param.sound_name == null) return false;
+                bool result = Regex.match_simple (
+                    sound_name, param.sound_name,
                     REGEX_COMPILE_OPTIONS,
                     REGEX_MATCH_FLAGS);
                 if (!result) return false;
@@ -243,6 +261,8 @@ namespace SwayNotificationCenter {
             spawn_env += "SWAYNC_BODY=%s".printf (param.body);
             spawn_env += "SWAYNC_URGENCY=%s".printf (param.urgency.to_string ());
             spawn_env += "SWAYNC_CATEGORY=%s".printf (param.category);
+            spawn_env += "SWAYNC_SOUND_NAME=%s".printf (param.sound_name);
+            spawn_env += "SWAYNC_SOUND_FILE=%s".printf (param.sound_file);
             spawn_env += "SWAYNC_ID=%s".printf (param.applied_id.to_string ());
             spawn_env += "SWAYNC_REPLACES_ID=%s".printf (param.replaces_id.to_string ());
             spawn_env += "SWAYNC_TIME=%s".printf (param.time.to_string ());

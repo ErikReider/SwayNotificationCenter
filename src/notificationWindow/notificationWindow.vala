@@ -151,7 +151,6 @@ namespace SwayNotificationCenter {
         public void change_visibility (bool value) {
             if (!value) {
                 close_all_notifications ();
-                close ();
             } else {
                 this.set_anchor ();
             }
@@ -169,6 +168,8 @@ namespace SwayNotificationCenter {
                     remove_notification (notification, false);
                 }
             }
+
+            close ();
         }
 
         private void remove_notification (Notification ? noti, bool dismiss) {

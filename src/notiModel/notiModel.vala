@@ -133,7 +133,7 @@ namespace SwayNotificationCenter {
             this.applied_id = applied_id;
             this.app_name = app_name;
             this.replaces_id = replaces_id;
-            this.app_icon = app_icon;
+            this.app_icon = Uri.unescape_string (app_icon);
             this.summary = summary;
             this.body = body;
             this.hints = hints;
@@ -237,7 +237,7 @@ namespace SwayNotificationCenter {
                     case "image-path":
                     case "image_path":
                         if (hint_value.is_of_type (VariantType.STRING)) {
-                            image_path = hint_value.get_string ();
+                            image_path = Uri.unescape_string (hint_value.get_string ());
                         }
                         break;
                     case "desktop-entry":

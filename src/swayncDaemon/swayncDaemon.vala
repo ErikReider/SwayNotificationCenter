@@ -129,7 +129,7 @@ namespace SwayNotificationCenter {
 
         [DBus (visible = false)]
         public void show_blank_windows (Gdk.Monitor ? monitor) {
-            if (!use_layer_shell || !ConfigModel.instance.layer_shell_cover_screen){
+            if (!use_layer_shell || !ConfigModel.instance.layer_shell_cover_screen) {
                 return;
             }
             foreach (unowned BlankWindow win in blank_windows.data) {

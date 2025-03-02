@@ -8,6 +8,7 @@ Summary:    Notification daemon with GTK GUI
 Provides:   desktop-notification-daemon
 Provides:   sway-notification-center = %{version}-%{release}
 Provides:   %{alt_pkg_name} = %{version}-%{release}
+Provides:   %{alt_pkg_name}-git = %{version}-%{release}
 License:    GPLv3
 URL:        https://github.com/ErikReider/SwayNotificationCenter
 VCS:        {{{ git_repo_vcs }}}

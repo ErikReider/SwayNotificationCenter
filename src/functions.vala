@@ -29,7 +29,7 @@ namespace SwayNotificationCenter {
                     if (is_uri) uri = uri.slice (URI_PREFIX.length, uri.length);
 
                     var pixbuf = new Gdk.Pixbuf.from_file_at_scale (
-                        uri,
+                        Uri.unescape_string (uri),
                         icon_size * img.scale_factor,
                         icon_size * img.scale_factor,
                         true);

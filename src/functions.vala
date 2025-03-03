@@ -358,7 +358,7 @@ namespace SwayNotificationCenter {
                 }
 
                 string[] argvp;
-                Shell.parse_argv ("/bin/sh -c %s".printf (cmd), out argvp);
+                Shell.parse_argv ("/bin/sh -c \"%s\"".printf (cmd), out argvp);
 
                 Pid child_pid;
                 int std_output;
@@ -381,13 +381,17 @@ namespace SwayNotificationCenter {
                         return false;
                     }
                     try {
-                        channel.read_line (out res, null, null);
+                        if (channel.read_line (out res, null, null) == IOStatus.NORMAL) {
+                            debug ("Exec output:\n%s", res);
+                        } else {
+                            res = "";
+                        }
                         return true;
                     } catch (IOChannelError e) {
-                        stderr.printf ("stdout: IOChannelError: %s\n", e.message);
+                        warning ("stdout: IOChannelError: %s", e.message);
                         return false;
                     } catch (ConvertError e) {
-                        stderr.printf ("stdout: ConvertError: %s\n", e.message);
+                        warning ("stdout: ConvertError: %s", e.message);
                         return false;
                     }
                 });
@@ -400,12 +404,12 @@ namespace SwayNotificationCenter {
                     end_status = status;
                     execute_command.callback ();
                 });
-                // Waits until `run_script.callback()` is called above
+                // Waits until `execute_command.callback()` is called above
                 yield;
                 msg = res;
                 return end_status == 0;
             } catch (Error e) {
-                stderr.printf ("Run_Script Error: %s\n", e.message);
+                warning ("Execute Command Error: %s", e.message);
                 msg = e.message;
                 return false;
             }

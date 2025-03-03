@@ -1,7 +1,7 @@
 namespace SwayNotificationCenter {
     [DBus (name = "org.freedesktop.Notifications")]
     public class NotiDaemon : Object {
-        private uint32 noti_id = 0;
+        private uint32 action_index = 0;
 
         public bool dnd { get; set; default = false; }
 
@@ -88,10 +88,10 @@ namespace SwayNotificationCenter {
             manually_close_notification (id, !close);
         }
 
-        /** Activates the `noti_id` action of the latest notification */
-        public void invoke_action (uint32 noti_id)
+        /** Activates the `action_index` action of the latest notification */
+        public void invoke_action (uint32 action_index)
         throws DBusError, IOError {
-            NotificationWindow.instance.latest_notification_action (noti_id);
+            NotificationWindow.instance.latest_notification_action (action_index);
         }
 
         /*
@@ -146,7 +146,7 @@ namespace SwayNotificationCenter {
                                         HashTable<string, Variant> hints,
                                         int expire_timeout) throws DBusError, IOError {
             uint32 id = replaces_id;
-            if (replaces_id == 0 || replaces_id > noti_id) id = ++noti_id;
+            if (replaces_id == 0 || replaces_id > action_index) id = ++action_index;
 
             var param = new NotifyParams (
                 id,

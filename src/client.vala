@@ -30,7 +30,7 @@ interface CcDaemon : Object {
 
     public abstract void set_visibility (bool value) throws DBusError, IOError;
 
-    public abstract void invoke_action (uint32 action) throws DBusError, IOError;
+    public abstract void invoke_action (uint32 action_index) throws DBusError, IOError;
 
     [DBus (name = "GetSubscribeData")]
     public abstract SwayncDaemonData get_subscribe_data () throws Error;
@@ -195,11 +195,11 @@ public int command_line (string[] args) {
                 break;
             case "--action":
             case "-a":
-                int action = 0;
+                int action_index = 0;
                 if ( args.length >= 3 ) {
-                    action = int.parse (args[2]);
+                    action_index = int.parse (args[2]);
                 }
-                cc_daemon.invoke_action ((uint32) action);
+                cc_daemon.invoke_action ((uint32) action_index);
                 break;
             case "--get-inhibited":
             case "-I":

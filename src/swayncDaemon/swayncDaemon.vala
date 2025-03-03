@@ -258,10 +258,10 @@ namespace SwayNotificationCenter {
             noti_daemon.control_center.close_notification (id, true);
         }
 
-        /** Activates the `noti_id` action of the latest notification */
-        public void invoke_action (uint32 noti_id)
+        /** Activates the `action_index` action of the latest notification */
+        public void invoke_action (uint32 action_index)
         throws DBusError, IOError {
-            noti_daemon.invoke_action (noti_id);
+            noti_daemon.invoke_action (action_index);
         }
 
         /**

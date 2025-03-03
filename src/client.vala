@@ -71,7 +71,7 @@ private void print_help (string[] args) {
     print ("      \t --hide-latest \t\t\t Hides latest notification. Still shown in Control Center\n");
     print ("      \t --close-latest \t\t Closes latest notification\n");
     print ("  -C, \t --close-all \t\t\t Closes all notifications\n");
-    print ("  -a, \t --action [ACTION_INDEX]\t\t Invokes the action [ACTION_INDEX] of the latest notification\n");
+    print ("  -a, \t --action [ACTION_INDEX]\t Invokes the action [ACTION_INDEX] of the latest notification\n");
     print ("  -sw, \t --skip-wait \t\t\t Doesn't wait when swaync hasn't been started\n");
     print ("  -s, \t --subscribe \t\t\t Subscribe to notification add and close events\n");
     print ("  -swb,  --subscribe-waybar \t\t Subscribe to notification add and close events "

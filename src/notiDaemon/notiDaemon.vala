@@ -1,7 +1,7 @@
 namespace SwayNotificationCenter {
     [DBus (name = "org.freedesktop.Notifications")]
     public class NotiDaemon : Object {
-        private uint32 action_index = 0;
+        private uint32 noti_id = 0;
 
         public bool dnd { get; set; default = false; }
 
@@ -146,7 +146,7 @@ namespace SwayNotificationCenter {
                                         HashTable<string, Variant> hints,
                                         int expire_timeout) throws DBusError, IOError {
             uint32 id = replaces_id;
-            if (replaces_id == 0 || replaces_id > action_index) id = ++action_index;
+            if (replaces_id == 0 || replaces_id > noti_id) id = ++noti_id;
 
             var param = new NotifyParams (
                 id,

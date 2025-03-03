@@ -247,6 +247,11 @@ namespace SwayNotificationCenter {
             spawn_env += "SWAYNC_REPLACES_ID=%s".printf (param.replaces_id.to_string ());
             spawn_env += "SWAYNC_TIME=%s".printf (param.time.to_string ());
             spawn_env += "SWAYNC_DESKTOP_ENTRY=%s".printf (param.desktop_entry ?? "");
+            foreach (string hint in param.hints.get_keys ()) {
+                spawn_env += "SWAYNC_HINT_%s=%s".printf (
+                    hint.up ().replace ("-", "_"),
+                    param.hints[hint].print (false));
+            }
 
             return yield Functions.execute_command (exec, spawn_env, out msg);
         }

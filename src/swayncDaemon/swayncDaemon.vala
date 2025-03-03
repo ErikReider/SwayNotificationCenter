@@ -259,9 +259,9 @@ namespace SwayNotificationCenter {
         }
 
         /** Activates the `action_index` action of the latest notification */
-        public void invoke_action (uint32 action_index)
+        public void latest_invoke_action (uint32 action_index)
         throws DBusError, IOError {
-            noti_daemon.invoke_action (action_index);
+            noti_daemon.latest_invoke_action (action_index);
         }
 
         /**

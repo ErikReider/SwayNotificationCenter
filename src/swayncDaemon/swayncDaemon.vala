@@ -129,7 +129,9 @@ namespace SwayNotificationCenter {
 
         [DBus (visible = false)]
         public void show_blank_windows (Gdk.Monitor ? monitor) {
-            if (!use_layer_shell) return;
+            if (!use_layer_shell || !ConfigModel.instance.layer_shell_cover_screen) {
+                return;
+            }
             foreach (unowned BlankWindow win in blank_windows.data) {
                 if (win.monitor != monitor) win.show ();
             }
@@ -254,6 +256,12 @@ namespace SwayNotificationCenter {
         /** Closes a specific notification with the `id` */
         public void close_notification (uint32 id) throws DBusError, IOError {
             noti_daemon.control_center.close_notification (id, true);
+        }
+
+        /** Activates the `action_index` action of the latest notification */
+        public void latest_invoke_action (uint32 action_index)
+        throws DBusError, IOError {
+            noti_daemon.latest_invoke_action (action_index);
         }
 
         /**

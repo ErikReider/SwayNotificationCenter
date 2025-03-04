@@ -18,18 +18,18 @@ namespace SwayNotificationCenter {
                                           Gtk.Image img,
                                           int icon_size,
                                           int radius,
-                                          bool file_exists) {
+                                          bool file_exists,
+                                          bool is_theme_icon = false) {
             const string URI_PREFIX = "file://";
-            const uint PREFIX_SIZE = 7;
-            bool is_uri = (uri.length >= PREFIX_SIZE
-                           && uri.slice (0, PREFIX_SIZE) == URI_PREFIX);
-            if (is_uri || file_exists) {
+            bool is_uri = (uri.length >= URI_PREFIX.length
+                           && uri.slice (0, URI_PREFIX.length) == URI_PREFIX);
+            if (!is_theme_icon && (is_uri || file_exists)) {
                 // Try as a URI (file:// is the only URI schema supported right now)
                 try {
-                    if (is_uri) uri = uri.slice (PREFIX_SIZE, uri.length);
+                    if (is_uri) uri = uri.slice (URI_PREFIX.length, uri.length);
 
                     var pixbuf = new Gdk.Pixbuf.from_file_at_scale (
-                        uri,
+                        Uri.unescape_string (uri),
                         icon_size * img.scale_factor,
                         icon_size * img.scale_factor,
                         true);
@@ -357,8 +357,8 @@ namespace SwayNotificationCenter {
                     spawn_env += additions;
                 }
 
-                string[] argvp = {};
-                Shell.parse_argv (cmd, out argvp);
+                string[] argvp;
+                Shell.parse_argv ("/bin/sh -c \"%s\"".printf (cmd), out argvp);
 
                 Pid child_pid;
                 int std_output;
@@ -381,13 +381,17 @@ namespace SwayNotificationCenter {
                         return false;
                     }
                     try {
-                        channel.read_line (out res, null, null);
+                        if (channel.read_line (out res, null, null) == IOStatus.NORMAL) {
+                            debug ("Exec output:\n%s", res);
+                        } else {
+                            res = "";
+                        }
                         return true;
                     } catch (IOChannelError e) {
-                        stderr.printf ("stdout: IOChannelError: %s\n", e.message);
+                        warning ("stdout: IOChannelError: %s", e.message);
                         return false;
                     } catch (ConvertError e) {
-                        stderr.printf ("stdout: ConvertError: %s\n", e.message);
+                        warning ("stdout: ConvertError: %s", e.message);
                         return false;
                     }
                 });
@@ -400,12 +404,12 @@ namespace SwayNotificationCenter {
                     end_status = status;
                     execute_command.callback ();
                 });
-                // Waits until `run_script.callback()` is called above
+                // Waits until `execute_command.callback()` is called above
                 yield;
                 msg = res;
                 return end_status == 0;
             } catch (Error e) {
-                stderr.printf ("Run_Script Error: %s\n", e.message);
+                warning ("Execute Command Error: %s", e.message);
                 msg = e.message;
                 return false;
             }

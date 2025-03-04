@@ -394,6 +394,11 @@ namespace SwayNotificationCenter {
 
         /** Resets the UI positions */
         private void set_anchor () {
+            PositionX pos_x = ConfigModel.instance.control_center_positionX;
+            if (pos_x == PositionX.NONE) pos_x = ConfigModel.instance.positionX;
+            PositionY pos_y = ConfigModel.instance.control_center_positionY;
+            if (pos_y == PositionY.NONE) pos_y = ConfigModel.instance.positionY;
+
             if (swaync_daemon.use_layer_shell) {
                 // Set the exlusive zone
                 int exclusive_zone = ConfigModel.instance.control_center_exclusive_zone ? 0 : 100;
@@ -423,6 +428,41 @@ namespace SwayNotificationCenter {
                         break;
                 }
                 GtkLayerShell.set_layer (this, layer);
+
+                // Set whether the control center should cover the whole screen or not
+                bool cover_screen = ConfigModel.instance.layer_shell_cover_screen;
+                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, cover_screen);
+                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, cover_screen);
+                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, cover_screen);
+                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, cover_screen);
+                if (!ConfigModel.instance.layer_shell_cover_screen) {
+                    switch (pos_x) {
+                        case PositionX.LEFT:
+                            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, true);
+                            break;
+                        case PositionX.CENTER:
+                            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, true);
+                            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
+                            break;
+                        default:
+                        case PositionX.RIGHT:
+                            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
+                            break;
+                    }
+                    switch (pos_y) {
+                        default:
+                        case PositionY.TOP:
+                            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
+                            break;
+                        case PositionY.CENTER:
+                            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
+                            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
+                            break;
+                        case PositionY.BOTTOM:
+                            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
+                            break;
+                    }
+                }
             }
 
             // Set the box margins
@@ -433,8 +473,6 @@ namespace SwayNotificationCenter {
 
             // Anchor box to north/south edges as needed
             Gtk.Align align_x = Gtk.Align.END;
-            PositionX pos_x = ConfigModel.instance.control_center_positionX;
-            if (pos_x == PositionX.NONE) pos_x = ConfigModel.instance.positionX;
             switch (pos_x) {
                 case PositionX.LEFT:
                     align_x = Gtk.Align.START;
@@ -448,8 +486,6 @@ namespace SwayNotificationCenter {
                     break;
             }
             Gtk.Align align_y = Gtk.Align.START;
-            PositionY pos_y = ConfigModel.instance.control_center_positionY;
-            if (pos_y == PositionY.NONE) pos_y = ConfigModel.instance.positionY;
             switch (pos_y) {
                 default:
                 case PositionY.TOP:

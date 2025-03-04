@@ -728,5 +728,6 @@ SWAYNC_CATEGORY="SwayNC notification category"
 SWAYNC_REPLACES_ID="ID of notification to replace"
 SWAYNC_ID="SwayNC notification ID"
 SWAYNC_SUMMARY="Notification summary"
+SWAYNC_HINT_[NAME]="Value of the hint [NAME]"
 ```
 #END scripting

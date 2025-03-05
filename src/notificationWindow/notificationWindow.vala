@@ -271,5 +271,22 @@ namespace SwayNotificationCenter {
             Notification noti = (Notification) child;
             return noti.param.applied_id;
         }
+
+        public void latest_notification_action (uint32 action) {
+            List<weak Gtk.Widget> children = box.get_children ();
+            if (children.is_empty ()) return;
+
+            Gtk.Widget ? child = null;
+            if (list_reverse) {
+                child = children.last ().data;
+            } else {
+                child = children.first ().data;
+            }
+
+            if (child == null || !(child is Notification)) return;
+            Notification noti = (Notification) child;
+            noti.click_alt_action (action);
+            noti.close_notification ();
+        }
     }
 }

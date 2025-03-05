@@ -258,6 +258,12 @@ namespace SwayNotificationCenter {
             noti_daemon.control_center.close_notification (id, true);
         }
 
+        /** Activates the `action_index` action of the latest notification */
+        public void latest_invoke_action (uint32 action_index)
+        throws DBusError, IOError {
+            noti_daemon.latest_invoke_action (action_index);
+        }
+
         /**
          * Adds an inhibitor with the Application ID
          * (ex: "org.erikreider.swaysettings", "swayidle", etc...).

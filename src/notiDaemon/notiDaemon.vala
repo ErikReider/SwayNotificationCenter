@@ -88,6 +88,12 @@ namespace SwayNotificationCenter {
             manually_close_notification (id, !close);
         }
 
+        /** Activates the `action_index` action of the latest notification */
+        public void latest_invoke_action (uint32 action_index)
+        throws DBusError, IOError {
+            NotificationWindow.instance.latest_notification_action (action_index);
+        }
+
         /*
          * D-Bus Specification
          * https://specifications.freedesktop.org/notification-spec/latest/ar01s09.html

@@ -248,6 +248,9 @@ namespace SwayNotificationCenter {
             spawn_env += "SWAYNC_TIME=%s".printf (param.time.to_string ());
             spawn_env += "SWAYNC_DESKTOP_ENTRY=%s".printf (param.desktop_entry ?? "");
             foreach (string hint in param.hints.get_keys ()) {
+                if (hint.contains ("image") || hint.contains ("icon")) {
+                    continue;
+                }
                 spawn_env += "SWAYNC_HINT_%s=%s".printf (
                     hint.up ().replace ("-", "_"),
                     param.hints[hint].print (false));

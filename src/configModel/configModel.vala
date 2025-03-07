@@ -271,6 +271,12 @@ namespace SwayNotificationCenter {
         private static ConfigModel _instance;
         private static string _path = "";
 
+        public string path {
+            get {
+                return _path;
+            }
+        }
+
         /** Get the static singleton */
         public static unowned ConfigModel instance {
             get {

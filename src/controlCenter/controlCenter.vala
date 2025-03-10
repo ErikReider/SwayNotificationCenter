@@ -449,18 +449,23 @@ namespace SwayNotificationCenter {
                             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
                             break;
                     }
-                    switch (pos_y) {
-                        default:
-                        case PositionY.TOP:
-                            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
-                            break;
-                        case PositionY.CENTER:
-                            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
-                            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
-                            break;
-                        case PositionY.BOTTOM:
-                            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
-                            break;
+                    if (ConfigModel.instance.fit_to_screen) {
+                        GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
+                        GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
+                    } else {
+                        switch (pos_y) {
+                            default:
+                            case PositionY.TOP:
+                                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
+                                break;
+                            case PositionY.CENTER:
+                                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
+                                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
+                                break;
+                            case PositionY.BOTTOM:
+                                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
+                                break;
+                        }
                     }
                 }
             }

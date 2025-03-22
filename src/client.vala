@@ -14,6 +14,8 @@ interface CcDaemon : Object {
 
     public abstract void hide_latest_notifications (bool close) throws DBusError, IOError;
 
+    public abstract void hide_all_notifications () throws DBusError, IOError;
+
     public abstract void close_all_notifications () throws DBusError, IOError;
 
     public abstract uint notification_count () throws DBusError, IOError;
@@ -69,6 +71,7 @@ private void print_help (string[] args) {
     print ("  -Ic, \t --inhibitors-clear \t\t Clears all inhibitors\n");
     print ("  -c, \t --count \t\t\t Print the current notification count\n");
     print ("      \t --hide-latest \t\t\t Hides latest notification. Still shown in Control Center\n");
+    print ("      \t --hide-all \t\t\t Hides all notifications. Still shown in Control Center\n");
     print ("      \t --close-latest \t\t Closes latest notification\n");
     print ("  -C, \t --close-all \t\t\t Closes all notifications\n");
     print ("  -a, \t --action [ACTION_INDEX]\t Invokes the action [ACTION_INDEX] of the latest notification\n");
@@ -158,6 +161,9 @@ public int command_line (string[] args) {
                 break;
             case "--hide-latest":
                 cc_daemon.hide_latest_notifications (false);
+                break;
+            case "--hide-all":
+                cc_daemon.hide_all_notifications ();
                 break;
             case "--close-all":
             case "-C":

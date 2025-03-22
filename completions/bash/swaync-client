@@ -45,6 +45,7 @@ _swaync-client() {
         --inhibitors-clear
         --count
         --hide-latest
+        --hide-all
         --close-latest
         --close-all
         --skip-wait

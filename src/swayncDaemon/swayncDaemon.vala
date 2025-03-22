@@ -215,6 +215,12 @@ namespace SwayNotificationCenter {
             noti_daemon.hide_latest_notification (close);
         }
 
+        /** Closes all popup notifications */
+        public void hide_all_notifications ()
+        throws DBusError, IOError {
+            noti_daemon.hide_all_notifications ();
+        }
+
         /** Closes all popup and controlcenter notifications */
         public void close_all_notifications () throws DBusError, IOError {
             noti_daemon.close_all_notifications ();

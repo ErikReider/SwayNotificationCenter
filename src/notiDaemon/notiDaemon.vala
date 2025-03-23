@@ -88,6 +88,16 @@ namespace SwayNotificationCenter {
             manually_close_notification (id, !close);
         }
 
+        /** Closes all popup notifications */
+        public void hide_all_notifications ()
+        throws DBusError, IOError {
+            while (true) {
+                uint32 ? id = NotificationWindow.instance.get_latest_notification ();
+                if (id == null) return;
+                manually_close_notification (id, true);
+            }
+        }
+
         /** Activates the `action_index` action of the latest notification */
         public void latest_invoke_action (uint32 action_index)
         throws DBusError, IOError {

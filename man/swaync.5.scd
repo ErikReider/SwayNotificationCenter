@@ -344,6 +344,12 @@ config file to be able to detect config errors
 						type: string ++
 						description: Audio source/app name. Regex alowed. Hint ++
 							`$ qdbus | grep mpris` to find source names. ++
+				autohide: ++
+					type: bool ++
+					optional: true ++
+					default: false ++
+					description: Whether to hide the widget when the ++
+								 player has no metadata. ++
 			description: A widget that displays multiple music players. ++
 		*menubar*++
 			type: object ++
@@ -610,7 +616,8 @@ config file to be able to detect config errors
 		"mpris": {
 			"image-size": 96,
 			"image-radius": 12,
-			"blacklist": ["playerctld"]
+			"blacklist": ["playerctld"],
+			"autohide": true
 		},
 		"menubar": {
 			"menu#power": {

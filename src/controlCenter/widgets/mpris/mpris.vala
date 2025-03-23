@@ -219,7 +219,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                         remove_player_from_carousel (name);
                     }
                 });
-                if(check_player_metadata_empty (name)) return;
+                if (check_player_metadata_empty (name)) return;
             }
 
             add_player_to_carousel (name);

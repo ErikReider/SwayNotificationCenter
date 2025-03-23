@@ -146,7 +146,7 @@ namespace SwayNotificationCenter {
                 tag_regex = new Regex ("&lt;(/?(?:%s))&gt;".printf (joined_tags));
                 string unescaped = string.joinv ("|", UNESCAPE_CHARS);
                 tag_unescape_regex = new Regex ("&amp;(?=%s)".printf (unescaped));
-                img_tag_regex = new Regex ("""<img[^>]* src=\"([^\"]*)\"[^>]*>""");
+                img_tag_regex = new Regex ("<img[^>]* src=((\"([^\"]*)\")|(\'([^\']*)\'))[^>]*>");
             } catch (Error e) {
                 stderr.printf ("Invalid regex: %s", e.message);
             }
@@ -374,10 +374,21 @@ namespace SwayNotificationCenter {
                     string[] img_paths = {};
                     MatchInfo info;
                     if (img_tag_regex.match (text, 0, out info)) {
-                        img_paths += Functions.get_match_from_info (info);
-                        while (info.next ()) {
-                            img_paths += Functions.get_match_from_info (info);
-                        }
+                        do {
+                            if (info == null) {
+                                break;
+                            }
+
+                            // Use the first capture group and remove the start and end quote
+                            string result = info.fetch (1).strip ().slice (1, -1);
+
+                            // Replaces "~/" with $HOME
+                            if (result.index_of ("~/", 0) == 0) {
+                                result = Environment.get_home_dir () +
+                                      result.slice (1, result.length);
+                            }
+                            img_paths += result;
+                        } while (info.next ());
                     }
 
                     // Remove all images
@@ -385,7 +396,7 @@ namespace SwayNotificationCenter {
 
                     // Set the image if exists and is valid
                     if (img_paths.length > 0) {
-                        var img = img_paths[0];
+                        var img = Functions.uri_to_path (img_paths[0]);
                         var file = File.new_for_path (img);
                         if (img.length > 0 && file.query_exists ()) {
                             var buf = new Gdk.Pixbuf.from_file_at_scale (

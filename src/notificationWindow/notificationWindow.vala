@@ -42,7 +42,7 @@ namespace SwayNotificationCenter {
 
         Gee.HashSet<uint32> inline_reply_notifications = new Gee.HashSet<uint32> ();
 
-        private const int MAX_HEIGHT = 600;
+        private int MAX_HEIGHT = ConfigModel.instance.notification_window_height;
 
         private NotificationWindow () {
             if (swaync_daemon.use_layer_shell) {

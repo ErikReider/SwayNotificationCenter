@@ -207,20 +207,6 @@ namespace SwayNotificationCenter {
             return path;
         }
 
-        public static string get_match_from_info (MatchInfo info) {
-            var all = info.fetch_all ();
-            if (all.length > 1 && all[1].length > 0) {
-                string img = all[1];
-                // Replaces "~/" with $HOME
-                if (img.index_of ("~/", 0) == 0) {
-                    img = Environment.get_home_dir () +
-                          img.slice (1, img.length);
-                }
-                return img;
-            }
-            return "";
-        }
-
         /** Gets the base type of a type if it's derivited */
         public static Type get_base_type (Type type) {
             if (type.is_derived ()) {

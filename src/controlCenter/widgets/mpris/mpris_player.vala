@@ -43,6 +43,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
         private unowned Config mpris_config;
 
+        public signal void content_updated ();
+
         public MprisPlayer (MprisSource source, Config mpris_config) {
             Object (source: source);
             this.mpris_config = mpris_config;
@@ -228,6 +230,10 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
             // Update the buttons
             update_buttons (metadata);
+
+            // Emit signal
+            content_updated ();
+
         }
 
         private void update_buttons (HashTable<string, Variant> metadata) {

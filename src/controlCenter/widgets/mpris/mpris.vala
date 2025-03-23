@@ -3,6 +3,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         int image_size;
         int image_radius;
         bool blur;
+        bool autohide;
         string[] blacklist;
     }
 
@@ -31,6 +32,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             image_size = 96,
             image_radius = 12,
             blur = true,
+            autohide = false
         };
 
         public Mpris (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
@@ -111,6 +113,11 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                         mpris_config.blacklist[i] = blacklist.get_string_element (i);
                     }
                 }
+
+                // Get autohide
+                bool autohide_found;
+                bool? autohide = get_prop<bool> (config, "autohide", out autohide_found);
+                if (autohide_found) mpris_config.autohide = autohide;
             }
 
             hide ();
@@ -168,20 +175,67 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             return false;
         }
 
-        private void add_player (string name, MprisSource source) {
-            MprisPlayer player = new MprisPlayer (source, mpris_config);
-            player.get_style_context ().add_class ("%s-player".printf (css_class_name));
+
+        private bool check_player_metadata_empty (string name) {
+            MprisPlayer ? player = players.lookup (name);
+            if (player == null) return true;
+            HashTable<string, Variant> metadata = player.source.media_player.metadata;
+            if (metadata == null || metadata.size () == 0) {
+                debug ("Metadata is empty");
+                return true;
+            }
+            return false;
+        }
+
+        private bool check_carousel_has_player (MprisPlayer player) {
+            return carousel.get_children ().find (player) != null;
+        }
+
+        private void add_player_to_carousel (string name) {
+            MprisPlayer ? player = players.lookup (name);
+            if (player == null || check_carousel_has_player (player)) return;
             carousel.prepend (player);
-            players.set (name, player);
-
-            if (!visible) show ();
-
-            // Scroll to the new player
-            carousel.scroll_to (player);
             uint children_length = carousel.get_children ().length ();
             if (children_length > 1) {
                 button_prev.show ();
                 button_next.show ();
+                // Scroll to the new player
+                carousel.scroll_to (player);
+            }
+            if (!visible) show ();
+
+        }
+
+        private void add_player (string name, MprisSource source) {
+            MprisPlayer player = new MprisPlayer (source, mpris_config);
+            player.get_style_context ().add_class ("%s-player".printf (css_class_name));
+            players.set (name, player);
+
+            if (mpris_config.autohide) {
+                player.content_updated.connect (() => {
+                    if (!check_player_metadata_empty (name)) {
+                        add_player_to_carousel (name);
+                    } else {
+                        remove_player_from_carousel (name);
+                    }
+                });
+                if(check_player_metadata_empty (name)) return;
+            }
+
+            add_player_to_carousel (name);
+        }
+
+        private void remove_player_from_carousel (string name) {
+            MprisPlayer ? player = players.lookup (name);
+            if (player == null || !check_carousel_has_player (player)) return;
+            carousel.remove (player);
+            uint children_length = carousel.get_children ().length ();
+
+            if (children_length == 0) hide ();
+
+            if (children_length <= 1) {
+                button_prev.hide ();
+                button_next.hide ();
             }
         }
 
@@ -190,18 +244,12 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             MprisPlayer ? player;
             bool result = players.lookup_extended (name, out key, out player);
             if (!result || key == null || player == null) return;
+
+            remove_player_from_carousel (name);
+
             player.before_destroy ();
             player.destroy ();
             players.remove (name);
-
-            uint children_length = carousel.get_children ().length ();
-            if (children_length == 0) {
-                hide ();
-            }
-            if (children_length <= 1) {
-                button_prev.hide ();
-                button_next.hide ();
-            }
         }
 
         private void change_carousel_position (int delta) {

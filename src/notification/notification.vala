@@ -99,7 +99,6 @@ namespace SwayNotificationCenter {
         private static Regex tag_unescape_regex;
         private static Regex img_tag_regex;
         private const string[] TAGS = { "b", "u", "i" };
-        private const string[] QUOTE_CHARS = { "\"", "\'" };
         private const string[] UNESCAPE_CHARS = {
             "lt;", "#60;", "#x3C;", "#x3c;", // <
             "gt;", "#62;", "#x3E;", "#x3e;", // >
@@ -147,13 +146,7 @@ namespace SwayNotificationCenter {
                 tag_regex = new Regex ("&lt;(/?(?:%s))&gt;".printf (joined_tags));
                 string unescaped = string.joinv ("|", UNESCAPE_CHARS);
                 tag_unescape_regex = new Regex ("&amp;(?=%s)".printf (unescaped));
-
-                string[] img_srcs = {};
-                foreach (string quote in QUOTE_CHARS) {
-                    img_srcs += "(%s([^%s]*)%s)".printf (quote, quote, quote);
-                }
-                string img_src = "(%s)".printf (string.joinv ("|", img_srcs));
-                img_tag_regex = new Regex ("<img[^>]* src=%s[^>]*>".printf (img_src));
+                img_tag_regex = new Regex ("<img[^>]* src=((\"([^\"]*)\")|(\'([^\']*)\'))[^>]*>");
             } catch (Error e) {
                 stderr.printf ("Invalid regex: %s", e.message);
             }

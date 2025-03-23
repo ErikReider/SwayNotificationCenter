@@ -14,6 +14,18 @@ namespace SwayNotificationCenter {
             theme.add_resource_path ("/org/erikreider/swaync/icons");
         }
 
+        public static string uri_to_path (owned string uri) {
+            uri = uri.strip ();
+            const string URI_PREFIX = "file://";
+            bool is_uri = (uri.length >= URI_PREFIX.length
+                           && uri.slice (0, URI_PREFIX.length) == URI_PREFIX);
+            if (is_uri) {
+                // Try as a URI (file:// is the only URI schema supported right now)
+                uri = uri.slice (URI_PREFIX.length, uri.length);
+            }
+            return uri;
+        }
+
         public static void set_image_uri (owned string uri,
                                           Gtk.Image img,
                                           int icon_size,

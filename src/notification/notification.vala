@@ -385,7 +385,7 @@ namespace SwayNotificationCenter {
 
                     // Set the image if exists and is valid
                     if (img_paths.length > 0) {
-                        var img = img_paths[0];
+                        var img = Functions.uri_to_path (img_paths[0]);
                         var file = File.new_for_path (img);
                         if (img.length > 0 && file.query_exists ()) {
                             var buf = new Gdk.Pixbuf.from_file_at_scale (

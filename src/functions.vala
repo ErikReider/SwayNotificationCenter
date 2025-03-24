@@ -360,7 +360,7 @@ namespace SwayNotificationCenter {
 
                 Pid child_pid;
                 int std_output;
-                Process.spawn_async_with_pipes (
+                bool result = Process.spawn_async_with_pipes (
                     "/",
                     argvp,
                     spawn_env,
@@ -370,6 +370,11 @@ namespace SwayNotificationCenter {
                     null,
                     out std_output,
                     null);
+                if (!result) {
+                    msg = "Error executing command: %s\n".printf (cmd);
+                    warning (msg);
+                    return false;
+                }
 
                 // stdout:
                 string res = "";
@@ -379,10 +384,10 @@ namespace SwayNotificationCenter {
                         return false;
                     }
                     try {
-                        if (channel.read_line (out res, null, null) == IOStatus.NORMAL) {
-                            debug ("Exec output:\n%s", res);
-                        } else {
-                            res = "";
+                        string read = "";
+                        if (channel.read_line (out read, null, null) == IOStatus.NORMAL) {
+                            debug ("Exec output:\n%s", read);
+                            res += read;
                         }
                         return true;
                     } catch (IOChannelError e) {
@@ -398,7 +403,7 @@ namespace SwayNotificationCenter {
                 int end_status = 0;
                 ChildWatch.add (child_pid, (pid, status) => {
                     Process.close_pid (pid);
-                    GLib.FileUtils.close (std_output);
+                    FileUtils.close (std_output);
                     end_status = status;
                     execute_command.callback ();
                 });

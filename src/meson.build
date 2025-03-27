@@ -122,6 +122,23 @@ app_resources += gnome.compile_resources('sway_notification_center-resources',
   c_name: 'sway_notification_center'
 )
 
+# Tests
+test_sources = []
+foreach item : app_sources
+  if item not in ['main.vala']
+    test_sources += item
+  endif
+endforeach
+test('swaync-tests',
+  executable(
+    'swaync-tests',
+    ['tests/tests.vala', test_sources],
+    vala_args: args,
+    dependencies: app_deps,
+    install: false,
+  ),
+  timeout: 180)
+
 executable('swaync',
   [ app_sources, app_resources ],
   vala_args: args,

@@ -1,0 +1,38 @@
+{
+  "$schema": "/etc/xdg/swaync/configSchema.json",
+  "positionX": "center",
+  "positionY": "bottom",
+  "control-center-margin-top": 12,
+  "control-center-margin-bottom": 10,
+  "control-center-margin-right": 40,
+  "control-center-margin-left": 8,
+  "notification-icon-size": 83,
+  "notification-body-image-height": 140,
+  "notification-body-image-width": 210,
+  "timeout": 19,
+  "timeout-low": 59,
+  "timeout-critical": 1,
+  "fit-to-screen": false,
+  "control-center-width": 800,
+  "control-center-height": 800,
+  "notification-window-width": 50,
+  "keyboard-shortcuts": false,
+  "image-visibility": "never",
+  "transition-time": 20,
+  "hide-on-clear": true,
+  "hide-on-action": false,
+  "script-fail-notify": false,
+  "scripts": {
+    "example-script": {
+      "exec": "echo 'Do something...'",
+      "urgency": "Normal"
+    }
+  },
+  "notification-visibility": {
+    "example-name": {
+      "state": "muted",
+      "urgency": "Low",
+      "app-name": "Spotify"
+    }
+  }
+}

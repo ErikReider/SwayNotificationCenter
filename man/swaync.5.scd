@@ -80,6 +80,11 @@ config file to be able to detect config errors
 	default: true ++
 	description: If each notification should display a 'COPY \"1234\"' action
 
+*notification-ignore-left-click* ++
+	type: bool ++
+	default: false ++
+	description: If notification should be closed on left click. This does not affect sliding behavior
+
 *timeout* ++
 	type: integer ++
 	default: 10 ++

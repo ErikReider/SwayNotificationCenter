@@ -563,6 +563,11 @@ namespace SwayNotificationCenter {
         public bool notification_2fa_action { get; set; default = true; }
 
         /**
+         * If notification should be closed on left click. This does not affect sliding behavior
+         */
+        public bool notification_ignore_left_click { get; set; default = false; }
+
+        /**
          * If notifications should display a text field to reply if the
          * sender requests it.
          */

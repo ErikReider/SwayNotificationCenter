@@ -15,7 +15,7 @@ on:
 
 jobs:
   ubuntu-build:
-    container: ubuntu:23.10
+    container: ubuntu:24.10
     runs-on: ubuntu-latest
     env:
       DEBIAN_FRONTEND: noninteractive

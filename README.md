@@ -116,7 +116,9 @@ The package is available on COPR:
 
 ```zsh
 dnf copr enable erikreider/SwayNotificationCenter
+# Or latest stable release or -git package
 dnf install SwayNotificationCenter
+dnf install SwayNotificationCenter-git
 ```
 
 ### Fedora Silverblue (and other rpm-ostree variants)

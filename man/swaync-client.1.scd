@@ -70,6 +70,9 @@ swaync-client - Client executable
 *-C, --close-all*
 	Closes all notifications
 
+*-a, --action [ACTION_INDEX]*
+	Invokes the action [ACTION_INDEX] (or 0) of the latest notification
+
 *-sw, --skip-wait*
 	Doesn't wait when swaync hasn't been started
 

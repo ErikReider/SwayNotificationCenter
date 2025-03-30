@@ -131,6 +131,11 @@ config file to be able to detect config errors
 	default: true ++
 	description: Hides the control center when clicking on notification action
 
+*text-empty* ++
+	type: string ++
+	default: "No Notifications" ++
+	description: Text that appears when there are no notifications to show
+
 *fit-to-screen* ++
 	type: bool ++
 	default: true ++
@@ -728,5 +733,6 @@ SWAYNC_CATEGORY="SwayNC notification category"
 SWAYNC_REPLACES_ID="ID of notification to replace"
 SWAYNC_ID="SwayNC notification ID"
 SWAYNC_SUMMARY="Notification summary"
+SWAYNC_HINT_[NAME]="Value of the hint [NAME]"
 ```
 #END scripting

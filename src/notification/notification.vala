@@ -146,7 +146,7 @@ namespace SwayNotificationCenter {
                 tag_regex = new Regex ("&lt;(/?(?:%s))&gt;".printf (joined_tags));
                 string unescaped = string.joinv ("|", UNESCAPE_CHARS);
                 tag_unescape_regex = new Regex ("&amp;(?=%s)".printf (unescaped));
-                img_tag_regex = new Regex ("""<img[^>]* src=\"([^\"]*)\"[^>]*>""");
+                img_tag_regex = new Regex ("<img[^>]* src=((\"([^\"]*)\")|(\'([^\']*)\'))[^>]*>");
             } catch (Error e) {
                 stderr.printf ("Invalid regex: %s", e.message);
             }
@@ -374,10 +374,21 @@ namespace SwayNotificationCenter {
                     string[] img_paths = {};
                     MatchInfo info;
                     if (img_tag_regex.match (text, 0, out info)) {
-                        img_paths += Functions.get_match_from_info (info);
-                        while (info.next ()) {
-                            img_paths += Functions.get_match_from_info (info);
-                        }
+                        do {
+                            if (info == null) {
+                                break;
+                            }
+
+                            // Use the first capture group and remove the start and end quote
+                            string result = info.fetch (1).strip ().slice (1, -1);
+
+                            // Replaces "~/" with $HOME
+                            if (result.index_of ("~/", 0) == 0) {
+                                result = Environment.get_home_dir () +
+                                      result.slice (1, result.length);
+                            }
+                            img_paths += result;
+                        } while (info.next ());
                     }
 
                     // Remove all images
@@ -385,7 +396,7 @@ namespace SwayNotificationCenter {
 
                     // Set the image if exists and is valid
                     if (img_paths.length > 0) {
-                        var img = img_paths[0];
+                        var img = Functions.uri_to_path (img_paths[0]);
                         var file = File.new_for_path (img);
                         if (img.length > 0 && file.query_exists ()) {
                             var buf = new Gdk.Pixbuf.from_file_at_scale (
@@ -436,6 +447,8 @@ namespace SwayNotificationCenter {
                 // Sets the original text
                 this.body.set_text (text);
             }
+
+            this.body.set_visible (this.body.get_text ().length > 0);
         }
 
         /** Returns the first code found, else null */
@@ -454,7 +467,7 @@ namespace SwayNotificationCenter {
         }
 
         public void click_default_action () {
-            action_clicked (param.default_action, true);
+            action_clicked (param.default_action);
         }
 
         public void click_alt_action (uint index) {
@@ -472,11 +485,18 @@ namespace SwayNotificationCenter {
             action_clicked (param.actions.index (index));
         }
 
-        private void action_clicked (Action ? action, bool is_default = false) {
+        private void action_clicked (Action ? action) {
             noti_daemon.run_scripts (param, ScriptRunOnType.ACTION);
             if (action != null
                 && action.identifier != null
                 && action.identifier != "") {
+                // Try getting a XDG Activation token so that the application
+                // can request compositor focus
+                string ? token = swaync_daemon.xdg_activation.get_token (this);
+                if (token != null) {
+                    noti_daemon.ActivationToken (param.applied_id, token);
+                }
+
                 noti_daemon.ActionInvoked (param.applied_id, action.identifier);
                 if (ConfigModel.instance.hide_on_action) {
                     try {
@@ -683,19 +703,27 @@ namespace SwayNotificationCenter {
             int app_icon_size = notification_icon_size / 3;
             img_app_icon.set_pixel_size (app_icon_size);
 
-            var img_path_exists = File.new_for_uri (
-                param.image_path ?? "").query_exists ();
+            bool img_path_is_theme_icon = false;
+            bool img_path_exists = File.new_for_uri (param.image_path ?? "").query_exists ();
             if (param.image_path != null && !img_path_exists) {
                 // Check if it's not a URI
                 img_path_exists = File.new_for_path (
                     param.image_path ?? "").query_exists ();
+
+                // Check if it's a freedesktop.org-compliant icon
+                if (!img_path_exists) {
+                    unowned Gtk.IconTheme icon_theme = Gtk.IconTheme.get_default ();
+                    Gtk.IconInfo? info = icon_theme.lookup_icon (param.image_path,
+                                                                 notification_icon_size,
+                                                                 Gtk.IconLookupFlags.USE_BUILTIN);
+                    img_path_exists = info != null;
+                    img_path_is_theme_icon = img_path_exists;
+                }
             }
-            var app_icon_exists = File.new_for_uri (
-                app_icon_uri ?? "").query_exists ();
-            if (app_icon_uri != null && !img_path_exists) {
+            bool app_icon_exists = File.new_for_uri (app_icon_uri ?? "").query_exists ();
+            if (app_icon_uri != null && !app_icon_exists) {
                 // Check if it's not a URI
-                app_icon_exists = File.new_for_path (
-                    app_icon_uri ?? "").query_exists ();
+                app_icon_exists = File.new_for_path (app_icon_uri ?? "").query_exists ();
             }
 
             // Get the image CSS corner radius in pixels
@@ -715,9 +743,10 @@ namespace SwayNotificationCenter {
                        param.image_path != "" &&
                        img_path_exists) {
                 Functions.set_image_uri (param.image_path, img,
-                                          notification_icon_size,
-                                          radius,
-                                          img_path_exists);
+                                         notification_icon_size,
+                                         radius,
+                                         img_path_exists,
+                                         img_path_is_theme_icon);
             } else if (param.icon_data.is_initialized) {
                 Functions.set_image_data (param.icon_data, img,
                                           notification_icon_size, radius);

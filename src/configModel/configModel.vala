@@ -247,6 +247,14 @@ namespace SwayNotificationCenter {
             spawn_env += "SWAYNC_REPLACES_ID=%s".printf (param.replaces_id.to_string ());
             spawn_env += "SWAYNC_TIME=%s".printf (param.time.to_string ());
             spawn_env += "SWAYNC_DESKTOP_ENTRY=%s".printf (param.desktop_entry ?? "");
+            foreach (string hint in param.hints.get_keys ()) {
+                if (hint.contains ("image") || hint.contains ("icon")) {
+                    continue;
+                }
+                spawn_env += "SWAYNC_HINT_%s=%s".printf (
+                    hint.up ().replace ("-", "_"),
+                    param.hints[hint].print (false));
+            }
 
             return yield Functions.execute_command (exec, spawn_env, out msg);
         }
@@ -335,6 +343,12 @@ namespace SwayNotificationCenter {
          */
         public bool layer_shell { get; set; default = true; }
 
+        /**
+         * Wether or not the windows should cover the whole screen when
+         * layer-shell is used.
+         */
+        public bool layer_shell_cover_screen { get; set; default = true; }
+
         /** The CSS loading priority */
         public CssPriority cssPriority { // vala-lint=naming-convention
             get; set; default = CssPriority.APPLICATION;
@@ -411,6 +425,9 @@ namespace SwayNotificationCenter {
 
         /** Hides the control center when clicking on notification action */
         public bool hide_on_action { get; set; default = true; }
+
+        /** Text that appears when there are no notifications to show */
+        public string text_empty { get; set; default = "No Notifications"; }
 
         /** The controlcenters horizontal alignment. Supersedes `positionX` if not `NONE` */
         public PositionX control_center_positionX { // vala-lint=naming-convention

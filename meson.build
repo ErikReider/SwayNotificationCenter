@@ -8,12 +8,18 @@ add_project_arguments(['-Wno-error=int-conversion'], language: 'c')
 add_project_arguments(['--enable-gobject-tracing'], language: 'vala')
 add_project_arguments(['--enable-checking'], language: 'vala')
 
-i18n = import('i18n')
+cc = meson.get_compiler('c')
+vala = meson.get_compiler('vala')
+
 gnome = import('gnome')
 
 app_resources = []
 
 config_path = join_paths(get_option('sysconfdir'), 'xdg', 'swaync')
+
+# Wayland protocols
+protocol_dep = []
+subdir('protocols')
 
 subdir('data')
 subdir('src')

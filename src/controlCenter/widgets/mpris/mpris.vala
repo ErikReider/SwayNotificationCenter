@@ -59,7 +59,6 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 visible = true,
             };
             carousel.allow_scroll_wheel = true;
-            carousel.draw.connect (carousel_draw_cb);
             carousel.page_changed.connect ((index) => {
                 GLib.List<weak Gtk.Widget> children = carousel.get_children ();
                 int children_length = (int) children.length ();
@@ -120,51 +119,6 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             } catch (Error e) {
                 error ("MPRIS Widget error: %s", e.message);
             }
-        }
-
-        private bool carousel_draw_cb (Cairo.Context cr) {
-            Gtk.Allocation alloc;
-            carousel.get_allocated_size (out alloc, null);
-
-            Cairo.Pattern left_fade_gradient = new Cairo.Pattern.linear (0, 0, 1, 0);
-            left_fade_gradient.add_color_stop_rgba (0, 1, 1, 1, 1);
-            left_fade_gradient.add_color_stop_rgba (1, 1, 1, 1, 0);
-            Cairo.Pattern right_fade_gradient = new Cairo.Pattern.linear (0, 0, 1, 0);
-            right_fade_gradient.add_color_stop_rgba (0, 1, 1, 1, 0);
-            right_fade_gradient.add_color_stop_rgba (1, 1, 1, 1, 1);
-
-            cr.save ();
-            cr.push_group ();
-
-            // Draw widgets
-            carousel.draw.disconnect (carousel_draw_cb);
-            carousel.draw (cr);
-            carousel.draw.connect (carousel_draw_cb);
-
-            /// Draw vertical fade
-
-            // Top fade
-            cr.save ();
-            cr.scale (FADE_WIDTH, alloc.height);
-            cr.rectangle (0, 0, FADE_WIDTH, alloc.height);
-            cr.set_source (left_fade_gradient);
-            cr.set_operator (Cairo.Operator.DEST_OUT);
-            cr.fill ();
-            cr.restore ();
-            // Bottom fade
-            cr.save ();
-            cr.translate (alloc.width - FADE_WIDTH, 0);
-            cr.scale (FADE_WIDTH, alloc.height);
-            cr.rectangle (0, 0, FADE_WIDTH, alloc.height);
-            cr.set_source (right_fade_gradient);
-            cr.set_operator (Cairo.Operator.DEST_OUT);
-            cr.fill ();
-            cr.restore ();
-
-            cr.pop_group_to_source ();
-            cr.paint ();
-            cr.restore ();
-            return true;
         }
 
         /**

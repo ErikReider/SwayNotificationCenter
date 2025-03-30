@@ -133,7 +133,7 @@ namespace SwayNotificationCenter {
             this.applied_id = applied_id;
             this.app_name = app_name;
             this.replaces_id = replaces_id;
-            this.app_icon = app_icon;
+            this.app_icon = Uri.unescape_string (app_icon);
             this.summary = summary;
             this.body = body;
             this.hints = hints;
@@ -168,7 +168,7 @@ namespace SwayNotificationCenter {
             // Set name_id
             this.name_id = this.desktop_entry ?? this.app_name ?? "";
 
-            // Set display_name and make the first letter upper case
+            // Set display_name
             string ? display_name = this.desktop_entry ?? this.app_name;
             if (desktop_app_info != null) {
                 display_name = desktop_app_info.get_display_name ();
@@ -176,7 +176,7 @@ namespace SwayNotificationCenter {
             if (display_name == null || display_name.length == 0) {
                 display_name = "Unknown";
             }
-            this.display_name = display_name.splice (0, 1, display_name.up (1));
+            this.display_name = display_name;
         }
 
         private void parse_hints () {
@@ -237,7 +237,7 @@ namespace SwayNotificationCenter {
                     case "image-path":
                     case "image_path":
                         if (hint_value.is_of_type (VariantType.STRING)) {
-                            image_path = hint_value.get_string ();
+                            image_path = Uri.unescape_string (hint_value.get_string ());
                         }
                         break;
                     case "desktop-entry":

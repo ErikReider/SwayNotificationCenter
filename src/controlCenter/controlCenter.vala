@@ -54,8 +54,8 @@ namespace SwayNotificationCenter {
 
             // Limit the size to the ScrolledWindows size
             child.allocate (
-                n_width.clamp ((int) Math.fmin(m_width, window_width), window_width),
-                n_height.clamp ((int) Math.fmin(m_height, window_height), window_height),
+                n_width.clamp ((int) Math.fmin (m_width, window_width), window_width),
+                n_height.clamp ((int) Math.fmin (m_height, window_height), window_height),
                 baseline, null);
         }
     }

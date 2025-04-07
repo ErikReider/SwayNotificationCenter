@@ -1,4 +1,5 @@
 namespace SwayNotificationCenter {
+    /* Only to be used by the Viewport in the Control Center */
     private class FixedViewportLayout : Gtk.LayoutManager {
         private unowned Gtk.ScrolledWindow parent;
 
@@ -40,6 +41,11 @@ namespace SwayNotificationCenter {
                 return;
             }
 
+            if (ConfigModel.instance.fit_to_screen) {
+                child.allocate (width, height, baseline, null);
+                return;
+            }
+
             int m_height, n_height;
             child.measure (Gtk.Orientation.VERTICAL, width,
                            out m_height, out n_height,
@@ -49,13 +55,13 @@ namespace SwayNotificationCenter {
                            out m_width, out n_width,
                            null, null);
 
-            int window_width = parent.get_width ();
-            int window_height = parent.get_height ();
+            int parent_width = parent.get_width ();
+            int parent_height = parent.get_height ();
 
             // Limit the size to the ScrolledWindows size
             child.allocate (
-                n_width.clamp ((int) Math.fmin (m_width, window_width), window_width),
-                n_height.clamp ((int) Math.fmin (m_height, window_height), window_height),
+                n_width.clamp ((int) Math.fmin (m_width, parent_width), parent_width),
+                n_height.clamp ((int) Math.fmin (m_height, parent_height), parent_height),
                 baseline, null);
         }
     }

@@ -581,16 +581,9 @@ namespace SwayNotificationCenter {
             minimum = 0;
             natural = 0;
 
-            uint length = widgets.length ();
+            int length = (int) widgets.length ();
             if (length == 0) {
                 return;
-            }
-
-            int offset = 0;
-            for (uint i = 1;
-                 i < length && i < NUM_STACKED_NOTIFICATIONS;
-                 i++) {
-                offset += COLLAPSED_NOTIFICATION_OFFSET;
             }
 
             unowned GLib.List<weak Gtk.Widget> last = widgets.last ();
@@ -601,6 +594,9 @@ namespace SwayNotificationCenter {
                                      out minimum, out natural,
                                      null, null);
             }
+
+            int offset = (length - 1).clamp (0, NUM_STACKED_NOTIFICATIONS - 1)
+                * COLLAPSED_NOTIFICATION_OFFSET;
 
             natural += offset;
         }

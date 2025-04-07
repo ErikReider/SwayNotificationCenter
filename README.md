@@ -189,16 +189,16 @@ But we recommend to use [Guix Home](https://guix.gnu.org/manual/devel/en/html_no
 - `git`
 - `scdoc`
 - `sassc`
-- `gtk3`
-- `gtk-layer-shell`
+- `gtk4`
+- `gtk4-layer-shell`
 - `dbus`
 - `glib2`
 - `gobject-introspection`
 - `libgee`
 - `json-glib`
-- `libhandy`
+- `libadwaita`
 - `gvfs`
-- `granite`
+- `granite7`
 
 ##### Optional Dependencies
 

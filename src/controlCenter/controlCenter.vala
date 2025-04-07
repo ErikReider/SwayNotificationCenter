@@ -576,7 +576,12 @@ namespace SwayNotificationCenter {
                     break;
                 }
             }
-            if (group.is_empty ()) {
+
+            if (group.only_single_notification ()) {
+                if (expanded_group == group) {
+                    expanded_group = null;
+                }
+            } else if (group.is_empty ()) {
                 if (group.name_id.length > 0) {
                     noti_groups_name.remove (group.name_id);
                 }

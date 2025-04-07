@@ -183,8 +183,7 @@ namespace SwayNotificationCenter {
 
         /// Returns if there's more than one notification
         public bool only_single_notification () {
-            unowned Gtk.Widget ? widget = group.widgets.nth_data (1);
-            return widget == null;
+            return group.widgets.nth_data (0) != null && group.widgets.nth_data (1) == null;
         }
 
         public void set_expanded (bool state) {

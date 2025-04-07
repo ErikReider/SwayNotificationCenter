@@ -37,8 +37,6 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         private string prev_art_url;
         private DesktopAppInfo ? desktop_entry = null;
 
-        private Gdk.Texture ? album_art_texture = null;
-
         private unowned Config mpris_config;
 
         public MprisPlayer (MprisSource source, Config mpris_config) {
@@ -249,6 +247,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 // Cancel previous download, reset the state and download again
                 album_art_cancellable.cancel ();
                 album_art_cancellable.reset ();
+
+                Gdk.Texture ? album_art_texture = null;
                 try {
                     File file = File.new_for_uri (url);
                     InputStream stream = yield file.read_async (Priority.DEFAULT,
@@ -256,13 +256,12 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
                     Gdk.Pixbuf pixbuf = yield new Gdk.Pixbuf.from_stream_async (
                         stream, album_art_cancellable);
-                    this.album_art_texture = Gdk.Texture.for_pixbuf (pixbuf);
+                    album_art_texture = Gdk.Texture.for_pixbuf (pixbuf);
                 } catch (Error e) {
                     debug ("Could not download album art for %s. Using fallback...",
                            source.media_player.identity);
-                    this.album_art_texture = null;
                 }
-                if (this.album_art_texture != null) {
+                if (album_art_texture != null) {
                     // Set album art
                     Gtk.Snapshot snapshot = new Gtk.Snapshot ();
                     Functions.scale_texture (album_art_texture,
@@ -278,9 +277,6 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                     return;
                 }
             }
-            background_picture.set_paintable (null);
-
-            this.album_art_texture = null;
 
             // Get the app icon
             Icon ? icon = null;
@@ -288,29 +284,21 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 icon = desktop_entry.get_icon ();
             }
             unowned Gtk.IconTheme icon_theme = Gtk.IconTheme.get_for_display (get_display ());
-            Gtk.IconPaintable ? icon_info = null;
             if (icon != null) {
                 album_art.set_from_gicon (icon);
-                icon_info = icon_theme.lookup_by_gicon (icon, mpris_config.image_size,
-                                                        get_scale_factor (),
-                                                        Gtk.TextDirection.NONE,
-                                                        0);
+
+                Gtk.IconPaintable ? icon_info = icon_theme.lookup_by_gicon (
+                    icon, mpris_config.image_size, get_scale_factor (), Gtk.TextDirection.NONE, 0);
+                background_picture.set_paintable (icon_info);
             } else {
                 // Default icon
                 string icon_name = "audio-x-generic-symbolic";
                 album_art.set_from_icon_name (icon_name);
-                icon_info = icon_theme.lookup_icon (icon_name, null, mpris_config.image_size,
-                                                    get_scale_factor (),
-                                                    Gtk.TextDirection.NONE,
-                                                    0);
-            }
 
-            if (icon_info != null) {
-                try {
-                    this.album_art_texture = Gdk.Texture.from_file (icon_info.get_file ());
-                } catch (Error e) {
-                    warning ("Could not load icon: %s", e.message);
-                }
+                Gtk.IconPaintable ? icon_info = icon_theme.lookup_icon (
+                    icon_name, null, mpris_config.image_size, get_scale_factor (),
+                    Gtk.TextDirection.NONE, 0);
+                background_picture.set_paintable (icon_info);
             }
         }
 

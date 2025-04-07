@@ -5,12 +5,14 @@ namespace SwayNotificationCenter {
 
         public string name_id;
 
+        private NotificationCloseButton close_button;
         private DismissibleWidget dismissible;
         private ExpandableGroup group;
         private Gtk.Revealer revealer = new Gtk.Revealer ();
         private Gtk.Image app_icon;
         private Gtk.Label app_label;
 
+        private Gtk.EventControllerMotion motion_controller;
         private Gtk.GestureClick gesture;
         private bool gesture_down = false;
         private bool gesture_in = false;
@@ -28,9 +30,17 @@ namespace SwayNotificationCenter {
             dismissible.dismissed.connect (close_all_notifications);
             set_child (dismissible);
 
+            Gtk.Overlay overlay = new Gtk.Overlay ();
+            dismissible.child = overlay;
+
             Gtk.Box box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
             box.set_hexpand (true);
-            dismissible.child = box;
+            overlay.set_child (box);
+
+            close_button = new NotificationCloseButton ();
+            close_button.clicked.connect (close_all_notifications);
+            close_button.add_css_class ("notification-group-close-button");
+            overlay.add_overlay (close_button);
 
             revealer.set_transition_type (Gtk.RevealerTransitionType.SLIDE_UP);
             revealer.set_reveal_child (false);
@@ -108,7 +118,7 @@ namespace SwayNotificationCenter {
              * Handling of group presses
              */
             gesture = new Gtk.GestureClick ();
-            dismissible.add_controller (gesture);
+            box.add_controller (gesture);
             gesture.set_touch_only (false);
             gesture.set_exclusive (true);
             gesture.set_button (Gdk.BUTTON_PRIMARY);
@@ -153,6 +163,18 @@ namespace SwayNotificationCenter {
                 if (gesture_down) {
                     gesture_down = false;
                 }
+            });
+
+            /*
+             * Handling of group hover
+             */
+            motion_controller = new Gtk.EventControllerMotion ();
+            this.add_controller (motion_controller);
+            motion_controller.motion.connect ((event) => {
+                close_button.set_reveal (!group.is_expanded && !only_single_notification ());
+            });
+            motion_controller.leave.connect ((controller) => {
+                close_button.set_reveal (false);
             });
         }
 
@@ -253,10 +275,13 @@ namespace SwayNotificationCenter {
         }
 
         public void close_all_notifications () {
+            close_button.set_reveal (false);
             urgent_notifications.remove_all ();
             foreach (unowned Gtk.Widget widget in group.widgets) {
                 var noti = (Notification) widget;
-                if (noti != null) noti.close_notification (false);
+                if (noti != null) {
+                    noti.close_notification (false);
+                }
             }
         }
 

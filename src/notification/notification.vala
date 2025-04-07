@@ -1,5 +1,52 @@
 namespace SwayNotificationCenter {
 
+    public class NotificationCloseButton : Adw.Bin {
+        Gtk.Revealer revealer;
+        Gtk.Button button;
+
+        construct {
+            valign = Gtk.Align.START;
+            // TODO: Configurable
+            halign = Gtk.Align.END;
+
+            revealer = new Gtk.Revealer () {
+                transition_type = Gtk.RevealerTransitionType.CROSSFADE,
+                reveal_child = false,
+            };
+            revealer.notify["child-revealed"].connect (() => {
+                set_visible (revealer.reveal_child);
+            });
+            set_child (revealer);
+
+            button = new Gtk.Button.from_icon_name ("swaync-close-symbolic") {
+                has_frame = false,
+                halign = Gtk.Align.CENTER,
+                valign = Gtk.Align.CENTER,
+            };
+            button.add_css_class ("close-button");
+            button.add_css_class ("circular");
+            button.clicked.connect (() => this.clicked ());
+            revealer.set_child (button);
+        }
+
+        public signal void clicked ();
+
+        public void set_reveal (bool state) {
+            if (state == revealer.reveal_child) {
+                return;
+            }
+
+            if (state) {
+                set_visible (true);
+            }
+            revealer.set_reveal_child (state);
+        }
+
+        public void set_transition_duration (uint duration) {
+            revealer.set_transition_duration (duration);
+        }
+    }
+
     public enum NotificationType { CONTROL_CENTER, POPUP }
 
     [GtkTemplate (ui = "/org/erikreider/swaync/ui/notification.ui")]
@@ -30,9 +77,7 @@ namespace SwayNotificationCenter {
         unowned IterBox base_box;
 
         [GtkChild]
-        unowned Gtk.Revealer close_revealer;
-        [GtkChild]
-        unowned Gtk.Button close_button;
+        unowned NotificationCloseButton close_button;
 
         [GtkChild]
         unowned Gtk.Label summary;
@@ -217,11 +262,11 @@ namespace SwayNotificationCenter {
             motion_controller = new Gtk.EventControllerMotion ();
             base_widget.add_controller (motion_controller);
             motion_controller.enter.connect ((event) => {
-                close_revealer.set_reveal_child (true);
+                close_button.set_reveal (true);
                 remove_noti_timeout ();
             });
             motion_controller.leave.connect ((controller) => {
-                close_revealer.set_reveal_child (false);
+                close_button.set_reveal (false);
                 add_notification_timeout ();
             });
 
@@ -265,7 +310,7 @@ namespace SwayNotificationCenter {
             this.summary.set_text (param.summary ?? param.app_name);
             this.summary.set_ellipsize (Pango.EllipsizeMode.END);
 
-            close_revealer.set_transition_duration (this.transition_time);
+            close_button.set_transition_duration (this.transition_time);
 
             this.revealer.set_transition_duration (this.transition_time);
 

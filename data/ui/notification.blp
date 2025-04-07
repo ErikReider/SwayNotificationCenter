@@ -177,32 +177,7 @@ template $SwayNotificationCenterNotification: Box {
         }
 
         [overlay]
-        Revealer close_revealer {
-          transition-type: crossfade;
-          valign: start;
-          // TODO: Configurable
-          halign: end;
-
-          child: Button close_button {
-            has-frame: false;
-            halign: center;
-            valign: center;
-            margin-bottom: 2;
-            margin-top: 2;
-            margin-start: 4;
-            margin-end: 4;
-
-            styles [
-              "close-button",
-              "circular",
-            ]
-
-            child: Image {
-              icon-name: "swaync-close-symbolic";
-              overflow: hidden;
-            };
-          };
-        }
+        $SwayNotificationCenterNotificationCloseButton close_button {}
       };
     };
   }

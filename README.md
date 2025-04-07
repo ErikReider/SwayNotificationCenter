@@ -186,6 +186,7 @@ But we recommend to use [Guix Home](https://guix.gnu.org/manual/devel/en/html_no
 
 - `vala >= 0.56`
 - `meson`
+- `blueprint-compiler`
 - `git`
 - `scdoc`
 - `sassc`

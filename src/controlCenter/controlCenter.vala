@@ -144,6 +144,7 @@ namespace SwayNotificationCenter {
             // sometimes being passed through to unfucused application
             // Ex: Firefox in a fullscreen YouTube video
             key_controller = new Gtk.EventControllerKey ();
+            key_controller.set_propagation_phase (Gtk.PropagationPhase.CAPTURE);
             ((Gtk.Widget) this).add_controller (key_controller);
             key_controller.key_released.connect (key_released_event_cb);
             key_controller.key_pressed.connect (key_press_event_cb);

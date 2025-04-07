@@ -19,24 +19,27 @@ namespace SwayNotificationCenter.Widgets {
             this.show_per_app_icon = show_per_app_icon;
             this.show_per_app_label = show_per_app_label;
 
+            set_activatable (false);
+
             update (sink_input);
 
             scale.draw_value = false;
+            scale.set_hexpand (true);
 
             icon.pixel_size = icon_size;
 
             container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
 
             if (show_per_app_icon) {
-                container.add (icon);
+                container.append (icon);
             }
             if (show_per_app_label) {
-                container.add (label);
+                container.append (label);
             }
 
-            container.pack_start (scale);
+            container.append (scale);
 
-            add (container);
+            set_child (container);
 
             scale.value_changed.connect (() => {
                 client.set_sink_input_volume (sink_input, (float) scale.get_value ());
@@ -49,9 +52,7 @@ namespace SwayNotificationCenter.Widgets {
 
             if (show_per_app_icon) {
                 icon.set_from_icon_name (
-                    sink_input.application_icon_name ?? "application-x-executable",
-                    Gtk.IconSize.DIALOG
-                );
+                    sink_input.application_icon_name ?? "application-x-executable");
             }
 
             if (show_per_app_label) {
@@ -60,8 +61,6 @@ namespace SwayNotificationCenter.Widgets {
 
             scale.set_value (sink_input.volume);
             scale.tooltip_text = ((int) scale.get_value ()).to_string ();
-
-            this.show_all ();
         }
     }
 }

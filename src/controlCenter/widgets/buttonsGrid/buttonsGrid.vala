@@ -23,7 +23,8 @@ namespace SwayNotificationCenter.Widgets {
 
             Gtk.FlowBox container = new Gtk.FlowBox ();
             container.set_selection_mode (Gtk.SelectionMode.NONE);
-            pack_start (container, true, true, 0);
+            container.set_hexpand (true);
+            append (container);
 
             // add action to container
             foreach (var act in actions) {
@@ -40,8 +41,6 @@ namespace SwayNotificationCenter.Widgets {
                         break;
                 }
             }
-
-            show_all ();
         }
 
         public override void on_cc_visibility_change (bool value) {

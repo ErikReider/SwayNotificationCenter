@@ -50,22 +50,22 @@ widget_sources = [
 
 app_sources = [
   'main.vala',
-  'animation/animation.vala',
   'orderedHashTable/orderedHashTable.vala',
+  'iterHelpers/iterBox.vala',
+  'iterHelpers/iterListBoxController.vala',
+  'underlay/underlay.vala',
   'configModel/configModel.vala',
   'swayncDaemon/swayncDaemon.vala',
   'notiDaemon/notiDaemon.vala',
   'notiModel/notiModel.vala',
-  'fadedViewport/fadedViewport.vala',
   'notificationWindow/notificationWindow.vala',
+  'dismissableWidget/dismissableWidget.vala',
   'notification/notification.vala',
   'notificationGroup/notificationGroup.vala',
   'controlCenter/controlCenter.vala',
   widget_sources,
   'blankWindow/blankWindow.vala',
   'functions.vala',
-  'WaylandUtils/WaylandUtils.c',
-  'WaylandUtils/WaylandUtils.vala',
   'xdg_activation.vala',
   constants,
 ]
@@ -73,20 +73,18 @@ app_sources = [
 assert(vala.version() >= '0.56')
 
 app_deps = [
+  dependency('gtk4-layer-shell-0', version: '>= 1.0.3'),
   dependency('gio-2.0', version: '>= 2.50'),
   dependency('gio-unix-2.0', version: '>= 2.50'),
-  dependency('gtk+-3.0', version: '>= 3.22'),
+  dependency('gtk4', version: '>= 4.16.13'),
+  dependency('gtk4-wayland', version: '>= 4.16.5'),
   dependency('json-glib-1.0', version: '>= 1.0'),
-  dependency('libhandy-1', version: '>= 1.8.0'),
-  dependency('granite', version: '>= 6.2.0'),
-  dependency('gtk-layer-shell-0',
-    fallback: ['gtk-layer-shell-0', 'gtk-layer-shell'],
-    version: '>= 0.8.0'
-  ),
+  dependency('libadwaita-1', version: '>= 1.6.1'),
+  dependency('granite-7', version: '>= 7.5.0'),
   cc.find_library('m', required : true),
   vala.find_library('posix'),
-  dependency('gee-0.8'),
-  dependency('wayland-client'),
+  dependency('gee-0.8', version: '>=0.20.6'),
+  dependency('wayland-client', version: '>=1.23.0'),
   protocol_dep,
 ]
 
@@ -113,14 +111,8 @@ if get_option('pulse-audio')
 endif
 
 args = [
-  '--target-glib=2.50',
-  '--pkg=GtkLayerShell-0.1',
+  '--target-glib=2.82',
 ]
-
-app_resources += gnome.compile_resources('sway_notification_center-resources',
-  'sway_notification_center.gresource.xml',
-  c_name: 'sway_notification_center'
-)
 
 executable('swaync',
   [ app_sources, app_resources ],

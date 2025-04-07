@@ -1,5 +1,7 @@
 namespace SwayNotificationCenter {
     public class Functions {
+        const Gsk.ScalingFilter SCALING_FILTER = Gsk.ScalingFilter.NEAREST;
+
         private static Gtk.CssProvider system_css_provider;
         private static Gtk.CssProvider user_css_provider;
 
@@ -10,7 +12,7 @@ namespace SwayNotificationCenter {
             user_css_provider = new Gtk.CssProvider ();
 
             // Init resources
-            var theme = Gtk.IconTheme.get_default ();
+            var theme = Gtk.IconTheme.get_for_display (Gdk.Display.get_default ());
             theme.add_resource_path ("/org/erikreider/swaync/icons");
         }
 
@@ -29,7 +31,6 @@ namespace SwayNotificationCenter {
         public static void set_image_uri (owned string uri,
                                           Gtk.Image img,
                                           int icon_size,
-                                          int radius,
                                           bool file_exists,
                                           bool is_theme_icon = false) {
             const string URI_PREFIX = "file://";
@@ -40,18 +41,8 @@ namespace SwayNotificationCenter {
                 try {
                     if (is_uri) uri = uri.slice (URI_PREFIX.length, uri.length);
 
-                    var pixbuf = new Gdk.Pixbuf.from_file_at_scale (
-                        Uri.unescape_string (uri),
-                        icon_size * img.scale_factor,
-                        icon_size * img.scale_factor,
-                        true);
-                    // Scale and round the image. Scales to fit the size
-                    var surface = scale_round_pixbuf (pixbuf,
-                                                      icon_size,
-                                                      icon_size,
-                                                      img.scale_factor,
-                                                      radius);
-                    img.set_from_surface (surface);
+                    Gdk.Texture texture = Gdk.Texture.from_filename (Uri.unescape_string (uri));
+                    img.set_from_paintable (texture);
                 } catch (Error e) {
                     stderr.printf (e.message + "\n");
                 }
@@ -59,30 +50,26 @@ namespace SwayNotificationCenter {
 
             // Try as icon name
             if (img.storage_type == Gtk.ImageType.EMPTY) {
-                img.set_from_icon_name (uri, Gtk.IconSize.INVALID);
+                unowned Gdk.Display display = Gdk.Display.get_default ();
+                unowned Gtk.IconTheme icon_theme = Gtk.IconTheme.get_for_display (display);
+                if (icon_theme.has_icon (uri)) {
+                    img.set_from_icon_name (uri);
+                }
             }
         }
 
         public static void set_image_data (ImageData data,
                                            Gtk.Image img,
-                                           int icon_size,
-                                           int radius) {
-            // Rebuild and scale the image
-            var pixbuf = new Gdk.Pixbuf.with_unowned_data (data.data,
-                                                           Gdk.Colorspace.RGB,
-                                                           data.has_alpha,
-                                                           data.bits_per_sample,
-                                                           data.width,
-                                                           data.height,
-                                                           data.rowstride,
-                                                           null);
-
-            var surface = scale_round_pixbuf (pixbuf,
-                                              icon_size,
-                                              icon_size,
-                                              img.scale_factor,
-                                              radius);
-            img.set_from_surface (surface);
+                                           int icon_size) {
+            Gdk.MemoryFormat format = Gdk.MemoryFormat.R8G8B8;
+            if (data.has_alpha) {
+                format = Gdk.MemoryFormat.R8G8B8A8;
+            }
+            var texture = new Gdk.MemoryTexture (data.width, data.height,
+                                                 format,
+                                                 new Bytes.static (data.data),
+                                                 data.rowstride);
+            img.set_from_paintable (texture);
         }
 
         /** Load the package provided CSS file as a base.
@@ -95,31 +82,26 @@ namespace SwayNotificationCenter {
             // Load packaged CSS as backup
             string system_css = get_style_path (null, true);
             system_css = File.new_for_path (system_css).get_path () ?? system_css;
-            message ("Loading CSS: \"%s\"", system_css);
-            try {
+            if (!skip_packaged_css) {
+                message ("Loading CSS: \"%s\"", system_css);
                 system_css_provider.load_from_path (system_css);
-                Gtk.StyleContext.add_provider_for_screen (
-                    Gdk.Screen.get_default (),
+                Gtk.StyleContext.add_provider_for_display (
+                    Gdk.Display.get_default (),
                     system_css_provider,
                     css_priority);
-            } catch (Error e) {
-                critical ("Load packaged CSS Error (\"%s\"):\n\t%s\n", system_css, e.message);
+            } else {
+                message ("Skipping system CSS: \"%s\"", system_css);
             }
 
             // Load user CSS
             string user_css = get_style_path (style_path);
             user_css = File.new_for_path (user_css).get_path () ?? user_css;
             message ("Loading CSS: \"%s\"", user_css);
-            try {
-                user_css_provider.load_from_path (user_css);
-                Gtk.StyleContext.add_provider_for_screen (
-                    Gdk.Screen.get_default (),
-                    user_css_provider,
-                    css_priority);
-            } catch (Error e) {
-                critical ("Load user CSS Error (\"%s\"):\n\t%s\n", user_css, e.message);
-                return false;
-            }
+            user_css_provider.load_from_path (user_css);
+            Gtk.StyleContext.add_provider_for_display (
+                Gdk.Display.get_default (),
+                user_css_provider,
+                css_priority);
 
             return true;
         }
@@ -217,122 +199,64 @@ namespace SwayNotificationCenter {
             return type;
         }
 
-        /** Roundes the Cairo Surface to the given radii */
-        public static Cairo.Surface round_surface (Cairo.Surface base_surf,
-                                                   int buffer_width,
-                                                   int buffer_height,
-                                                   int img_scale,
-                                                   int radius) {
-            // Limit radii size
-            radius = int.min (radius, int.min (buffer_width / 2, buffer_height / 2));
-
-            Cairo.Surface surface = new Cairo.ImageSurface (Cairo.Format.ARGB32,
-                                                            buffer_width,
-                                                            buffer_height);
-            var cr = new Cairo.Context (surface);
-
-            // Border radius
-            const double DEGREES = Math.PI / 180.0;
-            cr.new_sub_path ();
-            cr.arc (buffer_width - radius, radius, radius, -90 * DEGREES, 0 * DEGREES);
-            cr.arc (buffer_width - radius, buffer_height - radius, radius, 0 * DEGREES, 90 * DEGREES);
-            cr.arc (radius, buffer_height - radius, radius, 90 * DEGREES, 180 * DEGREES);
-            cr.arc (radius, radius, radius, 180 * DEGREES, 270 * DEGREES);
-            cr.close_path ();
-            cr.set_source_rgba (0, 0, 0, 0);
-            cr.clip ();
-            cr.paint ();
-
-            cr.save ();
-            cr.set_source_surface (base_surf, 0, 0);
-            cr.paint ();
-            cr.restore ();
-
-            return surface;
-        }
-
-        /** Scales the pixbuf to fit the given dimensions */
-        public static Cairo.Surface scale_pixbuf (Gdk.Pixbuf pixbuf,
-                                                  int buffer_width,
-                                                  int buffer_height,
-                                                  int img_scale) {
-
-            Cairo.Surface surface = new Cairo.ImageSurface (Cairo.Format.ARGB32,
-                                                            buffer_width,
-                                                            buffer_height);
-            var cr = new Cairo.Context (surface);
-
-            cr.save ();
-            Cairo.Surface base_surf = Gdk.cairo_surface_create_from_pixbuf (pixbuf,
-                                                                             img_scale,
-                                                                             null);
-            int width = pixbuf.width / img_scale;
-            int height = pixbuf.height / img_scale;
+        /** Scales the Texture to fit the given dimensions */
+        public static void scale_texture (Gdk.Texture texture,
+                                          int buffer_width,
+                                          int buffer_height,
+                                          int img_scale,
+                                          Gtk.Snapshot snapshot) {
+            int width = texture.width / img_scale;
+            int height = texture.height / img_scale;
             double window_ratio = (double) buffer_width / buffer_height;
             double bg_ratio = width / height;
+            snapshot.save ();
             if (window_ratio > bg_ratio) { // Taller wallpaper than monitor
                 double scale = (double) buffer_width / width;
                 if (scale * height < buffer_height) {
-                    draw_scale_wide (buffer_width, width, buffer_height, height, cr, base_surf);
+                    draw_scale_wide (buffer_width, width, buffer_height, height, snapshot, texture);
                 } else {
-                    draw_scale_tall (buffer_width, width, buffer_height, height, cr, base_surf);
+                    draw_scale_tall (buffer_width, width, buffer_height, height, snapshot, texture);
                 }
             } else { // Wider wallpaper than monitor
                 double scale = (double) buffer_height / height;
                 if (scale * width < buffer_width) {
-                    draw_scale_tall (buffer_width, width, buffer_height, height, cr, base_surf);
+                    draw_scale_tall (buffer_width, width, buffer_height, height, snapshot, texture);
                 } else {
-                    draw_scale_wide (buffer_width, width, buffer_height, height, cr, base_surf);
+                    draw_scale_wide (buffer_width, width, buffer_height, height, snapshot, texture);
                 }
             }
-            cr.paint ();
-            cr.restore ();
 
-            base_surf.finish ();
-            return surface;
-        }
-
-        /** Scales the pixbuf to fit the given dimensions */
-        public static Cairo.Surface scale_round_pixbuf (Gdk.Pixbuf pixbuf,
-                                                        int buffer_width,
-                                                        int buffer_height,
-                                                        int img_scale,
-                                                        int radius) {
-            var surface = Functions.scale_pixbuf (pixbuf,
-                                                  buffer_width,
-                                                  buffer_height,
-                                                  img_scale);
-            surface = Functions.round_surface (surface,
-                                               buffer_width,
-                                               buffer_height,
-                                               img_scale,
-                                               radius);
-            return surface;
+            snapshot.restore ();
         }
 
         private static void draw_scale_tall (int buffer_width,
                                              int width,
                                              int buffer_height,
                                              int height,
-                                             Cairo.Context cr,
-                                             Cairo.Surface surface) {
-            double scale = (double) buffer_width / width;
-            cr.scale (scale, scale);
-            cr.set_source_surface (surface,
-                                   0, (double) buffer_height / 2 / scale - height / 2);
+                                             Gtk.Snapshot snapshot,
+                                             Gdk.Texture texture) {
+            float scale = (float) buffer_width / width;
+            snapshot.scale (scale, scale);
+            float x = 0;
+            float y = (float) (buffer_height / 2 / scale - height / 2);
+            snapshot.append_scaled_texture (texture,
+                                            SCALING_FILTER,
+                                            { { x, y }, { width, height } });
         }
 
         private static void draw_scale_wide (int buffer_width,
                                              int width,
                                              int buffer_height,
                                              int height,
-                                             Cairo.Context cr,
-                                             Cairo.Surface surface) {
-            double scale = (double) buffer_height / height;
-            cr.scale (scale, scale);
-            cr.set_source_surface (
-                surface,
-                (double) buffer_width / 2 / scale - width / 2, 0);
+                                             Gtk.Snapshot snapshot,
+                                             Gdk.Texture texture) {
+            float scale = (float) buffer_height / height;
+            snapshot.scale (scale, scale);
+            float x = (float) (buffer_width / 2 / scale - width / 2);
+            float y = 0;
+            snapshot.append_scaled_texture (texture,
+                                            SCALING_FILTER,
+                                            { { x, y }, { width, height } });
         }
 
         public delegate bool FilterFunc (char character);
@@ -411,6 +335,25 @@ namespace SwayNotificationCenter {
                 msg = e.message;
                 return false;
             }
+        }
+
+        public static unowned Wl.Display get_wl_display () {
+            unowned var display = Gdk.Display.get_default ();
+            if (display is Gdk.Wayland.Display) {
+                return ((Gdk.Wayland.Display) display).get_wl_display ();
+            }
+            GLib.error ("Only supports Wayland!");
+        }
+
+        public static Wl.Surface * get_wl_surface (Gdk.Surface surface) {
+            if (surface is Gdk.Wayland.Surface) {
+                return ((Gdk.Wayland.Surface) surface).get_wl_surface ();
+            }
+            GLib.error ("Only supports Wayland!");
+        }
+
+        public static double lerp (double a, double b, double t) {
+            return a * (1.0 - t) + b * t;
         }
     }
 }

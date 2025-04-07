@@ -33,7 +33,9 @@ namespace SwayNotificationCenter.Widgets {
             }
 
             title_widget = new Gtk.Label (title);
-            add (title_widget);
+            title_widget.set_hexpand (true);
+            title_widget.set_halign (Gtk.Align.START);
+            append (title_widget);
 
             if (has_clear_all_button) {
                 clear_all_button = new Gtk.Button.with_label (button_text);
@@ -44,14 +46,19 @@ namespace SwayNotificationCenter.Widgets {
                         error ("Error: %s\n", e.message);
                     }
                 });
+                if (noti_daemon.control_center != null) {
+                    clear_all_button.set_sensitive (
+                        noti_daemon.control_center.notification_count () > 0);
+                }
+                swaync_daemon.subscribe_v2.connect ((count) => {
+                    clear_all_button.set_sensitive (count > 0);
+                });
                 clear_all_button.set_can_focus (false);
                 clear_all_button.valign = Gtk.Align.CENTER;
                 // Backwards compatible towards older CSS stylesheets
-                clear_all_button.get_style_context ().add_class ("control-center-clear-all");
-                pack_end (clear_all_button, false);
+                clear_all_button.add_css_class ("control-center-clear-all");
+                append (clear_all_button);
             }
-
-            show_all ();
         }
     }
 }

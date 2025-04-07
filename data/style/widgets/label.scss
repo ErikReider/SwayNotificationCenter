@@ -1,6 +1,7 @@
 .widget-label {
-  margin: 8px;
-}
-.widget-label > label {
-  font-size: 1.1rem;
+  margin: $margin;
+
+  & > label {
+    font-size: 1.1rem;
+  }
 }

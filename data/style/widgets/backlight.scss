@@ -1,6 +1,5 @@
 .widget-backlight {
-  background-color: #{"@noti-bg"};
-  padding: 8px;
-  margin: 8px;
-  border-radius: 12px;
+  padding: $margin;
+  margin: $margin;
+  border-radius: $border-radius;
 }

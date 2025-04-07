@@ -1,5 +1,5 @@
 namespace SwayNotificationCenter {
-    [GtkTemplate (ui = "/org/erikreider/sway-notification-center/notificationWindow/notificationWindow.ui")]
+    [GtkTemplate (ui = "/org/erikreider/swaync/ui/notification_window.ui")]
     public class NotificationWindow : Gtk.ApplicationWindow {
         private static NotificationWindow ? window = null;
         /**
@@ -34,11 +34,10 @@ namespace SwayNotificationCenter {
         [GtkChild]
         unowned Gtk.Viewport viewport;
         [GtkChild]
-        unowned Gtk.Box box;
+        unowned IterBox box;
 
         private bool list_reverse = false;
-
-        private double last_upper = 0;
+        private uint scroll_to_source_id = 0;
 
         Gee.HashSet<uint32> inline_reply_notifications = new Gee.HashSet<uint32> ();
 
@@ -63,30 +62,25 @@ namespace SwayNotificationCenter {
             scrolled_window.set_max_content_height (MAX_HEIGHT);
             scrolled_window.set_propagate_natural_height (true);
 
-            viewport.size_allocate.connect (size_alloc);
+            set_resizable (false);
+            default_width = ConfigModel.instance.notification_window_width;
+        }
 
-            this.default_width = ConfigModel.instance.notification_window_width;
+        protected override void snapshot (Gtk.Snapshot snapshot) {
+            // HACK: Fixes fully transparent windows not being mapped
+            Gdk.RGBA color = Gdk.RGBA () {
+                red = 0,
+                green = 0,
+                blue = 0,
+                alpha = 0,
+            };
+            snapshot.append_color (color, Graphene.Rect.zero ());
+            base.snapshot (snapshot);
         }
 
         private void set_anchor () {
             if (swaync_daemon.use_layer_shell) {
-                GtkLayerShell.Layer layer;
-                switch (ConfigModel.instance.layer) {
-                    case Layer.BACKGROUND:
-                        layer = GtkLayerShell.Layer.BACKGROUND;
-                        break;
-                    case Layer.BOTTOM:
-                        layer = GtkLayerShell.Layer.BOTTOM;
-                        break;
-                    case Layer.TOP:
-                        layer = GtkLayerShell.Layer.TOP;
-                        break;
-                    default:
-                    case Layer.OVERLAY:
-                        layer = GtkLayerShell.Layer.OVERLAY;
-                        break;
-                }
-                GtkLayerShell.set_layer (this, layer);
+                GtkLayerShell.set_layer (this, ConfigModel.instance.layer.to_layer ());
 
                 switch (ConfigModel.instance.positionX) {
                     case PositionX.LEFT:
@@ -133,21 +127,6 @@ namespace SwayNotificationCenter {
             list_reverse = ConfigModel.instance.positionY == PositionY.BOTTOM;
         }
 
-        private void size_alloc () {
-            var adj = viewport.vadjustment;
-            double upper = adj.get_upper ();
-            if (last_upper < upper) {
-                scroll_to_start (list_reverse);
-            }
-            last_upper = upper;
-        }
-
-        private void scroll_to_start (bool reverse) {
-            var adj = viewport.vadjustment;
-            var val = (reverse ? adj.get_upper () : adj.get_lower ());
-            adj.set_value (val);
-        }
-
         public void change_visibility (bool value) {
             if (!value) {
                 close_all_notifications ();
@@ -162,8 +141,8 @@ namespace SwayNotificationCenter {
         public void close_all_notifications (remove_iter_func ? func = null) {
             inline_reply_notifications.clear ();
             if (!this.get_realized ()) return;
-            foreach (var w in box.get_children ()) {
-                Notification notification = (Notification) w;
+            foreach (unowned Gtk.Widget child in box.get_children ()) {
+                Notification notification = (Notification) child;
                 if (func == null || func (notification)) {
                     remove_notification (notification, false);
                 }
@@ -178,6 +157,7 @@ namespace SwayNotificationCenter {
                 if (noti.has_inline_reply) {
                     inline_reply_notifications.remove (noti.param.applied_id);
                     if (inline_reply_notifications.size == 0
+                        && swaync_daemon.use_layer_shell
                         && GtkLayerShell.get_keyboard_mode (this)
                         != GtkLayerShell.KeyboardMode.NONE) {
                         GtkLayerShell.set_keyboard_mode (
@@ -185,17 +165,32 @@ namespace SwayNotificationCenter {
                     }
                 }
                 noti.remove_noti_timeout ();
-                noti.destroy ();
+                box.remove (noti);
             }
 
             if (dismiss
                 && (!get_realized ()
                     || !get_mapped ()
                     || !(get_child () is Gtk.Widget)
-                    || box.get_children ().length () == 0)) {
+                    || box.length == 0)) {
                 close ();
                 return;
             }
+        }
+
+        /** Scroll to the latest notification */
+        private void scroll_to_latest_notification () {
+            if (scroll_to_source_id > 0) {
+                Source.remove (scroll_to_source_id);
+            }
+            scroll_to_source_id = Idle.add_once (() => {
+                scroll_to_source_id = 0;
+                if (list_reverse) {
+                    viewport.scroll_to (box.get_last_child (), null);
+                } else {
+                    viewport.scroll_to (box.get_first_child (), null);
+                }
+            });
         }
 
         public void add_notification (NotifyParams param) {
@@ -208,32 +203,31 @@ namespace SwayNotificationCenter {
             if (noti.has_inline_reply) {
                 inline_reply_notifications.add (param.applied_id);
 
-                if (GtkLayerShell.get_keyboard_mode (this)
-                    != GtkLayerShell.KeyboardMode.ON_DEMAND) {
+                if (swaync_daemon.use_layer_shell &&
+                    GtkLayerShell.get_keyboard_mode (this)
+                    != GtkLayerShell.KeyboardMode.ON_DEMAND
+                    && swaync_daemon.has_layer_on_demand) {
                     GtkLayerShell.set_keyboard_mode (
                         this, GtkLayerShell.KeyboardMode.ON_DEMAND);
                 }
             }
 
             if (list_reverse) {
-                box.pack_start (noti);
+                box.append (noti);
             } else {
-                box.pack_end (noti);
+                box.prepend (noti);
             }
-            this.grab_focus ();
             if (!this.get_mapped () || !this.get_realized ()) {
                 this.set_anchor ();
                 this.show ();
             }
 
-            // IMPORTANT: queue a resize event to force the layout to be recomputed
-            noti.queue_resize ();
-            scroll_to_start (list_reverse);
+            scroll_to_latest_notification ();
         }
 
         public void close_notification (uint32 id, bool dismiss) {
-            foreach (var w in box.get_children ()) {
-                var noti = (Notification) w;
+            foreach (unowned Gtk.Widget child in box.get_children ()) {
+                var noti = (Notification) child;
                 if (noti != null && noti.param.applied_id == id) {
                     remove_notification (noti, dismiss);
                     break;
@@ -242,12 +236,17 @@ namespace SwayNotificationCenter {
         }
 
         public void replace_notification (uint32 id, NotifyParams new_params) {
-            foreach (var w in box.get_children ()) {
-                var noti = (Notification) w;
+            foreach (unowned Gtk.Widget child in box.get_children ()) {
+                var noti = (Notification) child;
                 if (noti != null && noti.param.applied_id == id) {
                     noti.replace_notification (new_params);
-                    // Position the notification in the beginning of the list
-                    box.reorder_child (noti, (int) box.get_children ().length ());
+                    // Position the notification in the beginning/end of the list
+                    if (list_reverse) {
+                        box.reorder_child_after (noti, box.get_last_child ());
+                    } else {
+                        box.reorder_child_after (noti, null);
+                    }
+                    scroll_to_latest_notification ();
                     return;
                 }
             }
@@ -257,14 +256,15 @@ namespace SwayNotificationCenter {
         }
 
         public uint32 ? get_latest_notification () {
-            List<weak Gtk.Widget> children = box.get_children ();
-            if (children.is_empty ()) return null;
+            if (box.length == 0) {
+                return null;
+            }
 
-            Gtk.Widget ? child = null;
+            unowned Gtk.Widget ? child = null;
             if (list_reverse) {
-                child = children.last ().data;
+                child = box.get_last_child ();
             } else {
-                child = children.first ().data;
+                child = box.get_first_child ();
             }
 
             if (child == null || !(child is Notification)) return null;
@@ -273,14 +273,15 @@ namespace SwayNotificationCenter {
         }
 
         public void latest_notification_action (uint32 action) {
-            List<weak Gtk.Widget> children = box.get_children ();
-            if (children.is_empty ()) return;
+            if (box.length == 0) {
+                return;
+            }
 
             Gtk.Widget ? child = null;
             if (list_reverse) {
-                child = children.last ().data;
+                child = box.get_last_child ();
             } else {
-                child = children.first ().data;
+                child = box.get_first_child ();
             }
 
             if (child == null || !(child is Notification)) return;

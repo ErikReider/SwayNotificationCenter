@@ -38,6 +38,20 @@ namespace SwayNotificationCenter {
                     return "overlay";
             }
         }
+
+        public GtkLayerShell.Layer to_layer () {
+            switch (this) {
+                case BACKGROUND:
+                    return GtkLayerShell.Layer.BACKGROUND;
+                case BOTTOM:
+                    return GtkLayerShell.Layer.BOTTOM;
+                case TOP:
+                    return GtkLayerShell.Layer.TOP;
+                default:
+                case OVERLAY:
+                    return GtkLayerShell.Layer.OVERLAY;
+            }
+        }
     }
 
     public enum CssPriority {
@@ -75,8 +89,7 @@ namespace SwayNotificationCenter {
         public string ? category { get; set; default = null; }
 
         private const RegexCompileFlags REGEX_COMPILE_OPTIONS =
-            RegexCompileFlags.MULTILINE
-            | RegexCompileFlags.JAVASCRIPT_COMPAT;
+            RegexCompileFlags.MULTILINE;
 
         private const RegexMatchFlags REGEX_MATCH_FLAGS = RegexMatchFlags.NOTEMPTY;
 

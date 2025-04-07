@@ -405,7 +405,10 @@ namespace SwayNotificationCenter {
                 }
             }
 
-            int target_natural_height = get_height_for_latest_notifications ();
+            int target_natural_height;
+            int target_minimum_height;
+            get_height_for_latest_notifications (for_size, out target_minimum_height,
+                                                 out target_natural_height);
             // TODO: Always use natural as minimum?
             // Fixes large (tall) Notification body Pictures
             minimum = (int) Functions.lerp (minimum,
@@ -572,12 +575,16 @@ namespace SwayNotificationCenter {
         }
 
         /** Gets the collapsed height (first notification + stacked) */
-        private int get_height_for_latest_notifications () {
-            int natural_height = 0;
+        private void get_height_for_latest_notifications (int for_size,
+                                                          out int minimum,
+                                                          out int natural) {
+            minimum = 0;
+            natural = 0;
 
             uint length = widgets.length ();
-
-            if (length == 0) return natural_height;
+            if (length == 0) {
+                return;
+            }
 
             int offset = 0;
             for (uint i = 1;
@@ -590,14 +597,12 @@ namespace SwayNotificationCenter {
             if (last != null) {
                 unowned Gtk.Widget last_widget = widgets.last ().data;
 
-                last_widget.measure (Gtk.Orientation.VERTICAL, last_widget.get_width (),
-                                     null, out natural_height,
+                last_widget.measure (Gtk.Orientation.VERTICAL, for_size,
+                                     out minimum, out natural,
                                      null, null);
             }
 
-            natural_height += offset;
-
-            return natural_height;
+            natural += offset;
         }
 
         void animation_value_cb (double progress) {

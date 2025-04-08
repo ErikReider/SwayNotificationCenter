@@ -224,6 +224,10 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
   /* Styling only for Grouped Notifications */
   transition: opacity 200ms ease-in-out;
 
+  &:focus {
+    background: var(--noti-bg-focus);
+  }
+
   &.low {
     /* Low Priority Group */
   }

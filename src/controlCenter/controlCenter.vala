@@ -694,15 +694,6 @@ namespace SwayNotificationCenter {
             var noti = new Notification.regular (param,
                                                  noti_daemon,
                                                  NotificationType.CONTROL_CENTER);
-            // Set the new list position when a notification receives keyboard focus
-            Gtk.EventControllerFocus focus_controller = new Gtk.EventControllerFocus ();
-            noti.add_controller (focus_controller);
-            focus_controller.enter.connect (() => {
-                int i = list_box_controller.get_children ().index (noti);
-                if (list_position != int.MAX && list_position != i) {
-                    list_position = i;
-                }
-            });
             noti.set_time ();
 
             NotificationGroup ? group = null;
@@ -739,6 +730,16 @@ namespace SwayNotificationCenter {
                 if (param.name_id.length > 0) {
                     noti_groups_name.set (param.name_id, group);
                 }
+
+                // Set the new list position when the group receives keyboard focus
+                Gtk.EventControllerFocus focus_controller = new Gtk.EventControllerFocus ();
+                group.add_controller (focus_controller);
+                focus_controller.enter.connect (() => {
+                    int i = list_box_controller.get_children ().index (group);
+                    if (list_position != int.MAX && list_position != i) {
+                        list_position = i;
+                    }
+                });
 
                 // Switches the stack page depending on the amount of notifications
                 stack.set_visible_child_name (STACK_NOTIFICATIONS_PAGE);

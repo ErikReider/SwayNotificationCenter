@@ -1,6 +1,6 @@
 # SwayNotificationCenter
 
-[![Check PKGBUILD builds for Arch.](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/PKGBUILD-buildd.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/PKGBUILD-buildd.yml)
+[![Check PKGBUILD builds for Arch.](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/PKGBUILD-build.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/PKGBUILD-buildd.yml)
 [![Check build for Fedora.](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/fedora-build.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/fedora-build.yml)
 [![Check build for latest Ubuntu LTS.](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/ubuntu-build.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/ubuntu-build.yml)
 [![Linting](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/linting.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/linting.yml)

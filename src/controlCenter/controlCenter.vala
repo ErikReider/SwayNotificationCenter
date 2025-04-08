@@ -663,6 +663,7 @@ namespace SwayNotificationCenter {
                 }
 
                 list_box_controller.remove (group);
+                navigate_list (--list_position);
                 // Switches the stack page depending on the amount of notifications
                 if (list_box_controller.length < 1) {
                     stack.set_visible_child_name (STACK_PLACEHOLDER_PAGE);

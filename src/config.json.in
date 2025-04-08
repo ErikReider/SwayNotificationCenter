@@ -75,7 +75,8 @@
     },
     "mpris": {
       "image-size": 96,
-      "blacklist": []
+      "blacklist": [],
+      "autohide": false
     },
     "buttons-grid": {
       "actions": [

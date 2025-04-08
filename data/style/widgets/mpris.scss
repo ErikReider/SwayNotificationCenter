@@ -1,39 +1,50 @@
-@define-color mpris-album-art-overlay rgba(0, 0, 0, 0.55);
-@define-color mpris-button-hover rgba(0, 0, 0, 0.50);
+:root {
+  --mpris-album-art-overlay: rgba(0, 0, 0, 0.55);
+  --mpris-button-hover: rgba(0, 0, 0, 0.5);
+}
 
 $mpris-shadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
 
 .widget-mpris {
+  margin: $margin;
+
   /* The parent to all players */
   .widget-mpris-player {
-    padding: 8px;
-    padding: 16px;
     margin: 16px 20px;
-    background-color: #{"@mpris-album-art-overlay"};
     border-radius: $border-radius;
     box-shadow: $mpris-shadow;
 
-    button:hover {
-      /* The media player buttons (play, pause, next, etc...) */
-      background: #{"@noti-bg-hover"};
+    .mpris-background {
+      filter: blur(10px);
     }
 
-    .widget-mpris-album-art {
-      border-radius: $border-radius;
-      box-shadow: $mpris-shadow;
-    }
-    .widget-mpris-title {
-      font-weight: bold;
-      font-size: 1.25rem;
-    }
-    .widget-mpris-subtitle {
-      font-size: 1.1rem;
-    }
+    .mpris-overlay {
+      padding: 16px;
+      background-color: var(--mpris-album-art-overlay);
 
-    & > box > button {
-      /* Change player control buttons */
-      &:hover {
-        background-color: #{"@mpris-button-hover"};
+      button:hover {
+        /* The media player buttons (play, pause, next, etc...) */
+        background: var(--noti-bg-hover);
+      }
+
+      .widget-mpris-album-art {
+        border-radius: $border-radius;
+        box-shadow: $mpris-shadow;
+        -gtk-icon-size: 96px;
+      }
+      .widget-mpris-title {
+        font-weight: bold;
+        font-size: 1.25rem;
+      }
+      .widget-mpris-subtitle {
+        font-size: 1.1rem;
+      }
+
+      & > box > button {
+        /* Change player control buttons */
+        &:hover {
+          background-color: var(--mpris-button-hover);
+        }
       }
     }
   }

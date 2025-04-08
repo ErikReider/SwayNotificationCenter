@@ -1,0 +1,22 @@
+using Gtk 4.0;
+
+template $SwayNotificationCenterNotificationWindow: Gtk.ApplicationWindow {
+  styles [
+    "floating-notifications",
+  ]
+
+  Gtk.ScrolledWindow scrolled_window {
+    propagate-natural-height: true;
+    hscrollbar-policy: never;
+    vscrollbar-policy: automatic;
+    has-frame: false;
+
+    Gtk.Viewport viewport {
+      vexpand: true;
+
+      $IterBox box {
+        orientation: vertical;
+      }
+    }
+  }
+}

@@ -145,7 +145,7 @@
     },
     "control-center-height": {
       "type": "integer",
-      "description": "Height of the control center in pixels. Ignored when 'fit-to-screen' is set to 'true'",
+      "description": "Height of the control center in pixels. Ignored when 'fit-to-screen' is set to 'true'. Also limited to the height of the monitor, unless 'layer-shell-cover-screen' is set to false.",
       "default": 600,
       "minimum": 300
     },
@@ -409,17 +409,6 @@
           "type": "integer",
           "description": "The size of the album art",
           "default": 96
-        },
-        "image-radius": {
-          "type": "integer",
-          "description": "The border radius of the album art. Will be overriden by setting the border-radius in the style.css for the \".widget-mpris-album-art\" class",
-
-          "default": 12
-        },
-        "blur": {
-          "type": "boolean",
-          "description": "Appy the artwork as the MPRIS background and blur it",
-          "default": true
         }
       }
     },

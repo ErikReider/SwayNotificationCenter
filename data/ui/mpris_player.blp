@@ -1,0 +1,129 @@
+using Gtk 4.0;
+
+template $SwayNotificationCenterWidgetsMprisMprisPlayer: $Underlay {
+  overflow: hidden;
+  valign: start;
+  hexpand: true;
+
+  underlay_child: Picture background_picture {
+    content-fit: cover;
+
+    styles [
+      "mpris-background",
+    ]
+  };
+
+  child: Box {
+    orientation: vertical;
+
+    styles [
+      "mpris-overlay",
+    ]
+
+    Box {
+      spacing: 12;
+
+      Image album_art {
+        icon-name: "audio-x-generic-symbolic";
+        use-fallback: true;
+        pixel-size: 96;
+        overflow: hidden;
+
+        styles [
+          "widget-mpris-album-art",
+        ]
+      }
+
+      Box {
+        orientation: vertical;
+        spacing: 4;
+        hexpand: true;
+        valign: center;
+
+        Label title {
+          justify: left;
+          ellipsize: end;
+          wrap-mode: word_char;
+          xalign: 0;
+          yalign: 0;
+
+          styles [
+            "widget-mpris-title",
+          ]
+        }
+
+        Label sub_title {
+          justify: left;
+          ellipsize: end;
+          wrap-mode: word_char;
+          xalign: 0;
+          yalign: 0;
+
+          styles [
+            "widget-mpris-subtitle",
+          ]
+        }
+      }
+    }
+
+    Box {
+      spacing: 6;
+      halign: center;
+
+      Button button_shuffle {
+        has-frame: false;
+        icon-name: "media-playlist-shuffle-symbolic";
+
+        styles [
+          "circular",
+          "image-button",
+          "flat",
+        ]
+      }
+
+      Button button_prev {
+        has-frame: false;
+        icon-name: "media-seek-backward-symbolic";
+
+        styles [
+          "circular",
+          "image-button",
+          "flat",
+        ]
+      }
+
+      Button button_play_pause {
+        has-frame: false;
+        icon-name: "media-playback-pause-symbolic";
+
+        styles [
+          "circular",
+          "image-button",
+          "flat",
+        ]
+      }
+
+      Button button_next {
+        has-frame: false;
+        icon-name: "media-seek-forward-symbolic";
+
+        styles [
+          "circular",
+          "image-button",
+          "flat",
+        ]
+      }
+
+      Button button_repeat {
+        has-frame: false;
+        icon-name: "media-playlist-repeat-symbolic";
+
+        styles [
+          "circular",
+          "image-button",
+          "flat",
+        ]
+      }
+    }
+  };
+}

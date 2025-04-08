@@ -330,11 +330,6 @@ config file to be able to detect config errors
 					optional: true ++
 					default: 96 ++
 					description: The size of the album art. ++
-				image-radius: ++
-					type: integer ++
-					optional: true ++
-					default: 12 ++
-					description: The border radius of the album art. ++
 				blacklist: ++
 					type: array ++
 					optional: true ++
@@ -615,7 +610,6 @@ config file to be able to detect config errors
 		},
 		"mpris": {
 			"image-size": 96,
-			"image-radius": 12,
 			"blacklist": ["playerctld"],
 			"autohide": true
 		},

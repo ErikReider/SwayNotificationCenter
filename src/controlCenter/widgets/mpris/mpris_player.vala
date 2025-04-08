@@ -1,13 +1,16 @@
 namespace SwayNotificationCenter.Widgets.Mpris {
-    [GtkTemplate (ui = "/org/erikreider/sway-notification-center/controlCenter/widgets/mpris/mpris_player.ui")]
-    public class MprisPlayer : Gtk.Box {
+    [GtkTemplate (ui = "/org/erikreider/swaync/ui/mpris_player.ui")]
+    public class MprisPlayer : Underlay {
         [GtkChild]
-        unowned Gtk.Label title;
+        public unowned Gtk.Label title;
         [GtkChild]
         unowned Gtk.Label sub_title;
 
         [GtkChild]
         unowned Gtk.Image album_art;
+
+        [GtkChild]
+        unowned Gtk.Picture background_picture;
 
         [GtkChild]
         unowned Gtk.Button button_shuffle;
@@ -16,13 +19,9 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         [GtkChild]
         unowned Gtk.Button button_play_pause;
         [GtkChild]
-        unowned Gtk.Image button_play_pause_img;
-        [GtkChild]
         unowned Gtk.Button button_next;
         [GtkChild]
         unowned Gtk.Button button_repeat;
-        [GtkChild]
-        unowned Gtk.Image button_repeat_img;
 
         public MprisSource source { construct; get; }
 
@@ -37,9 +36,6 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         private Cancellable album_art_cancellable = new Cancellable ();
         private string prev_art_url;
         private DesktopAppInfo ? desktop_entry = null;
-
-        private Gdk.Pixbuf ? album_art_pixbuf = null;
-        private Granite.Drawing.BufferSurface ? blurred_cover_surface = null;
 
         private unowned Config mpris_config;
 
@@ -103,77 +99,6 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
         public void before_destroy () {
             source.properties_changed.disconnect (properties_changed);
-        }
-
-        public override bool draw (Cairo.Context cr) {
-            unowned Gdk.Window ? window = get_window ();
-            if (!mpris_config.blur || window == null ||
-                !(album_art_pixbuf is Gdk.Pixbuf)) {
-                return base.draw (cr);
-            }
-
-            const double DEGREES = Math.PI / 180.0;
-            unowned Gtk.StyleContext style_ctx = this.get_style_context ();
-            unowned Gtk.StateFlags state = style_ctx.get_state ();
-            Gtk.Border border = style_ctx.get_border (state);
-            Gtk.Border margin = style_ctx.get_margin (state);
-            Value radius_value = style_ctx.get_property (
-                Gtk.STYLE_PROPERTY_BORDER_RADIUS, state);
-            int radius = 0;
-            if (!radius_value.holds (Type.INT) ||
-                (radius = radius_value.get_int ()) == 0) {
-                radius = mpris_config.image_radius;
-            }
-            int scale = style_ctx.get_scale ();
-            int width = get_allocated_width ()
-                        - margin.left - margin.right
-                        - border.left - border.right;
-            int height = get_allocated_height ()
-                        - margin.top - margin.bottom
-                        - border.top - border.bottom;
-
-            cr.save ();
-            cr.new_sub_path ();
-            // Top Right
-            cr.arc (width - radius + margin.right,
-                    radius + margin.top,
-                    radius, -90 * DEGREES, 0 * DEGREES);
-            // Bottom Right
-            cr.arc (width - radius + margin.right,
-                    height - radius + margin.bottom,
-                    radius, 0 * DEGREES, 90 * DEGREES);
-            // Bottom Left
-            cr.arc (radius + margin.left,
-                    height - radius + margin.bottom,
-                    radius, 90 * DEGREES, 180 * DEGREES);
-            // Top Left
-            cr.arc (radius + margin.left,
-                    radius + margin.top,
-                    radius, 180 * DEGREES, 270 * DEGREES);
-            cr.close_path ();
-
-            cr.set_source_rgba (0, 0, 0, 0);
-            cr.clip ();
-
-            // Draw blurred player background
-            if (blurred_cover_surface == null
-                || blurred_cover_surface.width != width
-                || blurred_cover_surface.height != height) {
-                var buffer = new Granite.Drawing.BufferSurface (width, height);
-                Cairo.Surface surface = Functions.scale_pixbuf (
-                    album_art_pixbuf, width, height, scale);
-
-                buffer.context.set_source_surface (surface, 0, 0);
-                buffer.context.paint ();
-                buffer.fast_blur (8, 2);
-                blurred_cover_surface = buffer;
-            }
-            cr.set_source_surface (blurred_cover_surface.surface, margin.left, margin.top);
-            cr.paint ();
-
-            cr.restore ();
-
-            return base.draw (cr);
         }
 
         private void properties_changed (string iface,
@@ -325,89 +250,61 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 if (url == prev_art_url) return;
                 prev_art_url = url;
 
-                int scale = get_style_context ().get_scale ();
-
                 // Cancel previous download, reset the state and download again
                 album_art_cancellable.cancel ();
                 album_art_cancellable.reset ();
+
+                Gdk.Texture ? album_art_texture = null;
                 try {
                     File file = File.new_for_uri (url);
                     InputStream stream = yield file.read_async (Priority.DEFAULT,
                                                                 album_art_cancellable);
 
-                    this.album_art_pixbuf = yield new Gdk.Pixbuf.from_stream_async (
+                    Gdk.Pixbuf pixbuf = yield new Gdk.Pixbuf.from_stream_async (
                         stream, album_art_cancellable);
+                    album_art_texture = Gdk.Texture.for_pixbuf (pixbuf);
                 } catch (Error e) {
                     debug ("Could not download album art for %s. Using fallback...",
                            source.media_player.identity);
-                    this.album_art_pixbuf = null;
                 }
-                if (this.album_art_pixbuf != null) {
-                    unowned Gtk.StyleContext style_ctx = album_art.get_style_context ();
-                    Value br_value =
-                        style_ctx.get_property (Gtk.STYLE_PROPERTY_BORDER_RADIUS,
-                                                style_ctx.get_state ());
-                    int radius = 0;
-                    if (!br_value.holds (Type.INT) ||
-                        (radius = br_value.get_int ()) == 0) {
-                        radius = mpris_config.image_radius;
-                    }
-                    var surface = Functions.scale_pixbuf (this.album_art_pixbuf,
-                                                          mpris_config.image_size,
-                                                          mpris_config.image_size,
-                                                          scale);
-                    this.album_art_pixbuf = Gdk.pixbuf_get_from_surface (surface,
-                                                                         0, 0,
-                                                                         mpris_config.image_size,
-                                                                         mpris_config.image_size);
-                    this.blurred_cover_surface = null;
-                    surface = Functions.round_surface (surface,
-                                                       mpris_config.image_size,
-                                                       mpris_config.image_size,
-                                                       scale,
-                                                       radius);
-                    var pix_buf = Gdk.pixbuf_get_from_surface (surface,
-                                                               0, 0,
-                                                               mpris_config.image_size,
-                                                               mpris_config.image_size);
-                    surface.finish ();
-                    album_art.set_from_pixbuf (pix_buf);
-                    album_art.get_style_context ().set_scale (1);
-                    this.queue_draw ();
+                if (album_art_texture != null) {
+                    // Set album art
+                    Gtk.Snapshot snapshot = new Gtk.Snapshot ();
+                    Functions.scale_texture (album_art_texture,
+                                             mpris_config.image_size, mpris_config.image_size,
+                                             get_scale_factor (), snapshot);
+                    Graphene.Size size = Graphene.Size ().init (mpris_config.image_size, mpris_config.image_size);
+                    album_art.set_from_paintable (snapshot.free_to_paintable (size));
 
+                    // Set background album art
+                    background_picture.set_paintable (album_art_texture);
+
+                    this.queue_draw ();
                     return;
                 }
             }
 
-            this.album_art_pixbuf = null;
-            this.blurred_cover_surface = null;
             // Get the app icon
             Icon ? icon = null;
             if (desktop_entry is DesktopAppInfo) {
                 icon = desktop_entry.get_icon ();
             }
-            Gtk.IconInfo ? icon_info = null;
+            unowned Gtk.IconTheme icon_theme = Gtk.IconTheme.get_for_display (get_display ());
             if (icon != null) {
-                album_art.set_from_gicon (icon, Gtk.IconSize.INVALID);
-                icon_info = Gtk.IconTheme.get_default ().lookup_by_gicon (icon,
-                                                                          mpris_config.image_size,
-                                                                          Gtk.IconLookupFlags.USE_BUILTIN);
+                album_art.set_from_gicon (icon);
+
+                Gtk.IconPaintable ? icon_info = icon_theme.lookup_by_gicon (
+                    icon, mpris_config.image_size, get_scale_factor (), Gtk.TextDirection.NONE, 0);
+                background_picture.set_paintable (icon_info);
             } else {
                 // Default icon
                 string icon_name = "audio-x-generic-symbolic";
-                album_art.set_from_icon_name (icon_name,
-                                              Gtk.IconSize.INVALID);
-                icon_info = Gtk.IconTheme.get_default ().lookup_icon (icon_name,
-                                                                      mpris_config.image_size,
-                                                                      Gtk.IconLookupFlags.USE_BUILTIN);
-            }
+                album_art.set_from_icon_name (icon_name);
 
-            if (icon_info != null) {
-                try {
-                    this.album_art_pixbuf = icon_info.load_icon ();
-                } catch (Error e) {
-                    warning ("Could not load icon: %s", e.message);
-                }
+                Gtk.IconPaintable ? icon_info = icon_theme.lookup_icon (
+                    icon_name, null, mpris_config.image_size, get_scale_factor (),
+                    Gtk.TextDirection.NONE, 0);
+                background_picture.set_paintable (icon_info);
             }
         }
 
@@ -455,7 +352,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                     check = source.media_player.can_play;
                     break;
             }
-            button_play_pause_img.icon_name = icon_name;
+            button_play_pause.set_icon_name (icon_name);
             button_play_pause.sensitive = check && source.media_player.can_control;
         }
 
@@ -493,12 +390,14 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                             icon_name = ICON_REPEAT_SONG;
                             break;
                     }
-                    unowned Gtk.StyleContext ctx = button_repeat.get_style_context ();
-                    if (remove_flat_css_class) ctx.remove_class ("flat");
-                    else ctx.add_class ("flat");
+                    if (remove_flat_css_class) {
+                        button_repeat.remove_css_class ("flat");
+                    } else {
+                        button_repeat.add_css_class ("flat");
+                    }
                     button_repeat.get_child ().opacity = opacity;
                     button_repeat.sensitive = true;
-                    button_repeat_img.icon_name = icon_name;
+                    button_repeat.set_icon_name (icon_name);
                     button_repeat.show ();
                 }
             } else {

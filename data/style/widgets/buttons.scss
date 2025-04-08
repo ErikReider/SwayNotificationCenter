@@ -1,18 +1,15 @@
 .widget-buttons-grid {
-  padding: 8px;
-  margin: 8px;
-  border-radius: 12px;
-  background-color: #{"@noti-bg"};
-}
+  padding: $margin;
+  margin: $margin;
+  border-radius: $border-radius;
 
-.widget-buttons-grid > flowbox > flowboxchild > button {
-  background: #{"@noti-bg"};
-  border-radius: 12px;
-}
+  & flowboxchild > button {
+    border-radius: $border-radius;
+    &.toggle:checked {
+      /* style given to the active toggle button */
+    }
 
-.widget-buttons-grid > flowbox > flowboxchild > button.toggle:checked {
-  /* style given to the active toggle button */
-}
-
-.widget-buttons-grid > flowbox > flowboxchild > button:hover {
+    &:hover {
+    }
+  }
 }

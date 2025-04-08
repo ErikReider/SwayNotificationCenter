@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/org/erikreider/swaync">
+    <file preprocess="xml-stripblanks">icons/scalable/actions/swaync-collapse-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/swaync-close-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/swaync-up-small-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/swaync-down-small-symbolic.svg</file>
+
+    <file preprocess="xml-stripblanks">ui/notification_window.ui</file>
+    <file preprocess="xml-stripblanks">ui/notification.ui</file>
+    <file preprocess="xml-stripblanks">ui/control_center.ui</file>
+    <file preprocess="xml-stripblanks">ui/mpris_player.ui</file>
+  </gresource>
+</gresources>

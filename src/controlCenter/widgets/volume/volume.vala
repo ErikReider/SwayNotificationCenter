@@ -10,15 +10,16 @@ namespace SwayNotificationCenter.Widgets {
         Gtk.Label label_widget = new Gtk.Label (null);
         Gtk.Scale slider = new Gtk.Scale.with_range (Gtk.Orientation.HORIZONTAL, 0, 100, 1);
 
-        // Per app volume controll
+        // Per app volume control
         Gtk.ListBox levels_listbox;
-        Gtk.Button reveal_button;
+        IterListBoxController list_box_controller;
+        Gtk.ToggleButton reveal_button;
         Gtk.Revealer revealer;
         Gtk.Label no_sink_inputs_label;
         string empty_label = "No active sink input";
 
-        string expand_label = "⇧";
-        string collapse_label = "⇩";
+        string ? expand_label = null;
+        string ? collapse_label = null;
         int icon_size = 24;
 
         Gtk.RevealerTransitionType revealer_type = Gtk.RevealerTransitionType.SLIDE_DOWN;
@@ -98,49 +99,65 @@ namespace SwayNotificationCenter.Widgets {
             this.orientation = Gtk.Orientation.VERTICAL;
 
             slider.draw_value = false;
+            slider.set_hexpand (true);
 
-            main_volume_slider_container.add (label_widget);
-            main_volume_slider_container.pack_start (slider, true, true, 0);
-            add (main_volume_slider_container);
+            main_volume_slider_container.append (label_widget);
+            main_volume_slider_container.append (slider);
+            append (main_volume_slider_container);
 
             if (show_per_app) {
-                reveal_button = new Gtk.Button.with_label (expand_label);
                 revealer = new Gtk.Revealer ();
                 revealer.transition_type = revealer_type;
                 revealer.transition_duration = revealer_duration;
                 levels_listbox = new Gtk.ListBox ();
-                levels_listbox.get_style_context ().add_class ("per-app-volume");
-                revealer.add (levels_listbox);
+                levels_listbox.add_css_class ("per-app-volume");
+                levels_listbox.set_activate_on_single_click (true);
+                levels_listbox.set_selection_mode (Gtk.SelectionMode.NONE);
+                revealer.set_child (levels_listbox);
+
+                list_box_controller = new IterListBoxController (levels_listbox);
 
                 if (this.client.active_sinks.size == 0) {
                     no_sink_inputs_label = new Gtk.Label (empty_label);
-                    levels_listbox.add (no_sink_inputs_label);
+                    list_box_controller.append (no_sink_inputs_label);
                 }
 
                 foreach (var item in this.client.active_sinks.values) {
-                    levels_listbox.add (new SinkInputRow (item, client,
-                                                          icon_size, show_per_app_icon, show_per_app_label));
+                    SinkInputRow row = new SinkInputRow (item, client,
+                                                             icon_size, show_per_app_icon,
+                                                             show_per_app_label);
+                    list_box_controller.append (row);
                 }
 
                 this.client.change_active_sink.connect (active_sink_change);
                 this.client.new_active_sink.connect (active_sink_added);
                 this.client.remove_active_sink.connect (active_sink_removed);
 
-                reveal_button.clicked.connect (() => {
-                    bool show = revealer.reveal_child;
-                    revealer.set_reveal_child (!show);
-                    if (show) {
-                        reveal_button.label = expand_label;
-                    } else {
-                        reveal_button.label = collapse_label;
-                    }
+                reveal_button = new Gtk.ToggleButton ();
+                set_button_icon ();
+                reveal_button.toggled.connect (() => {
+                    set_button_icon ();
+                    revealer.set_reveal_child (reveal_button.active);
                 });
-
-                main_volume_slider_container.pack_end (reveal_button, false, false, 0);
-                add (revealer);
+                main_volume_slider_container.append (reveal_button);
+                append (revealer);
             }
+        }
 
-            show_all ();
+        private void set_button_icon () {
+            if (!reveal_button.active) {
+                if (expand_label == null) {
+                    reveal_button.set_icon_name ("swaync-up-small-symbolic");
+                } else {
+                    reveal_button.set_label (expand_label);
+                }
+            } else {
+                if (collapse_label == null) {
+                    reveal_button.set_icon_name ("swaync-down-small-symbolic");
+                } else {
+                    reveal_button.set_label (collapse_label);
+                }
+            }
         }
 
         public override void on_cc_visibility_change (bool val) {
@@ -160,8 +177,10 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         private void active_sink_change (PulseSinkInput sink) {
-            foreach (var row in levels_listbox.get_children ()) {
-                if (row == null) continue;
+            foreach (unowned Gtk.Widget row in list_box_controller.get_children ()) {
+                if (!(row is SinkInputRow)) {
+                    continue;
+                }
                 var s = (SinkInputRow) row;
                 if (s.sink_input.cmp (sink)) {
                     s.update (sink);
@@ -173,25 +192,28 @@ namespace SwayNotificationCenter.Widgets {
         private void active_sink_added (PulseSinkInput sink) {
             // one element added -> remove the empty label
             if (this.client.active_sinks.size == 1) {
-                var label = levels_listbox.get_children ().first ().data;
-                levels_listbox.remove ((Gtk.Widget) label);
+                var label = levels_listbox.get_first_child ();
+                list_box_controller.remove ((Gtk.Widget) label);
             }
-            levels_listbox.add (new SinkInputRow (sink, client, icon_size, show_per_app_icon, show_per_app_label));
-            show_all ();
+            SinkInputRow row = new SinkInputRow (sink, client,
+                                                 icon_size, show_per_app_icon,
+                                                 show_per_app_label);
+            list_box_controller.append (row);
         }
 
         private void active_sink_removed (PulseSinkInput sink) {
-            foreach (var row in levels_listbox.get_children ()) {
-                if (row == null) continue;
+            foreach (unowned Gtk.Widget row in list_box_controller.get_children ()) {
+                if (!(row is SinkInputRow)) {
+                    continue;
+                }
                 var s = (SinkInputRow) row;
                 if (s.sink_input.cmp (sink)) {
-                    levels_listbox.remove (row);
+                    list_box_controller.remove (row);
                     break;
                 }
             }
-            if (levels_listbox.get_children ().length () == 0) {
-                levels_listbox.add (no_sink_inputs_label);
-                show_all ();
+            if (levels_listbox.get_first_child () == null) {
+                list_box_controller.append (no_sink_inputs_label);
             }
         }
     }

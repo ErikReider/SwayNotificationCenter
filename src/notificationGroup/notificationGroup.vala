@@ -5,12 +5,15 @@ namespace SwayNotificationCenter {
 
         public string name_id;
 
+        private NotificationCloseButton close_button;
+        private DismissibleWidget dismissible;
         private ExpandableGroup group;
         private Gtk.Revealer revealer = new Gtk.Revealer ();
         private Gtk.Image app_icon;
         private Gtk.Label app_label;
 
-        private Gtk.GestureMultiPress gesture;
+        private Gtk.EventControllerMotion motion_controller;
+        private Gtk.GestureClick gesture;
         private bool gesture_down = false;
         private bool gesture_in = false;
 
@@ -21,9 +24,23 @@ namespace SwayNotificationCenter {
 
         public NotificationGroup (string name_id, string display_name) {
             this.name_id = name_id;
-            get_style_context ().add_class ("notification-group");
+            add_css_class ("notification-group");
+
+            dismissible = new DismissibleWidget ();
+            dismissible.dismissed.connect (close_all_notifications);
+            set_child (dismissible);
+
+            Gtk.Overlay overlay = new Gtk.Overlay ();
+            dismissible.child = overlay;
 
             Gtk.Box box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
+            box.set_hexpand (true);
+            overlay.set_child (box);
+
+            close_button = new NotificationCloseButton ();
+            close_button.clicked.connect (close_all_notifications);
+            close_button.add_css_class ("notification-group-close-button");
+            overlay.add_overlay (close_button);
 
             revealer.set_transition_type (Gtk.RevealerTransitionType.SLIDE_UP);
             revealer.set_reveal_child (false);
@@ -33,59 +50,56 @@ namespace SwayNotificationCenter {
             Gtk.Box controls_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 4);
             Gtk.Box end_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 4);
             end_box.set_halign (Gtk.Align.END);
-            end_box.get_style_context ().add_class ("notification-group-buttons");
+            end_box.add_css_class ("notification-group-buttons");
 
             // Collapse button
             Gtk.Button collapse_button = new Gtk.Button.from_icon_name (
-                "swaync-collapse-symbolic", Gtk.IconSize.BUTTON);
-            collapse_button.get_style_context ().add_class ("flat");
-            collapse_button.get_style_context ().add_class ("circular");
-            collapse_button.get_style_context ().add_class ("notification-group-collapse-button");
-            collapse_button.set_relief (Gtk.ReliefStyle.NORMAL);
+                "swaync-collapse-symbolic");
+            collapse_button.add_css_class ("circular");
+            collapse_button.add_css_class ("notification-group-collapse-button");
             collapse_button.set_halign (Gtk.Align.END);
             collapse_button.set_valign (Gtk.Align.CENTER);
             collapse_button.clicked.connect (() => {
                 set_expanded (false);
                 on_expand_change (false);
             });
-            end_box.add (collapse_button);
+            end_box.append (collapse_button);
 
             // Close all button
             Gtk.Button close_all_button = new Gtk.Button.from_icon_name (
-                "swaync-close-symbolic", Gtk.IconSize.BUTTON);
-            close_all_button.get_style_context ().add_class ("flat");
-            close_all_button.get_style_context ().add_class ("circular");
-            close_all_button.get_style_context ().add_class ("notification-group-close-all-button");
-            close_all_button.set_relief (Gtk.ReliefStyle.NORMAL);
+                "swaync-close-symbolic");
+            close_all_button.add_css_class ("circular");
+            close_all_button.add_css_class ("notification-group-close-all-button");
             close_all_button.set_halign (Gtk.Align.END);
             close_all_button.set_valign (Gtk.Align.CENTER);
             close_all_button.clicked.connect (() => {
                 close_all_notifications ();
                 on_expand_change (false);
             });
-            end_box.add (close_all_button);
+            end_box.append (close_all_button);
 
             // Group name label
             Gtk.Box start_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 4);
             start_box.set_halign (Gtk.Align.START);
-            start_box.get_style_context ().add_class ("notification-group-headers");
+            start_box.set_hexpand (true);
+            start_box.add_css_class ("notification-group-headers");
             // App Icon
             app_icon = new Gtk.Image ();
             app_icon.set_pixel_size (32);
             app_icon.set_valign (Gtk.Align.CENTER);
-            app_icon.get_style_context ().add_class ("notification-group-icon");
-            start_box.add (app_icon);
+            app_icon.add_css_class ("notification-group-icon");
+            start_box.append (app_icon);
             // App Label
             app_label = new Gtk.Label (display_name);
             app_label.xalign = 0;
-            app_label.get_style_context ().add_class ("title-1");
-            app_label.get_style_context ().add_class ("notification-group-header");
-            start_box.add (app_label);
+            app_label.add_css_class ("title-1");
+            app_label.add_css_class ("notification-group-header");
+            start_box.append (app_label);
 
-            controls_box.pack_start (start_box);
-            controls_box.pack_end (end_box);
-            revealer.add (controls_box);
-            box.add (revealer);
+            controls_box.prepend (start_box);
+            controls_box.append (end_box);
+            revealer.set_child (controls_box);
+            box.append (revealer);
 
             set_activatable (false);
 
@@ -98,15 +112,13 @@ namespace SwayNotificationCenter {
                 }
             });
             set_classes ();
-            box.add (group);
-            add (box);
-
-            show_all ();
+            box.append (group);
 
             /*
              * Handling of group presses
              */
-            gesture = new Gtk.GestureMultiPress (this);
+            gesture = new Gtk.GestureClick ();
+            box.add_controller (gesture);
             gesture.set_touch_only (false);
             gesture.set_exclusive (true);
             gesture.set_button (Gdk.BUTTON_PRIMARY);
@@ -122,7 +134,7 @@ namespace SwayNotificationCenter {
                 if (gesture_in) {
                     bool single_noti = only_single_notification ();
                     if (!group.is_expanded && !single_noti) {
-                        group.set_expanded (true);
+                        set_expanded (true);
                         on_expand_change (true);
                     }
                     group.set_sensitive (single_noti || group.is_expanded);
@@ -137,12 +149,12 @@ namespace SwayNotificationCenter {
                 Gtk.GestureSingle gesture_single = (Gtk.GestureSingle) gesture;
                 if (sequence != gesture_single.get_current_sequence ()) return;
 
-                Gtk.Allocation allocation;
+                int width = get_width ();
+                int height = get_height ();
                 double x, y;
 
-                get_allocation (out allocation);
                 gesture.get_point (sequence, out x, out y);
-                bool intersects = (x >= 0 && y >= 0 && x < allocation.width && y < allocation.height);
+                bool intersects = (x >= 0 && y >= 0 && x < width && y < height);
                 if (gesture_in != intersects) {
                     gesture_in = intersects;
                 }
@@ -152,14 +164,25 @@ namespace SwayNotificationCenter {
                     gesture_down = false;
                 }
             });
+
+            /*
+             * Handling of group hover
+             */
+            motion_controller = new Gtk.EventControllerMotion ();
+            this.add_controller (motion_controller);
+            motion_controller.motion.connect ((event) => {
+                close_button.set_reveal (!group.is_expanded && !only_single_notification ());
+            });
+            motion_controller.leave.connect ((controller) => {
+                close_button.set_reveal (false);
+            });
         }
 
         private void set_classes () {
-            unowned Gtk.StyleContext ctx = get_style_context ();
-            ctx.remove_class (STYLE_CLASS_COLLAPSED);
+            remove_css_class (STYLE_CLASS_COLLAPSED);
             if (!group.is_expanded) {
-                if (!ctx.has_class (STYLE_CLASS_COLLAPSED)) {
-                    ctx.add_class (STYLE_CLASS_COLLAPSED);
+                if (!has_css_class (STYLE_CLASS_COLLAPSED)) {
+                    add_css_class (STYLE_CLASS_COLLAPSED);
                 }
             }
         }
@@ -173,23 +196,22 @@ namespace SwayNotificationCenter {
             Icon ? icon = null;
             if (param.desktop_app_info != null
                 && (icon = param.desktop_app_info.get_icon ()) != null) {
-                app_icon.set_from_gicon (icon, Gtk.IconSize.INVALID);
+                app_icon.set_from_gicon (icon);
                 app_icon.show ();
             } else {
-                app_icon.set_from_icon_name ("application-x-executable-symbolic",
-                                             Gtk.IconSize.INVALID);
+                app_icon.set_from_icon_name ("application-x-executable-symbolic");
             }
         }
 
         /// Returns if there's more than one notification
         public bool only_single_notification () {
-            unowned Gtk.Widget ? widget = group.widgets.nth_data (1);
-            return widget == null;
+            return group.widgets.nth_data (0) != null && group.widgets.nth_data (1) == null;
         }
 
         public void set_expanded (bool state) {
             group.set_expanded (state);
             group.set_sensitive (only_single_notification () || group.is_expanded);
+            dismissible.set_can_dismiss (!state);
         }
 
         public bool toggle_expanded () {
@@ -201,9 +223,8 @@ namespace SwayNotificationCenter {
         public void add_notification (Notification noti) {
             if (noti.param.urgency == UrgencyLevels.CRITICAL) {
                 urgent_notifications.insert (noti.param.applied_id, true);
-                unowned Gtk.StyleContext ctx = get_style_context ();
-                if (!ctx.has_class (STYLE_CLASS_URGENT)) {
-                    ctx.add_class (STYLE_CLASS_URGENT);
+                if (!has_css_class (STYLE_CLASS_URGENT)) {
+                    add_css_class (STYLE_CLASS_URGENT);
                 }
             }
             group.add (noti);
@@ -219,7 +240,7 @@ namespace SwayNotificationCenter {
         public void remove_notification (Notification noti) {
             urgent_notifications.remove (noti.param.applied_id);
             if (urgent_notifications.length == 0) {
-                get_style_context ().remove_class (STYLE_CLASS_URGENT);
+                remove_css_class (STYLE_CLASS_URGENT);
             }
             group.remove (noti);
             if (only_single_notification ()) {
@@ -254,10 +275,13 @@ namespace SwayNotificationCenter {
         }
 
         public void close_all_notifications () {
+            close_button.set_reveal (false);
             urgent_notifications.remove_all ();
             foreach (unowned Gtk.Widget widget in group.widgets) {
                 var noti = (Notification) widget;
-                if (noti != null) noti.close_notification (false);
+                if (noti != null) {
+                    noti.close_notification (false);
+                }
             }
         }
 
@@ -269,14 +293,15 @@ namespace SwayNotificationCenter {
             }
         }
 
-        public int get_relative_y (Gtk.Widget parent) {
-            int dest_y;
-            translate_coordinates (parent, 0, 0, null, out dest_y);
-            return dest_y;
+        public float get_relative_y (Gtk.Widget parent) {
+            Graphene.Point point = Graphene.Point.zero ();
+            Graphene.Point dest_point;
+            compute_point (parent, point, out dest_point);
+            return dest_point.y;
         }
     }
 
-    private class ExpandableGroup : Gtk.Container {
+    private class ExpandableGroup : Gtk.Widget {
         const int NUM_STACKED_NOTIFICATIONS = 3;
         const int COLLAPSED_NOTIFICATION_OFFSET = 8;
 
@@ -288,7 +313,8 @@ namespace SwayNotificationCenter {
                 return (1 - animation_progress);
             }
         }
-        private Animation ? animation;
+        private Adw.TimedAnimation animation;
+        private Adw.CallbackAnimationTarget animation_target;
 
         private unowned on_expand_change change_cb;
 
@@ -297,15 +323,16 @@ namespace SwayNotificationCenter {
         public delegate void on_expand_change (bool state);
 
         public ExpandableGroup (uint animation_duration, on_expand_change change_cb) {
-            base.set_has_window (false);
             base.set_can_focus (true);
-            base.set_redraw_on_allocate (false);
 
             this.change_cb = change_cb;
-            animation = new Animation (this, animation_duration,
-                                       Animation.ease_in_out_cubic,
-                                       animation_value_cb,
-                                       animation_done_cb);
+
+            animation_target = new Adw.CallbackAnimationTarget (animation_value_cb);
+            animation = new Adw.TimedAnimation (this, 1.0, 0.0,
+                                                animation_duration,
+                                                animation_target);
+            animation.set_easing (Adw.Easing.EASE_IN_OUT_CUBIC);
+            animation.done.connect (animation_done_cb);
 
             this.show ();
 
@@ -323,36 +350,84 @@ namespace SwayNotificationCenter {
             change_cb (is_expanded);
         }
 
-        public override void add (Gtk.Widget widget) {
+        public void add (Gtk.Widget widget) {
             widget.set_parent (this);
             widgets.append (widget);
         }
 
-        public override void remove (Gtk.Widget widget) {
+        public void remove (Gtk.Widget widget) {
             widget.unparent ();
             widgets.remove (widget);
             if (this.get_visible () && widget.get_visible ()) {
-                this.queue_resize_no_redraw ();
+                queue_resize ();
             }
         }
 
-        public override void forall_internal (bool include_internals, Gtk.Callback callback) {
-            foreach (unowned Gtk.Widget widget in widgets) {
-                callback (widget);
-            }
+        private Gtk.Allocation get_alloc (Gtk.Widget w) {
+            Gtk.Allocation alloc = Gtk.Allocation ();
+            Graphene.Rect bounds;
+            w.compute_bounds (this, out bounds);
+
+            alloc.width = w.get_width ();
+            alloc.height = w.get_height ();
+            alloc.x = (int) bounds.origin.x;
+            alloc.y = (int) bounds.origin.y;
+            return alloc;
         }
 
         public override Gtk.SizeRequestMode get_request_mode () {
             return Gtk.SizeRequestMode.HEIGHT_FOR_WIDTH;
         }
 
-        public override void size_allocate (Gtk.Allocation allocation) {
-            base.size_allocate (allocation);
+        protected override void measure (Gtk.Orientation orientation, int for_size,
+                                         out int minimum, out int natural,
+                                         out int minimum_baseline, out int natural_baseline) {
+            minimum = 0;
+            natural = 0;
+            minimum_baseline = -1;
+            natural_baseline = -1;
+
+            if (orientation == Gtk.Orientation.HORIZONTAL) {
+                return;
+            }
+
+            foreach (unowned Gtk.Widget widget in widgets) {
+                if (widget != null && widget.get_visible ()) {
+                    int widget_minimum_height = 0;
+                    int widget_natural_height = 0;
+                    widget.measure (orientation, for_size,
+                                    out widget_minimum_height,
+                                    out widget_natural_height,
+                                    null, null);
+
+                    minimum += widget_minimum_height;
+                    natural += widget_natural_height;
+                }
+            }
+
+            int target_natural_height;
+            int target_minimum_height;
+            get_height_for_latest_notifications (for_size, out target_minimum_height,
+                                                 out target_natural_height);
+            // TODO: Always use natural as minimum?
+            // Fixes large (tall) Notification body Pictures
+            minimum = (int) Functions.lerp (minimum,
+                                                   target_natural_height,
+                                                   animation_progress_inv);
+            natural = (int) Functions.lerp (natural,
+                                                   target_natural_height,
+                                                   animation_progress_inv);
+        }
+
+        protected override void size_allocate (int alloc_width, int alloc_height, int baseline) {
+            base.size_allocate (alloc_width, alloc_height, baseline);
 
             int length = (int) widgets.length ();
             if (length == 0) return;
 
-            uint border_width = get_border_width ();
+            Gtk.Allocation allocation = get_alloc (this);
+            allocation.width = alloc_width;
+            allocation.height = alloc_height;
 
             Gtk.Allocation prev_allocation = Gtk.Allocation ();
             prev_allocation.y = allocation.y;
@@ -360,29 +435,28 @@ namespace SwayNotificationCenter {
             // The height of the most recent notification
             unowned Gtk.Widget last = widgets.last ().data;
             int target_height = 0;
-            last.get_preferred_height_for_width (allocation.width,
-                                                 out target_height, null);
+
+            last.measure (Gtk.Orientation.VERTICAL, allocation.width, null, out target_height, null, null);
 
             for (int i = length - 1; i >= 0; i--) {
                 unowned Gtk.Widget widget = widgets.nth_data (i);
                 if (widget != null && widget.get_visible ()) {
                     int height;
-                    widget.get_preferred_height_for_width (allocation.width,
-                                                           out height, null);
+                    widget.measure (Gtk.Orientation.VERTICAL, allocation.width,
+                                    null, out height,
+                                    null, null);
 
                     Gtk.Allocation alloc = Gtk.Allocation ();
-                    alloc.x = allocation.x + (int) border_width;
+                    alloc.x = allocation.x;
                     alloc.y = (int) (prev_allocation.y +
-                                     animation_progress * prev_allocation.height +
-                                     border_width);
-                    alloc.width = allocation.width - 2 * (int) border_width;
+                                     animation_progress * prev_allocation.height);
+                    alloc.width = allocation.width;
                     alloc.height = height;
                     // Expand smaller stacked notifications to the expected height
                     // But only when the animation has finished
                     if (target_height > height && !is_expanded && animation_progress == 0) {
                         alloc.height = target_height;
                     }
-                    alloc.height -= 2 * (int) border_width;
 
                     // Add the collapsed offset to only stacked notifications.
                     // Excludes notifications index > NUM_STACKED_NOTIFICATIONS
@@ -391,7 +465,9 @@ namespace SwayNotificationCenter {
                     }
 
                     prev_allocation = alloc;
-                    widget.size_allocate (alloc);
+                    Gsk.Transform transform = new Gsk.Transform ();
+                    transform = transform.translate (Graphene.Point ().init (alloc.x, alloc.y));
+                    widget.allocate (alloc.width, alloc.height, baseline, transform);
 
                     if (get_realized ()) {
                         widget.show ();
@@ -403,62 +479,22 @@ namespace SwayNotificationCenter {
             }
         }
 
-        public override void get_preferred_height_for_width (int width,
-                                                             out int minimum_height,
-                                                             out int natural_height) {
-            minimum_height = 0;
-            natural_height = 0;
-
-            foreach (unowned Gtk.Widget widget in widgets) {
-                if (widget != null && widget.get_visible ()) {
-                    int widget_minimum_height = 0;
-                    int widget_natural_height = 0;
-                    widget.get_preferred_height_for_width (width,
-                                                           out widget_minimum_height,
-                                                           out widget_natural_height);
-
-                    minimum_height += widget_minimum_height;
-                    natural_height += widget_natural_height;
-                }
+        // Draw the widget
+        protected override void snapshot (Gtk.Snapshot snapshot) {
+            int length = (int) widgets.length ();
+            if (length == 0) {
+                return;
             }
 
-            int target_minimum_height;
-            int target_natural_height;
-            get_height_for_latest_notifications (width,
-                                                 out target_minimum_height,
-                                                 out target_natural_height);
-            minimum_height = (int) Animation.lerp (minimum_height,
-                                                   target_minimum_height,
-                                                   animation_progress_inv);
-            natural_height = (int) Animation.lerp (natural_height,
-                                                   target_natural_height,
-                                                   animation_progress_inv);
-        }
-
-        public override bool draw (Cairo.Context cr) {
-            int length = (int) widgets.length ();
-            if (length == 0) return true;
-
-            Gtk.Allocation alloc;
-            get_allocated_size (out alloc, null);
+            Graphene.Rect bounds = Graphene.Rect ();
+            if (!compute_bounds (this, out bounds)) {
+                return;
+            }
+            Gtk.Allocation alloc = get_alloc (this);
+            int width = alloc.width;
 
             unowned Gtk.Widget latest = widgets.nth_data (length - 1);
-            Gtk.Allocation latest_alloc;
-            latest.get_allocated_size (out latest_alloc, null);
-
-            Cairo.Pattern hover_gradient = new Cairo.Pattern.linear (0, 0, 0, 1);
-            hover_gradient.add_color_stop_rgba (0, 1, 1, 1, 1);
-            hover_gradient.add_color_stop_rgba (1, 1, 1, 1, 1);
-
-            // Fades from the bottom at 0.5 -> top at 0.0 opacity
-            Cairo.Pattern fade_gradient = new Cairo.Pattern.linear (0, 0, 0, 1);
-            fade_gradient.add_color_stop_rgba (0, 1, 1, 1, animation_progress_inv);
-            fade_gradient.add_color_stop_rgba (1, 1, 1, 1, 0);
-            // Cross-fades in the non visible stacked notifications when expanded
-            Cairo.Pattern cross_fade_pattern =
-                new Cairo.Pattern.rgba (1, 1, 1, 1.5 * animation_progress_inv);
-
-            int width = alloc.width;
+            Gtk.Allocation latest_alloc = get_alloc (latest);
 
             for (int i = 0; i < length; i++) {
                 // Skip drawing excess notifications
@@ -469,101 +505,100 @@ namespace SwayNotificationCenter {
                 }
 
                 unowned Gtk.Widget widget = widgets.nth_data (i);
-                int preferred_height;
-                widget.get_preferred_height_for_width (width,
-                                                       out preferred_height, null);
-                Gtk.Allocation widget_alloc;
-                widget.get_allocated_size (out widget_alloc, null);
+                Gtk.Allocation widget_alloc = get_alloc (widget);
 
                 int height_diff = latest_alloc.height - widget_alloc.height;
 
-                cr.save ();
+                snapshot.save ();
 
-                // Translate to the widgets allocated y
-                double translate_y = widget_alloc.y - alloc.y;
                 // Move down even more if the height is larger than the latest
                 // in the stack (helps with only rendering the bottom portion)
-                translate_y += height_diff * animation_progress_inv;
-                cr.translate (0, translate_y);
+                double translate_y = height_diff * animation_progress_inv;
+                snapshot.translate (Graphene.Point ().init (0, (float) translate_y));
 
                 // Scale down lower notifications in the stack
                 if (i + 1 != length) {
                     double scale = double.min (
                         animation_progress + Math.pow (0.95, length - 1 - i), 1);
                     // Moves the scaled notification to the center of X and bottom y
-                    cr.translate ((widget_alloc.width - width * scale) * 0.5,
-                                  widget_alloc.height * (1 - scale));
-                    cr.scale (scale, scale);
+                    snapshot.translate (Graphene.Point ().init (
+                        (float) ((widget_alloc.width - width * scale) * 0.5),
+                        (float) (widget_alloc.height * (1 - scale))));
+                    snapshot.scale ((float) scale, (float) scale);
                 }
 
-                int lerped_y = (int) Animation.lerp (-height_diff, 0, animation_progress);
-                int lerped_height = (int) Animation.lerp (latest_alloc.height,
+                int lerped_y = (int) Functions.lerp (-height_diff, 0, animation_progress);
+                lerped_y += (int) widget_alloc.y - alloc.y;
+                int lerped_height = (int) Functions.lerp (latest_alloc.height,
                                                           widget_alloc.height,
                                                           animation_progress);
                 // Clip to the size of the latest notification
                 // (fixes issue where a larger bottom notification would
                 // be visible above)
-                cr.rectangle (0, lerped_y, width, lerped_height);
-                cr.clip ();
+                Graphene.Rect clip_bounds = Graphene.Rect ().init (0f,
+                                                                   (float) lerped_y,
+                                                                   (float) width,
+                                                                   (float) lerped_height);
+                snapshot.push_clip (clip_bounds);
 
+                // TODO: Fades from the bottom at 0.5 -> top at 0.0 opacity
                 // Draw patterns on the notification
-                cr.push_group ();
-                widget.draw (cr);
-                if (i + 1 != length) {
-                    // Draw Fade Gradient
-                    cr.save ();
-                    cr.translate (0, lerped_y);
-                    cr.scale (1, lerped_height * 0.5);
-                    cr.set_source (fade_gradient);
-                    cr.rectangle (0, 0, width, lerped_height * 0.5);
-                    cr.set_operator (Cairo.Operator.DEST_OUT);
-                    cr.fill ();
-                    cr.restore ();
-                }
-                // Draw notification cross-fade
-                if (i < length - NUM_STACKED_NOTIFICATIONS) {
-                    cr.save ();
-                    cr.translate (0, lerped_y);
-                    cr.scale (1, lerped_height);
-                    cr.set_source (cross_fade_pattern);
-                    cr.rectangle (0, 0, width, lerped_height);
-                    cr.set_operator (Cairo.Operator.DEST_OUT);
-                    cr.fill ();
-                    cr.restore ();
-                }
-                cr.pop_group_to_source ();
-                cr.paint ();
+                // cr.push_group ();
+                // widget.draw (cr);
+                // if (i + 1 != length) {
+                //     // Draw Fade Gradient
+                //     cr.save ();
+                //     cr.translate (0, lerped_y);
+                //     cr.scale (1, lerped_height * 0.5);
+                //     cr.set_source (fade_gradient);
+                //     cr.rectangle (0, 0, width, lerped_height * 0.5);
+                //     cr.set_operator (Cairo.Operator.DEST_OUT);
+                //     cr.fill ();
+                //     cr.restore ();
+                // }
+                // cr.pop_group_to_source ();
+                // cr.paint ();
 
-                cr.restore ();
+                // Cross-fades in the non visible stacked notifications when expanded
+                if (i < length - NUM_STACKED_NOTIFICATIONS) {
+                    snapshot.push_opacity (1.5 * animation_progress);
+                }
+                snapshot_child (widget, snapshot);
+
+                if (i < length - NUM_STACKED_NOTIFICATIONS) {
+                    snapshot.pop (); // Cross-fade
+                }
+                snapshot.pop (); // Clip
+
+                snapshot.restore ();
             }
-            return true;
         }
 
         /** Gets the collapsed height (first notification + stacked) */
-        private void get_height_for_latest_notifications (int width,
-                                                          out int minimum_height,
-                                                          out int natural_height) {
-            minimum_height = 0;
-            natural_height = 0;
+        private void get_height_for_latest_notifications (int for_size,
+                                                          out int minimum,
+                                                          out int natural) {
+            minimum = 0;
+            natural = 0;
 
-            uint length = widgets.length ();
-
-            if (length == 0) return;
-
-            int offset = 0;
-            for (uint i = 1;
-                 i < length && i < NUM_STACKED_NOTIFICATIONS;
-                 i++) {
-                offset += COLLAPSED_NOTIFICATION_OFFSET;
+            int length = (int) widgets.length ();
+            if (length == 0) {
+                return;
             }
 
-            unowned Gtk.Widget last = widgets.last ().data;
-            last.get_preferred_height_for_width (width,
-                                                 out minimum_height,
-                                                 out natural_height);
+            unowned GLib.List<weak Gtk.Widget> last = widgets.last ();
+            if (last != null) {
+                unowned Gtk.Widget last_widget = widgets.last ().data;
 
-            minimum_height += offset;
-            natural_height += offset;
+                last_widget.measure (Gtk.Orientation.VERTICAL, for_size,
+                                     out minimum, out natural,
+                                     null, null);
+            }
+
+            int offset = (length - 1).clamp (0, NUM_STACKED_NOTIFICATIONS - 1)
+                * COLLAPSED_NOTIFICATION_OFFSET;
+
+            natural += offset;
         }
 
         void animation_value_cb (double progress) {
@@ -573,14 +608,14 @@ namespace SwayNotificationCenter {
         }
 
         void animation_done_cb () {
-            animation.dispose ();
-
             this.queue_allocate ();
         }
 
         void animate (double to) {
-            animation.stop ();
-            animation.start (animation_progress, to);
+            animation.set_value_from (animation_progress);
+            animation.set_value_to (to);
+            animation.reset ();
+            animation.play ();
         }
     }
 }

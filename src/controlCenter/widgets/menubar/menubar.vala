@@ -37,34 +37,47 @@ namespace SwayNotificationCenter.Widgets {
             }
         }
 
-        Gtk.Box menus_container;
-        Gtk.Box topbar_container;
+        Gtk.Box left_container;
+        Gtk.Box right_container;
 
         List<ConfigObject ?> menu_objects;
         List<ToggleButton> toggle_buttons;
 
         public Menubar (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             base (suffix, swaync_daemon, noti_daemon);
+            set_orientation (Gtk.Orientation.VERTICAL);
+            set_hexpand (true);
 
             Json.Object ? config = get_config (this);
             if (config != null) {
                 parse_config_objects (config);
             }
 
-            menus_container = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
+            Gtk.Box topbar_container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
+            topbar_container.add_css_class ("menu-button-bar");
+            append (topbar_container);
 
-            topbar_container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
-            topbar_container.get_style_context ().add_class ("menu-button-bar");
-
-            menus_container.add (topbar_container);
+            left_container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0) {
+                overflow = Gtk.Overflow.HIDDEN,
+                hexpand = true,
+                halign = Gtk.Align.START,
+            };
+            left_container.add_css_class ("widget-menubar-container");
+            left_container.add_css_class ("start");
+            topbar_container.append (left_container);
+            right_container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0) {
+                overflow = Gtk.Overflow.HIDDEN,
+                hexpand = true,
+                halign = Gtk.Align.END,
+            };
+            right_container.add_css_class ("widget-menubar-container");
+            right_container.add_css_class ("end");
+            topbar_container.append (right_container);
 
             for (int i = 0; i < menu_objects.length (); i++) {
                 unowned ConfigObject ? obj = menu_objects.nth_data (i);
                 add_menu (ref obj);
             }
-
-            pack_start (menus_container, true, true, 0);
-            show_all ();
 
             foreach (var obj in menu_objects) {
                 obj.revealer ?.set_reveal_child (false);
@@ -75,42 +88,47 @@ namespace SwayNotificationCenter.Widgets {
             switch (obj.type) {
                 case MenuType.BUTTONS:
                     Gtk.Box container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
-                    if (obj.name != null) container.get_style_context ().add_class (obj.name);
+                    if (obj.name != null) container.add_css_class (obj.name);
 
                     foreach (Action a in obj.actions) {
                         switch (a.type) {
                             case ButtonType.TOGGLE:
                                 ToggleButton tb = new ToggleButton (a.label, a.command, a.update_command, a.active);
-                                container.add (tb);
+                                container.append (tb);
                                 toggle_buttons.append (tb);
                                 break;
                             default:
                                 Gtk.Button b = new Gtk.Button.with_label (a.label);
                                 b.clicked.connect (() => execute_command.begin (a.command));
-                                container.add (b);
+                                container.append (b);
                                 break;
                         }
                     }
                     switch (obj.position) {
                         case Position.LEFT:
-                            topbar_container.pack_start (container, false, false, 0);
+                            left_container.append (container);
                             break;
                         case Position.RIGHT:
-                            topbar_container.pack_end (container, false, false, 0);
+                            right_container.append (container);
                             break;
                     }
                     break;
                 case MenuType.MENU:
-                    Gtk.Button show_button = new Gtk.Button.with_label (obj.label);
+                    Gtk.ToggleButton show_button = new Gtk.ToggleButton.with_label (obj.label);
 
                     Gtk.Box menu = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
-                    if (obj.name != null) menu.get_style_context ().add_class (obj.name);
+                    if (obj.name != null) menu.add_css_class (obj.name);
 
                     Gtk.Revealer r = new Gtk.Revealer ();
-                    r.add (menu);
+                    r.set_child (menu);
                     r.set_transition_duration (obj.animation_duration);
                     r.set_transition_type (obj.animation_type);
                     obj.revealer = r;
+
+                    // Make sure that the toggle buttons state is always synced
+                    // with the revealers visibility.
+                    r.bind_property ("child-revealed",
+                        show_button, "active", BindingFlags.SYNC_CREATE, null, null);
 
                     show_button.clicked.connect (() => {
                         bool visible = !r.get_reveal_child ();
@@ -124,27 +142,29 @@ namespace SwayNotificationCenter.Widgets {
                         switch (a.type) {
                             case ButtonType.TOGGLE:
                                 ToggleButton tb = new ToggleButton (a.label, a.command, a.update_command, a.active);
-                                menu.pack_start (tb, true, true, 0);
+                                tb.set_hexpand (true);
+                                menu.append (tb);
                                 toggle_buttons.append (tb);
                                 break;
                             default:
                                 Gtk.Button b = new Gtk.Button.with_label (a.label);
+                                b.set_hexpand (true);
                                 b.clicked.connect (() => execute_command.begin (a.command));
-                                menu.pack_start (b, true, true, 0);
+                                menu.append (b);
                                 break;
                         }
                     }
 
                     switch (obj.position) {
                         case Position.RIGHT:
-                            topbar_container.pack_end (show_button, false, false, 0);
+                            right_container.append (show_button);
                             break;
                         case Position.LEFT:
-                            topbar_container.pack_start (show_button, false, false, 0);
+                            left_container.append (show_button);
                             break;
                     }
 
-                    menus_container.add (r);
+                    append (r);
                     break;
             }
         }

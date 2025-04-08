@@ -10,6 +10,8 @@ namespace SwayNotificationCenter.Widgets {
             this.update_command = update_command;
             this.label = label;
 
+            this.set_has_frame (true);
+
             if (active) {
                 this.active = true;
             }

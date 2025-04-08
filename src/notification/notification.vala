@@ -1,36 +1,83 @@
 namespace SwayNotificationCenter {
 
+    public class NotificationCloseButton : Adw.Bin {
+        Gtk.Revealer revealer;
+        Gtk.Button button;
+
+        construct {
+            valign = Gtk.Align.START;
+            // TODO: Configurable
+            halign = Gtk.Align.END;
+
+            revealer = new Gtk.Revealer () {
+                transition_type = Gtk.RevealerTransitionType.CROSSFADE,
+                reveal_child = false,
+            };
+            revealer.notify["child-revealed"].connect (() => {
+                set_visible (revealer.reveal_child);
+            });
+            set_child (revealer);
+
+            button = new Gtk.Button.from_icon_name ("swaync-close-symbolic") {
+                has_frame = false,
+                halign = Gtk.Align.CENTER,
+                valign = Gtk.Align.CENTER,
+            };
+            button.add_css_class ("close-button");
+            button.add_css_class ("circular");
+            button.clicked.connect (() => this.clicked ());
+            revealer.set_child (button);
+        }
+
+        public signal void clicked ();
+
+        public void set_reveal (bool state) {
+            if (state == revealer.reveal_child) {
+                return;
+            }
+
+            if (state) {
+                set_visible (true);
+            }
+            revealer.set_reveal_child (state);
+        }
+
+        public void set_transition_duration (uint duration) {
+            revealer.set_transition_duration (duration);
+        }
+    }
+
     public enum NotificationType { CONTROL_CENTER, POPUP }
 
-    [GtkTemplate (ui = "/org/erikreider/sway-notification-center/notification/notification.ui")]
-    public class Notification : Gtk.ListBoxRow {
+    [GtkTemplate (ui = "/org/erikreider/swaync/ui/notification.ui")]
+    public class Notification : Gtk.Box {
         [GtkChild]
         unowned Gtk.Revealer revealer;
         [GtkChild]
-        unowned Hdy.Carousel carousel;
+        unowned DismissibleWidget dismissible_widget;
 
         [GtkChild]
-        unowned Gtk.EventBox event_box;
+        unowned Gtk.Overlay base_widget;
 
         [GtkChild]
-        unowned Gtk.EventBox default_action;
+        unowned Gtk.Box default_action;
 
+        [GtkChild]
+        unowned Gtk.FlowBox alt_actions_box;
 
         /** The default_action gesture. Allows clicks while not in swipe gesture. */
-        private Gtk.GestureMultiPress gesture;
+        private Gtk.GestureClick gesture;
+        /** Detects when hovering over the widget */
+        private Gtk.EventControllerMotion motion_controller;
 
         [GtkChild]
         unowned Gtk.ProgressBar progress_bar;
 
         [GtkChild]
-        unowned Gtk.Box base_box;
+        unowned IterBox base_box;
 
         [GtkChild]
-        unowned Gtk.Revealer close_revealer;
-        [GtkChild]
-        unowned Gtk.Button close_button;
-
-        private Gtk.ButtonBox ? alt_actions_box = null;
+        unowned NotificationCloseButton close_button;
 
         [GtkChild]
         unowned Gtk.Label summary;
@@ -43,7 +90,7 @@ namespace SwayNotificationCenter {
         [GtkChild]
         unowned Gtk.Image img_app_icon;
         [GtkChild]
-        unowned Gtk.Image body_image;
+        unowned Gtk.Picture body_image;
 
         // Inline Reply
         [GtkChild]
@@ -56,7 +103,6 @@ namespace SwayNotificationCenter {
         private bool default_action_down = false;
         private bool default_action_in = false;
 
-        public static Gtk.IconSize icon_size = Gtk.IconSize.INVALID;
         private int notification_icon_size { get; default = ConfigModel.instance.notification_icon_size; }
 
         private int notification_body_image_height {
@@ -90,8 +136,6 @@ namespace SwayNotificationCenter {
         public int number_of_body_lines { get; construct; default = 10; }
 
         public bool has_inline_reply { get; private set; default = false; }
-
-        private int carousel_empty_widget_index = 0;
 
         private static Regex code_regex;
 
@@ -151,51 +195,57 @@ namespace SwayNotificationCenter {
                 stderr.printf ("Invalid regex: %s", e.message);
             }
 
-            // Build the default_action gesture. Makes clickes compatible with
-            // the Hdy Swipe gesture unlike a regular ::button_release_event
-            gesture = new Gtk.GestureMultiPress (default_action);
+            // Build the default_action gesture
+            gesture = new Gtk.GestureClick ();
+            default_action.add_controller (gesture);
             gesture.set_touch_only (false);
             gesture.set_exclusive (true);
-            gesture.set_button (Gdk.BUTTON_PRIMARY);
+            gesture.set_button (0);
             gesture.set_propagation_phase (Gtk.PropagationPhase.BUBBLE);
             gesture.pressed.connect ((_gesture, _n_press, _x, _y) => {
                 default_action_in = true;
                 default_action_down = true;
-                default_action_update_state ();
             });
             gesture.released.connect ((gesture, _n_press, _x, _y) => {
                 // Emit released
                 if (!default_action_down) return;
                 default_action_down = false;
                 if (default_action_in) {
-                    click_default_action ();
+                    // Close notification on middle and right button click
+                    switch (gesture.get_current_button ()) {
+                        default:
+                        case Gdk.BUTTON_PRIMARY:
+                            click_default_action ();
+                            break;
+                        case Gdk.BUTTON_MIDDLE:
+                        case Gdk.BUTTON_SECONDARY:
+                            this.close_notification ();
+                            break;
+                    }
                 }
 
                 Gdk.EventSequence ? sequence = gesture.get_current_sequence ();
                 if (sequence == null) {
                     default_action_in = false;
-                    default_action_update_state ();
                 }
             });
             gesture.update.connect ((gesture, sequence) => {
                 Gtk.GestureSingle gesture_single = (Gtk.GestureSingle) gesture;
                 if (sequence != gesture_single.get_current_sequence ()) return;
 
-                Gtk.Allocation allocation;
+                int width = default_action.get_width ();
+                int height = default_action.get_height ();
                 double x, y;
 
-                default_action.get_allocation (out allocation);
                 gesture.get_point (sequence, out x, out y);
-                bool in_button = (x >= 0 && y >= 0 && x < allocation.width && y < allocation.height);
+                bool in_button = (x >= 0 && y >= 0 && x < width && y < height);
                 if (default_action_in != in_button) {
                     default_action_in = in_button;
-                    default_action_update_state ();
                 }
             });
             gesture.cancel.connect ((_gesture, _sequence) => {
                 if (default_action_down) {
                     default_action_down = false;
-                    default_action_update_state ();
                 }
             });
 
@@ -205,72 +255,41 @@ namespace SwayNotificationCenter {
             /// Signals
             ///
 
-            this.button_press_event.connect ((event) => {
-                // Close notification on middle and right button click
-                switch (event.button) {
-                    case Gdk.BUTTON_MIDDLE:
-                    case Gdk.BUTTON_SECONDARY:
-                        this.close_notification ();
-                        return true;
-                    default:
-                        return false;
-                }
-            });
-
-            // Adds CSS :hover selector to EventBox
-            default_action.enter_notify_event.connect ((event) => {
-                if (event.detail != Gdk.NotifyType.INFERIOR
-                    && event.window == default_action.get_window ()) {
-                    default_action_in = true;
-                    default_action_update_state ();
-                }
-                return true;
-            });
-            default_action.leave_notify_event.connect ((event) => {
-                if (event.detail != Gdk.NotifyType.INFERIOR
-                    && event.window == default_action.get_window ()) {
-                    default_action_in = false;
-                    default_action_update_state ();
-                }
-                return true;
-            });
             default_action.unmap.connect (() => default_action_in = false);
 
             close_button.clicked.connect (() => close_notification ());
 
-            this.event_box.enter_notify_event.connect ((event) => {
-                close_revealer.set_reveal_child (true);
+            motion_controller = new Gtk.EventControllerMotion ();
+            base_widget.add_controller (motion_controller);
+            motion_controller.enter.connect ((event) => {
+                close_button.set_reveal (true);
                 remove_noti_timeout ();
-                return false;
             });
-            this.event_box.leave_notify_event.connect ((event) => {
-                if (event.detail == Gdk.NotifyType.INFERIOR) return true;
-                close_revealer.set_reveal_child (false);
+            motion_controller.leave.connect ((controller) => {
+                close_button.set_reveal (false);
                 add_notification_timeout ();
-                return false;
             });
 
-            this.carousel.page_changed.connect ((_, i) => {
-                if (i != this.carousel_empty_widget_index) return;
+
+            // Remove notification when it has been swiped
+            dismissible_widget.dismissed.connect (() => {
                 remove_noti_timeout ();
                 try {
                     noti_daemon.manually_close_notification (
                         param.applied_id, false);
                 } catch (Error e) {
-                    print ("Error: %s\n", e.message);
+                    printerr ("Error: %s\n", e.message);
                     this.destroy ();
                 }
             });
 
-            inline_reply_entry.key_release_event.connect ((w, event_key) => {
-                switch (Gdk.keyval_name (event_key.keyval)) {
-                    case "Return":
-                        inline_reply_button.clicked ();
-                        return true;
-                    default:
-                        return false;
+            Gtk.EventControllerKey reply_key_controller = new Gtk.EventControllerKey ();
+            reply_key_controller.key_released.connect ((keyval, keycode, state) => {
+                if (Gdk.keyval_name (keyval) == "Return") {
+                    inline_reply_button.clicked ();
                 }
             });
+            inline_reply_entry.add_controller (reply_key_controller);
             inline_reply_button.clicked.connect (() => {
                 string text = inline_reply_entry.get_text ().strip ();
                 if (text.length == 0) return;
@@ -281,58 +300,31 @@ namespace SwayNotificationCenter {
 
         }
 
-        private void default_action_update_state () {
-            bool pressed = default_action_in && default_action_down;
-
-            Gtk.StateFlags flags = default_action.get_state_flags () &
-                                   ~(Gtk.StateFlags.PRELIGHT | Gtk.StateFlags.ACTIVE);
-
-            if (default_action_in) flags |= Gtk.StateFlags.PRELIGHT;
-            if (pressed) flags |= Gtk.StateFlags.ACTIVE;
-
-            default_action.set_state_flags (flags, true);
-        }
-
-        private void on_size_allocation (Gtk.Allocation _ignored) {
-            // Force recomputing the allocated size of the wrapped GTK label in the body.
-            // `queue_resize` alone DOES NOT WORK because it does not properly invalidate
-            // the cache, this is a GTK bug!
-            // See https://gitlab.gnome.org/GNOME/gtk/-/issues/2556
-            if (body != null) {
-                body.set_size_request (-1, body.get_allocated_height ());
-            }
-        }
-
         private void build_noti () {
-            this.body.set_line_wrap (true);
-            this.body.set_line_wrap_mode (Pango.WrapMode.WORD_CHAR);
+            this.body.set_wrap (true);
+            this.body.set_wrap_mode (Pango.WrapMode.WORD_CHAR);
+            this.body.set_natural_wrap_mode (Gtk.NaturalWrapMode.WORD);
             this.body.set_ellipsize (Pango.EllipsizeMode.END);
 
-            this.summary.set_line_wrap (false);
+            this.summary.set_wrap (false);
             this.summary.set_text (param.summary ?? param.app_name);
             this.summary.set_ellipsize (Pango.EllipsizeMode.END);
 
-            close_revealer.set_transition_duration (this.transition_time);
+            close_button.set_transition_duration (this.transition_time);
 
             this.revealer.set_transition_duration (this.transition_time);
 
-            this.carousel.set_animation_duration (this.transition_time);
             // Changes the swipe direction depending on the notifications X position
             switch (ConfigModel.instance.positionX) {
                 case PositionX.LEFT:
-                    this.carousel.reorder (event_box, 0);
-                    this.carousel_empty_widget_index = 1;
+                    dismissible_widget.set_gesture_direction (SwipeDirection.SWIPE_LEFT);
                     break;
                 default:
                 case PositionX.RIGHT:
                 case PositionX.CENTER:
-                    this.carousel.scroll_to (event_box);
-                    this.carousel_empty_widget_index = 0;
+                    dismissible_widget.set_gesture_direction (SwipeDirection.SWIPE_RIGHT);
                     break;
             }
-            // Reset state
-            this.carousel.scroll_to (event_box);
-            this.carousel.allow_scroll_wheel = false;
 
             if (this.progress_bar.visible = param.has_synch) {
                 this.progress_bar.set_fraction (param.value * 0.01);
@@ -344,18 +336,14 @@ namespace SwayNotificationCenter {
             set_actions ();
             set_style_urgency ();
 
-            this.show ();
-
             Timeout.add (0, () => {
-                this.revealer.set_reveal_child (true);
+                revealer.set_reveal_child (true);
                 return Source.REMOVE;
             });
 
             remove_noti_timeout ();
-            this.size_allocate.disconnect (on_size_allocation);
             if (is_timed) {
                 add_notification_timeout ();
-                this.size_allocate.connect (on_size_allocation);
             }
         }
 
@@ -365,7 +353,7 @@ namespace SwayNotificationCenter {
             this.body.set_lines (this.number_of_body_lines);
 
             // Reset state
-            this.body_image.hide ();
+            body_image.hide ();
 
             // Removes all image tags and adds them to an array
             if (text.length > 0) {
@@ -396,16 +384,20 @@ namespace SwayNotificationCenter {
 
                     // Set the image if exists and is valid
                     if (img_paths.length > 0) {
-                        var img = Functions.uri_to_path (img_paths[0]);
-                        var file = File.new_for_path (img);
+                        string img = Functions.uri_to_path (img_paths[0]);
+                        File file = File.new_for_path (img);
                         if (img.length > 0 && file.query_exists ()) {
-                            var buf = new Gdk.Pixbuf.from_file_at_scale (
-                                file.get_path (),
-                                notification_body_image_width,
-                                notification_body_image_height,
-                                true);
-                            this.body_image.set_from_pixbuf (buf);
-                            this.body_image.show ();
+                            Gdk.Texture texture = Gdk.Texture.from_file (file);
+                            body_image.set_paintable (texture);
+                            body_image.set_can_shrink (true);
+                            body_image.set_content_fit (Gtk.ContentFit.SCALE_DOWN);
+                            body_image.width_request = notification_body_image_width;
+                            body_image.height_request = notification_body_image_height;
+                            // Fixes the Picture taking up too much space:
+                            // https://gitlab.gnome.org/GNOME/gtk/-/issues/7092
+                            Gtk.LayoutManager layout = new Gtk.CenterLayout ();
+                            body_image.set_layout_manager (layout);
+                            body_image.show ();
                         }
                     }
                 } catch (Error e) {
@@ -471,13 +463,20 @@ namespace SwayNotificationCenter {
         }
 
         public void click_alt_action (uint index) {
-            if (alt_actions_box == null) return;
-            List<weak Gtk.Widget> ? children = alt_actions_box.get_children ();
-            uint length = children.length ();
-            if (length == 0 || index >= length) return;
+            if (!alt_actions_box.visible) return;
 
-            unowned Gtk.Widget button = children.nth_data (index);
-            if (button is Gtk.Button) {
+            unowned Gtk.Widget? button = null;
+            int i = 0;
+            foreach (unowned Gtk.Widget child in base_box.get_children ()) {
+                if (i == index) {
+                    button = child;
+                }
+                i++;
+            }
+
+            if (button == null) {
+                return;
+            } else if (button is Gtk.Button) {
                 ((Gtk.Button) button).clicked ();
                 return;
             }
@@ -511,20 +510,20 @@ namespace SwayNotificationCenter {
 
         private void set_style_urgency () {
             // Reset state
-            base_box.get_style_context ().remove_class ("low");
-            base_box.get_style_context ().remove_class ("normal");
-            base_box.get_style_context ().remove_class ("critical");
+            base_box.remove_css_class ("low");
+            base_box.remove_css_class ("normal");
+            base_box.remove_css_class ("critical");
 
             switch (param.urgency) {
                 case UrgencyLevels.LOW:
-                    base_box.get_style_context ().add_class ("low");
+                    base_box.add_css_class ("low");
                     break;
                 case UrgencyLevels.NORMAL:
                 default:
-                    base_box.get_style_context ().add_class ("normal");
+                    base_box.add_css_class ("normal");
                     break;
                 case UrgencyLevels.CRITICAL:
-                    base_box.get_style_context ().add_class ("critical");
+                    base_box.add_css_class ("critical");
                     break;
             }
         }
@@ -536,7 +535,7 @@ namespace SwayNotificationCenter {
             // supports ON_DEMAND layer shell keyboard interactivity
             if (!ConfigModel.instance.notification_inline_replies
                 || (ConfigModel.instance.layer_shell
-                   && layer_shell_protocol_version < 4
+                   && swaync_daemon.has_layer_on_demand
                    && notification_type == NotificationType.POPUP)) {
                 return;
             }
@@ -563,51 +562,51 @@ namespace SwayNotificationCenter {
         }
 
         private void set_actions () {
-            // Reset state
-            foreach (Gtk.Widget child in base_box.get_children ()) {
-                if (child is Gtk.ScrolledWindow) {
-                    child.destroy ();
-                }
+            alt_actions_box.set_visible (false);
+
+            // Remove all of the old alt actions
+            for (unowned Gtk.Widget child = alt_actions_box.get_first_child ();
+                 child != null;
+                 child = alt_actions_box.get_first_child ()) {
+                alt_actions_box.remove (child);
             }
 
             // Check for security codes
             string ? code = parse_body_codes ();
+
+            // Display all of the actions
             if (param.actions.length > 0 || code != null) {
-                var viewport = new Gtk.Viewport (null, null);
-                var scroll = new Gtk.ScrolledWindow (null, null);
-                alt_actions_box = new Gtk.ButtonBox (Gtk.Orientation.HORIZONTAL);
-                alt_actions_box.set_homogeneous (true);
-                alt_actions_box.set_layout (Gtk.ButtonBoxStyle.EXPAND);
+                alt_actions_box.set_visible (true);
 
                 // Add "Copy code" Action if available and copy it to clipboard when clicked
                 if (code != null && code.length > 0) {
-                    string action_name = "COPY \"%s\"".printf (code);
-                    var action_button = new Gtk.Button.with_label (action_name);
+                    Gtk.FlowBoxChild flowbox_child = new Gtk.FlowBoxChild ();
+                    flowbox_child.add_css_class ("notification-action");
+                    alt_actions_box.append (flowbox_child);
+
+                    Gtk.Button action_button = new Gtk.Button.with_label (
+                        "COPY \"%s\"".printf (code));
                     action_button.clicked.connect (() => {
                         // Copy to clipboard
-                        get_clipboard (Gdk.SELECTION_CLIPBOARD).set_text (code, -1);
+                        get_clipboard ().set_text (code);
                         // Dismiss notification
                         action_clicked (null);
                     });
-                    action_button
-                     .get_style_context ().add_class ("notification-action");
                     action_button.set_can_focus (false);
-                    alt_actions_box.add (action_button);
+                    flowbox_child.set_child (action_button);
                 }
 
                 // Add notification specified actions
                 foreach (var action in param.actions.data) {
-                    var action_button = new Gtk.Button.with_label (action.name);
+                    Gtk.FlowBoxChild flowbox_child = new Gtk.FlowBoxChild ();
+                    flowbox_child.add_css_class ("notification-action");
+                    alt_actions_box.append (flowbox_child);
+
+                    Gtk.Button action_button = new Gtk.Button.with_label (action.name);
                     action_button.clicked.connect (() => action_clicked (action));
-                    action_button
-                     .get_style_context ().add_class ("notification-action");
                     action_button.set_can_focus (false);
-                    alt_actions_box.add (action_button);
+                    flowbox_child.set_child (action_button);
                 }
-                viewport.add (alt_actions_box);
-                scroll.add (viewport);
-                base_box.add (scroll);
-                scroll.show_all ();
             }
         }
 
@@ -712,11 +711,8 @@ namespace SwayNotificationCenter {
 
                 // Check if it's a freedesktop.org-compliant icon
                 if (!img_path_exists) {
-                    unowned Gtk.IconTheme icon_theme = Gtk.IconTheme.get_default ();
-                    Gtk.IconInfo? info = icon_theme.lookup_icon (param.image_path,
-                                                                 notification_icon_size,
-                                                                 Gtk.IconLookupFlags.USE_BUILTIN);
-                    img_path_exists = info != null;
+                    unowned Gtk.IconTheme icon_theme = Gtk.IconTheme.get_for_display (get_display ());
+                    img_path_exists = icon_theme.has_icon (param.image_path);
                     img_path_is_theme_icon = img_path_exists;
                 }
             }
@@ -726,30 +722,20 @@ namespace SwayNotificationCenter {
                 app_icon_exists = File.new_for_path (app_icon_uri ?? "").query_exists ();
             }
 
-            // Get the image CSS corner radius in pixels
-            int radius = 0;
-            unowned var ctx = img.get_style_context ();
-            var value = ctx.get_property (Gtk.STYLE_PROPERTY_BORDER_RADIUS,
-                                          ctx.get_state ());
-            if (value.type () == Type.INT) {
-                radius = value.get_int ();
-            }
-
             // Set the main image to the provided image
             if (param.image_data.is_initialized) {
                 Functions.set_image_data (param.image_data, img,
-                                          notification_icon_size, radius);
+                                          notification_icon_size);
             } else if (param.image_path != null &&
                        param.image_path != "" &&
                        img_path_exists) {
                 Functions.set_image_uri (param.image_path, img,
                                          notification_icon_size,
-                                         radius,
                                          img_path_exists,
                                          img_path_is_theme_icon);
             } else if (param.icon_data.is_initialized) {
                 Functions.set_image_data (param.icon_data, img,
-                                          notification_icon_size, radius);
+                                          notification_icon_size);
             }
 
             if (img.storage_type == Gtk.ImageType.EMPTY) {
@@ -757,13 +743,12 @@ namespace SwayNotificationCenter {
                 if (app_icon_uri != null) {
                     Functions.set_image_uri (app_icon_uri, img,
                                               notification_icon_size,
-                                              radius,
                                               app_icon_exists);
                 } else if (app_icon_name != null) {
-                    img.set_from_gicon (app_icon_name, icon_size);
+                    img.set_from_gicon (app_icon_name);
                 } else if (image_visibility == ImageVisibility.ALWAYS) {
                     // Default icon
-                    img.set_from_icon_name ("image-missing", icon_size);
+                    img.set_from_icon_name ("image-missing");
                 } else {
                     img.set_visible (false);
                 }
@@ -772,10 +757,9 @@ namespace SwayNotificationCenter {
                 if (app_icon_uri != null) {
                     Functions.set_image_uri (app_icon_uri, img_app_icon,
                                              app_icon_size,
-                                             0,
                                              app_icon_exists);
                 } else if (app_icon_name != null) {
-                    img_app_icon.set_from_gicon (app_icon_name, Gtk.IconSize.INVALID);
+                    img_app_icon.set_from_gicon (app_icon_name);
                 }
             }
         }
@@ -815,12 +799,6 @@ namespace SwayNotificationCenter {
                 Source.remove (timeout_id);
                 timeout_id = 0;
             }
-        }
-
-        /** Forces the EventBox to reload its style_context #27 */
-        public void reload_style_context () {
-            event_box.get_style_context ().changed ();
-            default_action.get_style_context ().changed ();
         }
     }
 }

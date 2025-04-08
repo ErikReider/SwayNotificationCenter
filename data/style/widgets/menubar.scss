@@ -1,26 +1,48 @@
-.widget-menubar > box > .menu-button-bar > button {
-  border: none;
-  background: transparent;
-}
+.widget-menubar {
+  & > .menu-button-bar {
+    /* The left button container */
+    & > .start {
+      margin-left: $margin;
+    }
 
-/* .AnyName { Name defined in config after #
-  background-color: @noti-bg;
-  padding: 8px;
-  margin: 8px;
-  border-radius: 12px;
-}
+    /* The right button container */
+    & > .end {
+      margin-right: $margin;
+    }
 
-.AnyName>button {
-  background: transparent;
-  border: none;
-}
+    /* The left and right button container */
+    & > .widget-menubar-container {
+      button {
+        border-radius: $border-radius;
+        margin: 0 $margin / 2;
+      }
+    }
+  }
 
-.AnyName>button:hover {
-  background-color: @noti-bg-hover;
-} */
+  /* The revealer buttons */
+  & > revealer {
+    margin-top: $margin;
 
-.topbar-buttons > button {
-  /* Name defined in config after # */
-  border: none;
-  background: transparent;
+    button {
+      border-radius: $border-radius;
+      margin: $margin;
+      margin-top: 0;
+    }
+  }
+
+  /* .AnyName { Name defined in config after #
+    background-color: rgba(var(--noti-bg), 1.0);
+    padding: 8px;
+    margin: 8px;
+    border-radius: 12px;
+  }
+
+  .AnyName>button {
+    background: transparent;
+    border: none;
+  }
+
+  .AnyName>button:hover {
+    background-color: var(--noti-bg-hover);
+  } */
 }

@@ -18,17 +18,18 @@ namespace SwayNotificationCenter {
 
         private Array<BlankWindow> blank_windows = new Array<BlankWindow> ();
         private unowned Gdk.Display ? display = Gdk.Display.get_default ();
-
-        [DBus (visible = false)]
-        public signal void reloading_css ();
+        private unowned GLib.ListModel ? monitors = null;
 
         // Only set on swaync start due to some limitations of GtkLayerShell
         [DBus (visible = false)]
         public bool use_layer_shell { get; private set; }
+        [DBus (visible = false)]
+        public bool has_layer_on_demand { get; private set; }
 
         public SwayncDaemon () {
             // Init noti_daemon
             this.use_layer_shell = ConfigModel.instance.layer_shell;
+            this.has_layer_on_demand = use_layer_shell && GtkLayerShell.get_protocol_version () >= 4;
             this.noti_daemon = new NotiDaemon (this);
             this.xdg_activation = new XdgActivationHelper ();
             Bus.own_name (BusType.SESSION, "org.freedesktop.Notifications",
@@ -67,27 +68,13 @@ namespace SwayNotificationCenter {
             /// Blank windows
 
             if (display == null) return;
+            monitors = display.get_monitors ();
+            monitors.items_changed.connect (() => {
+                close_blank_windows ();
+                bool visibility = noti_daemon.control_center.get_visibility ();
+                init_blank_windows (visibility);
+            });
             init_blank_windows (false);
-
-            display.closed.connect ((is_error) => {
-                clear_blank_windows ();
-                if (is_error) stderr.printf ("Display closed due to error!\n");
-            });
-
-            display.opened.connect ((d) => {
-                bool visibility = noti_daemon.control_center.get_visibility ();
-                init_blank_windows (visibility);
-            });
-
-            display.monitor_added.connect ((d, m) => {
-                bool visibility = noti_daemon.control_center.get_visibility ();
-                add_blank_window (d, m, visibility);
-            });
-
-            display.monitor_removed.connect ((monitor) => {
-                bool visibility = noti_daemon.control_center.get_visibility ();
-                init_blank_windows (visibility);
-            });
         }
 
         private void on_noti_bus_aquired (DBusConnection conn) {
@@ -100,25 +87,20 @@ namespace SwayNotificationCenter {
             }
         }
 
-        private void add_blank_window (Gdk.Display display,
-                                       Gdk.Monitor monitor,
-                                       bool visible) {
-            var win = new BlankWindow (display, monitor, this);
-            win.set_visible (visible);
-            blank_windows.append_val (win);
-        }
-
         private void init_blank_windows (bool visible) {
-            clear_blank_windows ();
+            close_blank_windows ();
+
             // Add a window to all monitors
-            for (int i = 0; i < display.get_n_monitors (); i++) {
-                unowned Gdk.Monitor ? monitor = display.get_monitor (i);
-                if (monitor == null) continue;
-                add_blank_window (display, monitor, visible);
+            for (int i = 0; i < monitors.get_n_items (); i++) {
+                Object ? obj = monitors.get_item (i);
+                if (obj == null || !(obj is Gdk.Monitor)) continue;
+                BlankWindow win = new BlankWindow ((Gdk.Monitor) obj);
+                win.set_visible (visible);
+                blank_windows.append_val (win);
             }
         }
 
-        private void clear_blank_windows () {
+        private void close_blank_windows () {
             while (blank_windows.length > 0) {
                 uint i = blank_windows.length - 1;
                 unowned BlankWindow ? win = blank_windows.index (i);
@@ -128,12 +110,14 @@ namespace SwayNotificationCenter {
         }
 
         [DBus (visible = false)]
-        public void show_blank_windows (Gdk.Monitor ? monitor) {
+        public void show_blank_windows (Gdk.Monitor ? ref_monitor) {
             if (!use_layer_shell || !ConfigModel.instance.layer_shell_cover_screen) {
                 return;
             }
             foreach (unowned BlankWindow win in blank_windows.data) {
-                if (win.monitor != monitor) win.show ();
+                if (win.monitor != ref_monitor) {
+                    win.show ();
+                }
             }
         }
 
@@ -174,7 +158,6 @@ namespace SwayNotificationCenter {
         /** Reloads the CSS file */
         public bool reload_css () throws Error {
             bool result = Functions.load_css (style_path);
-            if (result) reloading_css ();
             return result;
         }
 

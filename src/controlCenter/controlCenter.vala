@@ -719,6 +719,7 @@ namespace SwayNotificationCenter {
                                 child.remove_css_class ("not-expanded");
                             }
                         }
+                        expanded_group = null;
                         return;
                     }
 

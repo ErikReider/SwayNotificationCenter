@@ -8,7 +8,9 @@ namespace SwayNotificationCenter {
 
     static Settings self_settings;
 
-    public void main (string[] args) {
+    static bool activated = false;
+
+    public int main (string[] args) {
         Gtk.init ();
         Adw.init ();
         Functions.init ();
@@ -33,22 +35,29 @@ namespace SwayNotificationCenter {
                     case "-v":
                     case "--version":
                         stdout.printf ("%s\n", Constants.VERSION);
-                        return;
+                        return 0;
                     case "-h":
                     case "--help":
+                        print_help (args);
+                        return 0;
                     default:
                         print_help (args);
-                        return;
+                        return 1;
                 }
             }
         }
 
         var app = new Gtk.Application ("org.erikreider.swaync",
                                        ApplicationFlags.DEFAULT_FLAGS);
-        app.hold ();
         app.activate.connect (() => {
+            if (activated) {
+                return;
+            }
+            activated = true;
             ConfigModel.init (config_path);
             Functions.load_css (style_path);
+
+            app.hold ();
 
             swaync_daemon = new SwayncDaemon ();
             Bus.own_name (BusType.SESSION, "org.erikreider.swaync.cc",
@@ -64,7 +73,7 @@ namespace SwayNotificationCenter {
             app.add_window (swaync_daemon.noti_daemon.control_center);
         });
 
-        app.run ();
+        return app.run ();
     }
 
     void on_cc_bus_aquired (DBusConnection conn) {

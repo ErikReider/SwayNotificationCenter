@@ -257,7 +257,9 @@ namespace SwayNotificationCenter {
         }
 
         private bool key_press_event_cb (uint keyval, uint keycode, Gdk.ModifierType state) {
-            if (this.get_focus () is Gtk.Entry) return false;
+            if (get_focus () is Gtk.Text) {
+                return false;
+            }
             var children = list_box_controller.get_children ();
             var group = (NotificationGroup) list_box.get_focus_child ();
             switch (Gdk.keyval_name (keyval)) {

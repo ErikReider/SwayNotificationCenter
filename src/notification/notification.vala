@@ -535,7 +535,7 @@ namespace SwayNotificationCenter {
             // supports ON_DEMAND layer shell keyboard interactivity
             if (!ConfigModel.instance.notification_inline_replies
                 || (ConfigModel.instance.layer_shell
-                   && swaync_daemon.has_layer_on_demand
+                   && !swaync_daemon.has_layer_on_demand
                    && notification_type == NotificationType.POPUP)) {
                 return;
             }

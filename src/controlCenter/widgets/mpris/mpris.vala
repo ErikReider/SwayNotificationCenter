@@ -3,6 +3,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         int image_size;
         bool autohide;
         string[] blacklist;
+        bool loop;
     }
 
     public class Mpris : BaseWidget {
@@ -29,6 +30,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         Config mpris_config = Config () {
             image_size = 96,
             autohide = false,
+            loop = false,
         };
 
         public Mpris (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
@@ -63,8 +65,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                     button_next.sensitive = false;
                     return;
                 }
-                button_prev.sensitive = index > 0;
-                button_next.sensitive = index < carousel.n_pages - 1;
+                button_prev.sensitive = (index > 0) || mpris_config.loop;
+                button_next.sensitive = (index < carousel.n_pages - 1) || mpris_config.loop;
             });
 
             carousel_box.append (button_prev);
@@ -100,6 +102,11 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 bool autohide_found;
                 bool? autohide = get_prop<bool> (config, "autohide", out autohide_found);
                 if (autohide_found) mpris_config.autohide = autohide;
+
+                // Get loop
+                bool loop_found;
+                bool? loop = get_prop<bool> (config, "loop", out loop_found);
+                if (loop_found) mpris_config.loop = loop;
             }
 
             hide ();
@@ -225,8 +232,13 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         private void change_carousel_position (int delta) {
             uint children_length = carousel.n_pages;
             if (children_length == 0) return;
-            uint position = ((uint) carousel.position + delta)
-                .clamp (0, (children_length - 1));
+            uint position;
+            if (mpris_config.loop) {
+                position = ((uint) carousel.position + delta) % children_length;
+            } else {
+                position = ((uint) carousel.position + delta)
+                    .clamp (0, (children_length - 1));
+            }
             carousel.scroll_to (carousel.get_nth_page (position), true);
         }
 

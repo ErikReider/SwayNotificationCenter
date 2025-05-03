@@ -345,6 +345,11 @@ config file to be able to detect config errors
 					default: false ++
 					description: Whether to hide the widget when the ++
 								 player has no metadata. ++
+				loop: ++
+					type: bool ++
+					optional: true ++
+					default: false ++
+					description: Whether to loop through the mpris carousel. ++
 			description: A widget that displays multiple music players. ++
 		*menubar*++
 			type: object ++
@@ -611,7 +616,8 @@ config file to be able to detect config errors
 		"mpris": {
 			"image-size": 96,
 			"blacklist": ["playerctld"],
-			"autohide": true
+			"autohide": true,
+			"loop": false
 		},
 		"menubar": {
 			"menu#power": {

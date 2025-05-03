@@ -76,7 +76,8 @@
     "mpris": {
       "image-size": 96,
       "blacklist": [],
-      "autohide": false
+      "autohide": false,
+      "loop": false
     },
     "buttons-grid": {
       "actions": [

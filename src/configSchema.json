@@ -421,6 +421,11 @@
           "description": "Whether or not the album art should be hidden, always visible, or only visible when a valid album art is provided.",
           "default": "always",
           "enum": ["always", "when-available", "never"]
+        },
+        "loop-carousel": {
+          "type": "boolean",
+          "description": "Whether to loop through the mpris carousel.",
+          "default": "false"
         }
       }
     },

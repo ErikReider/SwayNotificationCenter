@@ -1,0 +1,23 @@
+.widget-todo {
+
+  .widget-todo-item {
+    background-color: white; 
+    .widget-todo-class {
+      font-size: 0.95rem;
+      font-weight: bold;
+    }
+
+    .widget-todo-assignment {
+      font-weight: bold;
+      font-size: 1rem;
+      color: black;
+    }
+
+    .widget-todo-due {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: gray;
+    }
+
+  }
+}

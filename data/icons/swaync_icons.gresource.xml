@@ -3,5 +3,9 @@
   <gresource prefix="/org/erikreider/swaync/icons/scalable/actions">
     <file preprocess="xml-stripblanks">swaync-collapse-symbolic.svg</file>
     <file preprocess="xml-stripblanks">swaync-close-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">swaync-assignment.svg</file>
+    <file preprocess="xml-stripblanks">swaync-discussion.svg</file>
+    <file preprocess="xml-stripblanks">swaync-quiz.svg</file>
+    <file preprocess="xml-stripblanks">swaync-lti.svg</file>
   </gresource>
 </gresources>

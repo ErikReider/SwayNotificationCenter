@@ -37,6 +37,9 @@ namespace SwayNotificationCenter.Widgets {
             case "inhibitors":
                 widget = new Inhibitors (suffix, swaync_daemon, noti_daemon);
                 break;
+            case "todo":
+                widget = new Todo.Todo (suffix, swaync_daemon, noti_daemon);
+                break;
             default:
                 warning ("Could not find widget: \"%s\"!", key);
                 return null;

@@ -46,6 +46,9 @@ widget_sources = [
   'controlCenter/widgets/backlight/backlightUtil.vala',
   # Widget: Inhibitors
   'controlCenter/widgets/inhibitors/inhibitors.vala',
+  # Widget: Canvas Todo
+  'controlCenter/widgets/todo/todo.vala',
+  'controlCenter/widgets/todo/todo_item.vala',
 ]
 
 app_sources = [

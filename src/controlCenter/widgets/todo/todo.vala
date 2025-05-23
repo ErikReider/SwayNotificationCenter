@@ -185,9 +185,10 @@ namespace SwayNotificationCenter.Widgets.Todo {
             };
 
             big_box.set_vexpand(true);
-            big_box.set_min_content_height(600);
-            big_box.set_max_content_height(1000);
-
+            big_box.set_min_content_height (100);
+            big_box.set_max_content_height (600);
+            big_box.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER);
+            
             small_box = new Gtk.Box(Gtk.Orientation.VERTICAL,0) {
                 visible = true
             };

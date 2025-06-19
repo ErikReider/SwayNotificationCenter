@@ -16,6 +16,7 @@
   "notification-icon-size": 64,
   "notification-body-image-height": 100,
   "notification-body-image-width": 200,
+  "notification-group-header-icon-size": 32,
   "timeout": 10,
   "timeout-low": 5,
   "timeout-critical": 0,

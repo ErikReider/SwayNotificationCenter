@@ -631,6 +631,23 @@ namespace SwayNotificationCenter {
             }
         }
 
+
+        /**
+         * Notification Group Header icon size, in pixels.
+         */
+        private const int NOTIFICATION_GROUP_HEADER_ICON_MINIMUM_SIZE = 16;
+        private const int NOTIFICATION_GROUP_HEADER_ICON_DEFAULT_SIZE = 32;
+        private int _notification_group_header_icon_size = NOTIFICATION_GROUP_HEADER_ICON_DEFAULT_SIZE;
+        public int notification_group_header_icon_size {
+            get {
+                return _notification_group_header_icon_size;
+            }
+            set {
+                _notification_group_header_icon_size = value > NOTIFICATION_GROUP_HEADER_ICON_MINIMUM_SIZE
+                    ? value : NOTIFICATION_GROUP_HEADER_ICON_MINIMUM_SIZE;
+            }
+        }
+
         /** Widgets to show in ControlCenter */
         public GenericArray<string> widgets {
             get;

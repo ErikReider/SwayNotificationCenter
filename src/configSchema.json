@@ -113,6 +113,12 @@
       "default": 200,
       "minimum": 200
     },
+    "notification-group-header-icon-size": {
+      "type": "integer",
+      "description": "The notification group header icon size (in pixels).",
+      "default": 32,
+      "minimum": 16
+    },
     "timeout": {
       "type": "integer",
       "description": "The notification timeout for notifications with normal priority",

@@ -75,6 +75,7 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
     // When true, the size_allocate method will scroll to the top/bottom
     private bool set_initial_scroll_value = false;
     private float fade_distance = 0.0f;
+    private unowned Gtk.Settings settings = Gtk.Settings.get_default ();
 
     construct {
         hadjustment = null;
@@ -266,7 +267,7 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
         // The padding to add to the bottom/top of the list to compensate
         // for the fade, but only when the list is large enough to allow
         // for scrolling.
-        if (use_card_animation && vadjustment != null && total_height > height) {
+        if (should_card_animate () && vadjustment != null && total_height > height) {
             total_height += (int) fade_distance;
         }
     }
@@ -335,7 +336,7 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
                 skip_child = false;
 
                 // Deck of cards effect
-                if (use_card_animation && has_scroll) {
+                if (should_card_animate () && has_scroll) {
                     float item_center = y + child_height * 0.5f;
                     // Compensate for very tall items being faded out before seeing the top
                     if (child_height > height) {
@@ -713,5 +714,13 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
             return null;
         }
         return children.last ().data;
+    }
+
+    private bool should_card_animate () {
+        bool value = this.use_card_animation;
+        if (settings != null) {
+            value &= settings.gtk_enable_animations;
+        }
+        return value;
     }
 }

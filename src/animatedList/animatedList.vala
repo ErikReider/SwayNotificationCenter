@@ -17,8 +17,6 @@ private struct WidgetAlloc {
     int height;
 }
 
-// TODO: Allocate in reversed order to maintain zindex with input
-// (now the bottom get allocated after the upper, resulting in clashing input regions)
 public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
     public const int SCROLL_ANIMATION_DURATION = 500;
 

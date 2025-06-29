@@ -144,17 +144,17 @@ namespace SwayNotificationCenter {
                 }
             }
 
-            list.animation_reveal_type = AnimatedListItem.RevealAnimationType.SLIDE_WITH;
+            list.animation_reveal_type = AnimatedListItem.RevealAnimationType.SLIDE;
             switch (ConfigModel.instance.positionX) {
                 case PositionX.LEFT:
                     list.animation_child_type = AnimatedListItem.ChildAnimationType.SLIDE_FROM_LEFT;
                     break;
-                case PositionX.RIGHT:
-                // TODO: Add reveal from top/bottom
                 case PositionX.CENTER:
-                    list.animation_child_type = AnimatedListItem.ChildAnimationType.SLIDE_FROM_RIGHT;
+                    list.animation_child_type = AnimatedListItem.ChildAnimationType.NONE;
                     break;
                 default:
+                case PositionX.RIGHT:
+                    list.animation_child_type = AnimatedListItem.ChildAnimationType.SLIDE_FROM_RIGHT;
                     break;
             }
             switch (ConfigModel.instance.positionY) {

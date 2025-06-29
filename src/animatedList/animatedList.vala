@@ -12,6 +12,11 @@ private struct WidgetHeights {
     int nat_height;
 }
 
+private struct WidgetAlloc {
+    float y;
+    int height;
+}
+
 // TODO: Allocate in reversed order to maintain zindex with input
 // (now the bottom get allocated after the upper, resulting in clashing input regions)
 public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
@@ -167,9 +172,9 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
     private void compute_height (int width,
                                  int height,
                                  out int total_height,
-                                 out int[] child_heights) {
+                                 out WidgetAlloc[] child_heights) {
         total_height = 0;
-        child_heights = new int[n_children];
+        child_heights = new WidgetAlloc[n_children];
 
         fade_distance = 0;
 
@@ -230,9 +235,8 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
         i = 0;
         foreach (AnimatedListItem child in children) {
             WidgetHeights computed_height = heights[i];
-            Gtk.Allocation child_allocation = Gtk.Allocation () {
-                y = 0, x = 0,
-                width = width,
+            WidgetAlloc child_allocation = WidgetAlloc () {
+                y = 0,
                 height = computed_height.min_height,
             };
             if (allocate_nat) {
@@ -243,13 +247,11 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
                 child_allocation.height += extra_height / num_vexpand_children;
             }
 
-            y += child_allocation.height;
-            total_height += child_allocation.height;
-
             child_allocation.y = y;
+            child_heights[i] = child_allocation;
 
-            child_heights[i] = child_allocation.height;
-
+            total_height += child_allocation.height;
+            y += child_allocation.height;
             i++;
         }
 
@@ -281,7 +283,7 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
         // for calculating the reversed list animation, so two loops through the
         // widgets is necessary...
         int total_height;
-        int[] heights;
+        WidgetAlloc[] heights;
         compute_height (width, height, out total_height, out heights);
 
         bool is_reversed = direction == AnimatedListDirection.BOTTOM_TO_TOP;
@@ -308,7 +310,6 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
         }
         total_height = int.max (height, total_height);
 
-        float y_offset = 0;
         // Allocate the size and position of each item
         uint index = 0;
         foreach (AnimatedListItem child in children) {
@@ -317,13 +318,14 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
                 continue;
             }
 
-            int child_height = heights[index];
+            WidgetAlloc child_allocation = heights[index];
+            int child_height = child_allocation.height;
 
             float scale = 1.0f;
             float x = 0;
-            float y = y_offset - scroll_y;
+            float y = child_allocation.y - scroll_y;
             if (is_reversed) {
-                y = total_height - child_height - y_offset - scroll_y;
+                y = total_height - child_height - child_allocation.y - scroll_y;
             }
             float opacity = 1.0f;
 
@@ -381,7 +383,6 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
             child.allocate (width, child_height, baseline, transform);
             child.set_opacity (opacity);
 
-            y_offset += child_height;
             index++;
         }
 

@@ -255,11 +255,12 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
             i++;
         }
 
+        const float LIMIT = 0.2f;
         if (fade_distance == 0) {
-            fade_distance = height * 0.2f;
+            fade_distance = height * LIMIT;
         } else {
             // Make sure that the fade distance isn't larger than the height
-            fade_distance = float.min (fade_distance, height);
+            fade_distance = float.min (fade_distance, height * LIMIT);
         }
 
         // The padding to add to the bottom/top of the list to compensate
@@ -335,8 +336,11 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
 
                 // Deck of cards effect
                 if (use_card_animation && has_scroll) {
-                    // TODO: Compensate for very tall items being faded out before seeing the top
                     float item_center = y + child_height * 0.5f;
+                    // Compensate for very tall items being faded out before seeing the top
+                    if (child_height > height) {
+                        item_center = y + (is_reversed ? child_height : 0);
+                    }
                     // The cut off where to start fade away
                     float local_fade_distance = get_fade_distance (height);
                     if ((!is_reversed && item_center > local_fade_distance)

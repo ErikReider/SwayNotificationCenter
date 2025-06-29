@@ -50,6 +50,8 @@ widget_sources = [
 
 app_sources = [
   'main.vala',
+  'animatedList/animatedList.vala',
+  'animatedList/animatedListItem.vala',
   'orderedHashTable/orderedHashTable.vala',
   'iterHelpers/iterBox.vala',
   'iterHelpers/iterListBoxController.vala',

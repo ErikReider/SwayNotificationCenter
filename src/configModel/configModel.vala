@@ -432,6 +432,8 @@ namespace SwayNotificationCenter {
          * Notification window's width, in pixels.
          */
         public int notification_window_width { get; set; default = 500; }
+        /** Max height of the notification in pixels */
+        public int notification_window_height { get; set; default = -1; }
 
         /** Hides the control center after clearing all notifications */
         public bool hide_on_clear { get; set; default = false; }

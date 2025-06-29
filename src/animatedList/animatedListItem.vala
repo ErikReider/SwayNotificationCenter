@@ -57,7 +57,7 @@ public class AnimatedListItem : Gtk.Widget {
     }
 
     public override Gtk.SizeRequestMode get_request_mode () {
-        return Gtk.SizeRequestMode.CONSTANT_SIZE;
+        return Gtk.SizeRequestMode.HEIGHT_FOR_WIDTH;
     }
 
     public override void size_allocate (int width,
@@ -135,17 +135,17 @@ public class AnimatedListItem : Gtk.Widget {
             return;
         }
 
-        if (orientation == Gtk.Orientation.VERTICAL) {
-            if (animation_value == 0) {
-                return;
-            }
-        }
-
         child.measure (orientation, for_size,
                        out minimum, out natural, null, null);
 
-        minimum = (int) Math.ceil (minimum * animation_value);
-        natural = (int) Math.ceil (natural * animation_value);
+        switch (orientation) {
+            case Gtk.Orientation.HORIZONTAL:
+                break;
+            case Gtk.Orientation.VERTICAL:;
+                minimum = (int) Math.ceil (minimum * animation_value);
+                natural = (int) Math.ceil (natural * animation_value);
+                break;
+        }
     }
 
     public override void snapshot (Gtk.Snapshot snapshot) {

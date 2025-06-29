@@ -7,6 +7,13 @@ private struct AnimationData {
     public unowned AnimatedListItem item;
 }
 
+private struct WidgetHeights {
+    int min_height;
+    int nat_height;
+}
+
+// TODO: Allocate in reversed order to maintain zindex with input
+// (now the bottom get allocated after the upper, resulting in clashing input regions)
 public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
     public const int SCROLL_ANIMATION_DURATION = 500;
 
@@ -32,9 +39,18 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
     public bool use_card_animation { get; construct set; }
     /** The direction that the items should flow in */
     public AnimatedListDirection direction { get; construct set; }
-    // TODO: Scroll to widget/bottom/top append/prepend
     /** Scroll to the latest item added to the list */
     public bool scroll_to_append { get; construct set; }
+    /** The default item reveal animation type */
+    public AnimatedListItem.RevealAnimationType animation_reveal_type {
+        get;
+        construct set;
+    }
+    /** The default item animation type */
+    public AnimatedListItem.ChildAnimationType animation_child_type {
+        get;
+        construct set;
+    }
 
     // Scroll bottom animation
     Adw.CallbackAnimationTarget scroll_btm_target;
@@ -53,6 +69,7 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
 
     // When true, the size_allocate method will scroll to the top/bottom
     private bool set_initial_scroll_value = false;
+    private float fade_distance = 0.0f;
 
     construct {
         hadjustment = null;
@@ -108,7 +125,7 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
     public override void dispose () {
         foreach (AnimatedListItem child in children) {
             transition_children = false;
-            remove.begin (child);
+            remove.begin (child, false);
         }
     }
 
@@ -117,28 +134,50 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
         return false;
     }
 
-    public override Gtk.SizeRequestMode get_request_mode () {
+    protected override Gtk.SizeRequestMode get_request_mode () {
+        foreach (unowned AnimatedListItem item in children) {
+            if (item.get_request_mode () != Gtk.SizeRequestMode.CONSTANT_SIZE) {
+                return Gtk.SizeRequestMode.HEIGHT_FOR_WIDTH;
+            }
+        }
         return Gtk.SizeRequestMode.CONSTANT_SIZE;
     }
 
-    private float get_base_fade_distance (int height) {
-        return float.min (height * 0.3f, 75);
+    protected override void compute_expand_internal (out bool hexpand_p,
+                                                     out bool vexpand_p) {
+        hexpand_p = false;
+        vexpand_p = false;
+
+        foreach (unowned AnimatedListItem item in children) {
+            hexpand_p |= item.compute_expand (Gtk.Orientation.HORIZONTAL);
+            vexpand_p |= item.compute_expand (Gtk.Orientation.VERTICAL);
+        }
     }
 
     private float get_fade_distance (int height) {
         switch (direction) {
             case AnimatedListDirection.TOP_TO_BOTTOM:
-                return height - get_base_fade_distance (height);
+                return height - fade_distance;
             case AnimatedListDirection.BOTTOM_TO_TOP:
-                return get_base_fade_distance (height);
+                return fade_distance;
         }
         return 0;
     }
 
-    private void get_total_height (out int[] heights,
-                                   out int total_height) {
-        heights = new int[n_children];
+    private void compute_height (int width,
+                                 int height,
+                                 out int total_height,
+                                 out int[] child_heights) {
         total_height = 0;
+        child_heights = new int[n_children];
+
+        fade_distance = 0;
+
+        int num_vexpand_children = 0;
+        WidgetHeights measured_height = WidgetHeights ();
+        WidgetHeights[] heights = new WidgetHeights[n_children];
+        int total_min = 0;
+        int total_nat = 0;
 
         int i = 0;
         foreach (AnimatedListItem child in children) {
@@ -146,17 +185,87 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
                 continue;
             }
 
-            int nat;
-            child.measure (Gtk.Orientation.VERTICAL, -1,
-                           null, out nat, null, null);
-            heights[i] = nat;
-            total_height += nat;
+            // Get the largest minimum height and use it for the fade distance
+            int nat_width;
+            // First, get the minimum width of our widget
+            child.measure (Gtk.Orientation.HORIZONTAL, -1,
+                           null, out nat_width, null, null);
+            // Now use the natural width to retrieve the minimum and
+            // natural height to display.
+            int min_height, nat_height;
+            child.measure (Gtk.Orientation.VERTICAL, nat_width,
+                           out min_height, out nat_height, null, null);
+            fade_distance = float.max (
+                fade_distance,
+                int.min (min_height, nat_height)
+            );
+
+            int min, nat;
+            child.measure (Gtk.Orientation.VERTICAL, width,
+                           out min, out nat, null, null);
+            heights[i] = WidgetHeights () {
+                min_height = min,
+                nat_height = nat,
+            };
+            total_min += min;
+            total_nat += nat;
+
+            if (child.compute_expand (Gtk.Orientation.VERTICAL)) {
+                num_vexpand_children++;
+            }
+
             i++;
         }
-    }
 
-    private float easing (float x) {
-        return x * x * x;
+        bool allocate_nat = false;
+        int extra_height = 0;
+        if (height >= measured_height.nat_height) {
+            allocate_nat = true;
+            extra_height = height - measured_height.nat_height;
+        } else {
+            warn_if_reached ();
+        }
+
+        int y = 0;
+        i = 0;
+        foreach (AnimatedListItem child in children) {
+            WidgetHeights computed_height = heights[i];
+            Gtk.Allocation child_allocation = Gtk.Allocation () {
+                y = 0, x = 0,
+                width = width,
+                height = computed_height.min_height,
+            };
+            if (allocate_nat) {
+                child_allocation.height = computed_height.nat_height;
+            }
+
+            if (child.compute_expand (Gtk.Orientation.VERTICAL)) {
+                child_allocation.height += extra_height / num_vexpand_children;
+            }
+
+            y += child_allocation.height;
+            total_height += child_allocation.height;
+
+            child_allocation.y = y;
+
+            child_heights[i] = child_allocation.height;
+
+            i++;
+        }
+
+        if (fade_distance == 0) {
+            fade_distance = height * 0.2f;
+        } else {
+            // Make sure that the fade distance isn't larger than the height
+            fade_distance = float.min (fade_distance, height);
+        }
+
+        // The padding to add to the bottom/top of the list to compensate
+        // for the fade, but only when the list is large enough to allow
+        // for scrolling.
+        if (use_card_animation && vadjustment != null && total_height > height) {
+            total_height += (int) fade_distance;
+        }
     }
 
     protected override void size_allocate (int width,
@@ -173,110 +282,112 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
         // widgets is necessary...
         int total_height;
         int[] heights;
-        get_total_height (out heights, out total_height);
+        compute_height (width, height, out total_height, out heights);
 
         bool is_reversed = direction == AnimatedListDirection.BOTTOM_TO_TOP;
         bool has_scroll = total_height > height;
 
-        // The cut off where to start fade away
-        float fade_distance = get_fade_distance (height);
-        // The padding to add to the bottom/top of the list to compensate
-        // for the fade
-        float fade_padding = 0;
-        if (use_card_animation) {
-            fade_padding = get_base_fade_distance (height) / 2;
-        }
-
         float scroll_y = 0.0f;
         if (vadjustment != null) {
             scroll_y = (float) vadjustment.value;
-            if (has_scroll) {
-                total_height += (int) fade_padding;
-
-                // Set the initial scroll value to the top or bottom
-                // if the user hasn't scrolled yet.
-                if (set_initial_scroll_value) {
-                    if (get_mapped ()) {
-                        set_initial_scroll_value = false;
-                    }
-                    switch (direction) {
-                        case AnimatedListDirection.TOP_TO_BOTTOM:
-                            scroll_y = 0;
-                            break;
-                        case AnimatedListDirection.BOTTOM_TO_TOP:
-                            scroll_y = total_height - height;
-                            break;
-                    }
+            // Set the initial scroll value to the top or bottom
+            // if the user hasn't scrolled yet.
+            if (has_scroll && set_initial_scroll_value) {
+                if (get_mapped ()) {
+                    set_initial_scroll_value = false;
+                }
+                switch (direction) {
+                    case AnimatedListDirection.TOP_TO_BOTTOM:
+                        scroll_y = 0;
+                        break;
+                    case AnimatedListDirection.BOTTOM_TO_TOP:
+                        scroll_y = total_height - height;
+                        break;
                 }
             }
         }
+        total_height = int.max (height, total_height);
 
-        // The total un-scaled height of all children
-        float prev_child_height = 0;
-        // Same as total_height, but with the scaled items.
-        // Increases every iteration.
         float y_offset = 0;
         // Allocate the size and position of each item
         uint index = 0;
         foreach (AnimatedListItem child in children) {
             if (!child.should_layout ()) {
+                index++;
                 continue;
             }
 
-            int child_nat = heights[index];
+            int child_height = heights[index];
 
-            float y_shift = 0.0f;
             float scale = 1.0f;
             float x = 0;
             float y = y_offset - scroll_y;
             if (is_reversed) {
-                y = total_height - child_nat - y_offset - scroll_y;
+                y = total_height - child_height - y_offset - scroll_y;
             }
             float opacity = 1.0f;
 
-            if (y < height && child_nat + y > 0) {
-                // Prepend the child so that the child can be rendered first
-                // (to maintain a reversed z-index)
-                visible_children.prepend (child);
+            bool skip_child = true;
+            if (y < height && child_height + y > 0) {
+                skip_child = false;
 
                 // Deck of cards effect
                 if (use_card_animation && has_scroll) {
-                    float item_center = y + child_nat * 0.5f;
-                    if ((!is_reversed && item_center > fade_distance)
-                        || (is_reversed && item_center < fade_distance)) {
-                        float fade = is_reversed ? (height - fade_distance) : fade_distance;
+                    // TODO: Compensate for very tall items being faded out before seeing the top
+                    float item_center = y + child_height * 0.5f;
+                    // The cut off where to start fade away
+                    float local_fade_distance = get_fade_distance (height);
+                    if ((!is_reversed && item_center > local_fade_distance)
+                        || (is_reversed && item_center < local_fade_distance)) {
                         // The distance from the fade edge
-                        float dist = Math.fabsf(item_center - fade_distance);
-                        scale = 1.0f - (dist / fade).clamp (0.0f, 1.0f) * 0.5f;
-                        x = (width - (width * scale)) * 0.5f;
+                        float dist = Math.fabsf (item_center - local_fade_distance);
 
-                        float ease = easing (scale * scale);
-                        y_shift = prev_child_height - prev_child_height * ease;
-                        opacity = Math.powf (ease, 2);
+                        // Hide when half way across the "circle".
+                        // A little trigonometry never killed anybody :-)
+                        float radius = fade_distance;
+                        if (dist < radius) {
+                            float angle = Math.atanf (dist / radius);
+                            // The Y value within the circle (dot product)
+                            float new_y = Math.sinf (angle) * radius;
+                            // The ratio between the untransformed height and the dot product height
+                            scale = 1.0f - (new_y / height * 2);
+                            // Center the item in the X axis
+                            x = (width - (width * scale)) * 0.5f;
+                            // Calculate the new distance from the start of the fade
+                            // NOTE: Reverse the direction of the animation
+                            // depending on the list direction.
+                            y += (float) (dist * Math.sin (angle) * (is_reversed ? 1 : -1));
+                            opacity = 1.0f - (dist / radius * 2);
+
+                            skip_child |= opacity <= 0.1;
+                        } else {
+                            skip_child = true;
+                        }
                     }
                 }
             }
 
+            // Only display visible items
+            if (!skip_child
+                && y < height && child_height + y > 0) {
+                // Prepend the child so that the child can be rendered first
+                // (to maintain a reversed z-index)
+                visible_children.prepend (child);
+            }
+
             Gsk.Transform transform = new Gsk.Transform ()
-                .translate (
-                    Graphene.Point ().init (
-                        x,
-                        // Reverse the direction of the animation depending
-                        // on the list direction
-                        y + y_shift * (is_reversed ? 1 : -1)
-                    )
-                )
+                .translate (Graphene.Point ().init (x, y))
                 .scale (scale, scale);
-            child.allocate (width, child_nat, baseline, transform);
+            child.allocate (width, child_height, baseline, transform);
             child.set_opacity (opacity);
 
-            y_offset += child_nat * scale - y_shift;
-            prev_child_height = child_nat * scale;
+            y_offset += child_height;
             index++;
         }
 
         if (vadjustment != null) {
-            vadjustment.configure (scroll_y, 0, total_height,
+            vadjustment.configure (scroll_y,
+                                   0, total_height,
                                    height * 0.1,
                                    height * 0.9,
                                    height);
@@ -294,6 +405,9 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
         minimum_baseline = -1;
         natural_baseline = -1;
 
+        // TODO: Fix this not using the scales and translations and such
+        int min = 0, nat = 0;
+        int largest_min = 0, largest_nat = 0;
         foreach (AnimatedListItem child in children) {
             if (!child.should_layout ()) {
                 continue;
@@ -302,8 +416,21 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
             int child_min, child_nat;
             child.measure (orientation, for_size,
                            out child_min, out child_nat, null, null);
-            minimum += child_min;
-            natural += child_nat;
+            min += child_min;
+            nat += child_nat;
+            largest_min = int.max (largest_min, child_min);
+            largest_nat = int.max (largest_min, child_nat);
+        }
+
+        switch (orientation) {
+            case Gtk.Orientation.HORIZONTAL:
+                minimum = largest_min;
+                natural = largest_nat;
+                break;
+            case Gtk.Orientation.VERTICAL:
+                minimum = min;
+                natural = nat;
+                break;
         }
     }
 
@@ -318,13 +445,13 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
     }
 
     private Gtk.Adjustment clone_adjustment (Gtk.Adjustment original) {
-        return new Gtk.Adjustment(
-            original.get_value(),
-            original.get_lower(),
-            original.get_upper(),
-            original.get_step_increment(),
-            original.get_page_increment(),
-            original.get_page_size()
+        return new Gtk.Adjustment (
+            original.get_value (),
+            original.get_lower (),
+            original.get_upper (),
+            original.get_step_increment (),
+            original.get_page_increment (),
+            original.get_page_size ()
         );
     }
 
@@ -388,6 +515,10 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
         } else {
             item = new AnimatedListItem ();
             item.child = widget;
+
+            // Set the defaults
+            item.animation_reveal_type = animation_reveal_type;
+            item.animation_child_type = animation_child_type;
 
             widget.unparent ();
             widget.set_parent (item);
@@ -469,12 +600,7 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
         return item;
     }
 
-    public async bool remove (Gtk.Widget widget) {
-        if (widget == null) {
-            warn_if_reached ();
-            return false;
-        }
-
+    private AnimatedListItem ? try_get_ancestor (Gtk.Widget widget) {
         AnimatedListItem item;
         if (widget is AnimatedListItem) {
             item = widget as AnimatedListItem;
@@ -487,18 +613,77 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
                 warning ("Widget %p of type  \"%s\" is not an ancestor of %s!",
                     widget, widget.get_type ().name (),
                     typeof (AnimatedListItem).name ());
-                return false;
+                return null;
             }
             item = ancestor as AnimatedListItem;
         }
 
+        if (item.parent != this) {
+            warn_if_reached ();
+            return null;
+        }
+        return item;
+    }
+
+    public async bool remove (Gtk.Widget widget, bool transition) {
+        if (widget == null) {
+            warn_if_reached ();
+            return false;
+        }
+
+        AnimatedListItem ? item = try_get_ancestor (widget);
+        if (item == null) {
+            return false;
+        }
+
         // Will unparent itself when done animating
-        bool result = yield item.removed (transition_children);
+        bool result = yield item.removed (transition_children && transition);
 
         children.remove (item);
         n_children--;
         item.destroy ();
         queue_resize ();
         return result;
+    }
+
+    public bool move_to_beginning (Gtk.Widget widget, bool scroll_to) {
+        if (widget == null) {
+            warn_if_reached ();
+            return false;
+        }
+
+        AnimatedListItem ? item = try_get_ancestor (widget);
+        if (item == null) {
+            warn_if_reached ();
+            return false;
+        }
+
+        // TODO: TEST THIS
+        // TODO: ALSO TEST SCROLLING COMPENSATION/SCROLL TO TOP
+        // move to the beginning of the list
+        item.insert_after (this, null);
+        children.remove (item);
+        children.prepend (item);
+
+        queue_resize ();
+        return true;
+    }
+
+    public bool is_empty () {
+        return children.is_empty ();
+    }
+
+    public unowned AnimatedListItem ? get_first_item () {
+        if (children.is_empty ()) {
+            return null;
+        }
+        return children.first ().data;
+    }
+
+    public unowned AnimatedListItem ? get_last_item () {
+        if (children.is_empty ()) {
+            return null;
+        }
+        return children.last ().data;
     }
 }

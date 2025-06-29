@@ -405,7 +405,6 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
         minimum_baseline = -1;
         natural_baseline = -1;
 
-        // TODO: Fix this not using the scales and translations and such
         int min = 0, nat = 0;
         int largest_min = 0, largest_nat = 0;
         foreach (AnimatedListItem child in children) {
@@ -658,15 +657,39 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
             return false;
         }
 
-        // TODO: TEST THIS
-        // TODO: ALSO TEST SCROLLING COMPENSATION/SCROLL TO TOP
         // move to the beginning of the list
         item.insert_after (this, null);
         children.remove (item);
         children.prepend (item);
 
         queue_resize ();
+
+        if (scroll_to) {
+            scroll_to_top ();
+        }
+
         return true;
+    }
+
+    private uint scroll_to_source_id = 0;
+    public void scroll_to_top () {
+        if (scroll_to_source_id > 0) {
+            Source.remove (scroll_to_source_id);
+        }
+        scroll_to_source_id = Idle.add_once (() => {
+            scroll_to_source_id = 0;
+
+            unowned AnimatedListItem ? item = get_first_item ();
+            return_if_fail (item != null);
+            switch (direction) {
+                case AnimatedListDirection.TOP_TO_BOTTOM:
+                    play_scroll_top_anim (item);
+                    break;
+                case AnimatedListDirection.BOTTOM_TO_TOP:
+                    play_scroll_bottom_anim (item);
+                    break;
+            }
+        });
     }
 
     public bool is_empty () {

@@ -35,7 +35,6 @@ namespace SwayNotificationCenter {
         unowned AnimatedList list;
 
         private Graphene.Rect scrolled_window_bounds = Graphene.Rect.zero ();
-        private uint scroll_to_source_id = 0;
 
         Gee.HashSet<uint32> inline_reply_notifications = new Gee.HashSet<uint32> ();
 
@@ -226,22 +225,6 @@ namespace SwayNotificationCenter {
             }
         }
 
-        // TODO:
-        /** Scroll to the latest notification */
-        private void scroll_to_latest_notification () {
-            if (scroll_to_source_id > 0) {
-                Source.remove (scroll_to_source_id);
-            }
-            // scroll_to_source_id = Idle.add_once (() => {
-            //     scroll_to_source_id = 0;
-            //     if (list_reverse) {
-            //         viewport.scroll_to (box.get_last_child (), null);
-            //     } else {
-            //         viewport.scroll_to (box.get_first_child (), null);
-            //     }
-            // });
-        }
-
         public void add_notification (NotifyParams param) {
             var noti = new Notification.timed (param,
                                                swaync_daemon.noti_daemon,
@@ -267,8 +250,6 @@ namespace SwayNotificationCenter {
             }
 
             list.append.begin (noti);
-
-            scroll_to_latest_notification ();
         }
 
         public void close_notification (uint32 id, bool dismiss) {
@@ -293,13 +274,8 @@ namespace SwayNotificationCenter {
                 if (noti != null && noti.param.applied_id == id) {
                     noti.replace_notification (new_params);
                     // Position the notification in the beginning/end of the list
+                    // and scroll to the new item
                     list.move_to_beginning (noti, true);
-                    // if (list_reverse) {
-                    //     box.reorder_child_after (noti, box.get_last_child ());
-                    // } else {
-                    //     box.reorder_child_after (noti, null);
-                    // }
-                    // scroll_to_latest_notification ();
                     return;
                 }
             }

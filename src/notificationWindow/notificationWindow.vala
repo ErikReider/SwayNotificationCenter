@@ -80,14 +80,37 @@ namespace SwayNotificationCenter {
                     return;
                 }
 
+                Cairo.Region region = new Cairo.Region ();
+                foreach (AnimatedListItem item in list.visible_children) {
+                    if (item.destroying) {
+                        continue;
+                    }
+                    Graphene.Rect out_bounds;
+                    item.compute_bounds (this, out out_bounds);
+                    Cairo.RectangleInt item_rect = Cairo.RectangleInt () {
+                        x = (int) out_bounds.get_x (),
+                        y = (int) out_bounds.get_y (),
+                        width = (int) out_bounds.get_width (),
+                        height = (int) out_bounds.get_height (),
+                    };
+                    region.union_rectangle (item_rect);
+                }
+
                 // The input region should only cover each preview widget
-                Cairo.RectangleInt rect = Cairo.RectangleInt () {
-                    x = (int) bounds.get_x (),
-                    y = (int) bounds.get_y (),
-                    width = (int) bounds.get_width (),
-                    height = (int) bounds.get_height (),
-                };
-                surface.set_input_region (new Cairo.Region.rectangle (rect));
+                Graphene.Rect scrollbar_bounds;
+                unowned Gtk.Widget scrollbar = scrolled_window.get_vscrollbar ();
+                if (scrollbar.should_layout ()) {
+                    scrollbar.compute_bounds (this, out scrollbar_bounds);
+                    Cairo.RectangleInt rect = Cairo.RectangleInt () {
+                        x = (int) scrollbar_bounds.get_x (),
+                        y = (int) scrollbar_bounds.get_y (),
+                        width = (int) scrollbar_bounds.get_width (),
+                        height = (int) scrollbar_bounds.get_height (),
+                    };
+                    region.union_rectangle (rect);
+                }
+
+                surface.set_input_region (region);
             }
         }
 

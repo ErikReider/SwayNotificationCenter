@@ -30,8 +30,10 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
         get;
         private construct set;
     }
-    private List<unowned AnimatedListItem> visible_children
-        = new List<unowned AnimatedListItem> ();
+    public unowned List<unowned AnimatedListItem> visible_children {
+        get;
+        private construct set;
+    }
 
     /**
      * Indicates if new / removed children should display an expand and shrink
@@ -79,6 +81,7 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
         hadjustment = null;
 
         children = new List<AnimatedListItem> ();
+        visible_children = new List<unowned AnimatedListItem> ();
 
         notify["vadjustment"].connect (() => {
             if (vadjustment != null) {

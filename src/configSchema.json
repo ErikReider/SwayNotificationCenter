@@ -415,6 +415,12 @@
           "deprecated": true,
           "description": "deprecated (change the CSS root variable \"--mpris-album-art-icon-size\"): The size of the album art",
           "default": -1
+        },
+        "show-album-art": {
+          "type": "string",
+          "description": "Whether or not the album art should be hidden, always visible, or only visible when a valid album art is provided.",
+          "default": "always",
+          "enum": ["always", "when-available", "never"]
         }
       }
     },

@@ -1,7 +1,24 @@
 namespace SwayNotificationCenter.Widgets.Mpris {
+    public enum AlbumArtState {
+        ALWAYS, WHEN_AVAILABLE, NEVER;
+
+        public static AlbumArtState parse (string value) {
+            switch (value) {
+                default:
+                case "always":
+                    return AlbumArtState.ALWAYS;
+                case "when-available":
+                    return AlbumArtState.WHEN_AVAILABLE;
+                case "never":
+                    return AlbumArtState.NEVER;
+            }
+        }
+    }
+
     public struct Config {
         [Version (deprecated = true, replacement = "CSS root variable")]
         int image_size;
+        AlbumArtState show_album_art;
         bool autohide;
         string[] blacklist;
     }
@@ -29,6 +46,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         // Default config values
         Config mpris_config = Config () {
             image_size = -1,
+            show_album_art = AlbumArtState.ALWAYS,
             autohide = false,
         };
 
@@ -86,6 +104,12 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 int? image_size = get_prop<int> (config, "image-size", out image_size_found);
                 if (image_size_found && image_size != null) {
                     mpris_config.image_size = image_size;
+                }
+
+                bool show_art_found;
+                string? show_album_art = get_prop<string> (config, "show-album-art", out show_art_found);
+                if (show_art_found && show_album_art != null) {
+                    mpris_config.show_album_art = AlbumArtState.parse (show_album_art);
                 }
 
                 Json.Array ? blacklist = get_prop_array (config, "blacklist");

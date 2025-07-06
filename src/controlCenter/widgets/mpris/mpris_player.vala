@@ -95,6 +95,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 });
             });
             album_art.set_pixel_size (mpris_config.image_size);
+            album_art.set_visible (mpris_config.show_album_art == AlbumArtState.ALWAYS);
         }
 
         public void before_destroy () {
@@ -280,6 +281,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                                              get_scale_factor (), snapshot);
                     Graphene.Size size = Graphene.Size ().init (icon_size, icon_size);
                     album_art.set_from_paintable (snapshot.free_to_paintable (size));
+                    album_art.set_visible (mpris_config.show_album_art != AlbumArtState.NEVER);
 
                     // Set background album art
                     background_picture.set_paintable (album_art_texture);
@@ -288,6 +290,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                     return;
                 }
             }
+
+            album_art.set_visible (mpris_config.show_album_art == AlbumArtState.ALWAYS);
 
             // Get the app icon
             Icon ? icon = null;

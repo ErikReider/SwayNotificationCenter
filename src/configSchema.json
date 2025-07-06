@@ -557,8 +557,9 @@
         },
         "icon-size": {
           "type": "integer",
-          "default": 24,
-          "description": "Size of the application icon in per app volume control"
+          "deprecated": true,
+          "default": -1,
+          "description": "deprecated (change the CSS root variable \"--widget-volume-row-icon-size\"): Size of the application icon in per app volume control"
         },
         "animation-type": {
           "type": "string",

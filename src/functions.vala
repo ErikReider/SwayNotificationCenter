@@ -30,7 +30,6 @@ namespace SwayNotificationCenter {
 
         public static void set_image_uri (owned string uri,
                                           Gtk.Image img,
-                                          int icon_size,
                                           bool file_exists,
                                           bool is_theme_icon = false) {
             const string URI_PREFIX = "file://";
@@ -59,8 +58,7 @@ namespace SwayNotificationCenter {
         }
 
         public static void set_image_data (ImageData data,
-                                           Gtk.Image img,
-                                           int icon_size) {
+                                           Gtk.Image img) {
             Gdk.MemoryFormat format = Gdk.MemoryFormat.R8G8B8;
             if (data.has_alpha) {
                 format = Gdk.MemoryFormat.R8G8B8A8;

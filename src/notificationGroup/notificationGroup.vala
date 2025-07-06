@@ -85,7 +85,6 @@ namespace SwayNotificationCenter {
             start_box.add_css_class ("notification-group-headers");
             // App Icon
             app_icon = new Gtk.Image ();
-            app_icon.set_pixel_size (32);
             app_icon.set_valign (Gtk.Align.CENTER);
             app_icon.add_css_class ("notification-group-icon");
             start_box.append (app_icon);

@@ -17,6 +17,7 @@
 
   --notification-icon-size: 64px;
   --notification-app-icon-size: var(--notification-icon-size) / 3;
+  --notification-group-icon-size: 32px;
 }
 
 $border: 1px solid var(--noti-border-color);
@@ -259,6 +260,7 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
 
     .notification-group-icon {
       color: var(--text-color);
+      -gtk-icon-size: var(--notification-group-icon-size);
     }
     .notification-group-header {
       color: var(--text-color);

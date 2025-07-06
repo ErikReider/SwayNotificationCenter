@@ -73,6 +73,15 @@ namespace SwayNotificationCenter {
             app.add_window (swaync_daemon.noti_daemon.control_center);
         });
 
+        try {
+            app.register ();
+            if (app.get_is_remote ()) {
+                printerr ("An instance of SwayNotificationCenter is already running!\n");
+            }
+        } catch (Error e) {
+            error (e.message);
+        }
+
         return app.run ();
     }
 

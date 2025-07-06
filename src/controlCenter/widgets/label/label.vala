@@ -38,6 +38,8 @@ namespace SwayNotificationCenter.Widgets {
             label_widget.set_justify (Gtk.Justification.LEFT);
             label_widget.set_xalign (0.0f);
             label_widget.set_yalign (0.0f);
+            label_widget.set_halign (Gtk.Align.FILL);
+            label_widget.set_hexpand (true);
 
             append (label_widget);
         }

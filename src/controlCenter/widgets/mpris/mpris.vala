@@ -1,5 +1,6 @@
 namespace SwayNotificationCenter.Widgets.Mpris {
     public struct Config {
+        [Version (deprecated = true, replacement = "CSS root variable")]
         int image_size;
         bool autohide;
         string[] blacklist;
@@ -27,7 +28,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
         // Default config values
         Config mpris_config = Config () {
-            image_size = 96,
+            image_size = -1,
             autohide = false,
         };
 
@@ -81,8 +82,11 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             Json.Object ? config = get_config (this);
             if (config != null) {
                 // Get image-size
-                int? image_size = get_prop<int> (config, "image-size");
-                if (image_size != null) mpris_config.image_size = image_size;
+                bool image_size_found;
+                int? image_size = get_prop<int> (config, "image-size", out image_size_found);
+                if (image_size_found && image_size != null) {
+                    mpris_config.image_size = image_size;
+                }
 
                 Json.Array ? blacklist = get_prop_array (config, "blacklist");
                 if (blacklist != null) {

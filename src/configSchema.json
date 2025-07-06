@@ -412,8 +412,9 @@
       "properties": {
         "image-size": {
           "type": "integer",
-          "description": "The size of the album art",
-          "default": 96
+          "deprecated": true,
+          "description": "deprecated (change the CSS root variable \"--mpris-album-art-icon-size\"): The size of the album art",
+          "default": -1
         }
       }
     },

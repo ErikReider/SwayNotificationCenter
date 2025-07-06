@@ -14,6 +14,10 @@
   --text-color-disabled: rgb(150, 150, 150);
 
   --bg-selected: rgb(0, 128, 255);
+
+  --notification-icon-size: 64px;
+  --notification-app-icon-size: var(--notification-icon-size) / 3;
+  --notification-group-icon-size: 32px;
 }
 
 $border: 1px solid var(--noti-border-color);
@@ -113,12 +117,14 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
           .image {
             /* Notification Primary Image */
             -gtk-icon-filter: none;
+            -gtk-icon-size: var(--notification-icon-size);
             border-radius: 100px; /* Size in px */
             margin: $margin;
           }
           .app-icon {
             /* Notification app icon (only visible when the primary image is set) */
             -gtk-icon-filter: none;
+            -gtk-icon-size: var(--notification-app-icon-size);
             -gtk-icon-shadow: 0 1px 4px black;
             margin: 6px;
           }
@@ -254,6 +260,7 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
 
     .notification-group-icon {
       color: var(--text-color);
+      -gtk-icon-size: var(--notification-group-icon-size);
     }
     .notification-group-header {
       color: var(--text-color);

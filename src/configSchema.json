@@ -97,9 +97,9 @@
     },
     "notification-icon-size": {
       "type": "integer",
-      "description": "The notification icon size (in pixels). The app icon size is 1/3",
-      "default": 64,
-      "minimum": 16
+      "deprecated": true,
+      "description": "deprecated (change the CSS root variable \"--notification-icon-size\"): The notification icon size (in pixels). The app icon size is 1/3",
+      "default": -1
     },
     "notification-body-image-height": {
       "type": "integer",
@@ -412,8 +412,9 @@
       "properties": {
         "image-size": {
           "type": "integer",
-          "description": "The size of the album art",
-          "default": 96
+          "deprecated": true,
+          "description": "deprecated (change the CSS root variable \"--mpris-album-art-icon-size\"): The size of the album art",
+          "default": -1
         }
       }
     },
@@ -556,8 +557,9 @@
         },
         "icon-size": {
           "type": "integer",
-          "default": 24,
-          "description": "Size of the application icon in per app volume control"
+          "deprecated": true,
+          "default": -1,
+          "description": "deprecated (change the CSS root variable \"--widget-volume-row-icon-size\"): Size of the application icon in per app volume control"
         },
         "animation-type": {
           "type": "string",

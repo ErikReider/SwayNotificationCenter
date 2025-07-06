@@ -269,11 +269,16 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 }
                 if (album_art_texture != null) {
                     // Set album art
+                    int icon_size = mpris_config.image_size;
+                    if (icon_size < 0) {
+                        icon_size = album_art_texture.width > album_art_texture.height
+                            ? album_art_texture.height : album_art_texture.width;
+                    }
                     Gtk.Snapshot snapshot = new Gtk.Snapshot ();
                     Functions.scale_texture (album_art_texture,
-                                             mpris_config.image_size, mpris_config.image_size,
+                                             icon_size, icon_size,
                                              get_scale_factor (), snapshot);
-                    Graphene.Size size = Graphene.Size ().init (mpris_config.image_size, mpris_config.image_size);
+                    Graphene.Size size = Graphene.Size ().init (icon_size, icon_size);
                     album_art.set_from_paintable (snapshot.free_to_paintable (size));
 
                     // Set background album art
@@ -291,21 +296,22 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             }
             unowned Gtk.IconTheme icon_theme = Gtk.IconTheme.get_for_display (get_display ());
             if (icon != null) {
-                album_art.set_from_gicon (icon);
-
                 Gtk.IconPaintable ? icon_info = icon_theme.lookup_by_gicon (
-                    icon, mpris_config.image_size, get_scale_factor (), Gtk.TextDirection.NONE, 0);
-                background_picture.set_paintable (icon_info);
-            } else {
-                // Default icon
-                string icon_name = "audio-x-generic-symbolic";
-                album_art.set_from_icon_name (icon_name);
-
-                Gtk.IconPaintable ? icon_info = icon_theme.lookup_icon (
-                    icon_name, null, mpris_config.image_size, get_scale_factor (),
-                    Gtk.TextDirection.NONE, 0);
-                background_picture.set_paintable (icon_info);
+                    icon, 128, get_scale_factor (), Gtk.TextDirection.NONE, 0);
+                if (icon_info != null) {
+                    album_art.set_from_gicon (icon);
+                    background_picture.set_paintable (icon_info);
+                    return;
+                }
             }
+
+            // Default icon
+            string icon_name = "audio-x-generic-symbolic";
+            album_art.set_from_icon_name (icon_name);
+            Gtk.IconPaintable ? icon_info = icon_theme.lookup_icon (
+                icon_name, null, 128, get_scale_factor (),
+                Gtk.TextDirection.NONE, 0);
+            background_picture.set_paintable (icon_info);
         }
 
         private void update_button_shuffle (HashTable<string, Variant> metadata) {

@@ -20,7 +20,9 @@ namespace SwayNotificationCenter.Widgets {
 
         string ? expand_label = null;
         string ? collapse_label = null;
-        int icon_size = 24;
+
+        [Version (deprecated = true, replacement = "CSS root variable")]
+        int icon_size = -1;
 
         Gtk.RevealerTransitionType revealer_type = Gtk.RevealerTransitionType.SLIDE_DOWN;
         int revealer_duration = 250;
@@ -124,8 +126,8 @@ namespace SwayNotificationCenter.Widgets {
 
                 foreach (var item in this.client.active_sinks.values) {
                     SinkInputRow row = new SinkInputRow (item, client,
-                                                             icon_size, show_per_app_icon,
-                                                             show_per_app_label);
+                                                         icon_size, show_per_app_icon,
+                                                         show_per_app_label);
                     list_box_controller.append (row);
                 }
 

@@ -13,7 +13,6 @@
   "control-center-margin-left": 0,
   "notification-2fa-action": true,
   "notification-inline-replies": false,
-  "notification-icon-size": 64,
   "notification-body-image-height": 100,
   "notification-body-image-width": 200,
   "timeout": 10,
@@ -74,9 +73,9 @@
       "text": "Label Text"
     },
     "mpris": {
-      "image-size": 96,
       "blacklist": [],
-      "autohide": false
+      "autohide": false,
+      "show-album-art": "always"
     },
     "buttons-grid": {
       "actions": [

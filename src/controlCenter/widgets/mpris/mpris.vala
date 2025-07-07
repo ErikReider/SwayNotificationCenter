@@ -134,7 +134,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             try {
                 setup_mpris ();
             } catch (Error e) {
-                error ("MPRIS Widget error: %s", e.message);
+                critical ("MPRIS Widget error: %s", e.message);
             }
         }
 

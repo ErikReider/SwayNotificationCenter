@@ -340,14 +340,14 @@ namespace SwayNotificationCenter {
             if (display is Gdk.Wayland.Display) {
                 return ((Gdk.Wayland.Display) display).get_wl_display ();
             }
-            GLib.error ("Only supports Wayland!");
+            error ("Only supports Wayland!");
         }
 
         public static Wl.Surface * get_wl_surface (Gdk.Surface surface) {
             if (surface is Gdk.Wayland.Surface) {
                 return ((Gdk.Wayland.Surface) surface).get_wl_surface ();
             }
-            GLib.error ("Only supports Wayland!");
+            error ("Only supports Wayland!");
         }
 
         public static double lerp (double a, double b, double t) {

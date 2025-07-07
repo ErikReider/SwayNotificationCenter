@@ -310,7 +310,7 @@ namespace SwayNotificationCenter {
                     try {
                         swaync_daemon.toggle_dnd ();
                     } catch (Error e) {
-                        error ("Error: %s\n", e.message);
+                        critical ("Error: %s\n", e.message);
                     }
                     break;
                 case "Down":

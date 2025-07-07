@@ -265,8 +265,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                         stream, album_art_cancellable);
                     album_art_texture = Gdk.Texture.for_pixbuf (pixbuf);
                 } catch (Error e) {
-                    debug ("Could not download album art for %s. Using fallback...",
-                           source.media_player.identity);
+                    critical ("Could not download album art for %s. Using fallback... (%s)",
+                           source.media_player.identity, e.message);
                 }
                 if (album_art_texture != null) {
                     // Set album art

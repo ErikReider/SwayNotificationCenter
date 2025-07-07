@@ -1058,7 +1058,7 @@ namespace SwayNotificationCenter {
             if (write_to_file (path)) {
                 debug ("Successfully wrote to %s", path);
             } else {
-                error ("ERROR WRITING TO %s", path);
+                critical ("ERROR WRITING TO %s", path);
             }
         }
 

@@ -725,8 +725,7 @@ namespace SwayNotificationCenter {
             if (param.image_data.is_initialized) {
                 Functions.set_image_data (param.image_data, img);
             } else if (param.image_path != null &&
-                       param.image_path != "" &&
-                       img_path_exists) {
+                       param.image_path != "") {
                 Functions.set_image_uri (param.image_path, img,
                                          img_path_exists,
                                          img_path_is_theme_icon);

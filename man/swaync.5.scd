@@ -111,6 +111,11 @@ config file to be able to detect config errors
 	default: true ++
 	description: If control center should use keyboard shortcuts
 
+*grouping* ++
+	type: bool ++
+	default: true ++
+	description: If notifications should be grouped by app name
+
 *image-visibility* ++
 	type: string ++
 	default: always ++
@@ -146,7 +151,7 @@ config file to be able to detect config errors
 	type: bool ++
 	default: true ++
 	description: Display notification timestamps relative to now e.g. \"26 minutes ago\". ++
-		If false, a local iso8601-formatted absolute timestamp is displayed. 
+		If false, a local iso8601-formatted absolute timestamp is displayed.
 
 *control-center-height* ++
 	type: integer ++

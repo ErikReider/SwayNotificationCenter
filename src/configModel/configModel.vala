@@ -421,6 +421,11 @@ namespace SwayNotificationCenter {
          */
         public bool keyboard_shortcuts { get; set; default = true; }
 
+        /**
+         * If notifications should be grouped by app name
+         */
+        public bool grouping { get; set; default = true; }
+
         /** Specifies if the notification image should be shown or not */
         public ImageVisibility image_visibility {
             get;

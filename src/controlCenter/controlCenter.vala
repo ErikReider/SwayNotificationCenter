@@ -408,14 +408,16 @@ namespace SwayNotificationCenter {
 
                 // Set whether the control center should cover the whole screen or not
                 bool cover_screen = ConfigModel.instance.layer_shell_cover_screen;
-                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, cover_screen);
-                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, cover_screen);
-                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, cover_screen);
-                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, cover_screen);
-                if (!ConfigModel.instance.layer_shell_cover_screen) {
+                if (cover_screen) {
+                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, cover_screen);
+                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, cover_screen);
+                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, cover_screen);
+                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, cover_screen);
+                } else {
                     switch (pos_x) {
                         case PositionX.LEFT:
                             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, true);
+                            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, false);
                             break;
                         case PositionX.CENTER:
                             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, true);
@@ -423,6 +425,7 @@ namespace SwayNotificationCenter {
                             break;
                         default:
                         case PositionX.RIGHT:
+                            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, false);
                             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
                             break;
                     }
@@ -434,12 +437,14 @@ namespace SwayNotificationCenter {
                             default:
                             case PositionY.TOP:
                                 GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
+                                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, false);
                                 break;
                             case PositionY.CENTER:
                                 GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
                                 GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
                                 break;
                             case PositionY.BOTTOM:
+                                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, false);
                                 GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
                                 break;
                         }

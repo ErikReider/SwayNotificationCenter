@@ -54,6 +54,8 @@ namespace SwayNotificationCenter.Widgets {
 
             slider.set_draw_value (false);
             slider.set_round_digits (round_digits);
+            slider.set_hexpand (true);
+            slider.set_halign (Gtk.Align.FILL);
             slider.value_changed.connect (() => {
                 double value = slider.get_value ();
                 if (value > max_limit)
@@ -70,10 +72,8 @@ namespace SwayNotificationCenter.Widgets {
                 }
             });
 
-            add (label_widget);
-            pack_start (slider, true, true, 0);
-
-            show_all ();
+            append (label_widget);
+            append (slider);
         }
 
         public string expand_cmd (string cmd, string regex, string value) {

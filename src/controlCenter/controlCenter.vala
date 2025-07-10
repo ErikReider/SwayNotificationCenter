@@ -97,7 +97,11 @@ namespace SwayNotificationCenter {
         HashTable<string, unowned NotificationGroup> noti_groups_name =
             new HashTable<string, unowned NotificationGroup> (str_hash, str_equal);
 
-        Queue<Notification> notification_history = new Queue<Notification> ();
+        struct HistoryEntry {
+            public Notification noti;
+            public string group_id;
+        }
+        Queue<HistoryEntry?> notification_history = new Queue<HistoryEntry?> ();
 
         const string STACK_NOTIFICATIONS_PAGE = "notifications-list";
         const string STACK_PLACEHOLDER_PAGE = "notifications-placeholder";
@@ -265,13 +269,19 @@ namespace SwayNotificationCenter {
             var children = list_box_controller.get_children ();
             var group = (NotificationGroup) list_box.get_focus_child ();
             switch (Gdk.keyval_name (keyval)) {
-                case "z": // TODO: always inhibited?
+                case "z":
                     if (state == Gdk.ModifierType.CONTROL_MASK) {
-                        if (notification_history.length > 0) {
-                            //  var latest = ((NotificationGroup) list_box.get_first_child ()).get_latest_notification ();
-                            var restored_params = notification_history.pop_head ().param;
-                            //  restored_params.applied_id = latest.param.applied_id;
-                            add_notification (restored_params);
+                        while (notification_history.length > 0) {
+                            var first_in_history = notification_history.pop_head ();
+                            add_notification (first_in_history.noti.param);
+                            if (notification_history.length /* still */ > 0) {
+                                var next_in_history = notification_history.peek_head ();
+                                if (first_in_history.group_id == next_in_history.group_id) {
+                                    continue;
+                                } else {
+                                    break;
+                                }
+                            }
                         }
                     }
                     break;
@@ -664,7 +674,10 @@ namespace SwayNotificationCenter {
                         noti.close_notification (false);
                     }
 
-                    notification_history.push_head (noti);
+                    notification_history.push_head (HistoryEntry () {
+                        noti = noti,
+                        group_id = group.name_id
+                    });
                     group.remove_notification (noti);
                     noti_groups_id.remove (id);
                     break;

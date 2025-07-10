@@ -75,7 +75,8 @@
     "mpris": {
       "blacklist": [],
       "autohide": false,
-      "show-album-art": "always"
+      "show-album-art": "always",
+      "loop-carousel": false
     },
     "buttons-grid": {
       "actions": [

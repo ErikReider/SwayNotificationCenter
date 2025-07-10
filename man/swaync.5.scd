@@ -354,6 +354,11 @@ config file to be able to detect config errors
 								 hidden, always visible, or only visible ++
 								 when a valid album art is provided. ++
 					enum: ["right", "left"] ++
+				loop-carousel: ++
+					type: bool ++
+					optional: true ++
+					default: false ++
+					description: Whether to loop through the mpris carousel. ++
 			description: A widget that displays multiple music players. ++
 		*menubar*++
 			type: object ++
@@ -615,7 +620,8 @@ config file to be able to detect config errors
 		"mpris": {
 			"blacklist": ["playerctld"],
 			"autohide": true,
-			"show-album-art": "always"
+			"show-album-art": "always",
+			"loop-carousel": false
 		},
 		"menubar": {
 			"menu#power": {

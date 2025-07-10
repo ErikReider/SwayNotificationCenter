@@ -38,6 +38,20 @@ namespace SwayNotificationCenter {
                     return "overlay";
             }
         }
+
+        public GtkLayerShell.Layer to_layer () {
+            switch (this) {
+                case BACKGROUND:
+                    return GtkLayerShell.Layer.BACKGROUND;
+                case BOTTOM:
+                    return GtkLayerShell.Layer.BOTTOM;
+                case TOP:
+                    return GtkLayerShell.Layer.TOP;
+                default:
+                case OVERLAY:
+                    return GtkLayerShell.Layer.OVERLAY;
+            }
+        }
     }
 
     public enum CssPriority {
@@ -75,8 +89,7 @@ namespace SwayNotificationCenter {
         public string ? category { get; set; default = null; }
 
         private const RegexCompileFlags REGEX_COMPILE_OPTIONS =
-            RegexCompileFlags.MULTILINE
-            | RegexCompileFlags.JAVASCRIPT_COMPAT;
+            RegexCompileFlags.MULTILINE;
 
         private const RegexMatchFlags REGEX_MATCH_FLAGS = RegexMatchFlags.NOTEMPTY;
 
@@ -247,6 +260,14 @@ namespace SwayNotificationCenter {
             spawn_env += "SWAYNC_REPLACES_ID=%s".printf (param.replaces_id.to_string ());
             spawn_env += "SWAYNC_TIME=%s".printf (param.time.to_string ());
             spawn_env += "SWAYNC_DESKTOP_ENTRY=%s".printf (param.desktop_entry ?? "");
+            foreach (string hint in param.hints.get_keys ()) {
+                if (hint.contains ("image") || hint.contains ("icon")) {
+                    continue;
+                }
+                spawn_env += "SWAYNC_HINT_%s=%s".printf (
+                    hint.up ().replace ("-", "_"),
+                    param.hints[hint].print (false));
+            }
 
             return yield Functions.execute_command (exec, spawn_env, out msg);
         }
@@ -335,6 +356,12 @@ namespace SwayNotificationCenter {
          */
         public bool layer_shell { get; set; default = true; }
 
+        /**
+         * Wether or not the windows should cover the whole screen when
+         * layer-shell is used.
+         */
+        public bool layer_shell_cover_screen { get; set; default = true; }
+
         /** The CSS loading priority */
         public CssPriority cssPriority { // vala-lint=naming-convention
             get; set; default = CssPriority.APPLICATION;
@@ -405,12 +432,17 @@ namespace SwayNotificationCenter {
          * Notification window's width, in pixels.
          */
         public int notification_window_width { get; set; default = 500; }
+        /** Max height of the notification in pixels */
+        public int notification_window_height { get; set; default = -1; }
 
         /** Hides the control center after clearing all notifications */
         public bool hide_on_clear { get; set; default = false; }
 
         /** Hides the control center when clicking on notification action */
         public bool hide_on_action { get; set; default = true; }
+
+        /** Text that appears when there are no notifications to show */
+        public string text_empty { get; set; default = "No Notifications"; }
 
         /** The controlcenters horizontal alignment. Supersedes `positionX` if not `NONE` */
         public PositionX control_center_positionX { // vala-lint=naming-convention
@@ -554,17 +586,9 @@ namespace SwayNotificationCenter {
         /**
          * Notification icon size, in pixels.
          */
-        private const int NOTIFICATION_ICON_MINIMUM_SIZE = 16;
-        private const int NOTIFICATION_ICON_DEFAULT_SIZE = 64;
-        private int _notification_icon_size = NOTIFICATION_ICON_DEFAULT_SIZE;
+        [Version (deprecated = true, replacement = "CSS root variable")]
         public int notification_icon_size {
-            get {
-                return _notification_icon_size;
-            }
-            set {
-                _notification_icon_size = value > NOTIFICATION_ICON_MINIMUM_SIZE
-                    ? value : NOTIFICATION_ICON_MINIMUM_SIZE;
-            }
+            get; set; default = -1;
         }
 
         /**
@@ -1034,7 +1058,7 @@ namespace SwayNotificationCenter {
             if (write_to_file (path)) {
                 debug ("Successfully wrote to %s", path);
             } else {
-                error ("ERROR WRITING TO %s", path);
+                critical ("ERROR WRITING TO %s", path);
             }
         }
 

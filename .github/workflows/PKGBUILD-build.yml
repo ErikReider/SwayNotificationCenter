@@ -17,14 +17,11 @@ jobs:
   PKGBUILD-build:
     container: archlinux:base-devel
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: [PKGBUILD, PKGBUILD-git]
     steps:
       - name: Install packages
         run: |
           pacman-key --init
-          pacman -Syu --noconfirm
+          pacman -Sy --noconfirm
 
       - name: Add builduser
         run: |
@@ -37,14 +34,23 @@ jobs:
 
       - name: Check out sources
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: swaync
 
-      - name: Test ${{ matrix.version }}
+      - name: Test PKGBUILD
         run: |
-          file="${{ matrix.version }}"
-          build_dir="/tmp/$file/"
+          cd swaync
+          build_dir="/tmp/PKGBUILD-git"
           cd build-scripts
+
           mkdir $build_dir
-          cp ./$file $build_dir/PKGBUILD
+          cp ./PKGBUILD-git $build_dir/PKGBUILD
+
+          mkdir $build_dir/src
+          cp -r ../ $build_dir/src/swaync
+
           cd $build_dir
-          sudo chown builduser $build_dir
-          sudo -H -u builduser bash -c 'makepkg -s --noconfirm'
+          sudo chown -R builduser $build_dir
+          # Use the locally checked-out branch instead of downloading the source
+          sudo -H -u builduser bash -c "makepkg -s --noconfirm --noextract SRCDEST=$build_dir"

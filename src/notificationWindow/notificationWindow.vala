@@ -1,5 +1,5 @@
 namespace SwayNotificationCenter {
-    [GtkTemplate (ui = "/org/erikreider/sway-notification-center/notificationWindow/notificationWindow.ui")]
+    [GtkTemplate (ui = "/org/erikreider/swaync/ui/notification_window.ui")]
     public class NotificationWindow : Gtk.ApplicationWindow {
         private static NotificationWindow ? window = null;
         /**
@@ -32,13 +32,9 @@ namespace SwayNotificationCenter {
         [GtkChild]
         unowned Gtk.ScrolledWindow scrolled_window;
         [GtkChild]
-        unowned Gtk.Viewport viewport;
-        [GtkChild]
-        unowned Gtk.Box box;
+        unowned AnimatedList list;
 
-        private bool list_reverse = false;
-
-        private double last_upper = 0;
+        private Graphene.Rect scrolled_window_bounds = Graphene.Rect.zero ();
 
         Gee.HashSet<uint32> inline_reply_notifications = new Gee.HashSet<uint32> ();
 
@@ -60,34 +56,82 @@ namespace SwayNotificationCenter {
 
             // -1 should set it to the content size unless it exceeds max_height
             scrolled_window.set_min_content_height (-1);
-            scrolled_window.set_max_content_height (MAX_HEIGHT);
+            scrolled_window.set_max_content_height (
+                int.max (ConfigModel.instance.notification_window_height, -1));
             scrolled_window.set_propagate_natural_height (true);
 
-            viewport.size_allocate.connect (size_alloc);
+            // TODO: Make option
+            list.use_card_animation = true;
 
-            this.default_width = ConfigModel.instance.notification_window_width;
+            // set_resizable (false);
+            default_width = ConfigModel.instance.notification_window_width;
+        }
+
+        protected override void size_allocate (int w, int h, int baseline) {
+            base.size_allocate (w, h, baseline);
+
+            // Set the input region to only be the size of the ScrolledWindow
+            Graphene.Rect bounds;
+            scrolled_window.compute_bounds (this, out bounds);
+            if (!bounds.equal (this.scrolled_window_bounds)) {
+                this.scrolled_window_bounds = bounds;
+                unowned Gdk.Surface ?surface = window.get_surface ();
+                if (surface == null) {
+                    return;
+                }
+
+                Cairo.Region region = new Cairo.Region ();
+                foreach (AnimatedListItem item in list.visible_children) {
+                    if (item.destroying) {
+                        continue;
+                    }
+                    Graphene.Rect out_bounds;
+                    item.compute_bounds (this, out out_bounds);
+                    Cairo.RectangleInt item_rect = Cairo.RectangleInt () {
+                        x = (int) out_bounds.get_x (),
+                        y = (int) out_bounds.get_y (),
+                        width = (int) out_bounds.get_width (),
+                        height = (int) out_bounds.get_height (),
+                    };
+                    region.union_rectangle (item_rect);
+                }
+
+                // The input region should only cover each preview widget
+                Graphene.Rect scrollbar_bounds;
+                unowned Gtk.Widget scrollbar = scrolled_window.get_vscrollbar ();
+                if (scrollbar.should_layout ()) {
+                    scrollbar.compute_bounds (this, out scrollbar_bounds);
+                    Cairo.RectangleInt rect = Cairo.RectangleInt () {
+                        x = (int) scrollbar_bounds.get_x (),
+                        y = (int) scrollbar_bounds.get_y (),
+                        width = (int) scrollbar_bounds.get_width (),
+                        height = (int) scrollbar_bounds.get_height (),
+                    };
+                    region.union_rectangle (rect);
+                }
+
+                surface.set_input_region (region);
+            }
+        }
+
+        protected override void snapshot (Gtk.Snapshot snapshot) {
+            // HACK: Fixes fully transparent windows not being mapped
+            Gdk.RGBA color = Gdk.RGBA () {
+                red = 0,
+                green = 0,
+                blue = 0,
+                alpha = 0,
+            };
+            snapshot.append_color (color, Graphene.Rect.zero ());
+            base.snapshot (snapshot);
         }
 
         private void set_anchor () {
             if (swaync_daemon.use_layer_shell) {
-                GtkLayerShell.Layer layer;
-                switch (ConfigModel.instance.layer) {
-                    case Layer.BACKGROUND:
-                        layer = GtkLayerShell.Layer.BACKGROUND;
-                        break;
-                    case Layer.BOTTOM:
-                        layer = GtkLayerShell.Layer.BOTTOM;
-                        break;
-                    case Layer.TOP:
-                        layer = GtkLayerShell.Layer.TOP;
-                        break;
-                    default:
-                    case Layer.OVERLAY:
-                        layer = GtkLayerShell.Layer.OVERLAY;
-                        break;
-                }
-                GtkLayerShell.set_layer (this, layer);
+                GtkLayerShell.set_layer (this, ConfigModel.instance.layer.to_layer ());
 
+                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
+                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
                 switch (ConfigModel.instance.positionX) {
                     case PositionX.LEFT:
                         GtkLayerShell.set_anchor (
@@ -111,47 +155,45 @@ namespace SwayNotificationCenter {
                 switch (ConfigModel.instance.positionY) {
                     default:
                     case PositionY.TOP:
-                        GtkLayerShell.set_anchor (
-                            this, GtkLayerShell.Edge.BOTTOM, false);
-                        GtkLayerShell.set_anchor (
-                            this, GtkLayerShell.Edge.TOP, true);
+                        scrolled_window.set_valign (Gtk.Align.START);
                         break;
                     case PositionY.CENTER:
-                        GtkLayerShell.set_anchor (
-                            this, GtkLayerShell.Edge.BOTTOM, false);
-                        GtkLayerShell.set_anchor (
-                            this, GtkLayerShell.Edge.TOP, false);
+                        scrolled_window.set_valign (Gtk.Align.CENTER);
                         break;
                     case PositionY.BOTTOM:
-                        GtkLayerShell.set_anchor (
-                            this, GtkLayerShell.Edge.TOP, false);
-                        GtkLayerShell.set_anchor (
-                            this, GtkLayerShell.Edge.BOTTOM, true);
+                        scrolled_window.set_valign (Gtk.Align.END);
                         break;
                 }
             }
-            list_reverse = ConfigModel.instance.positionY == PositionY.BOTTOM;
-        }
 
-        private void size_alloc () {
-            var adj = viewport.vadjustment;
-            double upper = adj.get_upper ();
-            if (last_upper < upper) {
-                scroll_to_start (list_reverse);
+            list.animation_reveal_type = AnimatedListItem.RevealAnimationType.SLIDE;
+            switch (ConfigModel.instance.positionX) {
+                case PositionX.LEFT:
+                    list.animation_child_type = AnimatedListItem.ChildAnimationType.SLIDE_FROM_LEFT;
+                    break;
+                case PositionX.CENTER:
+                    list.animation_child_type = AnimatedListItem.ChildAnimationType.NONE;
+                    break;
+                default:
+                case PositionX.RIGHT:
+                    list.animation_child_type = AnimatedListItem.ChildAnimationType.SLIDE_FROM_RIGHT;
+                    break;
             }
-            last_upper = upper;
-        }
-
-        private void scroll_to_start (bool reverse) {
-            var adj = viewport.vadjustment;
-            var val = (reverse ? adj.get_upper () : adj.get_lower ());
-            adj.set_value (val);
+            switch (ConfigModel.instance.positionY) {
+                default:
+                case SwayNotificationCenter.PositionY.TOP:
+                case SwayNotificationCenter.PositionY.CENTER:
+                    list.direction = AnimatedListDirection.TOP_TO_BOTTOM;
+                    break;
+                case SwayNotificationCenter.PositionY.BOTTOM:
+                    list.direction = AnimatedListDirection.BOTTOM_TO_TOP;
+                    break;
+            }
         }
 
         public void change_visibility (bool value) {
             if (!value) {
                 close_all_notifications ();
-                close ();
             } else {
                 this.set_anchor ();
             }
@@ -163,20 +205,28 @@ namespace SwayNotificationCenter {
         public void close_all_notifications (remove_iter_func ? func = null) {
             inline_reply_notifications.clear ();
             if (!this.get_realized ()) return;
-            foreach (var w in box.get_children ()) {
-                Notification notification = (Notification) w;
+            foreach (unowned AnimatedListItem item in list.children) {
+                if (item.destroying) {
+                    continue;
+                }
+                Notification notification = (Notification) item.child;
                 if (func == null || func (notification)) {
-                    remove_notification (notification, false);
+                    remove_notification (notification, false, false);
                 }
             }
+
+            close ();
         }
 
-        private void remove_notification (Notification ? noti, bool dismiss) {
+        private void remove_notification (Notification ? noti,
+                                          bool dismiss,
+                                          bool transition) {
             // Remove notification and its destruction timeout
             if (noti != null) {
                 if (noti.has_inline_reply) {
                     inline_reply_notifications.remove (noti.param.applied_id);
                     if (inline_reply_notifications.size == 0
+                        && swaync_daemon.use_layer_shell
                         && GtkLayerShell.get_keyboard_mode (this)
                         != GtkLayerShell.KeyboardMode.NONE) {
                         GtkLayerShell.set_keyboard_mode (
@@ -184,16 +234,17 @@ namespace SwayNotificationCenter {
                     }
                 }
                 noti.remove_noti_timeout ();
-                noti.destroy ();
-            }
-
-            if (dismiss
-                && (!get_realized ()
-                    || !get_mapped ()
-                    || !(get_child () is Gtk.Widget)
-                    || box.get_children ().length () == 0)) {
-                close ();
-                return;
+                list.remove.begin (noti, transition, (obj, res) => {
+                    if (list.remove.end (res)
+                        && dismiss
+                        && (!get_realized ()
+                            || !get_mapped ()
+                            || !(get_child () is Gtk.Widget)
+                            || list.is_empty ())) {
+                        close ();
+                        return;
+                    }
+                });
             }
         }
 
@@ -207,46 +258,47 @@ namespace SwayNotificationCenter {
             if (noti.has_inline_reply) {
                 inline_reply_notifications.add (param.applied_id);
 
-                if (GtkLayerShell.get_keyboard_mode (this)
-                    != GtkLayerShell.KeyboardMode.ON_DEMAND) {
+                if (swaync_daemon.use_layer_shell &&
+                    GtkLayerShell.get_keyboard_mode (this)
+                    != GtkLayerShell.KeyboardMode.ON_DEMAND
+                    && swaync_daemon.has_layer_on_demand) {
                     GtkLayerShell.set_keyboard_mode (
                         this, GtkLayerShell.KeyboardMode.ON_DEMAND);
                 }
             }
 
-            if (list_reverse) {
-                box.pack_start (noti);
-            } else {
-                box.pack_end (noti);
-            }
-            this.grab_focus ();
             if (!this.get_mapped () || !this.get_realized ()) {
                 this.set_anchor ();
                 this.show ();
             }
 
-            // IMPORTANT: queue a resize event to force the layout to be recomputed
-            noti.queue_resize ();
-            scroll_to_start (list_reverse);
+            list.append.begin (noti);
         }
 
         public void close_notification (uint32 id, bool dismiss) {
-            foreach (var w in box.get_children ()) {
-                var noti = (Notification) w;
+            foreach (unowned AnimatedListItem item in list.children) {
+                if (item.destroying) {
+                    continue;
+                }
+                var noti = (Notification) item.child;
                 if (noti != null && noti.param.applied_id == id) {
-                    remove_notification (noti, dismiss);
+                    remove_notification (noti, dismiss, true);
                     break;
                 }
             }
         }
 
         public void replace_notification (uint32 id, NotifyParams new_params) {
-            foreach (var w in box.get_children ()) {
-                var noti = (Notification) w;
+            foreach (unowned AnimatedListItem item in list.children) {
+                if (item.destroying) {
+                    continue;
+                }
+                var noti = (Notification) item.child;
                 if (noti != null && noti.param.applied_id == id) {
                     noti.replace_notification (new_params);
-                    // Position the notification in the beginning of the list
-                    box.reorder_child (noti, (int) box.get_children ().length ());
+                    // Position the notification in the beginning/end of the list
+                    // and scroll to the new item
+                    list.move_to_beginning (noti, true);
                     return;
                 }
             }
@@ -256,19 +308,24 @@ namespace SwayNotificationCenter {
         }
 
         public uint32 ? get_latest_notification () {
-            List<weak Gtk.Widget> children = box.get_children ();
-            if (children.is_empty ()) return null;
-
-            Gtk.Widget ? child = null;
-            if (list_reverse) {
-                child = children.last ().data;
-            } else {
-                child = children.first ().data;
+            unowned AnimatedListItem ? item = list.get_first_item ();
+            if (item == null || !(item.child is Notification)) {
+                return null;
             }
 
-            if (child == null || !(child is Notification)) return null;
-            Notification noti = (Notification) child;
+            Notification noti = (Notification) item.child;
             return noti.param.applied_id;
+        }
+
+        public void latest_notification_action (uint32 action) {
+            unowned AnimatedListItem ? item = list.get_first_item ();
+            if (item == null || !(item.child is Notification)) {
+                return;
+            }
+
+            Notification noti = (Notification) item.child;
+            noti.click_alt_action (action);
+            noti.close_notification ();
         }
     }
 }

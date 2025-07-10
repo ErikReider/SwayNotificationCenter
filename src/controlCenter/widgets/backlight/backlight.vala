@@ -51,15 +51,14 @@ namespace SwayNotificationCenter.Widgets {
 
             slider.set_draw_value (false);
             slider.set_round_digits (0);
+            slider.set_hexpand (true);
             slider.value_changed.connect (() => {
                 this.client.set_brightness.begin ((float) slider.get_value ());
                 slider.tooltip_text = ((int) slider.get_value ()).to_string ();
             });
 
-            add (label_widget);
-            pack_start (slider, true, true, 0);
-
-            show_all ();
+            append (label_widget);
+            append (slider);
         }
 
         public override void on_cc_visibility_change (bool val) {

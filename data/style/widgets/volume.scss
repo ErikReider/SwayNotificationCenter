@@ -1,18 +1,24 @@
+:root {
+  --widget-volume-row-icon-size: 24px;
+}
+
 .widget-volume {
-  background-color: #{"@noti-bg"};
-  padding: 8px;
-  margin: 8px;
-  border-radius: 12px;
+  padding: $margin;
+  margin: $margin;
+  border-radius: $border-radius;
 }
 
 .widget-volume > box > button {
-  background: transparent;
-  border: none;
+}
+
+/* Each row app icon */
+.widget-volume row image {
+  -gtk-icon-size: var(--widget-volume-row-icon-size);
 }
 
 .per-app-volume {
-  background-color: #{"@noti-bg-alt"};
-  padding: 4px 8px 8px 8px;
-  margin: 0px 8px 8px 8px;
-  border-radius: 12px;
+  background-color: var(--noti-bg-alt);
+  padding: $margin/2 $margin $margin $margin;
+  margin: 0px $margin $margin $margin;
+  border-radius: $border-radius;
 }

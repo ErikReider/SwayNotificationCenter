@@ -10,6 +10,8 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         Action[] actions;
+        // 7 is the default Gtk.FlowBox.max_children_per_line
+        int buttons_per_row = 7;
         List<ToggleButton> toggle_buttons;
 
         public ButtonsGrid (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
@@ -19,11 +21,17 @@ namespace SwayNotificationCenter.Widgets {
             if (config != null) {
                 Json.Array a = get_prop_array (config, "actions");
                 if (a != null) actions = parse_actions (a);
+
+                bool bpr_found = false;
+                int bpr = get_prop<int> (config, "buttons-per-row", out bpr_found);
+                if (bpr_found) buttons_per_row = bpr;
             }
 
             Gtk.FlowBox container = new Gtk.FlowBox ();
+            container.set_max_children_per_line (buttons_per_row);
             container.set_selection_mode (Gtk.SelectionMode.NONE);
-            pack_start (container, true, true, 0);
+            container.set_hexpand (true);
+            append (container);
 
             // add action to container
             foreach (var act in actions) {
@@ -40,8 +48,6 @@ namespace SwayNotificationCenter.Widgets {
                         break;
                 }
             }
-
-            show_all ();
         }
 
         public override void on_cc_visibility_change (bool value) {

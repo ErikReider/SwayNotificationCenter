@@ -34,7 +34,7 @@ namespace SwayNotificationCenter.Widgets {
                 try {
                     monitor = fd.monitor (FileMonitorFlags.NONE, null);
                 } catch (Error e) {
-                    error ("Error %s\n", e.message);
+                    critical ("Error %s\n", e.message);
                 }
             } else {
                 this.brightness_change (-1);
@@ -47,7 +47,7 @@ namespace SwayNotificationCenter.Widgets {
                 login1 = Bus.get_proxy_sync (BusType.SYSTEM,
                                              "org.freedesktop.login1", "/org/freedesktop/login1/session/auto");
             } catch (Error e) {
-                error ("Error %s\n", e.message);
+                critical ("Error %s\n", e.message);
             }
         }
 
@@ -59,7 +59,7 @@ namespace SwayNotificationCenter.Widgets {
                 connect_monitor ();
             } else {
                 this.brightness_change (-1);
-                warning ("Could not find device %s\n", path_current);
+                critical ("Could not find device %s\n", path_current);
                 close ();
             }
         }
@@ -79,15 +79,11 @@ namespace SwayNotificationCenter.Widgets {
 
         public async void set_brightness (float percent) {
             this.close ();
-            try {
-                if (subsystem == "backlight") {
-                    int actual = calc_actual (percent);
-                    login1.set_brightness.begin (subsystem, device, actual);
-                } else {
-                    login1.set_brightness.begin (subsystem, device, (uint32) percent);
-                }
-            } catch (Error e) {
-                error ("Error %s\n", e.message);
+            if (subsystem == "backlight") {
+                int actual = calc_actual (percent);
+                login1.set_brightness.begin (subsystem, device, actual);
+            } else {
+                login1.set_brightness.begin (subsystem, device, (uint32) percent);
             }
             connect_monitor ();
         }
@@ -104,7 +100,7 @@ namespace SwayNotificationCenter.Widgets {
                     this.brightness_change (int.parse (data));
                 }
             } catch (Error e) {
-                error ("Error %s\n", e.message);
+                critical ("Error %s\n", e.message);
             }
         }
 
@@ -115,7 +111,7 @@ namespace SwayNotificationCenter.Widgets {
                 string data = dis_max.read_line (null);
                 max = int.parse (data);
             } catch (Error e) {
-                error ("Error %s\n", e.message);
+                critical ("Error %s\n", e.message);
             }
         }
 

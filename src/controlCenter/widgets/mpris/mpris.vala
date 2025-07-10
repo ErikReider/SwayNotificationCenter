@@ -1,8 +1,27 @@
 namespace SwayNotificationCenter.Widgets.Mpris {
+    public enum AlbumArtState {
+        ALWAYS, WHEN_AVAILABLE, NEVER;
+
+        public static AlbumArtState parse (string value) {
+            switch (value) {
+                default:
+                case "always":
+                    return AlbumArtState.ALWAYS;
+                case "when-available":
+                    return AlbumArtState.WHEN_AVAILABLE;
+                case "never":
+                    return AlbumArtState.NEVER;
+            }
+        }
+    }
+
     public struct Config {
+        [Version (deprecated = true, replacement = "CSS root variable")]
         int image_size;
-        int image_radius;
-        bool blur;
+        AlbumArtState show_album_art;
+        bool autohide;
+        string[] blacklist;
+        bool loop_carousel;
     }
 
     public class Mpris : BaseWidget {
@@ -22,14 +41,15 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         Gtk.Button button_prev;
         Gtk.Button button_next;
         Gtk.Box carousel_box;
-        Hdy.Carousel carousel;
-        Hdy.CarouselIndicatorDots carousel_dots;
+        Adw.Carousel carousel;
+        Adw.CarouselIndicatorDots carousel_dots;
 
         // Default config values
         Config mpris_config = Config () {
-            image_size = 96,
-            image_radius = 12,
-            blur = true,
+            image_size = -1,
+            show_album_art = AlbumArtState.ALWAYS,
+            autohide = false,
+            loop_carousel = false,
         };
 
         public Mpris (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
@@ -42,128 +62,86 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 visible = true,
             };
 
-            button_prev = new Gtk.Button.from_icon_name ("go-previous", Gtk.IconSize.BUTTON) {
-                relief = Gtk.ReliefStyle.NONE,
+            button_prev = new Gtk.Button.from_icon_name ("go-previous") {
+                has_frame = false,
                 visible = false,
             };
             button_prev.clicked.connect (() => change_carousel_position (-1));
 
-            button_next = new Gtk.Button.from_icon_name ("go-next", Gtk.IconSize.BUTTON) {
-                relief = Gtk.ReliefStyle.NONE,
+            button_next = new Gtk.Button.from_icon_name ("go-next") {
+                has_frame = false,
                 visible = false,
             };
             button_next.clicked.connect (() => change_carousel_position (1));
 
-            carousel = new Hdy.Carousel () {
+            carousel = new Adw.Carousel () {
                 visible = true,
             };
             carousel.allow_scroll_wheel = true;
-            carousel.draw.connect (carousel_draw_cb);
             carousel.page_changed.connect ((index) => {
-                GLib.List<weak Gtk.Widget> children = carousel.get_children ();
-                int children_length = (int) children.length ();
-                if (children_length <= 1) {
+                if (carousel.n_pages <= 1) {
                     button_prev.sensitive = false;
                     button_next.sensitive = false;
                     return;
                 }
-                button_prev.sensitive = index > 0;
-                button_next.sensitive = index < children_length - 1;
+                button_prev.sensitive = (index > 0) || mpris_config.loop_carousel;
+                button_next.sensitive = (index < carousel.n_pages - 1) || mpris_config.loop_carousel;
             });
 
-            carousel_box.add (button_prev);
-            carousel_box.add (carousel);
-            carousel_box.add (button_next);
-            add (carousel_box);
+            carousel_box.append (button_prev);
+            carousel_box.append (carousel);
+            carousel_box.append (button_next);
+            append (carousel_box);
 
-            carousel_dots = new Hdy.CarouselIndicatorDots ();
+            carousel_dots = new Adw.CarouselIndicatorDots ();
             carousel_dots.set_carousel (carousel);
             carousel_dots.show ();
-            add (carousel_dots);
+            append (carousel_dots);
 
             // Config
             Json.Object ? config = get_config (this);
             if (config != null) {
                 // Get image-size
-                int? image_size = get_prop<int> (config, "image-size");
-                if (image_size != null) mpris_config.image_size = image_size;
+                bool image_size_found;
+                int? image_size = get_prop<int> (config, "image-size", out image_size_found);
+                if (image_size_found && image_size != null) {
+                    mpris_config.image_size = image_size;
+                }
 
-                // Get image-border-radius
-                int? image_radius = get_prop<int> (config, "image-radius");
-                if (image_radius != null) mpris_config.image_radius = image_radius;
-                // Clamp the radius
-                mpris_config.image_radius = mpris_config.image_radius.clamp (
-                    0, (int) (mpris_config.image_size * 0.5));
+                bool show_art_found;
+                string? show_album_art = get_prop<string> (config, "show-album-art", out show_art_found);
+                if (show_art_found && show_album_art != null) {
+                    mpris_config.show_album_art = AlbumArtState.parse (show_album_art);
+                }
 
-                // Get blur
-                bool blur_found;
-                bool? blur = get_prop<bool> (config, "blur", out blur_found);
-                if (blur_found) mpris_config.blur = blur;
+                Json.Array ? blacklist = get_prop_array (config, "blacklist");
+                if (blacklist != null) {
+                    mpris_config.blacklist = new string[blacklist.get_length ()];
+                    for (int i = 0; i < blacklist.get_length (); i++) {
+                        if (blacklist.get_element (i).get_node_type () != Json.NodeType.VALUE) {
+                            warning ("Blacklist entries should be strings");
+                            continue;
+                        }
+                        mpris_config.blacklist[i] = blacklist.get_string_element (i);
+                    }
+                }
+
+                // Get autohide
+                bool autohide_found;
+                bool? autohide = get_prop<bool> (config, "autohide", out autohide_found);
+                if (autohide_found) mpris_config.autohide = autohide;
+
+                // Get loop
+                bool loop_carousel_found;
+                bool? loop_carousel = get_prop<bool> (config, "loop-carousel", out loop_carousel_found);
+                if (loop_carousel_found) mpris_config.loop_carousel = loop_carousel;
             }
 
             hide ();
             try {
                 setup_mpris ();
             } catch (Error e) {
-                error ("MPRIS Widget error: %s", e.message);
-            }
-        }
-
-        private bool carousel_draw_cb (Cairo.Context cr) {
-            Gtk.Allocation alloc;
-            carousel.get_allocated_size (out alloc, null);
-
-            Cairo.Pattern left_fade_gradient = new Cairo.Pattern.linear (0, 0, 1, 0);
-            left_fade_gradient.add_color_stop_rgba (0, 1, 1, 1, 1);
-            left_fade_gradient.add_color_stop_rgba (1, 1, 1, 1, 0);
-            Cairo.Pattern right_fade_gradient = new Cairo.Pattern.linear (0, 0, 1, 0);
-            right_fade_gradient.add_color_stop_rgba (0, 1, 1, 1, 0);
-            right_fade_gradient.add_color_stop_rgba (1, 1, 1, 1, 1);
-
-            cr.save ();
-            cr.push_group ();
-
-            // Draw widgets
-            carousel.draw.disconnect (carousel_draw_cb);
-            carousel.draw (cr);
-            carousel.draw.connect (carousel_draw_cb);
-
-            /// Draw vertical fade
-
-            // Top fade
-            cr.save ();
-            cr.scale (FADE_WIDTH, alloc.height);
-            cr.rectangle (0, 0, FADE_WIDTH, alloc.height);
-            cr.set_source (left_fade_gradient);
-            cr.set_operator (Cairo.Operator.DEST_OUT);
-            cr.fill ();
-            cr.restore ();
-            // Bottom fade
-            cr.save ();
-            cr.translate (alloc.width - FADE_WIDTH, 0);
-            cr.scale (FADE_WIDTH, alloc.height);
-            cr.rectangle (0, 0, FADE_WIDTH, alloc.height);
-            cr.set_source (right_fade_gradient);
-            cr.set_operator (Cairo.Operator.DEST_OUT);
-            cr.fill ();
-            cr.restore ();
-
-            cr.pop_group_to_source ();
-            cr.paint ();
-            cr.restore ();
-            return true;
-        }
-
-        /**
-         * Forces the carousel to reload its style_context.
-         * Fixes carousel items not redrawing when window isn't visible.
-         * Probably related to: https://gitlab.gnome.org/GNOME/libhandy/-/issues/363
-         */
-        public override void on_cc_visibility_change (bool value) {
-            if (!value) return;
-            carousel.get_style_context ().changed ();
-            foreach (var child in carousel.get_children ()) {
-                child.get_style_context ().changed ();
+                critical ("MPRIS Widget error: %s", e.message);
             }
         }
 
@@ -174,6 +152,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             string[] names = dbus_iface.list_names ();
             foreach (string name in names) {
                 if (!name.has_prefix (MPRIS_PREFIX)) continue;
+                if (is_blacklisted (name)) continue;
                 if (check_player_exists (name)) return;
                 MprisSource ? source = MprisSource.get_player (name);
                 if (source != null) add_player (name, source);
@@ -185,6 +164,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                     remove_player (name);
                     return;
                 }
+                if (is_blacklisted (name)) return;
                 if (check_player_exists (name)) return;
                 MprisSource ? source = MprisSource.get_player (name);
                 if (source != null) add_player (name, source);
@@ -199,33 +179,63 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             return false;
         }
 
-        private void add_player (string name, MprisSource source) {
-            MprisPlayer player = new MprisPlayer (source, mpris_config);
-            player.get_style_context ().add_class ("%s-player".printf (css_class_name));
-            carousel.prepend (player);
-            players.set (name, player);
-
-            if (!visible) show ();
-
-            // Scroll to the new player
-            carousel.scroll_to (player);
-            uint children_length = carousel.get_children ().length ();
-            if (children_length > 1) {
-                button_prev.show ();
-                button_next.show ();
+        private bool check_player_metadata_empty (string name) {
+            MprisPlayer ? player = players.lookup (name);
+            if (player == null) return true;
+            HashTable<string, Variant> metadata = player.source.media_player.metadata;
+            if (metadata == null || metadata.size () == 0) {
+                debug ("Metadata is empty");
+                return true;
             }
+            return false;
         }
 
-        private void remove_player (string name) {
-            string ? key;
-            MprisPlayer ? player;
-            bool result = players.lookup_extended (name, out key, out player);
-            if (!result || key == null || player == null) return;
-            player.before_destroy ();
-            player.destroy ();
-            players.remove (name);
+        private bool check_carousel_has_player (MprisPlayer player) {
+            return player != null && player.parent == carousel;
+        }
 
-            uint children_length = carousel.get_children ().length ();
+        private void add_player_to_carousel (string name) {
+            MprisPlayer ? player = players.lookup (name);
+            if (player == null || check_carousel_has_player (player)) return;
+            // HACK: The carousel doesn't focus the prepended player when not mapped.
+            carousel.append (player);
+            carousel.reorder (player, 0);
+
+            if (carousel.n_pages > 1) {
+                button_prev.show ();
+                button_next.show ();
+                // Scroll to the new player
+                carousel.scroll_to (player, false);
+            }
+            if (!visible) show ();
+
+        }
+
+        private void add_player (string name, MprisSource source) {
+            MprisPlayer player = new MprisPlayer (source, mpris_config);
+            player.add_css_class ("%s-player".printf (css_class_name));
+            players.set (name, player);
+
+            if (mpris_config.autohide) {
+                player.content_updated.connect (() => {
+                    if (!check_player_metadata_empty (name)) {
+                        add_player_to_carousel (name);
+                    } else {
+                        remove_player_from_carousel (name);
+                    }
+                });
+                if (check_player_metadata_empty (name)) return;
+            }
+
+            add_player_to_carousel (name);
+        }
+
+        private void remove_player_from_carousel (string name) {
+            MprisPlayer ? player = players.lookup (name);
+            if (player == null || !check_carousel_has_player (player)) return;
+            carousel.remove (player);
+
+            uint children_length = carousel.n_pages;
             if (children_length == 0) {
                 hide ();
             }
@@ -235,13 +245,42 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             }
         }
 
+        private void remove_player (string name) {
+            string ? key;
+            MprisPlayer ? player;
+            bool result = players.lookup_extended (name, out key, out player);
+            if (!result || key == null || player == null) return;
+
+            remove_player_from_carousel (name);
+
+            player.before_destroy ();
+            players.remove (name);
+        }
+
         private void change_carousel_position (int delta) {
-            GLib.List<weak Gtk.Widget> children = carousel.get_children ();
-            int children_length = (int) children.length ();
+            uint children_length = carousel.n_pages;
             if (children_length == 0) return;
-            int position = ((int) carousel.position + delta).clamp (
-                0, children_length - 1);
-            carousel.scroll_to (children.nth_data (position));
+            uint position;
+            if (mpris_config.loop_carousel) {
+                position = ((uint) carousel.position + delta) % children_length;
+            } else {
+                position = ((uint) carousel.position + delta)
+                    .clamp (0, (children_length - 1));
+            }
+            carousel.scroll_to (carousel.get_nth_page (position), true);
+        }
+
+        private bool is_blacklisted (string name) {
+            foreach (string blacklistedPattern in mpris_config.blacklist) {
+                if (blacklistedPattern == null || blacklistedPattern.length == 0) {
+                    continue;
+                }
+                if (GLib.Regex.match_simple (blacklistedPattern, name, RegexCompileFlags.DEFAULT, 0)) {
+                    message ("\"%s\" is blacklisted", name);
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

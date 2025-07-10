@@ -9,8 +9,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
         public const string INTERFACE_PATH = "/org/mpris/MediaPlayer2";
 
-        private MprisSource (MprisMediaPlayer _meddia_player, DbusPropChange _props) {
-            this.media_player = _meddia_player;
+        private MprisSource (MprisMediaPlayer _media_player, DbusPropChange _props) {
+            this.media_player = _media_player;
             this.props = _props;
             this.props.properties_changed.connect (
                 (i, c, inv) => properties_changed (i, c, inv));

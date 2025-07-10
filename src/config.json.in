@@ -79,6 +79,7 @@
       "loop-carousel": false
     },
     "buttons-grid": {
+      "buttons-per-row": 7,
       "actions": [
         {
           "label": "直",

@@ -516,12 +516,14 @@ config file to be able to detect config errors
 					type: string ++
 					optional: true ++
 					default: "" ++
-					description: command to set the value ++
+					description: command to set the value. Use $value to get ++
+					the current value. ++
 				cmd_getter: ++
 					type: string ++
 					optional: true ++
 					default: "" ++
-					description: command to get the actual value ++
+					description: command to get the actual value. ++
+					Use $value to get the current value. ++
 				min: ++
 					type: integer ++
 					optional: true ++

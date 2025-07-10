@@ -545,12 +545,12 @@
         },
         "cmd_setter": {
           "type": "string",
-          "description": "command to set the value",
+          "description": "command to set the value. Use $value to get the current value",
           "default": ""
         },
         "cmd_getter": {
           "type": "string",
-          "description": "command to get the actual value",
+          "description": "command to get the actual value. Use $value to get the current value",
           "default": ""
         },
         "min": {

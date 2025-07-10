@@ -471,6 +471,8 @@ config file to be able to detect config errors
 			type: object ++
 			css class: widget-buttons (access buttons with >flowbox>flowboxchild>button) ++
 			properties: ++
+				buttons-per-row: ++
+				    type: number ++
 				actions: ++
 					type: array ++
 					Default values: [] ++

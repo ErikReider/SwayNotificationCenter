@@ -434,6 +434,10 @@
       "description": "A widget to add a grid of buttons that execute shell commands",
       "additionalProperties": false,
       "properties": {
+        "buttons-per-row": {
+          "type": "number",
+          "description": "How many buttons should be shown in a buttons-grid row"
+        },
         "actions": {
           "type": "array",
           "description": "A list of actions containing a label and a command",

@@ -82,6 +82,8 @@ namespace SwayNotificationCenter {
         public string image_path { get; set; }
         public string desktop_entry { get; set; }
         public string category { get; set; }
+        public string sound_name { get; set; }
+        public string sound_file { get; set; }
         public bool resident { get; set; }
         public bool transient { get; set; }
         public UrgencyLevels urgency { get; set; }
@@ -250,6 +252,16 @@ namespace SwayNotificationCenter {
                             category = hint_value.get_string ();
                         }
                         break;
+                    case "sound-name":
+                        if (hint_value.is_of_type (VariantType.STRING)) {
+                            sound_name = hint_value.get_string ();
+                        }
+                        break;
+                    case "sound-file":
+                        if (hint_value.is_of_type (VariantType.STRING)) {
+                            sound_file = hint_value.get_string ();
+                        }
+                        break;
                     case "resident":
                         if (hint_value.is_of_type (VariantType.BOOLEAN)) {
                             resident = hint_value.get_boolean ();
@@ -336,6 +348,8 @@ namespace SwayNotificationCenter {
             params.set ("image_path", image_path);
             params.set ("desktop_entry", desktop_entry);
             params.set ("category", category);
+            params.set ("sound_name", sound_name);
+            params.set ("sound_file", sound_file);
             params.set ("resident", resident.to_string ());
             params.set ("urgency", urgency.to_string ());
             string[] _actions = {};

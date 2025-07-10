@@ -751,6 +751,14 @@ config file to be able to detect config errors
 			type: string ++
 			optional: true ++
 			description: Which category the notification belongs to. Uses Regex.++
+		*sound-file*++
+			type: string ++
+			optional: true ++
+			description: Which sound file the notification requested. Uses Regex.++
+		*sound-name*++
+			type: string ++
+			optional: true ++
+			description: Which sound name the notification requested. Uses Regex.++
 		*run-on*++
 			type: string ++
 			optional: true ++
@@ -781,15 +789,17 @@ config file to be able to detect config errors
 
 	You can also use these environment variables in your script:
 ```
-SWAYNC_BODY="Notification body content"
-SWAYNC_DESKTOP_ENTRY="Desktop entry"
-SWAYNC_URGENCY="Notification urgency"
-SWAYNC_TIME="Notification time"
-SWAYNC_APP_NAME="Notification app name"
-SWAYNC_CATEGORY="SwayNC notification category"
-SWAYNC_REPLACES_ID="ID of notification to replace"
-SWAYNC_ID="SwayNC notification ID"
-SWAYNC_SUMMARY="Notification summary"
-SWAYNC_HINT_[NAME]="Value of the hint [NAME]"
+$SWAYNC_BODY="Notification body content"
+$SWAYNC_DESKTOP_ENTRY="Desktop entry"
+$SWAYNC_URGENCY="Notification urgency"
+$SWAYNC_TIME="Notification time"
+$SWAYNC_APP_NAME="Notification app name"
+$SWAYNC_CATEGORY="SwayNC notification category"
+$SWAYNC_REPLACES_ID="ID of notification to replace"
+$SWAYNC_ID="SwayNC notification ID"
+$SWAYNC_SUMMARY="Notification summary"
+$SWAYNC_HINT_[NAME]="Value of the hint [NAME]"
+$SWAYNC_SOUND_NAME="The name of the requested sound"
+$SWAYNC_SOUND_FILE="The file path of the requested sound"
 ```
 #END scripting

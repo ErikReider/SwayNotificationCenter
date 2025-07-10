@@ -695,10 +695,16 @@ namespace SwayNotificationCenter {
             }
 
             int notification_icon_size = ConfigModel.instance.notification_icon_size.clamp (-1, int.MAX);
+            if (notification_icon_size < 1) {
+                notification_icon_size = -1;
+            }
             img.set_pixel_size (notification_icon_size);
             img.height_request = notification_icon_size;
             img.width_request = notification_icon_size;
             int app_icon_size = (notification_icon_size / 3).clamp (-1, int.MAX);
+            if (app_icon_size < 1) {
+                app_icon_size = -1;
+            }
             img_app_icon.set_pixel_size (app_icon_size);
 
             bool img_path_is_theme_icon = false;

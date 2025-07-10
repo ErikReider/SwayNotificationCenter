@@ -16,7 +16,7 @@
   --bg-selected: rgb(0, 128, 255);
 
   --notification-icon-size: 64px;
-  --notification-app-icon-size: var(--notification-icon-size) / 3;
+  --notification-app-icon-size: calc(var(--notification-icon-size) / 3);
   --notification-group-icon-size: 32px;
 }
 

@@ -8,7 +8,7 @@ public class XdgActivationHelper : Object {
     private Activation * xdg_activation = null;
 
     public XdgActivationHelper () {
-        unowned Wl.Display wl_display = get_wl_display ();
+        unowned Wl.Display wl_display = Functions.get_wl_display ();
         var wl_registry = wl_display.get_registry ();
         wl_registry.add_listener (registry_listener, this);
 
@@ -48,13 +48,13 @@ public class XdgActivationHelper : Object {
             return null;
         }
 
-        unowned Wl.Display wl_display = get_wl_display ();
-        unowned Gdk.Window ? window = widget.get_window ();
-        if (window == null) {
+        unowned Wl.Display wl_display = Functions.get_wl_display ();
+        unowned Gtk.Root ? root = widget.get_root ();
+        if (root == null) {
             warning ("GDK Window is null");
             return null;
         }
-        unowned Wl.Surface wl_surface = get_wl_surface (window);
+        unowned Wl.Surface wl_surface = Functions.get_wl_surface (root.get_surface ());
 
         Value token_value = Value (typeof (string));
         token_value.set_string (null);

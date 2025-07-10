@@ -1,7 +1,6 @@
-SwayNotificationCenter
-======================
+# SwayNotificationCenter
 
-[![Check PKGBUILD builds for Arch.](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/PKGBUILD-buildd.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/PKGBUILD-buildd.yml)
+[![Check PKGBUILD builds for Arch.](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/PKGBUILD-build.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/PKGBUILD-buildd.yml)
 [![Check build for Fedora.](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/fedora-build.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/fedora-build.yml)
 [![Check build for latest Ubuntu LTS.](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/ubuntu-build.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/ubuntu-build.yml)
 [![Linting](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/linting.yml/badge.svg)](https://github.com/ErikReider/SwayNotificationCenter/actions/workflows/linting.yml)
@@ -21,8 +20,7 @@ https://github.com/ErikReider/SwayNotificationCenter/assets/35975961/93ff072f-e6
 
 ![Screenshot of panel](./assets/panel.png)
 
-Table of Contents
-=================
+## Table of Contents
 
   * [Want to show off your sick config?](#want-to-show-off-your-sick-config)
   * [Features](#features)
@@ -49,6 +47,7 @@ Table of Contents
      * [Disable scripting](#disable-scripting)
   * [i3status-rs Example](#i3status-rs-example)
   * [Waybar Example](#waybar-example)
+  * [Debugging Environment Variables](#debugging-environment-variables)
 
 ## Want to show off your sick config?
 
@@ -154,7 +153,6 @@ Lunar and later:
 sudo apt install sway-notification-center
 ```
 
-
 ### Debian
 
 Bookworm and later:
@@ -166,6 +164,7 @@ sudo apt install sway-notification-center
 ### Guix
 
 The simplest way is to install it to user's profile:
+
 ```zsh
 guix install swaynotificationcenter
 ```
@@ -173,7 +172,8 @@ guix install swaynotificationcenter
 But we recommend to use [Guix Home](https://guix.gnu.org/manual/devel/en/html_node/Home-Configuration.html) to manage packages and their configurations declaratively.
 
 ### rde
-```
+
+```scm
 (use-modules (rde features wm))
 
 ;; Include the following code into the list of your rde features:
@@ -186,19 +186,20 @@ But we recommend to use [Guix Home](https://guix.gnu.org/manual/devel/en/html_no
 
 - `vala >= 0.56`
 - `meson`
+- `blueprint-compiler`
 - `git`
 - `scdoc`
 - `sassc`
-- `gtk3`
-- `gtk-layer-shell`
+- `gtk4`
+- `gtk4-layer-shell`
 - `dbus`
 - `glib2`
 - `gobject-introspection`
 - `libgee`
 - `json-glib`
-- `libhandy`
+- `libadwaita`
 - `gvfs`
-- `granite`
+- `granite7`
 
 ##### Optional Dependencies
 
@@ -446,3 +447,15 @@ Alternatively, the number of notifications can be shown by adding `{}` anywhere 
     // ...
   },
 ```
+
+## Debugging Environment Variables
+
+- `G_MESSAGES_DEBUG=all`: Displays all of the debug messages.
+- `GTK_DEBUG=interactive`: Opens the GTK Inspector.
+- `G_ENABLE_DIAGNOSTIC=1`: If set to a non-zero value, this environment variable
+  enables diagnostic messages, like deprecation messages for GObject properties
+  and signals.
+- `G_DEBUG=fatal_criticals` or `G_DEBUG=fatal_warnings`: Causes GLib to abort
+  the program at the first call to g_warning() or g_critical().
+
+More can be read [here](https://www.manpagez.com/html/glib/glib-2.56.0/glib-running.php)

@@ -2,7 +2,7 @@
 %global alt_pkg_name swaync
 
 Name:       {{{ git_repo_name }}}
-Version:    0.10.1
+Version:    0.11.0
 Release:    1%{?dist}
 Summary:    Notification daemon with GTK GUI
 Provides:   desktop-notification-daemon
@@ -13,23 +13,24 @@ URL:        https://github.com/ErikReider/SwayNotificationCenter
 VCS:        {{{ git_repo_vcs }}}
 Source:     {{{ git_repo_pack }}}
 
-BuildRequires:  meson >= 0.51.0
+BuildRequires:  meson >= 1.5.1
 BuildRequires:  vala >= 0.56
 BuildRequires:  scdoc
-BuildRequires:  pkgconfig(gtk+-3.0) >= 3.22
-BuildRequires:  pkgconfig(gtk-layer-shell-0) >= 0.1
+BuildRequires:  pkgconfig(gtk4) >= 4.16
+BuildRequires:  pkgconfig(gtk4-layer-shell-0) >= 1.0.3
 BuildRequires:  pkgconfig(json-glib-1.0) >= 1.0
-BuildRequires:  pkgconfig(libhandy-1) >= 1.4.0
+BuildRequires:  pkgconfig(libadwaita-1) >= 1.6.5
 BuildRequires:  pkgconfig(glib-2.0) >= 2.50
 BuildRequires:  pkgconfig(gobject-introspection-1.0) >= 1.68
 BuildRequires:  pkgconfig(gee-0.8) >= 0.20
 BuildRequires:  pkgconfig(bash-completion)
 BuildRequires:  pkgconfig(fish)
 BuildRequires:  pkgconfig(libpulse)
-BuildRequires:  pkgconfig(granite)
+BuildRequires:  pkgconfig(granite-7)
 BuildRequires:  systemd-devel
 BuildRequires:  systemd
 BuildRequires:  sassc
+BuildRequires:  blueprint-compiler >= 0.16
 BuildRequires:  granite-devel
 
 Requires:       gvfs

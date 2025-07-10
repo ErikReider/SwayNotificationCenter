@@ -1,0 +1,184 @@
+using Gtk 4.0;
+
+template $SwayNotificationCenterNotification: Box {
+  hexpand: true;
+
+  styles [
+    "notification-row",
+  ]
+
+  Revealer revealer {
+    transition-type: crossfade;
+    reveal-child: false;
+    hexpand: true;
+
+    child: $DismissibleWidget dismissible_widget {
+      halign: fill;
+      valign: fill;
+
+      child: Overlay base_widget {
+        hexpand: true;
+
+        styles [
+          "notification-background",
+        ]
+
+        $IterBox base_box {
+          orientation: vertical;
+          overflow: hidden;
+
+          styles [
+            "notification",
+          ]
+
+          Box default_action {
+            orientation: vertical;
+
+            styles [
+              "notification-default-action",
+            ]
+
+            Box {
+              orientation: vertical;
+              spacing: 8;
+
+              styles [
+                "notification-content",
+              ]
+
+              Box {
+                // Box with images/icons
+                Overlay {
+                  halign: center;
+                  valign: center;
+
+                  child: Image img {
+                    // pixel-size: 48;
+                    valign: center;
+                    overflow: hidden;
+
+                    styles [
+                      "image",
+                    ]
+                  };
+
+                  [overlay]
+                  Image img_app_icon {
+                    // pixel-size: 48;
+                    halign: end;
+                    valign: end;
+                    overflow: hidden;
+
+                    styles [
+                      "app-icon",
+                    ]
+                  }
+                }
+
+                // Body, summary, and time
+                Box {
+                  hexpand: true;
+                  vexpand: true;
+                  valign: center;
+                  orientation: vertical;
+
+                  styles [
+                    "text-box",
+                  ]
+
+                  Box {
+                    orientation: horizontal;
+                    valign: center;
+
+                    Label summary {
+                      justify: left;
+                      ellipsize: end;
+                      wrap: false;
+                      xalign: 0;
+                      hexpand: true;
+
+                      styles [
+                        "summary",
+                      ]
+                    }
+
+                    Label time {
+                      justify: left;
+                      ellipsize: none;
+                      valign: start;
+
+                      styles [
+                        "time",
+                      ]
+                    }
+                  }
+
+                  Label body {
+                    ellipsize: end;
+                    justify: left;
+                    wrap-mode: word_char;
+                    natural-wrap-mode: word;
+                    lines: 1;
+                    xalign: 0;
+                    yalign: 0;
+                    hexpand: true;
+
+                    styles [
+                      "body",
+                    ]
+                  }
+                }
+              }
+
+              ProgressBar progress_bar {
+                orientation: horizontal;
+              }
+
+              Picture body_image {
+                halign: center;
+                overflow: hidden;
+              }
+
+              Box inline_reply_box {
+                styles [
+                  "inline-reply",
+                ]
+
+                Entry inline_reply_entry {
+                  input-purpose: free_form;
+                  input-hints: spellcheck | emoji;
+                  hexpand: true;
+
+                  styles [
+                    "inline-reply-entry",
+                  ]
+                }
+
+                Button inline_reply_button {
+                  styles [
+                    "inline-reply-button",
+                  ]
+                }
+              }
+            }
+          }
+
+          FlowBox alt_actions_box {
+            orientation: horizontal;
+            homogeneous: true;
+            overflow: hidden;
+            selection-mode: none;
+            activate-on-single-click: true;
+
+            styles [
+              "notification-alt-actions",
+            ]
+          }
+        }
+
+        [overlay]
+        $SwayNotificationCenterNotificationCloseButton close_button {}
+      };
+    };
+  }
+}

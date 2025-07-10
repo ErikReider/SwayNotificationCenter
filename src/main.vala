@@ -1,15 +1,18 @@
 namespace SwayNotificationCenter {
     static SwayncDaemon swaync_daemon;
+    // Args
     static string ? style_path;
     static string ? config_path;
-
-    static uint layer_shell_protocol_version = 3;
+    // Dev args
+    static bool skip_packaged_css = false;
 
     static Settings self_settings;
 
-    public void main (string[] args) {
-        Gtk.init (ref args);
-        Hdy.init ();
+    static bool activated = false;
+
+    public int main (string[] args) {
+        Gtk.init ();
+        Adw.init ();
         Functions.init ();
 
         self_settings = new Settings ("org.erikreider.swaync");
@@ -22,6 +25,9 @@ namespace SwayNotificationCenter {
                     case "--style":
                         style_path = args[++i];
                         break;
+                    case "--skip-system-css":
+                        skip_packaged_css = true;
+                        break;
                     case "-c":
                     case "--config":
                         config_path = args[++i];
@@ -29,35 +35,54 @@ namespace SwayNotificationCenter {
                     case "-v":
                     case "--version":
                         stdout.printf ("%s\n", Constants.VERSION);
-                        return;
+                        return 0;
                     case "-h":
                     case "--help":
+                        print_help (args);
+                        return 0;
                     default:
                         print_help (args);
-                        return;
+                        return 1;
                 }
             }
         }
 
-        ConfigModel.init (config_path);
-        Functions.load_css (style_path);
+        var app = new Gtk.Application ("org.erikreider.swaync",
+                                       ApplicationFlags.DEFAULT_FLAGS);
+        app.activate.connect (() => {
+            if (activated) {
+                return;
+            }
+            activated = true;
+            ConfigModel.init (config_path);
+            Functions.load_css (style_path);
 
-        if (ConfigModel.instance.layer_shell) {
-            layer_shell_protocol_version = GtkLayerShell.get_protocol_version ();
-        }
+            app.hold ();
 
-        swaync_daemon = new SwayncDaemon ();
-        Bus.own_name (BusType.SESSION, "org.erikreider.swaync.cc",
-                      BusNameOwnerFlags.NONE,
-                      on_cc_bus_aquired,
-                      () => {},
-                      () => {
-            stderr.printf (
-                "Could not acquire swaync name!...\n");
-            Process.exit (1);
+            swaync_daemon = new SwayncDaemon ();
+            Bus.own_name (BusType.SESSION, "org.erikreider.swaync.cc",
+                          BusNameOwnerFlags.NONE,
+                          on_cc_bus_aquired,
+                          () => {},
+                          () => {
+                stderr.printf (
+                    "Could not acquire swaync name!...\n");
+                Process.exit (1);
+            });
+
+            app.add_window (swaync_daemon.noti_daemon.control_center);
         });
 
-        Gtk.main ();
+        try {
+            app.register ();
+            if (app.get_is_remote ()) {
+                printerr ("An instance of SwayNotificationCenter is already running!\n");
+            }
+        } catch (Error e) {
+            error (e.message);
+        }
+
+        return app.run ();
     }
 
     void on_cc_bus_aquired (DBusConnection conn) {
@@ -78,5 +103,6 @@ namespace SwayNotificationCenter {
         print ("Options:\n");
         print ("\t -s, --style \t\t Use a custom Stylesheet file\n");
         print ("\t -c, --config \t\t Use a custom config file\n");
+        print ("\t --skip-system-css \t Skip trying to parse the packaged Stylesheet file. Useful for CSS debugging\n");
     }
 }

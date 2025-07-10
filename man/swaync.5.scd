@@ -100,6 +100,12 @@ config file to be able to detect config errors
 	default: 500 ++
 	description: Width of the notification in pixels
 
+*notification-window-height* ++
+	type: integer ++
+	default: -1 ++
+	description: Max height of the notification in pixels. -1 to use ++
+				 the full amount of space given by the compositor.
+
 *keyboard-shortcuts* ++
 	type: bool ++
 	default: true ++
@@ -325,16 +331,6 @@ config file to be able to detect config errors
 				widget-mpris-title ++
 				widget-mpris-subtitle ++
 			properties: ++
-				image-size: ++
-					type: integer ++
-					optional: true ++
-					default: 96 ++
-					description: The size of the album art. ++
-				image-radius: ++
-					type: integer ++
-					optional: true ++
-					default: 12 ++
-					description: The border radius of the album art. ++
 				blacklist: ++
 					type: array ++
 					optional: true ++
@@ -344,6 +340,25 @@ config file to be able to detect config errors
 						type: string ++
 						description: Audio source/app name. Regex alowed. Hint ++
 							`$ qdbus | grep mpris` to find source names. ++
+				autohide: ++
+					type: bool ++
+					optional: true ++
+					default: false ++
+					description: Whether to hide the widget when the ++
+								 player has no metadata. ++
+				show-album-art: ++
+					type: string ++
+					optional: true ++
+					default: "always" ++
+					description: Whether or not the album art should be ++
+								 hidden, always visible, or only visible ++
+								 when a valid album art is provided. ++
+					enum: ["right", "left"] ++
+				loop-carousel: ++
+					type: bool ++
+					optional: true ++
+					default: false ++
+					description: Whether to loop through the mpris carousel. ++
 			description: A widget that displays multiple music players. ++
 		*menubar*++
 			type: object ++
@@ -526,11 +541,6 @@ config file to be able to detect config errors
 					optional: true ++
 					default: "⇩" ++
 					description: Label displayed on button to hide per app volume control ++
-				icon-size: ++
-					type: integer ++
-					optional: true ++
-					default: 24 ++
-					description: Size of the application icon in per app volume control ++
 				animation-type: ++
 					type: string ++
 					optional: true ++
@@ -608,9 +618,10 @@ config file to be able to detect config errors
 			"text": "Label Text"
 		},
 		"mpris": {
-			"image-size": 96,
-			"image-radius": 12,
-			"blacklist": ["playerctld"]
+			"blacklist": ["playerctld"],
+			"autohide": true,
+			"show-album-art": "always",
+			"loop-carousel": false
 		},
 		"menubar": {
 			"menu#power": {

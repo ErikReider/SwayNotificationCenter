@@ -34,8 +34,8 @@ namespace SwayNotificationCenter.Widgets {
             this.swaync_daemon = swaync_daemon;
             this.noti_daemon = noti_daemon;
 
-            get_style_context ().add_class (css_class_name);
-            if (suffix.length > 0) get_style_context ().add_class (suffix);
+            add_css_class (css_class_name);
+            if (suffix.length > 0) add_css_class (suffix);
         }
 
         protected Json.Object ? get_config (Gtk.Widget widget) {
@@ -108,7 +108,7 @@ namespace SwayNotificationCenter.Widgets {
                 string t = actions.get_object_element (i).get_string_member_with_default ("type", "normal");
                 ButtonType type = ButtonType.parse (t);
                 string update_command =
-                  actions.get_object_element (i).get_string_member_with_default ("update-command", "");
+                    actions.get_object_element (i).get_string_member_with_default ("update-command", "");
                 bool active = actions.get_object_element (i).get_boolean_member_with_default ("active", false);
                 res[i] = Action () {
                     label = label,

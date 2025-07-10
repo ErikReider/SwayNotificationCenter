@@ -165,6 +165,11 @@
       "description": "If control center should use keyboard shortcuts",
       "default": true
     },
+    "notification-grouping": {
+      "type": "boolean",
+      "description": "If notifications should be grouped by app name",
+      "default": true
+    },
     "image-visibility": {
       "type": "string",
       "description": "The notification image visibility when no icon is available.",

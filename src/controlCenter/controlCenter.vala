@@ -708,7 +708,7 @@ namespace SwayNotificationCenter {
             if (param.name_id.length > 0) {
                 noti_groups_name.lookup_extended (param.name_id, null, out group);
             }
-            if (group == null) {
+            if (group == null || ConfigModel.instance.notification_grouping == false) {
                 group = new NotificationGroup (param.name_id, param.display_name);
                 // Collapse other groups on expand
                 group.on_expand_change.connect ((expanded) => {

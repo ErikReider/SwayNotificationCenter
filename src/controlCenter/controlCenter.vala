@@ -267,7 +267,7 @@ namespace SwayNotificationCenter {
             switch (Gdk.keyval_name (keyval)) {
                 case "z": // TODO: always inhibited?
                     if (state == Gdk.ModifierType.CONTROL_MASK) {
-                        if (group != null && notification_history.length > 0) {
+                        if (notification_history.length > 0) {
                             //  var latest = ((NotificationGroup) list_box.get_first_child ()).get_latest_notification ();
                             var restored_params = notification_history.pop_head ().param;
                             //  restored_params.applied_id = latest.param.applied_id;

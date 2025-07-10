@@ -239,6 +239,14 @@
               "type": "string",
               "description": "Which category the notification belongs to. Uses Regex."
             },
+            "sound-file": {
+              "type": "string",
+              "description": "Which sound file the notification requested. Uses Regex."
+            },
+            "sound-name": {
+              "type": "string",
+              "description": "Which sound name the notification requested. Uses Regex."
+            },
             "run-on": {
               "type": "string",
               "description": "Whether to run the script on an action being activated, or when the notification is received.",

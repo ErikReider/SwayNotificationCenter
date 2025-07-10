@@ -339,6 +339,9 @@
         "^menubar(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
           "$ref": "#/widgets/menubar"
         },
+        "^slider(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
+          "$ref": "#/widgets/slider"
+        },
         "^volume(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
           "$ref": "#/widgets/volume"
         },
@@ -466,9 +469,9 @@
                 "default": ""
               },
               "active": {
-                  "type": "boolean",
-                  "description": "Wether the toggle button is active as default or not",
-                  "default": false
+                "type": "boolean",
+                "description": "Wether the toggle button is active as default or not",
+                "default": false
               }
             }
           }
@@ -502,13 +505,13 @@
               "description": "Animation type for menu",
               "enum": ["slide_down", "slide_up", "none"]
             },
-            "animation-duration":{
+            "animation-duration": {
               "type": "integer",
               "default": 250,
               "description": "Duration of animation in milliseconds"
             },
             "actions": {
-              "$ref" : "#/widgets/buttons-grid/properties/actions"
+              "$ref": "#/widgets/buttons-grid/properties/actions"
             }
           }
         },
@@ -524,9 +527,56 @@
               "enum": ["right", "left"]
             },
             "actions": {
-              "$ref" : "#/widgets/buttons-grid/properties/actions"
+              "$ref": "#/widgets/buttons-grid/properties/actions"
             }
           }
+        }
+      }
+    },
+    "slider": {
+      "type": "object",
+      "description": "general slider control",
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Text displayed in front of the slider",
+          "default": "slider"
+        },
+        "cmd_setter": {
+          "type": "string",
+          "description": "command to set the value. Use $value to get the current value",
+          "default": ""
+        },
+        "cmd_getter": {
+          "type": "string",
+          "description": "command to get the actual value. Use $value to get the current value",
+          "default": ""
+        },
+        "min": {
+          "type": "integer",
+          "description": "minimum value of the slider range",
+          "default": 0
+        },
+        "max": {
+          "type": "integer",
+          "description": "maximum value of the slider range",
+          "default": 100
+        },
+        "min_limit": {
+          "type": "integer",
+          "description": "limit minimum value of the slider",
+          "default": 0
+        },
+        "max_limit": {
+          "type": "integer",
+          "description": "limit maximum value of the slider",
+          "default": 100
+        },
+        "value_scale": {
+          "type": "integer",
+          "default": 0,
+          "description": "scale small value, slider round digits"
         }
       }
     },
@@ -582,7 +632,7 @@
           "description": "Animation type for menu",
           "enum": ["slide_down", "slide_up", "none"]
         },
-        "animation-duration":{
+        "animation-duration": {
           "type": "integer",
           "default": 250,
           "description": "Duration of animation in milliseconds"

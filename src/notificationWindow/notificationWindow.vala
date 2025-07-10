@@ -65,6 +65,14 @@ namespace SwayNotificationCenter {
 
             // set_resizable (false);
             default_width = ConfigModel.instance.notification_window_width;
+
+            // Change output on config reload
+            app.config_reload.connect ((old, config) => {
+                if (old.notification_window_preferred_output
+                    != config.notification_window_preferred_output) {
+                    set_anchor ();
+                }
+            });
         }
 
         protected override void size_allocate (int w, int h, int baseline) {
@@ -189,6 +197,10 @@ namespace SwayNotificationCenter {
                     list.direction = AnimatedListDirection.BOTTOM_TO_TOP;
                     break;
             }
+
+            // Set the preferred monitor
+            set_monitor (Functions.try_get_monitor (
+                ConfigModel.instance.notification_window_preferred_output));
         }
 
         public void change_visibility (bool value) {
@@ -326,6 +338,10 @@ namespace SwayNotificationCenter {
             Notification noti = (Notification) item.child;
             noti.click_alt_action (action);
             noti.close_notification ();
+        }
+
+        public void set_monitor (Gdk.Monitor ? monitor) {
+            GtkLayerShell.set_monitor (this, monitor);
         }
     }
 }

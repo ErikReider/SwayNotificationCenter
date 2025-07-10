@@ -17,8 +17,6 @@ namespace SwayNotificationCenter {
         public signal void inhibited_changed (uint length);
 
         private Array<BlankWindow> blank_windows = new Array<BlankWindow> ();
-        private unowned Gdk.Display ? display = Gdk.Display.get_default ();
-        private unowned GLib.ListModel ? monitors = null;
 
         // Only set on swaync start due to some limitations of GtkLayerShell
         [DBus (visible = false)]
@@ -65,14 +63,21 @@ namespace SwayNotificationCenter {
                 stderr.printf (e.message + "\n");
             }
 
-            /// Blank windows
-
-            if (display == null) return;
-            monitors = display.get_monitors ();
             monitors.items_changed.connect (() => {
+                // Blank windows
                 close_blank_windows ();
                 bool visibility = noti_daemon.control_center.get_visibility ();
                 init_blank_windows (visibility);
+
+                // Set preferred output
+                noti_daemon.control_center.set_monitor (
+                    Functions.try_get_monitor (
+                        ConfigModel.instance.control_center_preferred_output));
+                if (!NotificationWindow.is_null) {
+                    NotificationWindow.instance.set_monitor (
+                        Functions.try_get_monitor (
+                            ConfigModel.instance.notification_window_preferred_output));
+                }
             });
             init_blank_windows (false);
         }

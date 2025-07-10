@@ -219,6 +219,14 @@ namespace SwayNotificationCenter {
             stack.set_visible_child_name (STACK_PLACEHOLDER_PAGE);
 
             add_widgets ();
+
+            // Change output on config reload
+            app.config_reload.connect ((old, config) => {
+                if (old.control_center_preferred_output
+                    != config.control_center_preferred_output) {
+                    set_anchor ();
+                }
+            });
         }
 
         // Scroll to the expanded group once said group has fully expanded
@@ -513,6 +521,10 @@ namespace SwayNotificationCenter {
             // Use a custom layout to limit the minimum size above to the size
             // of the window so that it doesn't exceed the monitors edge
             window.child.set_layout_manager (new FixedViewportLayout (window));
+
+            // Set the preferred monitor
+            set_monitor (Functions.try_get_monitor (
+                ConfigModel.instance.control_center_preferred_output));
         }
 
         /**
@@ -781,6 +793,10 @@ namespace SwayNotificationCenter {
 
         public bool get_visibility () {
             return this.visible;
+        }
+
+        public void set_monitor (Gdk.Monitor ? monitor) {
+            GtkLayerShell.set_monitor (this, monitor);
         }
     }
 }

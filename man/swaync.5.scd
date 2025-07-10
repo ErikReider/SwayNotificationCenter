@@ -247,6 +247,8 @@ config file to be able to detect config errors
 			optional: true ++
 		*buttons-grid*++
 			optional: true ++
+		*slider*++
+			optional: true ++
 #START pulse-audio
 		*volume*++
 			optional: true ++
@@ -359,6 +361,11 @@ config file to be able to detect config errors
 								 hidden, always visible, or only visible ++
 								 when a valid album art is provided. ++
 					enum: ["right", "left"] ++
+				loop-carousel: ++
+					type: bool ++
+					optional: true ++
+					default: false ++
+					description: Whether to loop through the mpris carousel. ++
 			description: A widget that displays multiple music players. ++
 		*menubar*++
 			type: object ++
@@ -471,6 +478,8 @@ config file to be able to detect config errors
 			type: object ++
 			css class: widget-buttons (access buttons with >flowbox>flowboxchild>button) ++
 			properties: ++
+				buttons-per-row: ++
+				    type: number ++
 				actions: ++
 					type: array ++
 					Default values: [] ++
@@ -499,6 +508,53 @@ config file to be able to detect config errors
 								description: Wether the toggle button is active as default or not ++
 					description: A list of actions containing a label and a command ++
 			description: A grid of buttons that execute shell commands ++
+		*slider*++
+			type: object ++
+			css class: widget-slider ++
+			properties: ++
+				label: ++
+					type: string ++
+					optional: true ++
+					default: "slider" ++
+					description: Text displayed in front of the slider ++
+				cmd_setter: ++
+					type: string ++
+					optional: true ++
+					default: "" ++
+					description: command to set the value. Use $value to get ++
+					the current value. ++
+				cmd_getter: ++
+					type: string ++
+					optional: true ++
+					default: "" ++
+					description: command to get the actual value. ++
+					Use $value to get the current value. ++
+				min: ++
+					type: integer ++
+					optional: true ++
+					default: 0 ++
+					description: minimum value of the slider range ++
+				max: ++
+					type: integer ++
+					optional: true ++
+					default: 100 ++
+					description: maximum value of the slider range ++
+				min_limit: ++
+					type: integer ++
+					optional: true ++
+					default: 0 ++
+					description: limit minimum value of the slider ++
+				max_limit: ++
+					type: integer ++
+					optional: true ++
+					default: 100 ++
+					description: limit maximum value of the slider ++
+				value_scale: ++
+					type: integer ++
+					optional: true ++
+					default: 0 ++
+					description: scale small value, slider round digits ++
+			description: general slider control ++
 #START pulse-audio
 		*volume*++
 			type: object ++
@@ -620,7 +676,8 @@ config file to be able to detect config errors
 		"mpris": {
 			"blacklist": ["playerctld"],
 			"autohide": true,
-			"show-album-art": "always"
+			"show-album-art": "always",
+			"loop-carousel": false
 		},
 		"menubar": {
 			"menu#power": {
@@ -699,6 +756,14 @@ config file to be able to detect config errors
 			type: string ++
 			optional: true ++
 			description: Which category the notification belongs to. Uses Regex.++
+		*sound-file*++
+			type: string ++
+			optional: true ++
+			description: Which sound file the notification requested. Uses Regex.++
+		*sound-name*++
+			type: string ++
+			optional: true ++
+			description: Which sound name the notification requested. Uses Regex.++
 		*run-on*++
 			type: string ++
 			optional: true ++
@@ -729,15 +794,17 @@ config file to be able to detect config errors
 
 	You can also use these environment variables in your script:
 ```
-SWAYNC_BODY="Notification body content"
-SWAYNC_DESKTOP_ENTRY="Desktop entry"
-SWAYNC_URGENCY="Notification urgency"
-SWAYNC_TIME="Notification time"
-SWAYNC_APP_NAME="Notification app name"
-SWAYNC_CATEGORY="SwayNC notification category"
-SWAYNC_REPLACES_ID="ID of notification to replace"
-SWAYNC_ID="SwayNC notification ID"
-SWAYNC_SUMMARY="Notification summary"
-SWAYNC_HINT_[NAME]="Value of the hint [NAME]"
+$SWAYNC_BODY="Notification body content"
+$SWAYNC_DESKTOP_ENTRY="Desktop entry"
+$SWAYNC_URGENCY="Notification urgency"
+$SWAYNC_TIME="Notification time"
+$SWAYNC_APP_NAME="Notification app name"
+$SWAYNC_CATEGORY="SwayNC notification category"
+$SWAYNC_REPLACES_ID="ID of notification to replace"
+$SWAYNC_ID="SwayNC notification ID"
+$SWAYNC_SUMMARY="Notification summary"
+$SWAYNC_HINT_[NAME]="Value of the hint [NAME]"
+$SWAYNC_SOUND_NAME="The name of the requested sound"
+$SWAYNC_SOUND_FILE="The file path of the requested sound"
 ```
 #END scripting

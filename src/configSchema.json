@@ -27,7 +27,7 @@
     },
     "layer-shell-cover-screen": {
       "type": "boolean",
-      "description": "Wether or not the windows should cover the whole screen when layer-shell is used. Fixes animations in compositors like Hyprland.",
+      "description": "Wether or not the windows should cover the whole screen when layer-shell is used. May exceed the height of the monitor if the value is too large. Fixes animations in compositors like Hyprland.",
       "default": true
     },
     "cssPriority": {
@@ -244,6 +244,14 @@
               "type": "string",
               "description": "Which category the notification belongs to. Uses Regex."
             },
+            "sound-file": {
+              "type": "string",
+              "description": "Which sound file the notification requested. Uses Regex."
+            },
+            "sound-name": {
+              "type": "string",
+              "description": "Which sound name the notification requested. Uses Regex."
+            },
             "run-on": {
               "type": "string",
               "description": "Whether to run the script on an action being activated, or when the notification is received.",
@@ -344,6 +352,9 @@
         "^menubar(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
           "$ref": "#/widgets/menubar"
         },
+        "^slider(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
+          "$ref": "#/widgets/slider"
+        },
         "^volume(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
           "$ref": "#/widgets/volume"
         },
@@ -426,6 +437,11 @@
           "description": "Whether or not the album art should be hidden, always visible, or only visible when a valid album art is provided.",
           "default": "always",
           "enum": ["always", "when-available", "never"]
+        },
+        "loop-carousel": {
+          "type": "boolean",
+          "description": "Whether to loop through the mpris carousel.",
+          "default": "false"
         }
       }
     },
@@ -434,6 +450,10 @@
       "description": "A widget to add a grid of buttons that execute shell commands",
       "additionalProperties": false,
       "properties": {
+        "buttons-per-row": {
+          "type": "number",
+          "description": "How many buttons should be shown in a buttons-grid row"
+        },
         "actions": {
           "type": "array",
           "description": "A list of actions containing a label and a command",
@@ -462,9 +482,9 @@
                 "default": ""
               },
               "active": {
-                  "type": "boolean",
-                  "description": "Wether the toggle button is active as default or not",
-                  "default": false
+                "type": "boolean",
+                "description": "Wether the toggle button is active as default or not",
+                "default": false
               }
             }
           }
@@ -498,13 +518,13 @@
               "description": "Animation type for menu",
               "enum": ["slide_down", "slide_up", "none"]
             },
-            "animation-duration":{
+            "animation-duration": {
               "type": "integer",
               "default": 250,
               "description": "Duration of animation in milliseconds"
             },
             "actions": {
-              "$ref" : "#/widgets/buttons-grid/properties/actions"
+              "$ref": "#/widgets/buttons-grid/properties/actions"
             }
           }
         },
@@ -520,9 +540,56 @@
               "enum": ["right", "left"]
             },
             "actions": {
-              "$ref" : "#/widgets/buttons-grid/properties/actions"
+              "$ref": "#/widgets/buttons-grid/properties/actions"
             }
           }
+        }
+      }
+    },
+    "slider": {
+      "type": "object",
+      "description": "general slider control",
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Text displayed in front of the slider",
+          "default": "slider"
+        },
+        "cmd_setter": {
+          "type": "string",
+          "description": "command to set the value. Use $value to get the current value",
+          "default": ""
+        },
+        "cmd_getter": {
+          "type": "string",
+          "description": "command to get the actual value. Use $value to get the current value",
+          "default": ""
+        },
+        "min": {
+          "type": "integer",
+          "description": "minimum value of the slider range",
+          "default": 0
+        },
+        "max": {
+          "type": "integer",
+          "description": "maximum value of the slider range",
+          "default": 100
+        },
+        "min_limit": {
+          "type": "integer",
+          "description": "limit minimum value of the slider",
+          "default": 0
+        },
+        "max_limit": {
+          "type": "integer",
+          "description": "limit maximum value of the slider",
+          "default": 100
+        },
+        "value_scale": {
+          "type": "integer",
+          "default": 0,
+          "description": "scale small value, slider round digits"
         }
       }
     },
@@ -578,7 +645,7 @@
           "description": "Animation type for menu",
           "enum": ["slide_down", "slide_up", "none"]
         },
-        "animation-duration":{
+        "animation-duration": {
           "type": "integer",
           "default": 250,
           "description": "Duration of animation in milliseconds"

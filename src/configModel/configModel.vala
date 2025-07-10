@@ -444,7 +444,7 @@ namespace SwayNotificationCenter {
         /**
          * If notifications should be grouped by app name
          */
-        public bool grouping { get; set; default = true; }
+        public bool notification_grouping { get; set; default = true; }
 
         /** Specifies if the notification image should be shown or not */
         public ImageVisibility image_visibility {

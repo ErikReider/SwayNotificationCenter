@@ -165,7 +165,7 @@
       "description": "If control center should use keyboard shortcuts",
       "default": true
     },
-    "grouping": {
+    "notification-grouping": {
       "type": "boolean",
       "description": "If notifications should be grouped by app name",
       "default": true

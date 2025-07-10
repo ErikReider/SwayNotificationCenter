@@ -111,7 +111,7 @@ config file to be able to detect config errors
 	default: true ++
 	description: If control center should use keyboard shortcuts
 
-*grouping* ++
+*notification-grouping* ++
 	type: bool ++
 	default: true ++
 	description: If notifications should be grouped by app name

@@ -27,7 +27,7 @@
     },
     "layer-shell-cover-screen": {
       "type": "boolean",
-      "description": "Wether or not the windows should cover the whole screen when layer-shell is used. Fixes animations in compositors like Hyprland.",
+      "description": "Wether or not the windows should cover the whole screen when layer-shell is used. May exceed the height of the monitor if the value is too large. Fixes animations in compositors like Hyprland.",
       "default": true
     },
     "cssPriority": {

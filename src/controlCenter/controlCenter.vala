@@ -47,11 +47,11 @@ namespace SwayNotificationCenter {
             }
 
             int m_height, n_height;
-            child.measure (Gtk.Orientation.VERTICAL, width,
+            child.measure (Gtk.Orientation.VERTICAL, -1,
                            out m_height, out n_height,
                            null, null);
             int m_width, n_width;
-            child.measure (Gtk.Orientation.HORIZONTAL, height,
+            child.measure (Gtk.Orientation.HORIZONTAL, -1,
                            out m_width, out n_width,
                            null, null);
 

@@ -43,7 +43,7 @@ namespace SwayNotificationCenter.Widgets {
                     try {
                         swaync_daemon.close_all_notifications ();
                     } catch (Error e) {
-                        error ("Error: %s\n", e.message);
+                        critical ("Error: %s\n", e.message);
                     }
                 });
                 if (noti_daemon.control_center != null) {

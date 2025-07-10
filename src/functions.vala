@@ -30,7 +30,6 @@ namespace SwayNotificationCenter {
 
         public static void set_image_uri (owned string uri,
                                           Gtk.Image img,
-                                          int icon_size,
                                           bool file_exists,
                                           bool is_theme_icon = false) {
             const string URI_PREFIX = "file://";
@@ -59,8 +58,7 @@ namespace SwayNotificationCenter {
         }
 
         public static void set_image_data (ImageData data,
-                                           Gtk.Image img,
-                                           int icon_size) {
+                                           Gtk.Image img) {
             Gdk.MemoryFormat format = Gdk.MemoryFormat.R8G8B8;
             if (data.has_alpha) {
                 format = Gdk.MemoryFormat.R8G8B8A8;
@@ -282,6 +280,9 @@ namespace SwayNotificationCenter {
                 string[] argvp;
                 Shell.parse_argv ("/bin/sh -c \"%s\"".printf (cmd), out argvp);
 
+                if (argvp[0].has_prefix ("~"))
+                    argvp[0] = Environment.get_home_dir () + argvp[0].substring (1);
+
                 Pid child_pid;
                 int std_output;
                 Process.spawn_async_with_pipes (
@@ -342,14 +343,14 @@ namespace SwayNotificationCenter {
             if (display is Gdk.Wayland.Display) {
                 return ((Gdk.Wayland.Display) display).get_wl_display ();
             }
-            GLib.error ("Only supports Wayland!");
+            error ("Only supports Wayland!");
         }
 
         public static Wl.Surface * get_wl_surface (Gdk.Surface surface) {
             if (surface is Gdk.Wayland.Surface) {
                 return ((Gdk.Wayland.Surface) surface).get_wl_surface ();
             }
-            GLib.error ("Only supports Wayland!");
+            error ("Only supports Wayland!");
         }
 
         public static double lerp (double a, double b, double t) {

@@ -82,45 +82,27 @@ public class DismissibleWidget : Gtk.Widget, Adw.Swipeable {
         minimum_baseline = -1;
         natural_baseline = -1;
 
-        int child_min, child_nat;
-
-        if (!child.visible) {
+        if (child == null || !child.should_layout ()) {
             return;
         }
 
         child.measure (orientation, for_size,
-                       out child_min, out child_nat, null, null);
-
-        minimum = int.max (minimum, child_min);
-        natural = int.max (natural, child_nat);
+                       out minimum, out natural, null, null);
     }
 
     protected override void size_allocate (int width, int height, int baseline) {
-        if (!child.visible) {
+        if (child == null || !child.should_layout ()) {
             return;
         }
 
-        int child_width, child_height;
-        int min = 0, nat = 0;
-
-        if (orientation == Gtk.Orientation.HORIZONTAL) {
-            child.measure (orientation,
-                           height, out min, out nat, null, null);
-        } else {
-            child.measure (orientation,
-                           width, out min, out nat, null, null);
-        }
-
-        child_width = width;
-        child_height = height;
+        int child_width = width;
+        int child_height = height;
 
         double x = 0;
         if (get_direction () == Gtk.TextDirection.RTL) {
-            x -= ((width * swipe_progress) - (width - child_width) / 2.0)
-                 + (width * child_offset * 2);
+            x -= (width * swipe_progress);
         } else {
-            x -= - ((width * swipe_progress) - (width - child_width) / 2.0)
-                 - (width * child_offset * 2);
+            x += (width * swipe_progress);
         }
 
         Gsk.Transform transform = new Gsk.Transform ()
@@ -130,15 +112,9 @@ public class DismissibleWidget : Gtk.Widget, Adw.Swipeable {
     }
 
     protected override void snapshot (Gtk.Snapshot snapshot) {
-        snapshot.save ();
-
         snapshot.push_opacity (1 - swipe_progress.abs ());
-
         snapshot_child (child, snapshot);
-
         snapshot.pop ();
-
-        snapshot.restore ();
     }
 
     /*
@@ -177,6 +153,9 @@ public class DismissibleWidget : Gtk.Widget, Adw.Swipeable {
         animation.set_value_from (swipe_progress);
         animation.set_value_to (to);
         animation.set_initial_velocity (velocity);
+
+        // Disable user input if dismissed
+        set_can_target (to == 0);
 
         animation.play ();
 

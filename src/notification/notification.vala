@@ -103,8 +103,6 @@ namespace SwayNotificationCenter {
         private bool default_action_down = false;
         private bool default_action_in = false;
 
-        private int notification_icon_size { get; default = ConfigModel.instance.notification_icon_size; }
-
         private int notification_body_image_height {
             get;
             default = ConfigModel.instance.notification_body_image_height;
@@ -696,10 +694,17 @@ namespace SwayNotificationCenter {
                 return;
             }
 
+            int notification_icon_size = ConfigModel.instance.notification_icon_size.clamp (-1, int.MAX);
+            if (notification_icon_size < 1) {
+                notification_icon_size = -1;
+            }
             img.set_pixel_size (notification_icon_size);
             img.height_request = notification_icon_size;
             img.width_request = notification_icon_size;
-            int app_icon_size = notification_icon_size / 3;
+            int app_icon_size = (notification_icon_size / 3).clamp (-1, int.MAX);
+            if (app_icon_size < 1) {
+                app_icon_size = -1;
+            }
             img_app_icon.set_pixel_size (app_icon_size);
 
             bool img_path_is_theme_icon = false;
@@ -724,25 +729,21 @@ namespace SwayNotificationCenter {
 
             // Set the main image to the provided image
             if (param.image_data.is_initialized) {
-                Functions.set_image_data (param.image_data, img,
-                                          notification_icon_size);
+                Functions.set_image_data (param.image_data, img);
             } else if (param.image_path != null &&
                        param.image_path != "" &&
                        img_path_exists) {
                 Functions.set_image_uri (param.image_path, img,
-                                         notification_icon_size,
                                          img_path_exists,
                                          img_path_is_theme_icon);
             } else if (param.icon_data.is_initialized) {
-                Functions.set_image_data (param.icon_data, img,
-                                          notification_icon_size);
+                Functions.set_image_data (param.icon_data, img);
             }
 
             if (img.storage_type == Gtk.ImageType.EMPTY) {
                 // Get the app icon
                 if (app_icon_uri != null) {
                     Functions.set_image_uri (app_icon_uri, img,
-                                              notification_icon_size,
                                               app_icon_exists);
                 } else if (app_icon_name != null) {
                     img.set_from_gicon (app_icon_name);
@@ -756,7 +757,6 @@ namespace SwayNotificationCenter {
                 // We only set the app icon if the main image is set
                 if (app_icon_uri != null) {
                     Functions.set_image_uri (app_icon_uri, img_app_icon,
-                                             app_icon_size,
                                              app_icon_exists);
                 } else if (app_icon_name != null) {
                     img_app_icon.set_from_gicon (app_icon_name);

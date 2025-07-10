@@ -41,6 +41,8 @@ widget_sources = [
   'controlCenter/widgets/menubar/menubar.vala',
   # Widget: Buttons Grid
   'controlCenter/widgets/buttonsGrid/buttonsGrid.vala',
+  # Widget: Slider
+  'controlCenter/widgets/slider/slider.vala',
   # Widget: Backlight Slider
   'controlCenter/widgets/backlight/backlight.vala',
   'controlCenter/widgets/backlight/backlightUtil.vala',
@@ -50,6 +52,8 @@ widget_sources = [
 
 app_sources = [
   'main.vala',
+  'animatedList/animatedList.vala',
+  'animatedList/animatedListItem.vala',
   'orderedHashTable/orderedHashTable.vala',
   'iterHelpers/iterBox.vala',
   'iterHelpers/iterListBoxController.vala',

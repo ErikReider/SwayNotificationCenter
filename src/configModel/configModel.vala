@@ -452,6 +452,8 @@ namespace SwayNotificationCenter {
          * Notification window's width, in pixels.
          */
         public int notification_window_width { get; set; default = 500; }
+        /** Max height of the notification in pixels */
+        public int notification_window_height { get; set; default = -1; }
 
         /** Hides the control center after clearing all notifications */
         public bool hide_on_clear { get; set; default = false; }
@@ -604,17 +606,9 @@ namespace SwayNotificationCenter {
         /**
          * Notification icon size, in pixels.
          */
-        private const int NOTIFICATION_ICON_MINIMUM_SIZE = 16;
-        private const int NOTIFICATION_ICON_DEFAULT_SIZE = 64;
-        private int _notification_icon_size = NOTIFICATION_ICON_DEFAULT_SIZE;
+        [Version (deprecated = true, replacement = "CSS root variable")]
         public int notification_icon_size {
-            get {
-                return _notification_icon_size;
-            }
-            set {
-                _notification_icon_size = value > NOTIFICATION_ICON_MINIMUM_SIZE
-                    ? value : NOTIFICATION_ICON_MINIMUM_SIZE;
-            }
+            get; set; default = -1;
         }
 
         /**
@@ -1084,7 +1078,7 @@ namespace SwayNotificationCenter {
             if (write_to_file (path)) {
                 debug ("Successfully wrote to %s", path);
             } else {
-                error ("ERROR WRITING TO %s", path);
+                critical ("ERROR WRITING TO %s", path);
             }
         }
 

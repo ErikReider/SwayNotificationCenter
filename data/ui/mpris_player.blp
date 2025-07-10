@@ -2,7 +2,7 @@ using Gtk 4.0;
 
 template $SwayNotificationCenterWidgetsMprisMprisPlayer: $Underlay {
   overflow: hidden;
-  valign: start;
+  valign: fill;
   hexpand: true;
 
   underlay_child: Picture background_picture {
@@ -21,6 +21,7 @@ template $SwayNotificationCenterWidgetsMprisMprisPlayer: $Underlay {
     ]
 
     Box {
+      vexpand: true;
       spacing: 12;
 
       Image album_art {

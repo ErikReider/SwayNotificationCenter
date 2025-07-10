@@ -53,7 +53,7 @@ namespace SwayNotificationCenter.Widgets {
                     try {
                         swaync_daemon.clear_inhibitors ();
                     } catch (Error e) {
-                        error ("Error: %s\n", e.message);
+                        critical ("Error: %s\n", e.message);
                     }
                 });
                 clear_all_button.set_can_focus (false);

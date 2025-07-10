@@ -1,8 +1,27 @@
 namespace SwayNotificationCenter.Widgets.Mpris {
+    public enum AlbumArtState {
+        ALWAYS, WHEN_AVAILABLE, NEVER;
+
+        public static AlbumArtState parse (string value) {
+            switch (value) {
+                default:
+                case "always":
+                    return AlbumArtState.ALWAYS;
+                case "when-available":
+                    return AlbumArtState.WHEN_AVAILABLE;
+                case "never":
+                    return AlbumArtState.NEVER;
+            }
+        }
+    }
+
     public struct Config {
+        [Version (deprecated = true, replacement = "CSS root variable")]
         int image_size;
+        AlbumArtState show_album_art;
         bool autohide;
         string[] blacklist;
+        bool loop_carousel;
     }
 
     public class Mpris : BaseWidget {
@@ -27,8 +46,10 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
         // Default config values
         Config mpris_config = Config () {
-            image_size = 96,
+            image_size = -1,
+            show_album_art = AlbumArtState.ALWAYS,
             autohide = false,
+            loop_carousel = false,
         };
 
         public Mpris (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
@@ -63,8 +84,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                     button_next.sensitive = false;
                     return;
                 }
-                button_prev.sensitive = index > 0;
-                button_next.sensitive = index < carousel.n_pages - 1;
+                button_prev.sensitive = (index > 0) || mpris_config.loop_carousel;
+                button_next.sensitive = (index < carousel.n_pages - 1) || mpris_config.loop_carousel;
             });
 
             carousel_box.append (button_prev);
@@ -81,8 +102,17 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             Json.Object ? config = get_config (this);
             if (config != null) {
                 // Get image-size
-                int? image_size = get_prop<int> (config, "image-size");
-                if (image_size != null) mpris_config.image_size = image_size;
+                bool image_size_found;
+                int? image_size = get_prop<int> (config, "image-size", out image_size_found);
+                if (image_size_found && image_size != null) {
+                    mpris_config.image_size = image_size;
+                }
+
+                bool show_art_found;
+                string? show_album_art = get_prop<string> (config, "show-album-art", out show_art_found);
+                if (show_art_found && show_album_art != null) {
+                    mpris_config.show_album_art = AlbumArtState.parse (show_album_art);
+                }
 
                 Json.Array ? blacklist = get_prop_array (config, "blacklist");
                 if (blacklist != null) {
@@ -100,13 +130,18 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 bool autohide_found;
                 bool? autohide = get_prop<bool> (config, "autohide", out autohide_found);
                 if (autohide_found) mpris_config.autohide = autohide;
+
+                // Get loop
+                bool loop_carousel_found;
+                bool? loop_carousel = get_prop<bool> (config, "loop-carousel", out loop_carousel_found);
+                if (loop_carousel_found) mpris_config.loop_carousel = loop_carousel;
             }
 
             hide ();
             try {
                 setup_mpris ();
             } catch (Error e) {
-                error ("MPRIS Widget error: %s", e.message);
+                critical ("MPRIS Widget error: %s", e.message);
             }
         }
 
@@ -225,8 +260,13 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         private void change_carousel_position (int delta) {
             uint children_length = carousel.n_pages;
             if (children_length == 0) return;
-            uint position = ((uint) carousel.position + delta)
-                .clamp (0, (children_length - 1));
+            uint position;
+            if (mpris_config.loop_carousel) {
+                position = ((uint) carousel.position + delta) % children_length;
+            } else {
+                position = ((uint) carousel.position + delta)
+                    .clamp (0, (children_length - 1));
+            }
             carousel.scroll_to (carousel.get_nth_page (position), true);
         }
 

@@ -11,12 +11,11 @@ template $SwayNotificationCenterNotificationWindow: Gtk.ApplicationWindow {
     vscrollbar-policy: automatic;
     has-frame: false;
 
-    Gtk.Viewport viewport {
-      vexpand: true;
+    $AnimatedList list {
+      scroll_to_append: true;
+      transition_children: true;
 
-      $IterBox box {
-        orientation: vertical;
-      }
+      vexpand: true;
     }
   }
 }

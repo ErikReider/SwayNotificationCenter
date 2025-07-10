@@ -26,7 +26,7 @@ namespace SwayNotificationCenter.Widgets {
             scale.draw_value = false;
             scale.set_hexpand (true);
 
-            icon.pixel_size = icon_size;
+            icon.set_pixel_size (icon_size);
 
             container = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
 

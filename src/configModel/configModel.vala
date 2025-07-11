@@ -87,6 +87,8 @@ namespace SwayNotificationCenter {
         public string ? body { get; set; default = null; }
         public string ? urgency { get; set; default = null; }
         public string ? category { get; set; default = null; }
+        public string ? sound_name { get; set; default = null; }
+        public string ? sound_file { get; set; default = null; }
 
         private const RegexCompileFlags REGEX_COMPILE_OPTIONS =
             RegexCompileFlags.MULTILINE;
@@ -137,6 +139,22 @@ namespace SwayNotificationCenter {
                 if (param.category == null) return false;
                 bool result = Regex.match_simple (
                     category, param.category,
+                    REGEX_COMPILE_OPTIONS,
+                    REGEX_MATCH_FLAGS);
+                if (!result) return false;
+            }
+            if (sound_file != null) {
+                if (param.sound_file == null) return false;
+                bool result = Regex.match_simple (
+                    sound_file, param.sound_file,
+                    REGEX_COMPILE_OPTIONS,
+                    REGEX_MATCH_FLAGS);
+                if (!result) return false;
+            }
+            if (sound_name != null) {
+                if (param.sound_name == null) return false;
+                bool result = Regex.match_simple (
+                    sound_name, param.sound_name,
                     REGEX_COMPILE_OPTIONS,
                     REGEX_MATCH_FLAGS);
                 if (!result) return false;
@@ -256,6 +274,8 @@ namespace SwayNotificationCenter {
             spawn_env += "SWAYNC_BODY=%s".printf (param.body);
             spawn_env += "SWAYNC_URGENCY=%s".printf (param.urgency.to_string ());
             spawn_env += "SWAYNC_CATEGORY=%s".printf (param.category);
+            spawn_env += "SWAYNC_SOUND_NAME=%s".printf (param.sound_name);
+            spawn_env += "SWAYNC_SOUND_FILE=%s".printf (param.sound_file);
             spawn_env += "SWAYNC_ID=%s".printf (param.applied_id.to_string ());
             spawn_env += "SWAYNC_REPLACES_ID=%s".printf (param.replaces_id.to_string ());
             spawn_env += "SWAYNC_TIME=%s".printf (param.time.to_string ());
@@ -281,7 +301,8 @@ namespace SwayNotificationCenter {
 
     public class ConfigModel : Object, Json.Serializable {
 
-        private static ConfigModel _instance;
+        private static ConfigModel ? previous_config = null;
+        private static ConfigModel ? _instance = null;
         private static string _path = "";
 
         /** Get the static singleton */
@@ -329,10 +350,15 @@ namespace SwayNotificationCenter {
                 m = model;
             } catch (Error e) {
                 critical (e.message);
+                m = new ConfigModel ();
             }
-            _instance = m ?? new ConfigModel ();
+            previous_config = _instance;
+
+            _instance = m;
             _path = path;
             debug (_instance.to_string ());
+
+            app.config_reload (previous_config, m);
         }
 
         /* Properties */
@@ -421,6 +447,11 @@ namespace SwayNotificationCenter {
          */
         public bool keyboard_shortcuts { get; set; default = true; }
 
+        /**
+         * If notifications should be grouped by app name
+         */
+        public bool notification_grouping { get; set; default = true; }
+
         /** Specifies if the notification image should be shown or not */
         public ImageVisibility image_visibility {
             get;
@@ -434,6 +465,12 @@ namespace SwayNotificationCenter {
         public int notification_window_width { get; set; default = 500; }
         /** Max height of the notification in pixels */
         public int notification_window_height { get; set; default = -1; }
+
+        /**
+         * The preferred output to open the notification window (popup notifications).
+         * If the output is not found, the currently focused one is picked.
+         */
+        public string notification_window_preferred_output { get; set; default = ""; }
 
         /** Hides the control center after clearing all notifications */
         public bool hide_on_clear { get; set; default = false; }
@@ -571,6 +608,12 @@ namespace SwayNotificationCenter {
                     ? value : CONTROL_CENTER_MINIMUM_WIDTH;
             }
         }
+
+        /**
+         * The preferred output to open the control center.
+         * If the output is not found, the currently focused one is picked.
+         */
+        public string control_center_preferred_output { get; set; default = ""; }
 
         /**
          * If each notification should display a 'COPY \"1234\"' action

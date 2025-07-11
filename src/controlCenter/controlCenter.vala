@@ -47,11 +47,11 @@ namespace SwayNotificationCenter {
             }
 
             int m_height, n_height;
-            child.measure (Gtk.Orientation.VERTICAL, width,
+            child.measure (Gtk.Orientation.VERTICAL, -1,
                            out m_height, out n_height,
                            null, null);
             int m_width, n_width;
-            child.measure (Gtk.Orientation.HORIZONTAL, height,
+            child.measure (Gtk.Orientation.HORIZONTAL, -1,
                            out m_width, out n_width,
                            null, null);
 
@@ -116,6 +116,8 @@ namespace SwayNotificationCenter {
 
         private Array<Widgets.BaseWidget> widgets = new Array<Widgets.BaseWidget> ();
         private const string[] DEFAULT_WIDGETS = { "title", "dnd", "notifications" };
+
+        private string ? monitor_name = null;
 
         public ControlCenter (SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             this.swaync_daemon = swaync_daemon;
@@ -219,6 +221,17 @@ namespace SwayNotificationCenter {
             stack.set_visible_child_name (STACK_PLACEHOLDER_PAGE);
 
             add_widgets ();
+
+            // Change output on config reload
+            app.config_reload.connect ((old, config) => {
+                string monitor_name = config.control_center_preferred_output;
+                if (old == null
+                    || old.control_center_preferred_output != monitor_name
+                    || this.monitor_name != monitor_name) {
+                    this.monitor_name = null;
+                    set_anchor ();
+                }
+            });
         }
 
         // Scroll to the expanded group once said group has fully expanded
@@ -408,14 +421,16 @@ namespace SwayNotificationCenter {
 
                 // Set whether the control center should cover the whole screen or not
                 bool cover_screen = ConfigModel.instance.layer_shell_cover_screen;
-                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, cover_screen);
-                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, cover_screen);
-                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, cover_screen);
-                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, cover_screen);
-                if (!ConfigModel.instance.layer_shell_cover_screen) {
+                if (cover_screen) {
+                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, cover_screen);
+                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, cover_screen);
+                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, cover_screen);
+                    GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, cover_screen);
+                } else {
                     switch (pos_x) {
                         case PositionX.LEFT:
                             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, true);
+                            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, false);
                             break;
                         case PositionX.CENTER:
                             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, true);
@@ -423,6 +438,7 @@ namespace SwayNotificationCenter {
                             break;
                         default:
                         case PositionX.RIGHT:
+                            GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, false);
                             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, true);
                             break;
                     }
@@ -434,12 +450,14 @@ namespace SwayNotificationCenter {
                             default:
                             case PositionY.TOP:
                                 GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
+                                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, false);
                                 break;
                             case PositionY.CENTER:
                                 GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
                                 GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
                                 break;
                             case PositionY.BOTTOM:
+                                GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, false);
                                 GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
                                 break;
                         }
@@ -508,6 +526,13 @@ namespace SwayNotificationCenter {
             // Use a custom layout to limit the minimum size above to the size
             // of the window so that it doesn't exceed the monitors edge
             window.child.set_layout_manager (new FixedViewportLayout (window));
+
+            // Set the preferred monitor
+            string ? monitor_name = ConfigModel.instance.control_center_preferred_output;
+            if (this.monitor_name != null) {
+                monitor_name = this.monitor_name;
+            }
+            set_monitor (Functions.try_get_monitor (monitor_name));
         }
 
         /**
@@ -703,7 +728,7 @@ namespace SwayNotificationCenter {
             if (param.name_id.length > 0) {
                 noti_groups_name.lookup_extended (param.name_id, null, out group);
             }
-            if (group == null) {
+            if (group == null || ConfigModel.instance.notification_grouping == false) {
                 group = new NotificationGroup (param.name_id, param.display_name);
                 // Collapse other groups on expand
                 group.on_expand_change.connect ((expanded) => {
@@ -776,6 +801,11 @@ namespace SwayNotificationCenter {
 
         public bool get_visibility () {
             return this.visible;
+        }
+
+        public void set_monitor (Gdk.Monitor ? monitor) {
+            this.monitor_name = monitor == null ? null : monitor.connector;
+            GtkLayerShell.set_monitor (this, monitor);
         }
     }
 }

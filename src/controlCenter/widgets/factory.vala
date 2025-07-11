@@ -26,6 +26,9 @@ namespace SwayNotificationCenter.Widgets {
             case "buttons-grid":
                 widget = new ButtonsGrid (suffix, swaync_daemon, noti_daemon);
                 break;
+            case "slider":
+                widget = new Slider (suffix, swaync_daemon, noti_daemon);
+                break;
 #if HAVE_PULSE_AUDIO
             case "volume":
                 widget = new Volume (suffix, swaync_daemon, noti_daemon);

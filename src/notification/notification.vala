@@ -1,5 +1,4 @@
 namespace SwayNotificationCenter {
-
     public class NotificationCloseButton : Adw.Bin {
         Gtk.Revealer revealer;
         Gtk.Button button;
@@ -465,9 +464,16 @@ namespace SwayNotificationCenter {
 
             unowned Gtk.Widget? button = null;
             int i = 0;
-            foreach (unowned Gtk.Widget child in base_box.get_children ()) {
+            for (unowned Gtk.Widget ? child = alt_actions_box.get_first_child ();
+                 child != null;
+                 child = child.get_next_sibling ()) {
+                if (!(child is Gtk.FlowBoxChild)) {
+                    continue;
+                }
+                unowned Gtk.FlowBoxChild f_child = (Gtk.FlowBoxChild) child;
                 if (i == index) {
-                    button = child;
+                    button = f_child.child;
+                    break;
                 }
                 i++;
             }
@@ -695,10 +701,16 @@ namespace SwayNotificationCenter {
             }
 
             int notification_icon_size = ConfigModel.instance.notification_icon_size.clamp (-1, int.MAX);
+            if (notification_icon_size < 1) {
+                notification_icon_size = -1;
+            }
             img.set_pixel_size (notification_icon_size);
             img.height_request = notification_icon_size;
             img.width_request = notification_icon_size;
             int app_icon_size = (notification_icon_size / 3).clamp (-1, int.MAX);
+            if (app_icon_size < 1) {
+                app_icon_size = -1;
+            }
             img_app_icon.set_pixel_size (app_icon_size);
 
             bool img_path_is_theme_icon = false;

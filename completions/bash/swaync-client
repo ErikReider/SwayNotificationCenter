@@ -51,6 +51,8 @@ _swaync-client() {
         --skip-wait
         --subscribe
         --subscribe-waybar
+        --change-cc-monitor
+        --change-noti-monitor
     )
     case $prev in
         -s | --style)

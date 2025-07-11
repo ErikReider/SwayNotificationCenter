@@ -75,17 +75,53 @@ namespace SwayNotificationCenter {
         public int expire_timeout { get; set; }
         public int64 time { get; set; } // Epoch in seconds
 
-        // Hints
+        // Hints: https://specifications.freedesktop.org/notification-spec/latest/hints.html
+        /**
+         * When set, a server that has the "action-icons" capability will attempt to
+         * interpret any action identifier as a named icon. The localized display
+         * name will be used to annotate the icon for accessibility purposes.
+         * The icon name should be compliant with the Freedesktop.org Icon Naming Specification.
+         */
         public bool action_icons { get; set; }
+        /**
+         * This is a raw data image format which describes the
+         * width, height, rowstride, has alpha, bits per sample, channels
+         * and image data respectively.
+         */
         public ImageData image_data { get; set; }
         public ImageData icon_data { get; set; }
         public string image_path { get; set; }
+        /**
+         * This specifies the name of the desktop filename representing the calling program.
+         * This should be the same as the prefix used for the application's .desktop file.
+         * An example would be "rhythmbox" from "rhythmbox.desktop". This can be used
+         * by the daemon to retrieve the correct icon for the application, for
+         * logging purposes, etc.
+         */
         public string desktop_entry { get; set; }
+        /** The type of notification this is. */
         public string category { get; set; }
+        /**
+         * A themeable named sound from the freedesktop.org sound naming specification
+         * to play when the notification pops up. Similar to icon-name, only for sounds.
+         * An example would be "message-new-instant".
+         */
         public string sound_name { get; set; }
+        /** The path to a sound file to play when the notification pops up. */
         public string sound_file { get; set; }
+        /**
+         * When set the server will not automatically remove the notification
+         * when an action has been invoked. The notification will remain resident
+         * in the server until it is explicitly removed by the user or by the sender.
+         * This hint is likely only useful when the server has the "persistence" capability.
+         */
         public bool resident { get; set; }
+        /**
+         * When set the server will treat the notification as transient and by-pass
+         * the server's persistence capability, if it should exist. (Always be visible)
+         */
         public bool transient { get; set; }
+        /** The urgency level. */
         public UrgencyLevels urgency { get; set; }
         /** Replaces the old notification with the same value of:
          * - x-canonical-private-synchronous

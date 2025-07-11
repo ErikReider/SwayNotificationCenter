@@ -222,6 +222,7 @@ namespace SwayNotificationCenter {
         /** Return true to remove notification, false to skip */
         public delegate bool remove_iter_func (Notification notification);
 
+        /** Hides all notifications. Only invokes the close action when transient */
         public void close_all_notifications (remove_iter_func ? func = null) {
             inline_reply_notifications.clear ();
             if (!this.get_realized ()) return;
@@ -231,7 +232,7 @@ namespace SwayNotificationCenter {
                 }
                 Notification notification = (Notification) item.child;
                 if (func == null || func (notification)) {
-                    remove_notification (notification, false, false);
+                    remove_notification (notification, notification.param.transient, false);
                 }
             }
 

@@ -133,15 +133,17 @@ private void print_subscribe_waybar () {
     }
 }
 
-public int command_line (string[] args) {
+public int command_line (ref string[] args) {
     bool skip_wait = "--skip-wait" in args || "-sw" in args;
 
+    // Used to know how many args the current command consumed
+    int used_args = 1;
     try {
-        if (args.length < 2) {
+        if (args.length < 1) {
             print_help (args);
             Process.exit (1);
         }
-        switch (args[1]) {
+        switch (args[0]) {
             case "--help":
             case "-h":
                 print_help (args);
@@ -209,8 +211,9 @@ public int command_line (string[] args) {
             case "--action":
             case "-a":
                 int action_index = 0;
-                if ( args.length >= 3 ) {
-                    action_index = int.parse (args[2]);
+                if (args.length >= 2) {
+                    used_args++;
+                    action_index = int.parse (args[1]);
                 }
                 cc_daemon.latest_invoke_action ((uint32) action_index);
                 break;
@@ -224,27 +227,29 @@ public int command_line (string[] args) {
                 break;
             case "--inhibitor-add":
             case "-Ia":
-                if (args.length < 3) {
+                if (args.length < 2) {
                     stderr.printf ("Application ID needed!");
                     Process.exit (1);
                 }
-                if (cc_daemon.add_inhibitor (args[2])) {
-                    print ("Added inhibitor: \"%s\"", args[2]);
+                used_args++;
+                if (cc_daemon.add_inhibitor (args[1])) {
+                    print ("Added inhibitor: \"%s\"", args[1]);
                     break;
                 }
-                stderr.printf ("Inhibitor: \"%s\" already added!...", args[2]);
+                stderr.printf ("Inhibitor: \"%s\" already added!...", args[1]);
                 break;
             case "--inhibitor-remove":
             case "-Ir":
-                if (args.length < 3) {
+                if (args.length < 2) {
                     stderr.printf ("Application ID needed!");
                     Process.exit (1);
                 }
-                if (cc_daemon.remove_inhibitor (args[2])) {
-                    print ("Removed inhibitor: \"%s\"", args[2]);
+                used_args++;
+                if (cc_daemon.remove_inhibitor (args[1])) {
+                    print ("Removed inhibitor: \"%s\"", args[1]);
                     break;
                 }
-                stderr.printf ("Inhibitor: \"%s\" does not exist!...", args[2]);
+                stderr.printf ("Inhibitor: \"%s\" does not exist!...", args[1]);
                 break;
             case "inhibitors-clear":
             case "-Ic":
@@ -284,26 +289,28 @@ public int command_line (string[] args) {
                 loop.run ();
                 break;
             case "--change-cc-monitor":
-                if (args.length < 3) {
+                if (args.length < 2) {
                     stderr.printf ("Monitor connector name needed!");
                     Process.exit (1);
                 }
-                if (cc_daemon.set_cc_monitor (args[2])) {
-                    print ("Changed monitor to: \"%s\"", args[2]);
+                used_args++;
+                if (cc_daemon.set_cc_monitor (args[1])) {
+                    print ("Changed monitor to: \"%s\"", args[1]);
                     break;
                 }
-                stderr.printf ("Could not find monitor: \"%s\"!", args[2]);
+                stderr.printf ("Could not find monitor: \"%s\"!", args[1]);
                 break;
             case "--change-noti-monitor":
-                if (args.length < 3) {
+                if (args.length < 2) {
                     stderr.printf ("Monitor connector name needed!");
                     Process.exit (1);
                 }
-                if (cc_daemon.set_noti_window_monitor (args[2])) {
-                    print ("Changed monitor to: \"%s\"", args[2]);
+                used_args++;
+                if (cc_daemon.set_noti_window_monitor (args[1])) {
+                    print ("Changed monitor to: \"%s\"", args[1]);
                     break;
                 }
-                stderr.printf ("Could not find monitor: \"%s\"!", args[2]);
+                stderr.printf ("Could not find monitor: \"%s\"!", args[1]);
                 break;
             default:
                 print_help (args);
@@ -314,6 +321,8 @@ public int command_line (string[] args) {
         if (skip_wait) Process.exit (1);
         return 1;
     }
+
+    args = args[used_args:];
     return 0;
 }
 
@@ -322,15 +331,23 @@ void print_connection_error () {
         "Could not connect to CC service. Will wait for connection...\n");
 }
 
-int try_connect (string[] args) {
+int try_connect (owned string[] args) {
     try {
         cc_daemon = Bus.get_proxy_sync (
             BusType.SESSION,
             "org.erikreider.swaync.cc",
             "/org/erikreider/swaync/cc");
-        if (command_line (args) == 1) {
-            print_connection_error ();
-            return 1;
+        bool one_arg = true;
+        while (args.length > 0) {
+            if (!one_arg) {
+                // Separate each command output
+                print ("\n");
+            }
+            if (command_line (ref args) == 1) {
+                print_connection_error ();
+                return 1;
+            }
+            one_arg = false;
         }
         return 0;
     } catch (Error e) {
@@ -340,14 +357,14 @@ int try_connect (string[] args) {
 }
 
 public int main (string[] args) {
-    if (try_connect (args) == 1) {
+    if (try_connect (args[1:]) == 1) {
         MainLoop loop = new MainLoop ();
         Bus.watch_name (
             BusType.SESSION,
             "org.erikreider.swaync.cc",
             BusNameWatcherFlags.NONE,
             (conn, name, name_owner) => {
-            if (try_connect (args) == 0) loop.quit ();
+            if (try_connect (args[1:]) == 0) loop.quit ();
         },
             null);
         loop.run ();

@@ -79,8 +79,10 @@ private void print_help (string[] args) {
     print ("  -s, \t --subscribe \t\t\t Subscribe to notification add and close events\n");
     print ("  -swb,  --subscribe-waybar \t\t Subscribe to notification add and close events "
            + "with waybar support. Read README for example\n");
-    print ("      \t --change-cc-monitor \t\t Changes the preferred control center monitor (resets on config reload)\n");
-    print ("      \t --change-noti-monitor \t\t Changes the preferred notification monitor (resets on config reload)\n");
+    print ("      \t --change-cc-monitor \t\t Changes the preferred control center monitor"
+           + " (resets on config reload)\n");
+    print ("      \t --change-noti-monitor \t\t Changes the preferred notification monitor"
+           + " (resets on config reload)\n");
 }
 
 private void on_subscribe (uint count, bool dnd, bool cc_open, bool inhibited) {

@@ -123,7 +123,8 @@ namespace SwayNotificationCenter {
             print ("Options:\n");
             print ("\t -s, --style \t\t Use a custom Stylesheet file\n");
             print ("\t -c, --config \t\t Use a custom config file\n");
-            print ("\t --skip-system-css \t Skip trying to parse the packaged Stylesheet file. Useful for CSS debugging\n");
+            print ("\t --skip-system-css \t Skip trying to parse the packaged Stylesheet file."
+                + " Useful for CSS debugging\n");
         }
     }
 }

@@ -1,5 +1,4 @@
 namespace SwayNotificationCenter {
-
     public class NotificationCloseButton : Adw.Bin {
         Gtk.Revealer revealer;
         Gtk.Button button;
@@ -465,9 +464,16 @@ namespace SwayNotificationCenter {
 
             unowned Gtk.Widget? button = null;
             int i = 0;
-            foreach (unowned Gtk.Widget child in base_box.get_children ()) {
+            for (unowned Gtk.Widget ? child = alt_actions_box.get_first_child ();
+                 child != null;
+                 child = child.get_next_sibling ()) {
+                if (!(child is Gtk.FlowBoxChild)) {
+                    continue;
+                }
+                unowned Gtk.FlowBoxChild f_child = (Gtk.FlowBoxChild) child;
                 if (i == index) {
-                    button = child;
+                    button = f_child.child;
+                    break;
                 }
                 i++;
             }

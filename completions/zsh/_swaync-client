@@ -18,9 +18,10 @@ _arguments -s \
     '(-Ir --inhibitor-remove)'{-Ir,--inhibitor-remove}'[Remove an inhibitor]' \
     '(-Ic --inhibitors-clear)'{-Ic,--inhibitors-clear}'[Clears all inhibitors]' \
     '(-c --count)'{-c,--count}'[Print the current notification count]' \
-    '(--hide-latest)'--hide-latest'[Closes all notifications]' \
-    '(--close-latest)'--close-latest'[Hides latest notification. Still shown in Control Center]' \
-    '(-C --close-all)'{-C,--close-all}'[Closes latest notification]' \
+    '(--hide-latest)'--hide-latest'[Hides latest notification. Still shown in Control Center]' \
+    '(--hide-all)'--hide-all'[Hides all notifications. Still shown in Control Center]' \
+    '(--close-latest)'--close-latest'[Closes latest notification]' \
+    '(-C --close-all)'{-C,--close-all}'[Closes all notifications]' \
     '(-sw --skip-wait)'{-sw,--skip-wait}"[Doesn't wait when swaync hasn't been started]" \
     '(-s --subscribe)'{-s,--subscribe}'[Subscribe to notification add and close events]' \
     '(-swb --subscribe-waybar)'{-swb,--subscribe-waybar}'[Subscribe to notification add and close events with waybar support. Read README for example]' \

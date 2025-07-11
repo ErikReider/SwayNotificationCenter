@@ -64,6 +64,9 @@ swaync-client - Client executable
 *--hide-latest*
 	Hides latest notification. Still shown in Control Center
 
+*--hide-all*
+	Hides all notifications. Still shown in Control Center
+
 *--close-latest*
 	Closes latest notification
 

@@ -77,7 +77,7 @@ app_sources = [
 assert(vala.version() >= '0.56')
 
 app_deps = [
-  dependency('gtk4-layer-shell-0', version: '>= 1.0.3'),
+  dependency('gtk4-layer-shell-0', version: '>= 1.0.4'),
   dependency('gio-2.0', version: '>= 2.50'),
   dependency('gio-unix-2.0', version: '>= 2.50'),
   dependency('gtk4', version: '>= 4.16.13'),

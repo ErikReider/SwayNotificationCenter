@@ -17,7 +17,7 @@ BuildRequires:  meson >= 1.5.1
 BuildRequires:  vala >= 0.56
 BuildRequires:  scdoc
 BuildRequires:  pkgconfig(gtk4) >= 4.16
-BuildRequires:  pkgconfig(gtk4-layer-shell-0) >= 1.0.3
+BuildRequires:  pkgconfig(gtk4-layer-shell-0) >= 1.0.4
 BuildRequires:  pkgconfig(json-glib-1.0) >= 1.0
 BuildRequires:  pkgconfig(libadwaita-1) >= 1.6.5
 BuildRequires:  pkgconfig(glib-2.0) >= 2.50
@@ -31,7 +31,6 @@ BuildRequires:  systemd-devel
 BuildRequires:  systemd
 BuildRequires:  sassc
 BuildRequires:  blueprint-compiler >= 0.16
-BuildRequires:  granite-devel
 
 Requires:       gvfs
 Requires:       libnotify

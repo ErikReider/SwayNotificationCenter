@@ -73,6 +73,7 @@ Post your setup here: [Config flex 💪](https://github.com/ErikReider/SwayNotif
 - Basic configuration through a JSON config file
 - Hot-reload config through `swaync-client`
 - Customizable widgets
+- Select the preferred monitor to display on (with swaync-client command for scripting)
 
 ## Available Widgets
 
@@ -91,7 +92,6 @@ These widgets can be customized, added, removed and even reordered
 ## Planned Features
 
 - Slick animations 😎
-- Other build scripts than a PKGBUILD (debian and/or RHEL systems)
 
 ## Install
 

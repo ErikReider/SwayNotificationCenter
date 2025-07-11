@@ -30,13 +30,13 @@ namespace SwayNotificationCenter.Widgets {
 
             // Dnd button
             dnd_button = new Gtk.Switch () {
-                state = noti_daemon.dnd,
+                active = noti_daemon.dnd,
             };
-            dnd_button.state_set.connect (state_set);
+            dnd_button.notify["active"].connect (switch_active_changed_cb);
             noti_daemon.on_dnd_toggle.connect ((dnd) => {
-                dnd_button.state_set.disconnect (state_set);
+                dnd_button.notify["active"].disconnect (switch_active_changed_cb);
                 dnd_button.set_active (dnd);
-                dnd_button.state_set.connect (state_set);
+                dnd_button.notify["active"].connect (switch_active_changed_cb);
             });
 
             dnd_button.set_can_focus (false);
@@ -46,9 +46,8 @@ namespace SwayNotificationCenter.Widgets {
             append (dnd_button);
         }
 
-        private bool state_set (Gtk.Widget widget, bool state) {
-            noti_daemon.dnd = state;
-            return false;
+        private void switch_active_changed_cb () {
+            noti_daemon.dnd = dnd_button.active;
         }
     }
 }

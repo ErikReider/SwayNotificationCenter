@@ -357,7 +357,7 @@ namespace SwayNotificationCenter {
             return a * (1.0 - t) + b * t;
         }
 
-        public static Gdk.Monitor ? try_get_monitor (string name) {
+        public static unowned Gdk.Monitor ? try_get_monitor (string name) {
             if (name == null || name.length == 0) {
                 return null;
             }

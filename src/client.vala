@@ -32,6 +32,9 @@ interface CcDaemon : Object {
 
     public abstract void latest_invoke_action (uint32 action_index) throws DBusError, IOError;
 
+    public abstract bool set_cc_monitor (string monitor) throws DBusError, IOError;
+    public abstract bool set_noti_window_monitor (string monitor) throws DBusError, IOError;
+
     [DBus (name = "GetSubscribeData")]
     public abstract SwayncDaemonData get_subscribe_data () throws Error;
 
@@ -76,6 +79,8 @@ private void print_help (string[] args) {
     print ("  -s, \t --subscribe \t\t\t Subscribe to notification add and close events\n");
     print ("  -swb,  --subscribe-waybar \t\t Subscribe to notification add and close events "
            + "with waybar support. Read README for example\n");
+    print ("      \t --change-cc-monitor \t\t Changes the preferred control center monitor (resets on config reload)\n");
+    print ("      \t --change-noti-monitor \t\t Changes the preferred notification monitor (resets on config reload)\n");
 }
 
 private void on_subscribe (uint count, bool dnd, bool cc_open, bool inhibited) {
@@ -269,6 +274,28 @@ public int command_line (string[] args) {
                     print_subscribe_waybar,
                     print_subscribe_waybar);
                 loop.run ();
+                break;
+            case "--change-cc-monitor":
+                if (args.length < 3) {
+                    stderr.printf ("Monitor connector name needed!");
+                    Process.exit (1);
+                }
+                if (cc_daemon.set_cc_monitor (args[2])) {
+                    print ("Changed monitor to: \"%s\"", args[2]);
+                    break;
+                }
+                stderr.printf ("Could not find monitor: \"%s\"!", args[2]);
+                break;
+            case "--change-noti-monitor":
+                if (args.length < 3) {
+                    stderr.printf ("Monitor connector name needed!");
+                    Process.exit (1);
+                }
+                if (cc_daemon.set_noti_window_monitor (args[2])) {
+                    print ("Changed monitor to: \"%s\"", args[2]);
+                    break;
+                }
+                stderr.printf ("Could not find monitor: \"%s\"!", args[2]);
                 break;
             default:
                 print_help (args);

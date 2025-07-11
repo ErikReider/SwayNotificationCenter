@@ -70,13 +70,13 @@ namespace SwayNotificationCenter {
                 init_blank_windows (visibility);
 
                 // Set preferred output
-                noti_daemon.control_center.set_monitor (
-                    Functions.try_get_monitor (
-                        ConfigModel.instance.control_center_preferred_output));
-                if (!NotificationWindow.is_null) {
-                    NotificationWindow.instance.set_monitor (
-                        Functions.try_get_monitor (
-                            ConfigModel.instance.notification_window_preferred_output));
+                try {
+                    set_cc_monitor (
+                        ConfigModel.instance.control_center_preferred_output);
+                    set_noti_window_monitor (
+                        ConfigModel.instance.notification_window_preferred_output);
+                } catch (Error e) {
+                    critical (e.message);
                 }
             });
             init_blank_windows (false);
@@ -307,6 +307,26 @@ namespace SwayNotificationCenter {
                        noti_daemon.dnd,
                        get_visibility (),
                        inhibited);
+            return true;
+        }
+
+        public bool set_cc_monitor (string name) throws DBusError, IOError {
+            unowned Gdk.Monitor ? monitor = Functions.try_get_monitor (name);
+            if (monitor == null) {
+                return false;
+            }
+
+            noti_daemon.control_center.set_monitor (monitor);
+            return true;
+        }
+
+        public bool set_noti_window_monitor (string name) throws DBusError, IOError {
+            unowned Gdk.Monitor ? monitor = Functions.try_get_monitor (name);
+            if (monitor == null) {
+                return false;
+            }
+
+            NotificationWindow.instance.set_monitor (monitor);
             return true;
         }
     }

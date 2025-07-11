@@ -18,7 +18,11 @@ jobs:
       - name: Install tooling for source RPM build
         run: |
           microdnf -y install --nodocs --setopt=install_weak_deps=0 \
-            @development-tools @rpm-development-tools rpkg git 'dnf5-command(builddep)'
+            @development-tools @rpm-development-tools rpkg git \
+            'dnf5-command(builddep)' 'dnf5-command(copr)'
+          # Enable the official COPR repo
+          # (in case there are dependencies missing in the upstream repos)
+          microdnf copr enable erikreider/SwayNotificationCenter -y
 
       # It is necessary to checkout into sub-directory, because of some weird ownership problems cause by using containers
       - name: Check out sources

@@ -301,7 +301,8 @@ namespace SwayNotificationCenter {
 
     public class ConfigModel : Object, Json.Serializable {
 
-        private static ConfigModel _instance;
+        private static ConfigModel ? previous_config = null;
+        private static ConfigModel ? _instance = null;
         private static string _path = "";
 
         /** Get the static singleton */
@@ -349,10 +350,15 @@ namespace SwayNotificationCenter {
                 m = model;
             } catch (Error e) {
                 critical (e.message);
+                m = new ConfigModel ();
             }
-            _instance = m ?? new ConfigModel ();
+            previous_config = _instance;
+
+            _instance = m;
             _path = path;
             debug (_instance.to_string ());
+
+            app.config_reload (previous_config, m);
         }
 
         /* Properties */
@@ -459,6 +465,12 @@ namespace SwayNotificationCenter {
         public int notification_window_width { get; set; default = 500; }
         /** Max height of the notification in pixels */
         public int notification_window_height { get; set; default = -1; }
+
+        /**
+         * The preferred output to open the notification window (popup notifications).
+         * If the output is not found, the currently focused one is picked.
+         */
+        public string notification_window_preferred_output { get; set; default = ""; }
 
         /** Hides the control center after clearing all notifications */
         public bool hide_on_clear { get; set; default = false; }
@@ -596,6 +608,12 @@ namespace SwayNotificationCenter {
                     ? value : CONTROL_CENTER_MINIMUM_WIDTH;
             }
         }
+
+        /**
+         * The preferred output to open the control center.
+         * If the output is not found, the currently focused one is picked.
+         */
+        public string control_center_preferred_output { get; set; default = ""; }
 
         /**
          * If each notification should display a 'COPY \"1234\"' action

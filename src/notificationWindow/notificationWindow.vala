@@ -38,6 +38,8 @@ namespace SwayNotificationCenter {
 
         Gee.HashSet<uint32> inline_reply_notifications = new Gee.HashSet<uint32> ();
 
+        private static string ? monitor_name = null;
+
         private const int MAX_HEIGHT = 600;
 
         private NotificationWindow () {
@@ -65,6 +67,17 @@ namespace SwayNotificationCenter {
 
             // set_resizable (false);
             default_width = ConfigModel.instance.notification_window_width;
+
+            // Change output on config reload
+            app.config_reload.connect ((old, config) => {
+                string monitor_name = config.notification_window_preferred_output;
+                if (old == null
+                    || old.notification_window_preferred_output != monitor_name
+                    || NotificationWindow.monitor_name != monitor_name) {
+                    NotificationWindow.monitor_name = null;
+                    set_anchor ();
+                }
+            });
         }
 
         protected override void size_allocate (int w, int h, int baseline) {
@@ -189,6 +202,13 @@ namespace SwayNotificationCenter {
                     list.direction = AnimatedListDirection.BOTTOM_TO_TOP;
                     break;
             }
+
+            // Set the preferred monitor
+            string ? monitor_name = ConfigModel.instance.notification_window_preferred_output;
+            if (NotificationWindow.monitor_name != null) {
+                monitor_name = NotificationWindow.monitor_name;
+            }
+            set_monitor (Functions.try_get_monitor (monitor_name));
         }
 
         public void change_visibility (bool value) {
@@ -326,6 +346,11 @@ namespace SwayNotificationCenter {
             Notification noti = (Notification) item.child;
             noti.click_alt_action (action);
             noti.close_notification ();
+        }
+
+        public void set_monitor (Gdk.Monitor ? monitor) {
+            NotificationWindow.monitor_name = monitor == null ? null : monitor.connector;
+            GtkLayerShell.set_monitor (this, monitor);
         }
     }
 }

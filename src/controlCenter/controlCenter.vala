@@ -117,6 +117,8 @@ namespace SwayNotificationCenter {
         private Array<Widgets.BaseWidget> widgets = new Array<Widgets.BaseWidget> ();
         private const string[] DEFAULT_WIDGETS = { "title", "dnd", "notifications" };
 
+        private string ? monitor_name = null;
+
         public ControlCenter (SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             this.swaync_daemon = swaync_daemon;
             this.noti_daemon = noti_daemon;
@@ -219,6 +221,17 @@ namespace SwayNotificationCenter {
             stack.set_visible_child_name (STACK_PLACEHOLDER_PAGE);
 
             add_widgets ();
+
+            // Change output on config reload
+            app.config_reload.connect ((old, config) => {
+                string monitor_name = config.control_center_preferred_output;
+                if (old == null
+                    || old.control_center_preferred_output != monitor_name
+                    || this.monitor_name != monitor_name) {
+                    this.monitor_name = null;
+                    set_anchor ();
+                }
+            });
         }
 
         // Scroll to the expanded group once said group has fully expanded
@@ -513,6 +526,13 @@ namespace SwayNotificationCenter {
             // Use a custom layout to limit the minimum size above to the size
             // of the window so that it doesn't exceed the monitors edge
             window.child.set_layout_manager (new FixedViewportLayout (window));
+
+            // Set the preferred monitor
+            string ? monitor_name = ConfigModel.instance.control_center_preferred_output;
+            if (this.monitor_name != null) {
+                monitor_name = this.monitor_name;
+            }
+            set_monitor (Functions.try_get_monitor (monitor_name));
         }
 
         /**
@@ -781,6 +801,11 @@ namespace SwayNotificationCenter {
 
         public bool get_visibility () {
             return this.visible;
+        }
+
+        public void set_monitor (Gdk.Monitor ? monitor) {
+            this.monitor_name = monitor == null ? null : monitor.connector;
+            GtkLayerShell.set_monitor (this, monitor);
         }
     }
 }

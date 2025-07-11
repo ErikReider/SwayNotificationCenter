@@ -17,8 +17,6 @@ namespace SwayNotificationCenter {
         public signal void inhibited_changed (uint length);
 
         private Array<BlankWindow> blank_windows = new Array<BlankWindow> ();
-        private unowned Gdk.Display ? display = Gdk.Display.get_default ();
-        private unowned GLib.ListModel ? monitors = null;
 
         // Only set on swaync start due to some limitations of GtkLayerShell
         [DBus (visible = false)]
@@ -65,14 +63,21 @@ namespace SwayNotificationCenter {
                 stderr.printf (e.message + "\n");
             }
 
-            /// Blank windows
-
-            if (display == null) return;
-            monitors = display.get_monitors ();
             monitors.items_changed.connect (() => {
+                // Blank windows
                 close_blank_windows ();
                 bool visibility = noti_daemon.control_center.get_visibility ();
                 init_blank_windows (visibility);
+
+                // Set preferred output
+                try {
+                    set_cc_monitor (
+                        ConfigModel.instance.control_center_preferred_output);
+                    set_noti_window_monitor (
+                        ConfigModel.instance.notification_window_preferred_output);
+                } catch (Error e) {
+                    critical (e.message);
+                }
             });
             init_blank_windows (false);
         }
@@ -302,6 +307,26 @@ namespace SwayNotificationCenter {
                        noti_daemon.dnd,
                        get_visibility (),
                        inhibited);
+            return true;
+        }
+
+        public bool set_cc_monitor (string name) throws DBusError, IOError {
+            unowned Gdk.Monitor ? monitor = Functions.try_get_monitor (name);
+            if (monitor == null) {
+                return false;
+            }
+
+            noti_daemon.control_center.set_monitor (monitor);
+            return true;
+        }
+
+        public bool set_noti_window_monitor (string name) throws DBusError, IOError {
+            unowned Gdk.Monitor ? monitor = Functions.try_get_monitor (name);
+            if (monitor == null) {
+                return false;
+            }
+
+            NotificationWindow.instance.set_monitor (monitor);
             return true;
         }
     }

@@ -22,3 +22,5 @@ complete -c swaync-client -s C -l close-all --description "Closes all notificati
 complete -c swaync-client -s sw -l skip-wait --description "Doesn't wait when swaync hasn't been started" -r
 complete -c swaync-client -s s -l subscribe --description "Subscribe to notification add and close events" -r
 complete -c swaync-client -s swb -l subscribe-waybar --description "Subscribe to notification add and close events with waybar support. Read README for example" -r
+complete -c swaync-client      -l change-cc-monitor --description "Changes the preferred control center monitor (resets on config reload)" -r
+complete -c swaync-client      -l change-noti-monitor --description "Changes the preferred notification monitor (resets on config reload)" -r

@@ -106,6 +106,13 @@ config file to be able to detect config errors
 	description: Max height of the notification in pixels. -1 to use ++
 				 the full amount of space given by the compositor.
 
+*notification-window-preferred-output* ++
+	type: string ++
+	default: "" ++
+	description: The preferred output to open the notification window ++
+				 (popup notifications). If the output is not found, the ++
+				 currently focused one is picked.
+
 *keyboard-shortcuts* ++
 	type: bool ++
 	default: true ++
@@ -163,6 +170,12 @@ config file to be able to detect config errors
 	type: integer ++
 	default: 500 ++
 	description: The control center width in pixels
+
+*control-center-preferred-output* ++
+	type: string ++
+	default: "" ++
+	description: The preferred output to open the control center. If the ++
+				 output is not found, the currently focused one is picked.
 
 *notification-visibility* ++
 	type: object ++

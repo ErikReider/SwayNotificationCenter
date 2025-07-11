@@ -138,6 +138,10 @@
       "description": "Max height of the notification in pixels. -1 to use the full amount of space given by the compositor.",
       "default": -1
     },
+    "notification-window-preferred-output": {
+      "type": "string",
+      "description": "The preferred output to open the notification window (popup notifications). If the output is not found, the currently focused one is picked"
+    },
     "fit-to-screen": {
       "type": "boolean",
       "description": "If the control center should expand to both edges of the screen",
@@ -159,6 +163,10 @@
       "description": "Width of the control center in pixels",
       "default": 500,
       "minimum": 300
+    },
+    "control-center-preferred-output": {
+      "type": "string",
+      "description": "The preferred output to open the control center. If the output is not found, the currently focused one is picked"
     },
     "keyboard-shortcuts": {
       "type": "boolean",

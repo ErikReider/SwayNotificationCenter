@@ -356,5 +356,22 @@ namespace SwayNotificationCenter {
         public static double lerp (double a, double b, double t) {
             return a * (1.0 - t) + b * t;
         }
+
+        public static unowned Gdk.Monitor ? try_get_monitor (string name) {
+            if (name == null || name.length == 0) {
+                return null;
+            }
+
+            for (int i = 0; i < monitors.get_n_items (); i++) {
+                Object ? obj = monitors.get_item (i);
+                if (obj == null || !(obj is Gdk.Monitor)) continue;
+                unowned Gdk.Monitor monitor = (Gdk.Monitor) obj;
+                if (monitor.connector == name) {
+                    return monitor;
+                }
+            }
+
+            return null;
+        }
     }
 }

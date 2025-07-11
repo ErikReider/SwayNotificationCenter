@@ -81,3 +81,9 @@ swaync-client - Client executable
 
 *-swb, --subscribe-waybar*
 	Subscribe to notification add and close events with waybar support. Read README for example
+
+*--change-cc-monitor*
+	Changes the preferred control center monitor (resets on config reload)
+
+*--change-noti-monitor*
+	Changes the preferred notification monitor (resets on config reload)

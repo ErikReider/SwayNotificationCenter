@@ -8,6 +8,11 @@
       "type": "string",
       "description": "Pointer to the schema against which this document should be validated."
     },
+    "ignore-gtk-theme": {
+      "type": "boolean",
+      "description": "Unsets the GTK_THEME environment variable, fixing a lot of issues with GTK themes ruining the users custom CSS themes.",
+      "default": true
+    },
     "positionX": {
       "type": "string",
       "description": "Horizontal position of control center and notification window",
@@ -32,8 +37,8 @@
     },
     "cssPriority": {
       "type": "string",
-      "description": "Which GTK priority to use when loading the default and user CSS files. Pick \"user\" to override XDG_CONFIG_HOME/gtk-3.0/gtk.css",
-      "default": "application",
+      "description": "Which GTK priority to use when loading the default and user CSS files. Pick \"user\" to override XDG_CONFIG_HOME/gtk-4.0/gtk.css",
+      "default": "highest",
       "enum": ["application", "user"]
     },
     "positionY": {

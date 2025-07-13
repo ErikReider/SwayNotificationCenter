@@ -60,8 +60,8 @@ namespace SwayNotificationCenter {
         public int get_priority () {
             switch (this) {
                 case APPLICATION:
-                default:
                     return Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION;
+                default:
                 case USER:
                     return Gtk.STYLE_PROVIDER_PRIORITY_USER;
             }
@@ -316,7 +316,7 @@ namespace SwayNotificationCenter {
 
         /** Get the static singleton and reload the config */
         public static unowned ConfigModel init (string ? path) {
-            _path = Functions.get_config_path (path);
+            _path = path;
             reload_config ();
             return _instance;
         }
@@ -358,10 +358,15 @@ namespace SwayNotificationCenter {
             _path = path;
             debug (_instance.to_string ());
 
-            app.config_reload (previous_config, m);
+            if (app != null) {
+                app.config_reload (previous_config, m);
+            }
         }
 
         /* Properties */
+
+        /** Unsets the GTK_THEME env variable when true */
+        public bool ignore_gtk_theme { get; set; default = true; }
 
         /** The notifications and controlcenters horizontal alignment */
         public PositionX positionX { // vala-lint=naming-convention
@@ -390,7 +395,7 @@ namespace SwayNotificationCenter {
 
         /** The CSS loading priority */
         public CssPriority cssPriority { // vala-lint=naming-convention
-            get; set; default = CssPriority.APPLICATION;
+            get; set; default = CssPriority.USER;
         }
 
         /** The timeout for notifications with NORMAL priority */

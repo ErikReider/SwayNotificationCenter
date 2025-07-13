@@ -60,8 +60,8 @@ namespace SwayNotificationCenter {
         public int get_priority () {
             switch (this) {
                 case APPLICATION:
-                default:
                     return Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION;
+                default:
                 case USER:
                     return Gtk.STYLE_PROVIDER_PRIORITY_USER;
             }
@@ -395,7 +395,7 @@ namespace SwayNotificationCenter {
 
         /** The CSS loading priority */
         public CssPriority cssPriority { // vala-lint=naming-convention
-            get; set; default = CssPriority.APPLICATION;
+            get; set; default = CssPriority.USER;
         }
 
         /** The timeout for notifications with NORMAL priority */

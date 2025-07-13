@@ -364,7 +364,7 @@ Config properties:
     // that exact summary and body
     "example-script": {
       "exec": "/path/to/myRickRollScript.sh",
-      "app-name": "Spotify"
+      "app-name": "Spotify",
       "summary": "Never Gonna Give You Up",
       "body": "Rick Astley - Whenever You Need Somebody"
     }

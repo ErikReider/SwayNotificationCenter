@@ -9,6 +9,12 @@ swaync - Configuration file
 Using a text editor with a JSON language server is recommended when editing the
 config file to be able to detect config errors
 
+*ignore-gtk-theme* ++
+	type: bool ++
+	default: true ++
+	description: Unsets the GTK_THEME environment variable, fixing a lot of ++
+				 issues with GTK themes ruining the users custom CSS themes.
+
 *positionX* ++
 	type: string ++
 	default: right ++

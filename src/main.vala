@@ -39,7 +39,6 @@ namespace SwayNotificationCenter {
                 return;
             }
             activated = true;
-            ConfigModel.init (config_path);
             Functions.load_css (style_path);
 
             hold ();
@@ -74,9 +73,6 @@ namespace SwayNotificationCenter {
         }
 
         public static int main (string[] args) {
-            Gtk.init ();
-            Adw.init ();
-
             if (args.length > 0) {
                 for (uint i = 1; i < args.length; i++) {
                     string arg = args[i];
@@ -106,6 +102,16 @@ namespace SwayNotificationCenter {
                     }
                 }
             }
+
+            ConfigModel.init (config_path);
+
+            // Fixes custom themes messing with the default/custom CSS styling
+            if (ConfigModel.instance.ignore_gtk_theme) {
+                Environment.unset_variable ("GTK_THEME");
+            }
+
+            Gtk.init ();
+            Adw.init ();
 
             Functions.init ();
             self_settings = new Settings ("org.erikreider.swaync");

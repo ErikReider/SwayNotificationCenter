@@ -1,5 +1,6 @@
 {
   "$schema": @JSONPATH@,
+  "ignore-gtk-theme": true,
   "positionX": "right",
   "positionY": "top",
   "layer": "overlay",

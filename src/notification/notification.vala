@@ -32,6 +32,7 @@ namespace SwayNotificationCenter {
 
         public void set_reveal (bool state) {
             if (state == revealer.reveal_child) {
+                set_visible (state);
                 return;
             }
 

@@ -91,6 +91,7 @@ namespace SwayNotificationCenter {
             // App Label
             app_label = new Gtk.Label (display_name);
             app_label.xalign = 0;
+            app_label.set_ellipsize (Pango.EllipsizeMode.END);
             app_label.add_css_class ("title-1");
             app_label.add_css_class ("notification-group-header");
             start_box.append (app_label);

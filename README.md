@@ -258,6 +258,7 @@ To reload css after changes
 - Delete/BackSpace: Close notification
 - Shift+C: Close all notifications
 - Shift+D: Toggle Do Not Disturb
+- Ctrl+Z: Restore latest closed notification
 - Buttons 1-9: Execute alternative actions
 - Left click button / actions: Activate notification action
 - Middle/Right click notification: Close notification

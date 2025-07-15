@@ -43,6 +43,8 @@ swaync - A simple notification daemon with a GTK gui for notifications and the c
 
 *Shift+D*: Toggle Do Not Disturb
 
+*Ctrl+Z*: Restore latest closed notification
+
 *Buttons 1-9*: Execute alternative actions
 
 *Left click button / actions*: Activate notification action

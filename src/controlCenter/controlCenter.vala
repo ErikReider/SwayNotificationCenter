@@ -97,6 +97,8 @@ namespace SwayNotificationCenter {
         HashTable<string, unowned NotificationGroup> noti_groups_name =
             new HashTable<string, unowned NotificationGroup> (str_hash, str_equal);
 
+        Queue<Notification> notification_history = new Queue<Notification> ();
+
         const string STACK_NOTIFICATIONS_PAGE = "notifications-list";
         const string STACK_PLACEHOLDER_PAGE = "notifications-placeholder";
 
@@ -265,6 +267,14 @@ namespace SwayNotificationCenter {
                 case "Escape":
                 case "Caps_Lock":
                     this.set_visibility (false);
+                    return;
+                case "z":
+                    if (state == Gdk.ModifierType.CONTROL_MASK) {
+                        if (notification_history.length > 0) {
+                            var first_in_history = notification_history.pop_head ();
+                            add_notification (first_in_history.param);
+                        }
+                    }
                     return;
             }
         }
@@ -668,6 +678,8 @@ namespace SwayNotificationCenter {
             foreach (var w in group.get_notifications ()) {
                 var noti = (Notification) w;
                 if (noti != null && noti.param.applied_id == id) {
+                    notification_history.push_head (noti);
+
                     if (dismiss) {
                         noti.close_notification (false);
                     }

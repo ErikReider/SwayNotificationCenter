@@ -95,7 +95,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
             carousel_dots = new Adw.CarouselIndicatorDots ();
             carousel_dots.set_carousel (carousel);
-            carousel_dots.show ();
+            carousel_dots.set_halign (Gtk.Align.CENTER);
+            carousel_dots.set_valign (Gtk.Align.CENTER);
             append (carousel_dots);
 
             // Config
@@ -204,11 +205,13 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             if (carousel.n_pages > 1) {
                 button_prev.show ();
                 button_next.show ();
+                carousel_dots.set_visible (true);
                 // Scroll to the new player
                 carousel.scroll_to (player, false);
-            }
-            if (!visible) show ();
 
+            }
+
+            if (!visible) show ();
         }
 
         private void add_player (string name, MprisSource source) {
@@ -242,6 +245,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             if (children_length <= 1) {
                 button_prev.hide ();
                 button_next.hide ();
+                carousel_dots.set_visible (false);
             }
         }
 

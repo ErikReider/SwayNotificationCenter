@@ -220,6 +220,7 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
 
         & > button {
           border-radius: $border-radius;
+          color: var(--text-color);
         }
       }
     }

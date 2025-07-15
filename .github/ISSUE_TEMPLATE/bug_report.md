@@ -10,6 +10,10 @@ assignees: ''
 **Please read through the README and the Man pages before submitting**
 **Please also make sure that there isn't any prior issue describing this bug**
 
+**If this is a CSS issue, please make sure that the `cssPriority` config option is set to "user" before reporting**
+
+**Please also make sure that swaync is running with your primary GPU, and not PRIME**
+
 **Describe the bug**
 A clear and concise description of what the bug is.
 
@@ -30,8 +34,8 @@ Attach Gists for swaync logs by running `G_MESSAGES_DEBUG=all swaync` and (if ap
 If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
- - OS: [e.g. Fedora 37]
- - Version [e.g. 0.7]
+ - OS: [e.g. Fedora 42]
+ - Version [e.g. 0.12.0]
 
 **Additional context**
 Add any other context about the problem here.

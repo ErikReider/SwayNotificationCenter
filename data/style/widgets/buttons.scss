@@ -1,8 +1,4 @@
 .widget-buttons-grid {
-  padding: $margin;
-  margin: $margin;
-  border-radius: var(--border-radius);
-
   & flowboxchild>button {
     border-radius: var(--border-radius);
 

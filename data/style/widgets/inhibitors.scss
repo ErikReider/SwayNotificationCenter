@@ -1,11 +1,12 @@
 .widget-inhibitors {
-  &>label {
-    margin: $margin;
+  & > label {
+    margin-right: $margin;
     font-size: 1.5rem;
   }
 
-  &>button {
-    margin: $margin;
+  & > button {
+    margin-left: $margin;
     border-radius: var(--border-radius);
   }
 }
+

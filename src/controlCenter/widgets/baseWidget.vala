@@ -34,6 +34,8 @@ namespace SwayNotificationCenter.Widgets {
             this.swaync_daemon = swaync_daemon;
             this.noti_daemon = noti_daemon;
 
+            set_overflow (Gtk.Overflow.HIDDEN);
+            add_css_class ("widget");
             add_css_class (css_class_name);
             if (suffix.length > 0) add_css_class (suffix);
         }

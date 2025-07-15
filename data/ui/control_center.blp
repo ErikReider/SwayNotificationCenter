@@ -20,8 +20,18 @@ template $SwayNotificationCenterControlCenter: ApplicationWindow {
         orientation: vertical;
         vexpand: true;
 
+        styles [
+          "widgets",
+        ]
+
         Box notifications_box {
           orientation: vertical;
+          overflow: hidden;
+
+          styles [
+            "widget",
+            "widget-notifications",
+          ]
 
           Stack stack {
             hhomogeneous: true;

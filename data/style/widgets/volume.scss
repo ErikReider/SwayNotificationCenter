@@ -3,9 +3,6 @@
 }
 
 .widget-volume {
-  padding: $margin;
-  margin: $margin;
-  border-radius: var(--border-radius);
 }
 
 .widget-volume>box>button {}
@@ -17,7 +14,7 @@
 
 .per-app-volume {
   background-color: var(--noti-bg-alt);
-  padding: $margin/2 $margin $margin $margin;
-  margin: 0px $margin $margin $margin;
+  margin: $margin;
+  margin-bottom: 0;
   border-radius: var(--border-radius);
 }

@@ -361,6 +361,12 @@ $margin: 8px;
 }
 
 /*** Widgets ***/
+.widget {
+  margin: $margin;
+  padding: $margin;
+  border-radius: var(--border-radius);
+}
+
 /* Title widget */
 @import "widgets/title";
 /* DND widget */

@@ -1,13 +1,13 @@
 .widget-dnd {
   label {
     color: var(--text-color);
-    margin: $margin;
+    margin-right: $margin;
     font-size: 1.1rem;
   }
 
   switch {
     border-radius: var(--border-radius);
-    margin: $margin;
+    margin-left: $margin;
 
     &:checked {}
 

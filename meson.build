@@ -1,5 +1,5 @@
 project('sway-notificaton-center', ['c', 'vala'],
-  version: '0.12.0',
+  version: '0.12.1',
   meson_version: '>= 0.60.0',
   default_options: [ 'warning_level=2' ],
 )

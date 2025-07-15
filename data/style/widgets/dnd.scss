@@ -6,14 +6,13 @@
   }
 
   switch {
-    border-radius: $border-radius;
+    border-radius: var(--border-radius);
     margin: $margin;
 
-    &:checked {
-    }
+    &:checked {}
 
     slider {
-      border-radius: $border-radius;
+      border-radius: var(--border-radius);
     }
   }
 }

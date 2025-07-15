@@ -1,30 +1,31 @@
 .widget-menubar {
-  & > .menu-button-bar {
+  &>.menu-button-bar {
+
     /* The left button container */
-    & > .start {
+    &>.start {
       margin-left: $margin;
     }
 
     /* The right button container */
-    & > .end {
+    &>.end {
       margin-right: $margin;
     }
 
     /* The left and right button container */
-    & > .widget-menubar-container {
+    &>.widget-menubar-container {
       button {
-        border-radius: $border-radius;
+        border-radius: var(--border-radius);
         margin: 0 $margin / 2;
       }
     }
   }
 
   /* The revealer buttons */
-  & > revealer {
+  &>revealer {
     margin-top: $margin;
 
     button {
-      border-radius: $border-radius;
+      border-radius: var(--border-radius);
       margin: $margin;
       margin-top: 0;
     }

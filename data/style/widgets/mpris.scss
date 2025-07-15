@@ -2,9 +2,8 @@
   --mpris-album-art-overlay: rgba(0, 0, 0, 0.55);
   --mpris-button-hover: rgba(0, 0, 0, 0.5);
   --mpris-album-art-icon-size: 96px;
+  --mpris-album-art-shadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
 }
-
-$mpris-shadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
 
 .widget-mpris {
   margin: $margin;
@@ -12,8 +11,8 @@ $mpris-shadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
   /* The parent to all players */
   .widget-mpris-player {
     margin: 16px 20px;
-    border-radius: $border-radius;
-    box-shadow: $mpris-shadow;
+    border-radius: var(--border-radius);
+    box-shadow: var(--mpris-album-art-shadow);
 
     .mpris-background {
       filter: blur(10px);
@@ -29,19 +28,22 @@ $mpris-shadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
       }
 
       .widget-mpris-album-art {
-        border-radius: $border-radius;
-        box-shadow: $mpris-shadow;
+        border-radius: var(--border-radius);
+        box-shadow: var(--mpris-album-art-shadow);
         -gtk-icon-size: var(--mpris-album-art-icon-size);
       }
+
       .widget-mpris-title {
         font-weight: bold;
         font-size: 1.25rem;
       }
+
       .widget-mpris-subtitle {
         font-size: 1.1rem;
       }
 
-      & > box > button {
+      &>box>button {
+
         /* Change player control buttons */
         &:hover {
           background-color: var(--mpris-button-hover);
@@ -50,10 +52,11 @@ $mpris-shadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
     }
   }
 
-  & > box > button {
+  &>box>button {
     /* Change player side buttons */
   }
-  & > box > button:disabled {
+
+  &>box>button:disabled {
     /* Change player side buttons insensitive */
   }
 }

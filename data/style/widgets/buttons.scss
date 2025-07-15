@@ -1,15 +1,15 @@
 .widget-buttons-grid {
   padding: $margin;
   margin: $margin;
-  border-radius: $border-radius;
+  border-radius: var(--border-radius);
 
-  & flowboxchild > button {
-    border-radius: $border-radius;
+  & flowboxchild>button {
+    border-radius: var(--border-radius);
+
     &.toggle:checked {
       /* style given to the active toggle button */
     }
 
-    &:hover {
-    }
+    &:hover {}
   }
 }

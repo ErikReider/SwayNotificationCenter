@@ -5,11 +5,10 @@
 .widget-volume {
   padding: $margin;
   margin: $margin;
-  border-radius: $border-radius;
+  border-radius: var(--border-radius);
 }
 
-.widget-volume > box > button {
-}
+.widget-volume>box>button {}
 
 /* Each row app icon */
 .widget-volume row image {
@@ -20,5 +19,5 @@
   background-color: var(--noti-bg-alt);
   padding: $margin/2 $margin $margin $margin;
   margin: 0px $margin $margin $margin;
-  border-radius: $border-radius;
+  border-radius: var(--border-radius);
 }

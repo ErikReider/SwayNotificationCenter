@@ -18,20 +18,20 @@
   --notification-icon-size: 64px;
   --notification-app-icon-size: calc(var(--notification-icon-size) / 3);
   --notification-group-icon-size: 32px;
+
+  --border: 1px solid var(--noti-border-color);
+  --border-radius: 12px;
+
+  --notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
+    0 1px 3px 1px rgba(0, 0, 0, 0.7), 0 2px 6px 2px rgba(0, 0, 0, 0.3);
+  --font-size-body: 15px;
+  --font-size-summary: 16px;
+
+  --hover-tranistion: background 0.15s ease-in-out;
+  --group-collapse-tranistion: opacity 400ms ease-in-out;
 }
 
-$border: 1px solid var(--noti-border-color);
-$border-radius: 12px;
 $margin: 8px;
-
-$font-size-body: 15px;
-$font-size-summary: 16px;
-
-$hover-tranistion: background 0.15s ease-in-out;
-$group-collapse-tranistion: opacity 400ms ease-in-out;
-
-$notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
-  0 1px 3px 1px rgba(0, 0, 0, 0.7), 0 2px 6px 2px rgba(0, 0, 0, 0.3);
 
 .close-button {
   /* The notification Close Button */
@@ -50,7 +50,7 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
   &:hover {
     box-shadow: none;
     background: var(--noti-close-bg-hover);
-    transition: $hover-tranistion;
+    transition: var(--hover-tranistion);
     border: none;
   }
 }
@@ -62,26 +62,28 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
   &:focus {
     background: var(--noti-bg-focus);
   }
+
   .notification-background {
     padding: 6px 12px;
 
-    .close-button {
-    }
+    .close-button {}
 
     .notification {
       /* The actual notification */
-      border-radius: $border-radius;
-      border: $border;
+      border-radius: var(--border-radius);
+      border: var(--border);
       padding: 0;
-      transition: $hover-tranistion;
+      transition: var(--hover-tranistion);
       background: rgba(var(--noti-bg), var(--noti-bg-alpha));
 
       &.low {
         /* Low Priority Notification */
       }
+
       &.normal {
         /* Normal Priority Notification */
       }
+
       &.critical {
         /* Critical Priority Notification */
       }
@@ -94,8 +96,8 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
         background: transparent;
         border: none;
         color: var(--text-color);
-        transition: $hover-tranistion;
-        border-radius: $border-radius;
+        transition: var(--hover-tranistion);
+        border-radius: var(--border-radius);
 
         &:hover {
           -gtk-icon-filter: none;
@@ -110,7 +112,7 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
 
         .notification-content {
           background: transparent;
-          border-radius: $border-radius;
+          border-radius: var(--border-radius);
           $margin: 4px;
           padding: 0;
 
@@ -118,9 +120,11 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
             /* Notification Primary Image */
             -gtk-icon-filter: none;
             -gtk-icon-size: var(--notification-icon-size);
-            border-radius: 100px; /* Size in px */
+            border-radius: 100px;
+            /* Size in px */
             margin: $margin;
           }
+
           .app-icon {
             /* Notification app icon (only visible when the primary image is set) */
             -gtk-icon-filter: none;
@@ -137,24 +141,26 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
 
             .summary {
               /* Notification summary/title */
-              font-size: $font-size-summary;
+              font-size: var(--font-size-summary);
               font-weight: bold;
               background: transparent;
               color: var(--text-color);
               text-shadow: none;
             }
+
             .time {
               /* Notification time-ago */
-              font-size: $font-size-summary;
+              font-size: var(--font-size-summary);
               font-weight: bold;
               background: transparent;
               color: var(--text-color);
               text-shadow: none;
               margin-right: 30px;
             }
+
             .body {
               /* Notification body */
-              font-size: $font-size-body;
+              font-size: var(--font-size-body);
               font-weight: normal;
               background: transparent;
               color: var(--text-color);
@@ -182,22 +188,24 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
               background: var(--noti-bg-darker);
               color: var(--text-color);
               caret-color: var(--text-color);
-              border: $border;
-              border-radius: $border-radius;
+              border: var(--border);
+              border-radius: var(--border-radius);
             }
+
             .inline-reply-button {
               margin-left: 4px;
               background: rgba(var(--noti-bg), var(--noti-bg-alpha));
-              border: $border;
-              border-radius: $border-radius;
+              border: var(--border);
+              border-radius: var(--border-radius);
               color: var(--text-color);
 
               &:disabled {
                 background: initial;
                 color: var(--text-color-disabled);
-                border: $border;
+                border: var(--border);
                 border-color: transparent;
               }
+
               &:hover {
                 background: var(--noti-bg-hover);
               }
@@ -208,8 +216,8 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
 
       .notification-alt-actions {
         background: none;
-        border-bottom-left-radius: $border-radius;
-        border-bottom-right-radius: $border-radius;
+        border-bottom-left-radius: var(--border-radius);
+        border-bottom-right-radius: var(--border-radius);
         padding: $margin / 2;
       }
 
@@ -218,8 +226,8 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
         margin: $margin / 2;
         padding: 0;
 
-        & > button {
-          border-radius: $border-radius;
+        &>button {
+          border-radius: var(--border-radius);
           color: var(--text-color);
         }
       }
@@ -238,9 +246,11 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
   &.low {
     /* Low Priority Group */
   }
+
   &.normal {
     /* Low Priority Group */
   }
+
   &.critical {
     /* Low Priority Group */
   }
@@ -263,16 +273,19 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
       color: var(--text-color);
       -gtk-icon-size: var(--notification-group-icon-size);
     }
+
     .notification-group-header {
       color: var(--text-color);
     }
   }
+
   .notification-group-buttons {
     /* Notification Group Buttons */
     @extend %header;
   }
 
   &.collapsed {
+
     /* When another group is expanded, lower the opacity of the collapsed ones */
     &.not-expanded {
       opacity: 0.4;
@@ -284,6 +297,7 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
       }
 
       &:not(:last-child) {
+
         /* Top notification in stack */
         /* Set lower stacked notifications opacity to 0 */
         .notification-action,
@@ -307,7 +321,7 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
   /* The Control Center which contains the old notifications + widgets */
   background: var(--cc-bg);
   color: var(--text-color);
-  border-radius: $border-radius;
+  border-radius: var(--border-radius);
 
   .control-center-list-placeholder {
     /* The placeholder when there are no notifications */
@@ -319,11 +333,11 @@ $notification-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
     background: transparent;
 
     .notification {
-      box-shadow: $notification-shadow;
+      box-shadow: var(--notification-shadow);
 
       .notification-default-action,
       .notification-action {
-        transition: $group-collapse-tranistion, $hover-tranistion;
+        transition: var(--group-collapse-tranistion), var(--hover-tranistion);
 
         &:hover {
           background-color: var(--noti-bg-hover);

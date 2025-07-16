@@ -372,6 +372,9 @@ namespace SwayNotificationCenter {
                 if (monitor.connector == name) {
                     return monitor;
                 }
+                if (monitor.manufacturer + " " + monitor.model == name) {
+                  return monitor;
+                }
             }
 
             return null;

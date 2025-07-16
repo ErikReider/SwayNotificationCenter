@@ -169,8 +169,11 @@ config file to be able to detect config errors
 *control-center-height* ++
 	type: integer ++
 	default: 500 ++
-	description: The control center height in pixels ++
-		This setting is ignored when _fit-to-screen_ is set to "true".
+	description: Height of the control center in pixels. ++
+		A value of -1 means that it will fit to the content. ++
+		Ignored when 'fit-to-screen' is set to 'true'. ++
+		Also limited to the height of the monitor, unless ++
+		'layer-shell-cover-screen' is set to false.
 
 *control-center-width* ++
 	type: integer ++

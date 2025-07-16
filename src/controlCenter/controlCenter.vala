@@ -324,6 +324,7 @@ namespace SwayNotificationCenter {
                     GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, cover_screen);
                     GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, cover_screen);
                 } else {
+                    // Fallback to conventional positioning
                     switch (pos_x) {
                         case PositionX.LEFT:
                             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, true);

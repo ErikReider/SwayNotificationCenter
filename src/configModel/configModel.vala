@@ -581,19 +581,22 @@ namespace SwayNotificationCenter {
         public bool relative_timestamps { get; set; default = true; }
 
         /**
-         * Notification center's height, in pixels.
-         * Set `fit_to_screen` to true to ignore the height setting.
+         * Height of the control center in pixels. A value of -1 means that it
+         * will fit to the content. Ignored when 'fit-to-screen' is set to 'true'.
+         * Also limited to the height of the monitor, unless 'layer-shell-cover-screen'
+         * is set to false.
          */
-        private const int CONTROL_CENTER_MINIMUM_HEIGHT = 300;
-        private const int CONTROL_CENTER_DEFAULT_HEIGHT = 300;
-        private int _control_center_height = CONTROL_CENTER_DEFAULT_HEIGHT;
+        private int _control_center_height = 500;
         public int control_center_height {
             get {
                 return _control_center_height;
             }
             set {
-                _control_center_height = value > CONTROL_CENTER_MINIMUM_HEIGHT
-                    ? value : CONTROL_CENTER_MINIMUM_HEIGHT;
+                if (value < 1) {
+                    _control_center_height = -1;
+                    return;
+                }
+                _control_center_height = value;
             }
         }
 

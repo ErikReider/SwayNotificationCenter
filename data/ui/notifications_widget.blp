@@ -1,0 +1,62 @@
+using Gtk 4.0;
+
+template $SwayNotificationCenterWidgetsNotifications: $SwayNotificationCenterWidgetsBaseWidget {
+  orientation: vertical;
+  overflow: hidden;
+
+  Stack stack {
+    hhomogeneous: true;
+    vhomogeneous: true;
+    transition-type: crossfade;
+    transition-duration: 200;
+    vexpand: true;
+
+    StackPage {
+      name: "notifications-list";
+
+      child: ScrolledWindow scrolled_window {
+        hscrollbar-policy: never;
+        has-frame: false;
+
+        child: Viewport viewport {
+          vexpand: true;
+
+          child: ListBox list_box {
+            valign: fill;
+
+            styles [
+              "control-center-list",
+            ]
+          };
+        };
+      };
+    }
+
+    StackPage {
+      name: "notifications-placeholder";
+
+      child: Box {
+        halign: center;
+        valign: center;
+        hexpand: true;
+        vexpand: true;
+        orientation: vertical;
+        spacing: 12;
+
+        styles [
+          "control-center-list-placeholder",
+        ]
+
+        Image {
+          pixel-size: 96;
+          icon-name: "preferences-system-notifications-symbolic";
+          use-fallback: true;
+        }
+
+        Label text_empty_label {
+          label: "No Notifications";
+        }
+      };
+    }
+  }
+}

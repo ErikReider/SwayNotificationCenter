@@ -27,12 +27,12 @@
     },
     "layer-shell": {
       "type": "boolean",
-      "description": "Wether or not the windows should be opened as layer-shell surfaces. Note: Requires swaync restart to apply",
+      "description": "Whether or not the windows should be opened as layer-shell surfaces. Note: Requires swaync restart to apply",
       "default": true
     },
     "layer-shell-cover-screen": {
       "type": "boolean",
-      "description": "Wether or not the windows should cover the whole screen when layer-shell is used. May exceed the height of the monitor if the value is too large. Fixes animations in compositors like Hyprland.",
+      "description": "Whether or not the windows should cover the whole screen when layer-shell is used. May exceed the height of the monitor if the value is too large. Fixes animations in compositors like Hyprland.",
       "default": true
     },
     "cssPriority": {
@@ -332,6 +332,7 @@
     },
     "widgets": {
       "type": "array",
+      "uniqueItems": true,
       "description": "Which order and which widgets to display. If the \"notifications\" widget isn't specified, it will be placed at the bottom.",
       "default": ["inhibitors", "title", "dnd", "notifications"],
       "items": {
@@ -346,6 +347,10 @@
       "additionalProperties": false,
       "$comment": "New widgets go here in \"patternProperties\" ↓",
       "patternProperties": {
+        "notifications": {
+          "$comment": "References the widget structure from \"widgets\" below",
+          "$ref": "#/widgets/notifications"
+        },
         "^title(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
           "$comment": "References the widget structure from \"widgets\" below",
           "$ref": "#/widgets/title"
@@ -383,6 +388,18 @@
   },
   "widgets": {
     "$comment": "New widgets go here",
+    "notifications": {
+      "type": "object",
+      "description": "Control Center Title Widget",
+      "additionalProperties": false,
+      "properties": {
+        "vexpand": {
+          "type": "boolean",
+          "description": "Whether or not the notifications widget should vertically expand or not",
+          "default": true
+        }
+      }
+    },
     "title": {
       "type": "object",
       "description": "Control Center Title Widget",
@@ -395,7 +412,7 @@
         },
         "clear-all-button": {
           "type": "boolean",
-          "description": "Wether to display a \"Clear All\" button",
+          "description": "Whether to display a \"Clear All\" button",
           "default": true
         },
         "button-text": {
@@ -496,7 +513,7 @@
               },
               "active": {
                 "type": "boolean",
-                "description": "Wether the toggle button is active as default or not",
+                "description": "Whether the toggle button is active as default or not",
                 "default": false
               }
             }
@@ -705,7 +722,7 @@
         },
         "clear-all-button": {
           "type": "boolean",
-          "description": "Wether to display a \"Clear All\" button",
+          "description": "Whether to display a \"Clear All\" button",
           "default": true
         },
         "button-text": {

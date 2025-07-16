@@ -1,13 +1,20 @@
 namespace SwayNotificationCenter.Widgets {
     public static BaseWidget ? get_widget_from_key (owned string key,
                                                     SwayncDaemon swaync_daemon,
-                                                    NotiDaemon noti_daemon) {
+                                                    NotiDaemon noti_daemon,
+                                                    out bool is_notifications) {
+        is_notifications = false;
+
         string[] key_seperated = key.split ("#");
         string suffix = "";
         if (key_seperated.length > 0) key = key_seperated[0];
         if (key_seperated.length > 1) suffix = key_seperated[1];
         BaseWidget widget;
         switch (key) {
+            case "notifications":
+                is_notifications = true;
+                message ("Loading widget: widget-notifications");
+                return null;
             case "title":
                 widget = new Title (suffix, swaync_daemon, noti_daemon);
                 break;

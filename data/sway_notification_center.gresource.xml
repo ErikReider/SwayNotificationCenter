@@ -10,5 +10,6 @@
     <file preprocess="xml-stripblanks">ui/notification.ui</file>
     <file preprocess="xml-stripblanks">ui/control_center.ui</file>
     <file preprocess="xml-stripblanks">ui/mpris_player.ui</file>
+    <file preprocess="xml-stripblanks">ui/notifications_widget.ui</file>
   </gresource>
 </gresources>

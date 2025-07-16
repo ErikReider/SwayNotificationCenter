@@ -69,6 +69,7 @@ namespace SwayNotificationCenter.Widgets {
             }
 
             set_vexpand (this.vertical_expand);
+            scrolled_window.set_propagate_natural_height (!this.vertical_expand);
         }
 
         public uint notification_count () {

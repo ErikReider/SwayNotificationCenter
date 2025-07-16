@@ -407,9 +407,12 @@ namespace SwayNotificationCenter {
             window.set_halign (align_x);
             window.set_valign (align_y);
 
-            window.set_propagate_natural_height (true);
-
             // Re-set the minimum size
+            window.set_propagate_natural_height (
+                ConfigModel.instance.control_center_height < 1
+                || ConfigModel.instance.fit_to_screen);
+            window.set_size_request (ConfigModel.instance.control_center_width,
+                                  ConfigModel.instance.control_center_height);
             box.set_size_request (ConfigModel.instance.control_center_width,
                                   ConfigModel.instance.control_center_height);
             // Use a custom layout to limit the minimum size above to the size

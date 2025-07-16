@@ -300,8 +300,6 @@ namespace SwayNotificationCenter {
 #endif
 
     public class ConfigModel : Object, Json.Serializable {
-
-        private static ConfigModel ? previous_config = null;
         private static ConfigModel ? _instance = null;
         private static string _path = "";
 
@@ -352,7 +350,8 @@ namespace SwayNotificationCenter {
                 critical (e.message);
                 m = new ConfigModel ();
             }
-            previous_config = _instance;
+
+            ConfigModel ? previous_config = _instance;
 
             _instance = m;
             _path = path;

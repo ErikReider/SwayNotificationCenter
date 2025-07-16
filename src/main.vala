@@ -15,8 +15,7 @@ namespace SwayNotificationCenter {
 
         static bool activated = false;
 
-        public signal void config_reload (
-            owned ConfigModel ? old_config, ConfigModel new_config);
+        public signal void config_reload (ConfigModel ? old_config, ConfigModel new_config);
 
         public Swaync () {
             Object (

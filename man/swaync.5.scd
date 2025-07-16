@@ -304,6 +304,17 @@ config file to be able to detect config errors
 		Example: "title#TheMainTitle" ++
 		To address this widget specifically in the css file use the css class .TheMainTitle ++
 	Widgets to customize: ++
+		*notifications*++
+			type: object ++
+			css class: widget-notifications ++
+			properties: ++
+				vexpand: ++
+					type: bool ++
+					optional: true ++
+					default: true ++
+					description: Whether or not the notifications widget ++
+								 should vertically expand or not ++
+			description: The Notifications Widget. ++
 		*title*++
 			type: object ++
 			css class: widget-title ++

@@ -9,6 +9,7 @@ namespace SwayNotificationCenter {
     static string ? config_path;
     // Dev args
     static bool skip_packaged_css = false;
+    static string ? custom_packaged_css;
 
     public class Swaync : Gtk.Application {
 
@@ -84,6 +85,9 @@ namespace SwayNotificationCenter {
                         case "--skip-system-css":
                             skip_packaged_css = true;
                             break;
+                        case "--custom-system-css":
+                            custom_packaged_css = args[++i];
+                            break;
                         case "-c":
                         case "--config":
                             config_path = args[++i];
@@ -130,6 +134,8 @@ namespace SwayNotificationCenter {
             print ("\t -s, --style \t\t Use a custom Stylesheet file\n");
             print ("\t -c, --config \t\t Use a custom config file\n");
             print ("\t --skip-system-css \t Skip trying to parse the packaged Stylesheet file."
+                + " Useful for CSS debugging\n");
+            print ("\t --custom-system-css \t Pick a custom CSS file to use as the \"system\" CSS."
                 + " Useful for CSS debugging\n");
         }
     }

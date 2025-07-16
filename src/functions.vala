@@ -80,6 +80,9 @@ namespace SwayNotificationCenter {
             // Load packaged CSS as backup
             string system_css = get_style_path (null, true);
             system_css = File.new_for_path (system_css).get_path () ?? system_css;
+            if (custom_packaged_css != null) {
+                system_css = custom_packaged_css;
+            }
             if (!skip_packaged_css) {
                 message ("Loading CSS: \"%s\"", system_css);
                 system_css_provider.load_from_path (system_css);

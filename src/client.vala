@@ -133,9 +133,7 @@ private void print_subscribe_waybar () {
     }
 }
 
-public int command_line (ref string[] args) {
-    bool skip_wait = "--skip-wait" in args || "-sw" in args;
-
+public int command_line (ref string[] args, bool skip_wait) {
     // Used to know how many args the current command consumed
     int used_args = 1;
     try {
@@ -313,6 +311,7 @@ public int command_line (ref string[] args) {
                 stderr.printf ("Could not find monitor: \"%s\"!", args[1]);
                 break;
             default:
+                print ("Unknown command: \"%s\"\n", args[0]);
                 print_help (args);
                 break;
         }
@@ -337,17 +336,27 @@ int try_connect (owned string[] args) {
             BusType.SESSION,
             "org.erikreider.swaync.cc",
             "/org/erikreider/swaync/cc");
+
+        bool skip_wait = "--skip-wait" in args || "-sw" in args;
         bool one_arg = true;
         while (args.length > 0) {
+            if (args[0] == "--skip-wait" || args[0] == "-sw") {
+                args = args[1:];
+                continue;
+            }
             if (!one_arg) {
                 // Separate each command output
                 print ("\n");
             }
-            if (command_line (ref args) == 1) {
+            if (command_line (ref args, skip_wait) == 1) {
                 print_connection_error ();
                 return 1;
             }
             one_arg = false;
+        }
+        // Should only be reached if the args only contains --skip-wait or -sw
+        if (one_arg) {
+            stderr.printf ("Skipping wait, but with no action.");
         }
         return 0;
     } catch (Error e) {

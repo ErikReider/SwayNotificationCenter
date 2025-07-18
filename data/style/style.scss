@@ -31,6 +31,9 @@
   --group-collapse-tranistion: opacity 400ms ease-in-out;
 }
 
+/* Fallback for older CSS themes */
+@import "pre-gtk4-variables";
+
 $margin: 8px;
 
 .close-button {

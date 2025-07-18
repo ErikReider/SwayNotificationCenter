@@ -478,7 +478,7 @@
           "description": "Audio sources for the mpris widget to ignore.",
           "items": {
             "type": "string",
-            "description": "Audio source/app name. Regex alowed."
+            "description": "Audio source/app name. Regex allowed."
           }
         },
         "loop-carousel": {

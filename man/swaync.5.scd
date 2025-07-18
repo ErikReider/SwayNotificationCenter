@@ -378,7 +378,7 @@ config file to be able to detect config errors
 					description: Audio sources for the mpris widget to ignore. ++
 					Valid array values: ++
 						type: string ++
-						description: Audio source/app name. Regex alowed. Hint ++
+						description: Audio source/app name. Regex allowed. Hint ++
 							`$ qdbus | grep mpris` to find source names. ++
 				autohide: ++
 					type: bool ++

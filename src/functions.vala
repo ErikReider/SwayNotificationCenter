@@ -369,11 +369,18 @@ namespace SwayNotificationCenter {
                 Object ? obj = monitors.get_item (i);
                 if (obj == null || !(obj is Gdk.Monitor)) continue;
                 unowned Gdk.Monitor monitor = (Gdk.Monitor) obj;
+
                 if (monitor.connector == name) {
                     return monitor;
                 }
-                if (monitor.manufacturer + " " + monitor.model == name) {
-                  return monitor;
+
+                // Try matching a string consisting of the manufacturer + model + serial number.
+                // Just like Sway does (sway-output(5) man page)
+                string id = "%s %s %s".printf (monitor.manufacturer,
+                                               monitor.model,
+                                               monitor.description);
+                if (id == name) {
+                    return monitor;
                 }
             }
 

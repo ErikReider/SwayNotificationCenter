@@ -472,6 +472,11 @@ namespace SwayNotificationCenter {
 
         /**
          * The preferred output to open the notification window (popup notifications).
+         *
+         * Can either be the monitor connector name (ex: "DP-1"),
+         * or the full name, manufacturer model serial
+         * (ex: "Acer Technologies XV272U V 503023B314202").
+         *
          * If the output is not found, the currently focused one is picked.
          */
         public string notification_window_preferred_output { get; set; default = ""; }
@@ -618,6 +623,11 @@ namespace SwayNotificationCenter {
 
         /**
          * The preferred output to open the control center.
+         *
+         * Can either be the monitor connector name (ex: "DP-1"),
+         * or the full name, manufacturer model serial
+         * (ex: "Acer Technologies XV272U V 503023B314202").
+         *
          * If the output is not found, the currently focused one is picked.
          */
         public string control_center_preferred_output { get; set; default = ""; }

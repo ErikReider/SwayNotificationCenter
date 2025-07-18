@@ -116,8 +116,10 @@ config file to be able to detect config errors
 	type: string ++
 	default: "" ++
 	description: The preferred output to open the notification window ++
-				 (popup notifications). If the output is not found, the ++
-				 currently focused one is picked.
+				 (popup notifications). Can either be the monitor connector ++
+				 name (ex: "DP-1"), or the full name, manufacturer model serial ++
+				 (ex: "Acer Technologies XV272U V 503023B314202"). ++
+				 If the output is not found, the currently focused one is picked.
 
 *keyboard-shortcuts* ++
 	type: bool ++
@@ -183,7 +185,10 @@ config file to be able to detect config errors
 *control-center-preferred-output* ++
 	type: string ++
 	default: "" ++
-	description: The preferred output to open the control center. If the ++
+	description: The preferred output to open the control center. Can either ++
+				 be the monitor connector name (ex: "DP-1"), or ++
+				 the full name, manufacturer model serial ++
+				 (ex: "Acer Technologies XV272U V 503023B314202"). If the ++
 				 output is not found, the currently focused one is picked.
 
 *notification-visibility* ++

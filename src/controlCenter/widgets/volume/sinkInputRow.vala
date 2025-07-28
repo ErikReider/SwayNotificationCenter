@@ -50,10 +50,20 @@ namespace SwayNotificationCenter.Widgets {
         public void update (PulseSinkInput sink_input) {
             this.sink_input = sink_input;
 
-            if (show_per_app_icon) {
-                icon.set_from_icon_name (
-                    sink_input.application_icon_name ?? "application-x-executable");
+        if (show_per_app_icon) {
+            string icon_name;
+            if (sink_input.application_icon_name != null) { 
+                icon_name = sink_input.application_icon_name;
+            } else {
+                icon_name = sink_input.application_binary;
             }
+            var theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default());
+            if (theme.has_icon(icon_name)) {
+                icon.set_from_icon_name(icon_name);
+            } else {
+                icon.set_from_icon_name("application-x-executable");
+            }
+        }
 
             if (show_per_app_label) {
                 label.set_text (this.sink_input.name);

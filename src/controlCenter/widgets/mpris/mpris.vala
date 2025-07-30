@@ -97,6 +97,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             carousel_dots.set_carousel (carousel);
             carousel_dots.set_halign (Gtk.Align.CENTER);
             carousel_dots.set_valign (Gtk.Align.CENTER);
+            carousel_dots.set_visible (false);
             append (carousel_dots);
 
             // Config

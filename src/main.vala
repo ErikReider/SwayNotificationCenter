@@ -106,6 +106,11 @@ namespace SwayNotificationCenter {
                 }
             }
 
+            // Register custom Widgets so that they can be used in .ui template files
+            typeof (AnimatedList).ensure ();
+            typeof (AnimatedListItem).ensure ();
+            typeof (Underlay).ensure ();
+
             ConfigModel.init (config_path);
 
             // Fixes custom themes messing with the default/custom CSS styling

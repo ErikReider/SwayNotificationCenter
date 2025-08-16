@@ -63,23 +63,8 @@ namespace SwayNotificationCenter {
                 stderr.printf (e.message + "\n");
             }
 
-            monitors.items_changed.connect (() => {
-                // Blank windows
-                close_blank_windows ();
-                bool visibility = noti_daemon.control_center.get_visibility ();
-                init_blank_windows (visibility);
-
-                // Set preferred output
-                try {
-                    set_cc_monitor (
-                        ConfigModel.instance.control_center_preferred_output);
-                    set_noti_window_monitor (
-                        ConfigModel.instance.notification_window_preferred_output);
-                } catch (Error e) {
-                    critical (e.message);
-                }
-            });
-            init_blank_windows (false);
+            monitors.items_changed.connect (monitors_changed);
+            monitors_changed (0, 0, monitors.get_n_items ());
         }
 
         private void on_noti_bus_aquired (DBusConnection conn) {
@@ -92,25 +77,30 @@ namespace SwayNotificationCenter {
             }
         }
 
-        private void init_blank_windows (bool visible) {
-            close_blank_windows ();
+        private void monitors_changed (uint position, uint removed, uint added) {
+            bool visible = noti_daemon.control_center.get_visibility ();
 
-            // Add a window to all monitors
-            for (int i = 0; i < monitors.get_n_items (); i++) {
-                Object ? obj = monitors.get_item (i);
-                if (obj == null || !(obj is Gdk.Monitor)) continue;
-                BlankWindow win = new BlankWindow ((Gdk.Monitor) obj);
-                win.set_visible (visible);
-                blank_windows.append_val (win);
-            }
-        }
-
-        private void close_blank_windows () {
-            while (blank_windows.length > 0) {
-                uint i = blank_windows.length - 1;
-                unowned BlankWindow ? win = blank_windows.index (i);
+            for (uint i = 0; i < removed; i++) {
+                unowned BlankWindow win = blank_windows.index (position + i);
                 win.close ();
-                blank_windows.remove_index (i);
+                blank_windows.remove_index (position + i);
+            }
+
+            for (uint i = 0; i < added; i++) {
+                Gdk.Monitor monitor = (Gdk.Monitor) monitors.get_item (position + i);
+                BlankWindow win = new BlankWindow (monitor);
+                win.set_visible (visible);
+                blank_windows.insert_val (position + i, win);
+            }
+
+            // Set preferred output
+            try {
+                set_cc_monitor (
+                    ConfigModel.instance.control_center_preferred_output);
+                set_noti_window_monitor (
+                    ConfigModel.instance.notification_window_preferred_output);
+            } catch (Error e) {
+                critical (e.message);
             }
         }
 

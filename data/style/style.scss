@@ -27,8 +27,12 @@
   --font-size-body: 15px;
   --font-size-summary: 16px;
 
+  /* Deprecated variables (because of their typos). Keeeping them around for backwards compatibility. */
   --hover-tranistion: background 0.15s ease-in-out;
   --group-collapse-tranistion: opacity 400ms ease-in-out;
+
+  --hover-transition: var(--hover-tranistion);
+  --group-collapse-transition: var(--group-collapse-tranistion);
 }
 
 /* Fallback for older CSS themes */

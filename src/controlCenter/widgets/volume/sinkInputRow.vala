@@ -56,7 +56,11 @@ namespace SwayNotificationCenter.Widgets {
             }
 
             if (show_per_app_label) {
-                label.set_text (this.sink_input.name);
+                if (this.sink_input.name.length >=10) {
+                    label.set_text(this.sink_input.name.substring(0, 7).concat("...")); 
+                } else {
+                    label.set_text (this.sink_input.name);
+                }
             }
 
             scale.set_value (sink_input.volume);

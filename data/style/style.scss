@@ -40,6 +40,10 @@
 
 $margin: 8px;
 
+notificationwindow, blankwindow, blankwindow {
+  background: transparent;
+}
+
 .close-button {
   /* The notification Close Button */
   background: var(--noti-close-bg);

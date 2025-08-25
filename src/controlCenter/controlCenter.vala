@@ -24,6 +24,7 @@ namespace SwayNotificationCenter {
         private string ? monitor_name = null;
 
         public ControlCenter (SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
+            Object (css_name: "blankwindow");
             this.swaync_daemon = swaync_daemon;
             this.noti_daemon = noti_daemon;
 

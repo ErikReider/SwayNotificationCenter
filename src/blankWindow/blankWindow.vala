@@ -7,6 +7,7 @@ namespace SwayNotificationCenter {
         private bool blank_window_in = false;
 
         public BlankWindow (Gdk.Monitor monitor) {
+            Object (css_name: "blankwindow");
             this.monitor = monitor;
 
             blank_window_gesture = new Gtk.GestureClick ();

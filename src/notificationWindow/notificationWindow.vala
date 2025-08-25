@@ -43,6 +43,7 @@ namespace SwayNotificationCenter {
         private const int MAX_HEIGHT = 600;
 
         private NotificationWindow () {
+            Object (css_name: "notificationwindow");
             if (swaync_daemon.use_layer_shell) {
                 if (!GtkLayerShell.is_supported ()) {
                     stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");

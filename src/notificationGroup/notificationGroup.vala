@@ -31,6 +31,7 @@ namespace SwayNotificationCenter {
             set_child (dismissible);
 
             Gtk.Overlay overlay = new Gtk.Overlay ();
+            overlay.set_can_focus (false);
             dismissible.child = overlay;
 
             Gtk.Box box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);

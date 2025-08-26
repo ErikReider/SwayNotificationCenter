@@ -32,7 +32,6 @@ namespace SwayNotificationCenter.Widgets {
         private HashTable<string, unowned NotificationGroup> noti_groups_name =
             new HashTable<string, unowned NotificationGroup> (str_hash, str_equal);
 
-        private int list_position = 0;
         private bool list_reverse = false;
 
         // Default config values
@@ -132,8 +131,15 @@ namespace SwayNotificationCenter.Widgets {
                     expanded_group = null;
                 }
 
+                // Make sure to change focus to the sibling. Otherwise,
+                // the ListBox focuses the first notification.
+                if (list_reverse) {
+                    navigate_up (group, true);
+                } else {
+                    navigate_down (group, true);
+                }
                 list_box_controller.remove (group);
-                navigate_list (--list_position);
+
                 // Switches the stack page depending on the amount of notifications
                 if (list_box_controller.length < 1) {
                     stack.set_visible_child_name (STACK_PLACEHOLDER_PAGE);
@@ -202,18 +208,9 @@ namespace SwayNotificationCenter.Widgets {
                     noti_groups_name.set (param.name_id, group);
                 }
 
-                // Set the new list position when the group receives keyboard focus
-                Gtk.EventControllerFocus focus_controller = new Gtk.EventControllerFocus ();
-                group.add_controller (focus_controller);
-                focus_controller.enter.connect (() => {
-                    int i = list_box_controller.get_children ().index (group);
-                    if (list_position != int.MAX && list_position != i) {
-                        list_position = i;
-                    }
-                });
-
                 // Switches the stack page depending on the amount of notifications
                 stack.set_visible_child_name (STACK_NOTIFICATIONS_PAGE);
+
                 list_box_controller.append (group);
             }
 
@@ -237,9 +234,8 @@ namespace SwayNotificationCenter.Widgets {
                 stderr.printf (e.message + "\n");
             }
 
-            // Keep focus on currently focused notification
-            list_box.grab_focus ();
-            navigate_list (++list_position);
+            // Focus the incoming notification
+            group.grab_focus ();
         }
 
         public void set_list_is_reversed (bool reversed) {
@@ -253,6 +249,9 @@ namespace SwayNotificationCenter.Widgets {
 
         public bool key_press_event_cb (uint keyval, uint keycode, Gdk.ModifierType state) {
             var children = list_box_controller.get_children ();
+            if (!(list_box.get_focus_child () is NotificationGroup)) {
+                focus_first_notification ();
+            }
             var group = (NotificationGroup) list_box.get_focus_child ();
             switch (Gdk.keyval_name (keyval)) {
                 case "Return":
@@ -267,32 +266,14 @@ namespace SwayNotificationCenter.Widgets {
                     break;
                 case "Delete":
                 case "BackSpace":
-                    if (group != null) {
-                        int len = (int) children.length ();
-                        if (len == 0) break;
-                        // Add a delta so that we select the next notification
-                        // due to it not being gone from the list yet due to
-                        // the fade transition
-                        int delta = 2;
-                        if (list_reverse) {
-                            if (children.first ().data != group) {
-                                delta = 0;
-                            }
-                            list_position--;
-                        } else {
-                            if (list_position > 0) list_position--;
-                            if (children.last ().data == group) {
-                                delta = 0;
-                            }
-                        }
+                    if (group != null && !children.is_empty ()) {
                         var noti = group.get_latest_notification ();
                         if (group.only_single_notification () && noti != null) {
                             close_notification (noti.param.applied_id, true);
                             break;
                         }
                         group.close_all_notifications ();
-                        navigate_list (list_position + delta);
-                        return true;
+                        break;
                     }
                     break;
                 case "C":
@@ -306,19 +287,16 @@ namespace SwayNotificationCenter.Widgets {
                     }
                     break;
                 case "Down":
-                    if (list_position + 1 < children.length ()) {
-                        ++list_position;
-                    }
+                    navigate_down (group);
                     break;
                 case "Up":
-                    if (list_position > 0) --list_position;
+                    navigate_up (group);
                     break;
                 case "Home":
-                    list_position = 0;
+                    navigate_to_first_notification ();
                     break;
                 case "End":
-                    list_position = ((int) children.length ()) - 1;
-                    if (list_position == uint.MAX) list_position = 0;
+                    navigate_to_last_notification ();
                     break;
                 default:
                     // Pressing 1-9 to activate a notification action
@@ -333,7 +311,6 @@ namespace SwayNotificationCenter.Widgets {
                     }
                     break;
             }
-            navigate_list (list_position);
             // Override the builtin list navigation
             return true;
         }
@@ -391,29 +368,80 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         private void navigate_list (int i) {
+            if (list_box_controller.length == 0) {
+                return;
+            }
+
             unowned Gtk.ListBoxRow ? widget = list_box.get_row_at_index (i);
             if (widget == null) {
                 // Try getting the last widget
                 if (list_reverse) {
                     widget = list_box.get_row_at_index (0);
                 } else {
-                    int len = ((int) list_box_controller.length) - 1;
+                    int len = list_box_controller.length - 1;
                     widget = list_box.get_row_at_index (len);
                 }
             }
             if (widget != null) {
                 widget.grab_focus ();
-                list_box.set_focus_child (widget);
+            } else {
+                list_box.grab_focus ();
             }
         }
 
-        private void focus_first_notification () {
-            // Focus the first notification
-            list_position = (list_reverse ? (((int) list_box_controller.length) - 1) : 0)
-                .clamp (0, (int) list_box_controller.length);
+        private void navigate_up (NotificationGroup ? focused_group,
+                                  bool fallback_other_dir = false) {
+            if (list_box_controller.length == 1) {
+                focus_first_notification ();
+                return;
+            }
+            if (!(focused_group is NotificationGroup) || list_box_controller.length == 0) {
+                return;
+            }
+            if (list_box.get_first_child () == focused_group) {
+                if (fallback_other_dir) {
+                    navigate_down (focused_group, false);
+                }
+                return;
+            }
 
-            list_box.grab_focus ();
-            navigate_list (list_position);
+            focused_group.move_focus (Gtk.DirectionType.TAB_BACKWARD);
+        }
+
+        private void navigate_down (NotificationGroup ? focused_group,
+                                    bool fallback_other_dir = false) {
+            if (list_box_controller.length == 1) {
+                focus_first_notification ();
+                return;
+            }
+            if (!(focused_group is NotificationGroup) || list_box_controller.length == 0) {
+                return;
+            }
+            if (list_box.get_last_child () == focused_group) {
+                if (fallback_other_dir) {
+                    navigate_up (focused_group, false);
+                }
+                return;
+            }
+
+            focused_group.move_focus (Gtk.DirectionType.TAB_FORWARD);
+        }
+
+        private void navigate_to_first_notification () {
+            int i = (list_reverse ? list_box_controller.length - 1 : 0)
+                .clamp (0, list_box_controller.length);
+            navigate_list (i);
+        }
+
+        private void navigate_to_last_notification () {
+            int i = (list_reverse ? 0 : list_box_controller.length - 1)
+                .clamp (0, list_box_controller.length);
+            navigate_list (i);
+        }
+
+        private void focus_first_notification () {
+            navigate_to_first_notification ();
+
             foreach (unowned Gtk.Widget w in list_box_controller.get_children ()) {
                 var group = (NotificationGroup) w;
                 if (group != null) group.update ();

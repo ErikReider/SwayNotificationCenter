@@ -167,7 +167,9 @@ namespace SwayNotificationCenter.Widgets {
                 this.client.start ();
             } else {
                 this.client.close ();
-                if (show_per_app) revealer.set_reveal_child (false);
+                if (show_per_app) {
+                    reveal_button.set_active (false);
+                }
             }
         }
 

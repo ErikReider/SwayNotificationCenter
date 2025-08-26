@@ -1,5 +1,5 @@
 public class IterListBoxController : Object {
-    public uint length { get; private set; default = 0; }
+    public int length { get; private set; default = 0; }
 
     private List<Gtk.Widget> children = new List<Gtk.Widget> ();
     public unowned Gtk.ListBox list_box {
@@ -13,11 +13,10 @@ public class IterListBoxController : Object {
 
     private void on_add (Gtk.Widget child) {
         length++;
-        child.destroy.connect (() => {
-            children.remove (child);
-        });
+        child.destroy.connect (this.remove);
     }
 
+    // NOTE: Not sorted
     public List<weak Gtk.Widget> get_children () {
         return children.copy ();
     }

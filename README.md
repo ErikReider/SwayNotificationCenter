@@ -439,11 +439,11 @@ Waybar css file
 }
 ```
 
-Alternatively, the number of notifications can be shown by adding `{}` anywhere in the `format` field in the Waybar config
+Alternatively, the number of notifications can be shown by adding `{0}` anywhere in the `format` field in the Waybar config
 
 ```jsonc
   "custom/notification": {
-    "format": "{} {icon}",
+    "format": "{0} {icon}",
     // ...
   },
 ```

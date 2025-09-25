@@ -16,9 +16,11 @@ theme might require extra tweaks to the default CSS style file*
 
 ## Demo
 
-https://github.com/ErikReider/SwayNotificationCenter/assets/35975961/93ff072f-e653-4064-8200-1c90590b83ef
+https://github.com/user-attachments/assets/5c054ac3-90bb-483e-a8f2-5af191805f04
 
-![Screenshot of panel](./assets/panel.png)
+My own [config](https://github.com/ErikReider/Linux/tree/master/dotfiles/.config/swaync):
+
+<img width="655" height="829" alt="Config" src="https://github.com/user-attachments/assets/5993cbb2-a54d-4d1c-9289-b7e2b9d0a09f" />
 
 ## Table of Contents
 

@@ -64,7 +64,7 @@ namespace SwayNotificationCenter {
             }
 
             monitors.items_changed.connect (monitors_changed);
-            monitors_changed (0, 0, monitors.get_n_items ());
+            Idle.add_once (() => monitors_changed (0, 0, monitors.get_n_items ()));
         }
 
         private void on_noti_bus_aquired (DBusConnection conn) {

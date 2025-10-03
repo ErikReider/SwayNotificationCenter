@@ -263,7 +263,9 @@ namespace SwayNotificationCenter {
                             || !get_mapped ()
                             || !(get_child () is Gtk.Widget)
                             || list.is_empty ())) {
-                        close ();
+                        Idle.add_once (() => {
+                            close ();
+                        });
                         return;
                     }
                 });

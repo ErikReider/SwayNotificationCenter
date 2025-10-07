@@ -222,12 +222,16 @@ namespace SwayNotificationCenter {
                 Variant hint_value = hints[hint];
                 switch (hint) {
                     case "SWAYNC_NO_SCRIPT":
-                        if (hint_value.is_of_type (VariantType.BOOLEAN)) {
+                        if (hint_value.is_of_type (VariantType.INT32)) {
+                            swaync_no_script = hint_value.get_int32 () == 1;
+                        } else if (hint_value.is_of_type (VariantType.BOOLEAN)) {
                             swaync_no_script = hint_value.get_boolean ();
                         }
                         break;
                     case "SWAYNC_BYPASS_DND":
-                        if (hint_value.is_of_type (VariantType.BOOLEAN)) {
+                        if (hint_value.is_of_type (VariantType.INT32)) {
+                            swaync_bypass_dnd = hint_value.get_int32 () == 1;
+                        } else if (hint_value.is_of_type (VariantType.BOOLEAN)) {
                             swaync_bypass_dnd = hint_value.get_boolean ();
                         }
                         break;
@@ -245,7 +249,9 @@ namespace SwayNotificationCenter {
                         }
                         break;
                     case "action-icons":
-                        if (hint_value.is_of_type (VariantType.BOOLEAN)) {
+                        if (hint_value.is_of_type (VariantType.INT32)) {
+                            action_icons = hint_value.get_int32 () == 1;
+                        } else if (hint_value.is_of_type (VariantType.BOOLEAN)) {
                             action_icons = hint_value.get_boolean ();
                         }
                         break;
@@ -299,15 +305,17 @@ namespace SwayNotificationCenter {
                         }
                         break;
                     case "resident":
-                        if (hint_value.is_of_type (VariantType.BOOLEAN)) {
+                        if (hint_value.is_of_type (VariantType.INT32)) {
+                            resident = hint_value.get_int32 () == 1;
+                        } else if (hint_value.is_of_type (VariantType.BOOLEAN)) {
                             resident = hint_value.get_boolean ();
                         }
                         break;
                     case "transient":
-                        if (hint_value.is_of_type (VariantType.BOOLEAN)) {
-                            transient = hint_value.get_boolean ();
-                        } else if (hint_value.is_of_type (VariantType.INT32)) {
+                        if (hint_value.is_of_type (VariantType.INT32)) {
                             transient = hint_value.get_int32 () == 1;
+                        } else if (hint_value.is_of_type (VariantType.BOOLEAN)) {
+                            transient = hint_value.get_boolean ();
                         }
                         break;
                     case "urgency":
@@ -355,16 +363,16 @@ namespace SwayNotificationCenter {
         }
 
         public string to_string () {
-            var params = new HashTable<string, string ?> (str_hash, str_equal);
+            var params = new OrderedHashTable<string ?> ();
 
-            params.set ("applied_id", applied_id.to_string ());
-            params.set ("app_name", app_name);
-            params.set ("replaces_id", replaces_id.to_string ());
-            params.set ("app_icon", app_icon);
-            params.set ("default_action", default_action == null
+            params.insert ("applied_id", applied_id.to_string ());
+            params.insert ("app_name", app_name);
+            params.insert ("replaces_id", replaces_id.to_string ());
+            params.insert ("app_icon", app_icon);
+            params.insert ("default_action", default_action == null
                         ? null : default_action.to_string ());
-            params.set ("summary", summary);
-            params.set ("body", "\t" + body);
+            params.insert ("summary", summary);
+            params.insert ("body", "\t" + body);
             string[] _hints = {};
             foreach (var key in hints.get_keys ()) {
                 Variant v = hints[key];
@@ -374,26 +382,30 @@ namespace SwayNotificationCenter {
                 }
                 _hints += "\n\t%s: %s".printf (key, data);
             }
-            params.set ("hints", string.joinv ("", _hints));
-            params.set ("expire_timeout", expire_timeout.to_string ());
-            params.set ("time", "\t" + time.to_string ());
+            params.insert ("hints", string.joinv ("", _hints));
+            params.insert ("expire_timeout", expire_timeout.to_string ());
+            params.insert ("time", "\t" + time.to_string ());
+            params.insert ("found desktop file", (desktop_app_info != null).to_string ());
+            params.insert ("applied app_id", name_id);
+            params.insert ("display name", display_name);
 
-            params.set ("action_icons", action_icons.to_string ());
-            params.set ("image_data", image_data.is_initialized.to_string ());
-            params.set ("icon_data", icon_data.is_initialized.to_string ());
-            params.set ("image_path", image_path);
-            params.set ("desktop_entry", desktop_entry);
-            params.set ("category", category);
-            params.set ("sound_name", sound_name);
-            params.set ("sound_file", sound_file);
-            params.set ("resident", resident.to_string ());
-            params.set ("urgency", urgency.to_string ());
+            params.insert ("action_icons", action_icons.to_string ());
+            params.insert ("image_data", image_data.is_initialized.to_string ());
+            params.insert ("icon_data", icon_data.is_initialized.to_string ());
+            params.insert ("image_path", image_path);
+            params.insert ("desktop_entry", desktop_entry);
+            params.insert ("category", category);
+            params.insert ("sound_name", sound_name);
+            params.insert ("sound_file", sound_file);
+            params.insert ("resident", resident.to_string ());
+            params.insert ("transient", transient.to_string ());
+            params.insert ("urgency", urgency.to_string ());
             string[] _actions = {};
             foreach (var _action in actions.data) {
                 _actions += "\n\t" + _action.to_string ();
             }
-            params.set ("actions", string.joinv ("", _actions));
-            params.set ("inline-reply", inline_reply == null
+            params.insert ("actions", string.joinv ("", _actions));
+            params.insert ("inline-reply", inline_reply == null
                         ? null : inline_reply.to_string ());
 
             string[] result = {};

@@ -180,7 +180,8 @@ namespace SwayNotificationCenter {
                 break;
             }
 
-            debug ("Notification: %s\n", param.to_string ());
+            debug ("Notification (ID:%u, state: %s): %s\n",
+                param.applied_id, state.to_string (), param.to_string ());
 
             // Get the notification id to replace
             uint32 replace_notification = 0;
@@ -198,21 +199,29 @@ namespace SwayNotificationCenter {
                 synchronous_ids.set (param.synchronous, id);
             }
 
+            string ? hide_notification_reason = null;
             bool show_notification = state == NotificationStatusEnum.ENABLED
                                      || state == NotificationStatusEnum.TRANSIENT;
+            if (!show_notification) {
+                hide_notification_reason = "Notification status is not Enabled or Transient in Config";
+            }
+
             // Don't show the notification window if the control center is open
             if (control_center.get_visibility ()) {
+                hide_notification_reason = "Control Center is visible";
                 show_notification = false;
             }
 
             bool bypass_dnd = param.urgency == UrgencyLevels.CRITICAL || param.swaync_bypass_dnd;
             // Don't show the notification window if dnd or inhibited
             if (!bypass_dnd && (dnd || swaync_daemon.inhibited)) {
+                hide_notification_reason = "Do Not Disturb is enabled or an Inhibitor is running";
                 show_notification = false;
             }
 
             if (show_notification) {
                 if (replace_notification > 0) {
+                    debug ("Replacing Notification: ID:%u\n", param.applied_id);
                     NotificationWindow.instance.replace_notification (replace_notification, param);
                 } else {
                     NotificationWindow.instance.add_notification (param);
@@ -220,6 +229,9 @@ namespace SwayNotificationCenter {
             } else if (replace_notification > 0) {
                 // Remove the old notification due to it not being replaced
                 NotificationWindow.instance.close_notification (replace_notification, false);
+            } else {
+                debug ("Not displaying Notification: ID:%u, Reason: \"%s\"\n",
+                    param.applied_id, hide_notification_reason);
             }
 
             // Only add notification to CC if it isn't IGNORED and not transient/TRANSIENT
@@ -227,6 +239,7 @@ namespace SwayNotificationCenter {
                 && state != NotificationStatusEnum.TRANSIENT
                 && !param.transient) {
                     if (replace_notification > 0) {
+                        debug ("Replacing CC Notification: ID:%u\n", param.applied_id);
                         control_center.replace_notification (replace_notification, param);
                     } else {
                         control_center.add_notification (param);
@@ -234,6 +247,8 @@ namespace SwayNotificationCenter {
             } else if (replace_notification > 0) {
                 // Remove the old notification due to it not being replaced
                 control_center.close_notification (replace_notification, false);
+            } else {
+                debug ("Not Placing Notification in CC: ID:%u\n", param.applied_id);
             }
 
 #if WANT_SCRIPTING
@@ -246,6 +261,7 @@ namespace SwayNotificationCenter {
             if (scripts.length == 0) return id;
             this.run_scripts (param, ScriptRunOnType.RECEIVE);
 #endif
+            debug ("\n");
             return id;
         }
 

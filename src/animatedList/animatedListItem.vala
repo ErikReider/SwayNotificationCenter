@@ -29,9 +29,8 @@ public class AnimatedListItem : Gtk.Widget {
     public bool animation_child_fade { get; construct set; }
     public bool destroying { get; private set; default = false; }
 
-    private Adw.CallbackAnimationTarget target;
     private Adw.TimedAnimation animation;
-    private double animation_value = 0.0;
+    private double animation_value = 1.0;
     private ulong animation_done_cb_id = 0;
     private unowned SourceFunc ? removed_cb = null;
     private unowned SourceFunc ? added_cb = null;
@@ -48,12 +47,20 @@ public class AnimatedListItem : Gtk.Widget {
             animation_child_fade: true
         );
 
-        target = new Adw.CallbackAnimationTarget (animation_value_cb);
-        animation = new Adw.TimedAnimation (this, 0.0, 1.0,
-                                            animation_duration, target);
+        Adw.CallbackAnimationTarget target = new Adw.CallbackAnimationTarget (set_animation_value);
+        animation = new Adw.TimedAnimation (this, 0.0, 1.0, animation_duration, target);
         bind_property ("animation-easing",
                        animation, "easing",
                        BindingFlags.SYNC_CREATE, null, null);
+    }
+
+    public override void dispose () {
+        if (child != null) {
+            child.unparent ();
+            child = null;
+        }
+
+        base.dispose ();
     }
 
     public override Gtk.SizeRequestMode get_request_mode () {
@@ -164,26 +171,12 @@ public class AnimatedListItem : Gtk.Widget {
         }
     }
 
-    private void animation_value_cb (double value) {
-        this.animation_value = value;
+    private void set_animation_value (double value) {
+        animation_value = value;
         queue_resize ();
     }
 
-    private void animation_done_add () {
-        if (added_cb != null) {
-            added_cb ();
-            added_cb = null;
-        }
-    }
-    private void animation_done_remove () {
-        unparent ();
-        if (removed_cb != null) {
-            removed_cb ();
-            removed_cb = null;
-        }
-    }
-
-    private void animation_remove_done_cb () {
+    private inline void remove_animation_done_cb () {
         if (animation_done_cb_id != 0) {
             animation.disconnect (animation_done_cb_id);
             animation_done_cb_id = 0;
@@ -191,9 +184,16 @@ public class AnimatedListItem : Gtk.Widget {
     }
 
     delegate void animation_done (Adw.Animation animation);
-    private void animation_add_done_cb (animation_done handler) {
-        animation_remove_done_cb ();
-        animation_done_cb_id = animation.done.connect ((a) => handler (a));
+    private void set_animation_done_cb (animation_done handler) {
+        remove_animation_done_cb ();
+        animation_done_cb_id = animation.done.connect (handler);
+    }
+
+    private void added_finished_cb () {
+        if (added_cb != null) {
+            added_cb ();
+            added_cb = null;
+        }
     }
 
     public async void added (bool transition) {
@@ -202,10 +202,10 @@ public class AnimatedListItem : Gtk.Widget {
             return;
         }
 
-        animation_remove_done_cb ();
+        remove_animation_done_cb ();
 
         if (get_mapped () && transition) {
-            animation_add_done_cb (animation_done_add);
+            set_animation_done_cb (added_finished_cb);
             added_cb = added.callback;
             animation.value_from
                 = animation.state == Adw.AnimationState.PLAYING
@@ -215,8 +215,15 @@ public class AnimatedListItem : Gtk.Widget {
             animation.play ();
             yield;
         } else {
-            animation_value = 1.0;
-            animation_done_add ();
+            set_animation_value (1.0);
+            added_finished_cb ();
+        }
+    }
+
+    private void removed_finised_cb () {
+        if (removed_cb != null) {
+            removed_cb ();
+            removed_cb = null;
         }
     }
 
@@ -226,13 +233,13 @@ public class AnimatedListItem : Gtk.Widget {
             return false;
         }
 
-        animation_remove_done_cb ();
+        remove_animation_done_cb ();
 
         set_can_focus (false);
         set_can_target (false);
 
         if (get_mapped () && transition) {
-            animation_add_done_cb (animation_done_remove);
+            set_animation_done_cb (removed_finised_cb);
             removed_cb = removed.callback;
             animation.value_from
                 = animation.state == Adw.AnimationState.PLAYING
@@ -242,9 +249,16 @@ public class AnimatedListItem : Gtk.Widget {
             animation.play ();
             yield;
         } else {
-            animation_value = 0.0;
-            animation_done_remove ();
+            set_animation_value (0.0);
+            removed_finised_cb ();
         }
+
+        if (child != null) {
+            child.unparent ();
+            child = null;
+        }
+        // Fixes the animation keeping a reference of the widget
+        animation = null;
 
         return true;
     }

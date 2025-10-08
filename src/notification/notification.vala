@@ -24,8 +24,12 @@ namespace SwayNotificationCenter {
             };
             button.add_css_class ("close-button");
             button.add_css_class ("circular");
-            button.clicked.connect (() => this.clicked ());
+            button.clicked.connect (click_cb);
             revealer.set_child (button);
+        }
+
+        private void click_cb () {
+            clicked ();
         }
 
         public signal void clicked ();
@@ -50,7 +54,7 @@ namespace SwayNotificationCenter {
     public enum NotificationType { CONTROL_CENTER, POPUP }
 
     [GtkTemplate (ui = "/org/erikreider/swaync/ui/notification.ui")]
-    public class Notification : Gtk.Box {
+    public class Notification : Adw.Bin {
         [GtkChild]
         unowned Gtk.Revealer revealer;
         [GtkChild]
@@ -276,8 +280,7 @@ namespace SwayNotificationCenter {
                     noti_daemon.manually_close_notification (
                         param.applied_id, false);
                 } catch (Error e) {
-                    printerr ("Error: %s\n", e.message);
-                    this.destroy ();
+                    critical ("Error: %s", e.message);
                 }
             });
 
@@ -671,8 +674,7 @@ namespace SwayNotificationCenter {
                     noti_daemon.manually_close_notification (param.applied_id,
                                                              is_timeout);
                 } catch (Error e) {
-                    print ("Error: %s\n", e.message);
-                    this.destroy ();
+                    critical ("Error: %s", e.message);
                 }
                 return Source.REMOVE;
             });

@@ -63,10 +63,10 @@ namespace SwayNotificationCenter {
             if (data.has_alpha) {
                 format = Gdk.MemoryFormat.R8G8B8A8;
             }
-            var texture = new Gdk.MemoryTexture (data.width, data.height,
-                                                 format,
-                                                 new Bytes.static (data.data),
-                                                 data.rowstride);
+            Gdk.Texture texture = new Gdk.MemoryTexture (data.width, data.height,
+                                                         format,
+                                                         new Bytes.static (data.data),
+                                                         data.rowstride);
             img.set_from_paintable (texture);
         }
 

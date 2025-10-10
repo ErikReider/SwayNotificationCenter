@@ -266,7 +266,6 @@ namespace SwayNotificationCenter {
                         Idle.add_once (() => {
                             close ();
                         });
-                        return;
                     }
                 });
             }

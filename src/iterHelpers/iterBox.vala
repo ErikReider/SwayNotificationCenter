@@ -8,6 +8,14 @@ public class IterBox : Gtk.Box {
         set_name ("iterbox");
     }
 
+    public override void dispose () {
+        foreach (Gtk.Widget child in children) {
+            remove (child);
+        }
+
+        base.dispose ();
+    }
+
     private void on_add (Gtk.Widget child) {
         length++;
         child.destroy.connect (() => {

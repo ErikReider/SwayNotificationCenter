@@ -40,7 +40,14 @@ namespace SwayNotificationCenter {
                 try {
                     if (is_uri) uri = uri.slice (URI_PREFIX.length, uri.length);
 
-                    Gdk.Texture texture = Gdk.Texture.from_filename (Uri.unescape_string (uri));
+                    Gtk.Requisition natural_size;
+                    img.get_preferred_size (null, out natural_size);
+
+                    Gdk.Pixbuf pixbuf = new Gdk.Pixbuf.from_file_at_size (
+                        Uri.unescape_string (uri),
+                        natural_size.width, natural_size.height);
+
+                    Gdk.Texture texture = Gdk.Texture.for_pixbuf (pixbuf);
                     img.set_from_paintable (texture);
                 } catch (Error e) {
                     stderr.printf (e.message + "\n");
@@ -59,14 +66,22 @@ namespace SwayNotificationCenter {
 
         public static void set_image_data (ImageData data,
                                            Gtk.Image img) {
-            Gdk.MemoryFormat format = Gdk.MemoryFormat.R8G8B8;
-            if (data.has_alpha) {
-                format = Gdk.MemoryFormat.R8G8B8A8;
-            }
-            var texture = new Gdk.MemoryTexture (data.width, data.height,
-                                                 format,
-                                                 new Bytes.static (data.data),
-                                                 data.rowstride);
+            Gtk.Requisition natural_size;
+            img.get_preferred_size (null, out natural_size);
+
+            Gdk.Pixbuf pixbuf = new Gdk.Pixbuf.with_unowned_data (data.data,
+                                                           Gdk.Colorspace.RGB,
+                                                           data.has_alpha,
+                                                           data.bits_per_sample,
+                                                           data.width,
+                                                           data.height,
+                                                           data.rowstride,
+                                                           null);
+            Gdk.Pixbuf scaled = pixbuf.scale_simple (natural_size.width,
+                                                     natural_size.height,
+                                                     Gdk.InterpType.BILINEAR);
+
+            Gdk.Texture texture = Gdk.Texture.for_pixbuf (scaled);
             img.set_from_paintable (texture);
         }
 

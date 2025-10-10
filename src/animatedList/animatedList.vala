@@ -134,6 +134,8 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
             transition_children = false;
             remove.begin (child, false);
         }
+
+        base.dispose ();
     }
 
     public bool get_border (out Gtk.Border border) {
@@ -538,7 +540,7 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
      * BOTTOM_TO_TOP: Top
      */
     public async AnimatedListItem ? prepend (Gtk.Widget widget) {
-        if (widget == null) {
+        if (widget == null || widget.parent != null) {
             warn_if_reached ();
             return null;
         }
@@ -570,7 +572,7 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
      * BOTTOM_TO_TOP: Bottom
      */
     public async AnimatedListItem ? append (Gtk.Widget widget) {
-        if (widget == null) {
+        if (widget == null || widget.parent != null) {
             warn_if_reached ();
             return null;
         }
@@ -645,9 +647,9 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
         // Will unparent itself when done animating
         bool result = yield item.removed (transition_children && transition);
 
+        item.unparent ();
         children.remove (item);
         n_children--;
-        item.destroy ();
         queue_resize ();
         return result;
     }

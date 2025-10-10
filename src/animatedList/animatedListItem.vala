@@ -234,6 +234,8 @@ public class AnimatedListItem : Gtk.Widget {
         }
 
         remove_animation_done_cb ();
+        // Call the `added` callback if it's still stuck in the yield waiting state
+        added_finished_cb ();
 
         set_can_focus (false);
         set_can_target (false);

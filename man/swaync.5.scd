@@ -191,6 +191,51 @@ config file to be able to detect config errors
 				 (ex: "Acer Technologies XV272U V 503023B314202"). If the ++
 				 output is not found, the currently focused one is picked.
 
+*notification-action-filter* ++
+	type: object ++
+	visibility object properties: ++
+		*use-regex*++
+			type: bool ++
+			optional: true ++
+			default: false ++
+			description: Indicates if all the below fields should use ++
+				regex or not.++
+		*app-name*++
+			type: string ++
+			optional: true ++
+			description: The app-name.++
+		*desktop-entry*++
+			type: string ++
+			optional: true ++
+			description: The desktop-entry.++
+		*id-matcher*++
+			type: string ++
+			optional: true (needs at least one *matcher*) ++
+			description: Matches the actions identifier. Can be found by ++
+				reading the output of swaync when run with the ++
+				*G_MESSAGES_DEBUG=all* environment variable.++
+		*text-matcher*++
+			type: string ++
+			optional: true (needs at least one *matcher*) ++
+			description: Matches the actions text visible in the notification. ++
+	description: Hides matching action(s) of matching notifications. ++
+		If the notification doesn't include one of the properties, that ++
+		property will be ignored. If all properties match the given ++
+		notification, the matching actions will be hidden. ++
+	example:
+```
+{
+	"notification-action-filter": {
+		"hide-chromium-settings": {
+			"desktop-entry": "chromium-browser",
+			"use-regex": false,
+			"id-matcher": "settings",
+			"text-matcher": "Settings"
+		}
+	},
+}
+```
+
 *notification-visibility* ++
 	type: object ++
 	visibility object properties: ++

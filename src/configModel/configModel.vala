@@ -193,6 +193,111 @@ namespace SwayNotificationCenter {
         }
     }
 
+    public class ActionMatching : Object, Json.Serializable {
+        public string ? app_name { get; set; default = null; }
+        public string ? desktop_entry { get; set; default = null; }
+        // Action ID
+        public string ? name_matcher { get; set; }
+        // Action text
+        public string ? text_matcher { get; set; }
+
+        private const RegexCompileFlags REGEX_COMPILE_OPTIONS =
+            RegexCompileFlags.MULTILINE;
+
+        private const RegexMatchFlags REGEX_MATCH_FLAGS = RegexMatchFlags.NOTEMPTY;
+
+        private List<Action> ? match_action (Array<Action> actions) {
+            List<Action> matching = new List<Action> ();
+            foreach (Action action in actions) {
+                bool result = Regex.match_simple (
+                    name_matcher, action.identifier,
+                    REGEX_COMPILE_OPTIONS,
+                    REGEX_MATCH_FLAGS);
+                if (result) {
+                    matching.append (action);
+                    continue;
+                }
+
+                result = Regex.match_simple (
+                    text_matcher, action.text,
+                    REGEX_COMPILE_OPTIONS,
+                    REGEX_MATCH_FLAGS);
+                if (result) {
+                    matching.append (action);
+                    continue;
+                }
+            }
+            if (!matching.is_empty ()) {
+                return matching;
+            }
+
+            return null;
+        }
+
+        public List<Action> ? matches_notification (NotifyParams param) {
+            if (name_matcher == null && text_matcher == null) {
+                critical ("Action filter doesn't contain a matcher: %s", this.to_string ());
+                return null;
+            }
+
+            if (app_name != null) {
+                if (param.app_name == null) return null;
+                bool result = Regex.match_simple (
+                    app_name, param.app_name,
+                    REGEX_COMPILE_OPTIONS,
+                    REGEX_MATCH_FLAGS);
+                if (result) {
+                    var matches = match_action (param.actions);
+                    if (matches != null) {
+                        return matches;
+                    }
+                }
+            }
+            if (desktop_entry != null) {
+                if (param.desktop_entry == null) return null;
+                bool result = Regex.match_simple (
+                    desktop_entry, param.desktop_entry,
+                    REGEX_COMPILE_OPTIONS,
+                    REGEX_MATCH_FLAGS);
+                if (result) {
+                    var matches = match_action (param.actions);
+                    if (matches != null) {
+                        return matches;
+                    }
+                }
+            }
+            return null;
+        }
+
+        public string to_string () {
+            string[] fields = {};
+            if (app_name != null) fields += "app-name: %s".printf (app_name);
+            if (desktop_entry != null) fields += "desktop-entry: %s".printf (desktop_entry);
+            if (name_matcher != null) fields += "name_matcher: %s".printf (name_matcher);
+            if (text_matcher != null) fields += "text_matcher: %s".printf (text_matcher);
+            return string.joinv (", ", fields);
+        }
+
+        // public override Json.Node serialize_property (string property_name,
+        //                                               Value value,
+        //                                               ParamSpec pspec) {
+        //     // Return enum nickname instead of enum int value
+        //     if (value.type ().is_a (Type.ENUM)) {
+        //         var node = new Json.Node (Json.NodeType.VALUE);
+        //         EnumClass enumc = (EnumClass) value.type ().class_ref ();
+        //         unowned EnumValue ? eval
+        //             = enumc.get_value (value.get_enum ());
+        //         if (eval == null) {
+        //             node.set_value (value);
+        //             return node;
+        //         }
+        //         node.set_string (eval.value_nick);
+        //         return node;
+        //     }
+        //     return default_serialize_property (property_name, value, pspec);
+        // }
+    }
+
     public enum NotificationStatusEnum {
         ENABLED,
         MUTED,
@@ -556,6 +661,12 @@ namespace SwayNotificationCenter {
             default = new OrderedHashTable<Category> ();
         }
 
+        /** Filter Notification Actions */
+        public OrderedHashTable<ActionMatching> notification_action_filter {
+            get;
+            set;
+            default = new OrderedHashTable<ActionMatching> ();
+        }
 
         /** Notification Status */
         public OrderedHashTable<NotificationVisibility> notification_visibility {
@@ -716,6 +827,15 @@ namespace SwayNotificationCenter {
                     bool status;
                     OrderedHashTable<Category> result =
                         extract_hashtable<Category> (
+                            property_name,
+                            property_node,
+                            out status);
+                    value = result;
+                    return status;
+                case "notification-action-filter":
+                    bool status;
+                    OrderedHashTable<ActionMatching> result =
+                        extract_hashtable<ActionMatching> (
                             property_name,
                             property_node,
                             out status);

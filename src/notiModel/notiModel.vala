@@ -55,11 +55,11 @@ namespace SwayNotificationCenter {
 
     public class Action : Object {
         public string identifier { get; set; }
-        public string name { get; set; }
+        public string text { get; set; }
 
         public string to_string () {
-            if (identifier == null || name == null) return "None";
-            return "Name: %s, Id: %s".printf (name, identifier);
+            if (identifier == null || text == null) return "None";
+            return "Name: %s, Id: %s".printf (text, identifier);
         }
     }
 
@@ -338,16 +338,16 @@ namespace SwayNotificationCenter {
                 for (int i = 0; i < actions.length; i++) {
                     var action = new Action ();
                     action.identifier = actions[i];
-                    action.name = actions[i + 1];
-                    if (action.name != null && action.identifier != null) {
+                    action.text = actions[i + 1];
+                    if (action.text != null && action.identifier != null) {
                         string id = action.identifier.down ();
                         switch (id) {
                             case "default":
                                 default_action = action;
                                 break;
                             case "inline-reply":
-                                if (action.name == "") {
-                                    action.name = "Reply";
+                                if (action.text == "") {
+                                    action.text = "Reply";
                                 }
                                 inline_reply = action;
                                 break;

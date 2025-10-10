@@ -566,7 +566,7 @@ namespace SwayNotificationCenter {
             },
                 null);
 
-            inline_reply_button.set_label (param.inline_reply.name ?? "Reply");
+            inline_reply_button.set_label (param.inline_reply.text ?? "Reply");
         }
 
         private void set_actions () {
@@ -613,7 +613,7 @@ namespace SwayNotificationCenter {
                     flowbox_child.add_css_class ("notification-action");
                     alt_actions_box.append (flowbox_child);
 
-                    Gtk.Button action_button = new Gtk.Button.with_label (action.name);
+                    Gtk.Button action_button = new Gtk.Button.with_label (action.text);
                     action_button.clicked.connect (() => action_clicked (action));
                     action_button.set_can_focus (false);
                     flowbox_child.set_child (action_button);

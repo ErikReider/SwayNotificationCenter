@@ -80,6 +80,20 @@ namespace SwayNotificationCenter {
         }
     }
 
+    private struct MatchCase {
+        string ? pattern;
+        string ? str;
+
+        public MatchCase (string ? pattern, string ? str) {
+            this.pattern = pattern;
+            this.str = str;
+        }
+
+        public bool is_valid () {
+            return pattern != null && str != null;
+        }
+    }
+
     public class NotificationMatching : Object, Json.Serializable {
         public string ? app_name { get; set; default = null; }
         public string ? desktop_entry { get; set; default = null; }
@@ -196,106 +210,78 @@ namespace SwayNotificationCenter {
     public class ActionMatching : Object, Json.Serializable {
         public string ? app_name { get; set; default = null; }
         public string ? desktop_entry { get; set; default = null; }
-        // Action ID
-        public string ? name_matcher { get; set; }
-        // Action text
+        public string ? id_matcher { get; set; }
         public string ? text_matcher { get; set; }
+        public bool use_regex { get; set; default = false; }
 
         private const RegexCompileFlags REGEX_COMPILE_OPTIONS =
             RegexCompileFlags.MULTILINE;
 
         private const RegexMatchFlags REGEX_MATCH_FLAGS = RegexMatchFlags.NOTEMPTY;
 
-        private List<Action> ? match_action (Array<Action> actions) {
-            List<Action> matching = new List<Action> ();
-            foreach (Action action in actions) {
-                bool result = Regex.match_simple (
-                    name_matcher, action.identifier,
-                    REGEX_COMPILE_OPTIONS,
-                    REGEX_MATCH_FLAGS);
-                if (result) {
-                    matching.append (action);
+        public bool matches_action (Action action) {
+            MatchCase[] matchers = {
+                MatchCase (id_matcher, action.identifier),
+                MatchCase (text_matcher, action.text),
+            };
+            foreach (MatchCase matcher in matchers) {
+                if (!matcher.is_valid ()) {
                     continue;
                 }
-
-                result = Regex.match_simple (
-                    text_matcher, action.text,
-                    REGEX_COMPILE_OPTIONS,
-                    REGEX_MATCH_FLAGS);
-                if (result) {
-                    matching.append (action);
-                    continue;
+                if (use_regex) {
+                    bool result = Regex.match_simple (
+                        matcher.pattern, matcher.str,
+                        REGEX_COMPILE_OPTIONS,
+                        REGEX_MATCH_FLAGS);
+                    if (!result) return false;
+                } else {
+                    if (matcher.pattern != matcher.str) {
+                        return false;
+                    }
                 }
             }
-            if (!matching.is_empty ()) {
-                return matching;
-            }
 
-            return null;
+            return true;
         }
 
-        public List<Action> ? matches_notification (NotifyParams param) {
-            if (name_matcher == null && text_matcher == null) {
+        public bool matches_notification (NotifyParams param) {
+            if (id_matcher == null && text_matcher == null) {
                 critical ("Action filter doesn't contain a matcher: %s", this.to_string ());
-                return null;
+                return false;
             }
 
-            if (app_name != null) {
-                if (param.app_name == null) return null;
-                bool result = Regex.match_simple (
-                    app_name, param.app_name,
-                    REGEX_COMPILE_OPTIONS,
-                    REGEX_MATCH_FLAGS);
-                if (result) {
-                    var matches = match_action (param.actions);
-                    if (matches != null) {
-                        return matches;
+            MatchCase[] matchers = {
+                MatchCase (app_name, param.app_name),
+                MatchCase (desktop_entry, param.desktop_entry),
+            };
+            foreach (MatchCase matcher in matchers) {
+                if (!matcher.is_valid ()) {
+                    continue;
+                }
+                if (use_regex) {
+                    bool result = Regex.match_simple (
+                        matcher.pattern, matcher.str,
+                        REGEX_COMPILE_OPTIONS,
+                        REGEX_MATCH_FLAGS);
+                    if (!result) return false;
+                } else {
+                    if (matcher.pattern != matcher.str) {
+                        return false;
                     }
                 }
             }
-            if (desktop_entry != null) {
-                if (param.desktop_entry == null) return null;
-                bool result = Regex.match_simple (
-                    desktop_entry, param.desktop_entry,
-                    REGEX_COMPILE_OPTIONS,
-                    REGEX_MATCH_FLAGS);
-                if (result) {
-                    var matches = match_action (param.actions);
-                    if (matches != null) {
-                        return matches;
-                    }
-                }
-            }
-            return null;
+
+            return true;
         }
 
         public string to_string () {
             string[] fields = {};
             if (app_name != null) fields += "app-name: %s".printf (app_name);
             if (desktop_entry != null) fields += "desktop-entry: %s".printf (desktop_entry);
-            if (name_matcher != null) fields += "name_matcher: %s".printf (name_matcher);
+            if (id_matcher != null) fields += "name_matcher: %s".printf (id_matcher);
             if (text_matcher != null) fields += "text_matcher: %s".printf (text_matcher);
             return string.joinv (", ", fields);
         }
-
-        // public override Json.Node serialize_property (string property_name,
-        //                                               Value value,
-        //                                               ParamSpec pspec) {
-        //     // Return enum nickname instead of enum int value
-        //     if (value.type ().is_a (Type.ENUM)) {
-        //         var node = new Json.Node (Json.NodeType.VALUE);
-        //         EnumClass enumc = (EnumClass) value.type ().class_ref ();
-        //         unowned EnumValue ? eval
-        //             = enumc.get_value (value.get_enum ());
-        //         if (eval == null) {
-        //             node.set_value (value);
-        //             return node;
-        //         }
-        //         node.set_string (eval.value_nick);
-        //         return node;
-        //     }
-        //     return default_serialize_property (property_name, value, pspec);
-        // }
     }
 
     public enum NotificationStatusEnum {

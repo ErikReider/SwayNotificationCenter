@@ -54,8 +54,12 @@ namespace SwayNotificationCenter {
     }
 
     public class Action : Object {
-        public string identifier { get; set; }
-        public string text { get; set; }
+        public string identifier { get; construct set; }
+        public string text { get; construct set; }
+
+        public Action (string identifier, string text) {
+            Object (identifier: identifier, text: text);
+        }
 
         public string to_string () {
             if (identifier == null || text == null) return "None";
@@ -334,31 +338,56 @@ namespace SwayNotificationCenter {
 
         private void parse_actions (string[] actions) {
             Array<Action> parsed_actions = new Array<Action> ();
-            if (actions.length > 1 && actions.length % 2 == 0) {
-                for (int i = 0; i < actions.length; i++) {
-                    var action = new Action ();
-                    action.identifier = actions[i];
-                    action.text = actions[i + 1];
-                    if (action.text != null && action.identifier != null) {
-                        string id = action.identifier.down ();
-                        switch (id) {
-                            case "default":
-                                default_action = action;
-                                break;
-                            case "inline-reply":
-                                if (action.text == "") {
-                                    action.text = "Reply";
-                                }
-                                inline_reply = action;
-                                break;
-                            default:
-                                parsed_actions.append_val (action);
-                                break;
-                        }
-                    }
-                    i++;
+            if (actions.length <= 1 || actions.length % 2 != 0) {
+                this.actions = parsed_actions;
+                return;
+            }
+
+            // Find all the matching filters
+            List<unowned ActionMatching> valid_matchers = new List<unowned ActionMatching> ();
+            unowned OrderedHashTable<ActionMatching> filters =
+                ConfigModel.instance.notification_action_filter;
+            foreach (string key in filters.get_keys ()) {
+                unowned ActionMatching matcher = filters[key];
+                if (matcher.matches_notification (this)) {
+                    valid_matchers.append (matcher);
                 }
             }
+
+            for (int i = 0; i < actions.length; i += 2) {
+                Action action = new Action (actions[i], actions[i + 1]);
+
+                // Filtering
+                bool matches = false;
+                foreach (unowned ActionMatching matcher in valid_matchers) {
+                    if (matcher.matches_action (action)) {
+                        matches = true;
+                        break;
+                    }
+                }
+                if (matches) {
+                    continue;
+                }
+
+                if (action.text != null && action.identifier != null) {
+                    string id = action.identifier.down ();
+                    switch (id) {
+                        case "default":
+                            default_action = action;
+                            break;
+                        case "inline-reply":
+                            if (action.text == "") {
+                                action.text = "Reply";
+                            }
+                            inline_reply = action;
+                            break;
+                        default:
+                            parsed_actions.append_val (action);
+                            break;
+                    }
+                }
+            }
+
             this.actions = parsed_actions;
         }
 

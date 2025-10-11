@@ -275,6 +275,47 @@
         }
       }
     },
+    "notification-action-filter": {
+      "type": "object",
+      "description": "Hides matching action(s) of matching notifications. If the notification doesn't include one of the properties, that property will be ignored. If all properties match the given notification, the matching actions will be hidden.",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "patternProperties": {
+        "^.{1,}$": {
+          "type": "object",
+          "description": "Your script object.",
+          "minProperties": 1,
+          "anyOf": [
+            { "required": ["id-matcher"] },
+            { "required": ["text-matcher"] }
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "use-regex": {
+              "type": "boolean",
+              "default": false,
+              "description": "Indicates if all the below fields should use regex or not."
+            },
+            "app-name": {
+              "type": "string",
+              "description": "The app-name."
+            },
+            "desktop-entry": {
+              "type": "string",
+              "description": "The desktop-entry."
+            },
+            "id-matcher": {
+              "type": "string",
+              "description": "Matches the action identifier. Can be found by reading the output of swaync when run with the `G_MESSAGES_DEBUG=all` environment variable."
+            },
+            "text-matcher": {
+              "type": "string",
+              "description": "Matches the actions text visible in the notification."
+            }
+          }
+        }
+      }
+    },
     "notification-visibility": {
       "type": "object",
       "description": "Set the visibility of each incoming notification. If the notification doesn't include one of the properties, that property will be ignored. All properties (except for state) use regex. If all properties match the given notification, the notification will be follow the provided state. Only the first matching object will be used.",

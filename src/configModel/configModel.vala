@@ -80,6 +80,20 @@ namespace SwayNotificationCenter {
         }
     }
 
+    private struct MatchCase {
+        string ? pattern;
+        string ? str;
+
+        public MatchCase (string ? pattern, string ? str) {
+            this.pattern = pattern;
+            this.str = str;
+        }
+
+        public bool is_valid () {
+            return pattern != null && str != null;
+        }
+    }
+
     public class NotificationMatching : Object, Json.Serializable {
         public string ? app_name { get; set; default = null; }
         public string ? desktop_entry { get; set; default = null; }
@@ -187,6 +201,112 @@ namespace SwayNotificationCenter {
                     return node;
                 }
                 node.set_string (eval.value_nick);
+                return node;
+            } else if (value.type ().is_a (Type.BOOLEAN)) {
+                // Somehow the default serializer doesn't handle booleans :/
+                var node = new Json.Node (Json.NodeType.VALUE);
+                node.set_boolean (value.get_boolean ());
+                return node;
+            }
+            return default_serialize_property (property_name, value, pspec);
+        }
+    }
+
+    public class ActionMatching : Object, Json.Serializable {
+        public string ? app_name { get; set; default = null; }
+        public string ? desktop_entry { get; set; default = null; }
+        public string ? id_matcher { get; set; }
+        public string ? text_matcher { get; set; }
+        public bool use_regex { get; set; default = false; }
+
+        private const RegexCompileFlags REGEX_COMPILE_OPTIONS =
+            RegexCompileFlags.MULTILINE;
+
+        private const RegexMatchFlags REGEX_MATCH_FLAGS = RegexMatchFlags.NOTEMPTY;
+
+        public bool matches_action (Action action) {
+            MatchCase[] matchers = {
+                MatchCase (id_matcher, action.identifier),
+                MatchCase (text_matcher, action.text),
+            };
+            foreach (MatchCase matcher in matchers) {
+                if (!matcher.is_valid ()) {
+                    continue;
+                }
+                if (use_regex) {
+                    bool result = Regex.match_simple (
+                        matcher.pattern, matcher.str,
+                        REGEX_COMPILE_OPTIONS,
+                        REGEX_MATCH_FLAGS);
+                    if (!result) return false;
+                } else {
+                    if (matcher.pattern != matcher.str) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        public bool matches_notification (NotifyParams param) {
+            if (id_matcher == null && text_matcher == null) {
+                critical ("Action filter doesn't contain a matcher: %s", this.to_string ());
+                return false;
+            }
+
+            MatchCase[] matchers = {
+                MatchCase (app_name, param.app_name),
+                MatchCase (desktop_entry, param.desktop_entry),
+            };
+            foreach (MatchCase matcher in matchers) {
+                if (!matcher.is_valid ()) {
+                    continue;
+                }
+                if (use_regex) {
+                    bool result = Regex.match_simple (
+                        matcher.pattern, matcher.str,
+                        REGEX_COMPILE_OPTIONS,
+                        REGEX_MATCH_FLAGS);
+                    if (!result) return false;
+                } else {
+                    if (matcher.pattern != matcher.str) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        public string to_string () {
+            string[] fields = {};
+            if (app_name != null) fields += "app-name: %s".printf (app_name);
+            if (desktop_entry != null) fields += "desktop-entry: %s".printf (desktop_entry);
+            if (id_matcher != null) fields += "name_matcher: %s".printf (id_matcher);
+            if (text_matcher != null) fields += "text_matcher: %s".printf (text_matcher);
+            return string.joinv (", ", fields);
+        }
+
+        public override Json.Node serialize_property (string property_name,
+                                                      Value value,
+                                                      ParamSpec pspec) {
+            // Return enum nickname instead of enum int value
+            if (value.type ().is_a (Type.ENUM)) {
+                var node = new Json.Node (Json.NodeType.VALUE);
+                EnumClass enumc = (EnumClass) value.type ().class_ref ();
+                unowned EnumValue ? eval
+                    = enumc.get_value (value.get_enum ());
+                if (eval == null) {
+                    node.set_value (value);
+                    return node;
+                }
+                node.set_string (eval.value_nick);
+                return node;
+            } else if (value.type ().is_a (Type.BOOLEAN)) {
+                // Somehow the default serializer doesn't handle booleans :/
+                var node = new Json.Node (Json.NodeType.VALUE);
+                node.set_boolean (value.get_boolean ());
                 return node;
             }
             return default_serialize_property (property_name, value, pspec);
@@ -556,6 +676,12 @@ namespace SwayNotificationCenter {
             default = new OrderedHashTable<Category> ();
         }
 
+        /** Filter Notification Actions */
+        public OrderedHashTable<ActionMatching> notification_action_filter {
+            get;
+            set;
+            default = new OrderedHashTable<ActionMatching> ();
+        }
 
         /** Notification Status */
         public OrderedHashTable<NotificationVisibility> notification_visibility {
@@ -721,6 +847,15 @@ namespace SwayNotificationCenter {
                             out status);
                     value = result;
                     return status;
+                case "notification-action-filter":
+                    bool status;
+                    OrderedHashTable<ActionMatching> result =
+                        extract_hashtable<ActionMatching> (
+                            property_name,
+                            property_node,
+                            out status);
+                    value = result;
+                    return status;
                 case "notification-visibility":
                     bool status;
                     OrderedHashTable<NotificationVisibility> result =
@@ -800,6 +935,11 @@ namespace SwayNotificationCenter {
                     node = new Json.Node (Json.NodeType.OBJECT);
                     var table = (OrderedHashTable<Category>) value;
                     node.set_object (serialize_hashtable<Category> (table));
+                    break;
+                case "notification-action-filter":
+                    node = new Json.Node (Json.NodeType.OBJECT);
+                    var table = (OrderedHashTable<ActionMatching>) value;
+                    node.set_object (serialize_hashtable<ActionMatching> (table));
                     break;
                 case "notification-visibility":
                     node = new Json.Node (Json.NodeType.OBJECT);

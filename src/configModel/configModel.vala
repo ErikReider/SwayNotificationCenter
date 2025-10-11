@@ -202,6 +202,11 @@ namespace SwayNotificationCenter {
                 }
                 node.set_string (eval.value_nick);
                 return node;
+            } else if (value.type ().is_a (Type.BOOLEAN)) {
+                // Somehow the default serializer doesn't handle booleans :/
+                var node = new Json.Node (Json.NodeType.VALUE);
+                node.set_boolean (value.get_boolean ());
+                return node;
             }
             return default_serialize_property (property_name, value, pspec);
         }
@@ -281,6 +286,30 @@ namespace SwayNotificationCenter {
             if (id_matcher != null) fields += "name_matcher: %s".printf (id_matcher);
             if (text_matcher != null) fields += "text_matcher: %s".printf (text_matcher);
             return string.joinv (", ", fields);
+        }
+
+        public override Json.Node serialize_property (string property_name,
+                                                      Value value,
+                                                      ParamSpec pspec) {
+            // Return enum nickname instead of enum int value
+            if (value.type ().is_a (Type.ENUM)) {
+                var node = new Json.Node (Json.NodeType.VALUE);
+                EnumClass enumc = (EnumClass) value.type ().class_ref ();
+                unowned EnumValue ? eval
+                    = enumc.get_value (value.get_enum ());
+                if (eval == null) {
+                    node.set_value (value);
+                    return node;
+                }
+                node.set_string (eval.value_nick);
+                return node;
+            } else if (value.type ().is_a (Type.BOOLEAN)) {
+                // Somehow the default serializer doesn't handle booleans :/
+                var node = new Json.Node (Json.NodeType.VALUE);
+                node.set_boolean (value.get_boolean ());
+                return node;
+            }
+            return default_serialize_property (property_name, value, pspec);
         }
     }
 
@@ -906,6 +935,11 @@ namespace SwayNotificationCenter {
                     node = new Json.Node (Json.NodeType.OBJECT);
                     var table = (OrderedHashTable<Category>) value;
                     node.set_object (serialize_hashtable<Category> (table));
+                    break;
+                case "notification-action-filter":
+                    node = new Json.Node (Json.NodeType.OBJECT);
+                    var table = (OrderedHashTable<ActionMatching>) value;
+                    node.set_object (serialize_hashtable<ActionMatching> (table));
                     break;
                 case "notification-visibility":
                     node = new Json.Node (Json.NodeType.OBJECT);

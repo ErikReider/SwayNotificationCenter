@@ -47,7 +47,7 @@ namespace SwayNotificationCenter.Widgets {
             Json.Object ? props = null;
             bool result = config.lookup_extended (key, out orig_key, out props);
             if (!result || orig_key == null || props == null) {
-                critical ("%s: Config not found! Using default config...\n", key);
+                warning ("%s: Config not found! Using default config...\n", key);
                 return null;
             }
             return props;

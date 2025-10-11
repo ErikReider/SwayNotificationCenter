@@ -509,7 +509,7 @@ namespace SwayNotificationCenter {
                     try {
                         swaync_daemon.set_visibility (false);
                     } catch (Error e) {
-                        print ("Error: %s\n", e.message);
+                        critical ("Error: %s\n", e.message);
                     }
                 }
             }

@@ -174,7 +174,7 @@ namespace SwayNotificationCenter {
                 if (File.new_for_path (custom_path).query_exists ()) {
                     paths += custom_path;
                 } else {
-                    critical ("Custom config file \"%s\" not found, skipping...", custom_path);
+                    warning ("Custom config file \"%s\" not found, skipping...", custom_path);
                 }
             }
             paths += Path.build_path (Path.DIR_SEPARATOR.to_string (),

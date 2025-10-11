@@ -311,7 +311,7 @@ public int command_line (ref string[] args, bool skip_wait) {
                 stderr.printf ("Could not find monitor: \"%s\"!", args[1]);
                 break;
             default:
-                print ("Unknown command: \"%s\"\n", args[0]);
+                printerr ("Unknown command: \"%s\"\n", args[0]);
                 print_help (args);
                 break;
         }

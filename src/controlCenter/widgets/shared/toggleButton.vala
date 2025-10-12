@@ -1,6 +1,5 @@
 namespace SwayNotificationCenter.Widgets {
     class ToggleButton : Gtk.ToggleButton {
-
         private string command;
         private string update_command;
         private ulong handler_id;
@@ -26,23 +25,26 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         public async void on_update () {
-            if (update_command == "") return;
+            if (update_command == "") {
+                return;
+            }
             string msg = "";
             string[] env_additions = { "SWAYNC_TOGGLE_STATE=" + this.active.to_string () };
             yield Functions.execute_command (this.update_command, env_additions, out msg);
+
             try {
-              // remove trailing whitespaces
-              Regex regex = new Regex ("\\s+$");
-              string res = regex.replace (msg, msg.length, 0, "");
-              GLib.SignalHandler.block (this, this.handler_id);
-              if (res.up () == "TRUE") {
-                this.active = true;
-              } else {
-                this.active = false;
-              }
-              GLib.SignalHandler.unblock (this, this.handler_id);
+                // remove trailing whitespaces
+                Regex regex = new Regex ("\\s+$");
+                string res = regex.replace (msg, msg.length, 0, "");
+                GLib.SignalHandler.block (this, this.handler_id);
+                if (res.up () == "TRUE") {
+                    this.active = true;
+                } else {
+                    this.active = false;
+                }
+                GLib.SignalHandler.unblock (this, this.handler_id);
             } catch (RegexError e) {
-              stderr.printf ("RegexError: %s\n", e.message);
+                stderr.printf ("RegexError: %s\n", e.message);
             }
         }
     }

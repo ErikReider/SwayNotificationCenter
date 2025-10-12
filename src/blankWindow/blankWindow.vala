@@ -22,7 +22,9 @@ namespace SwayNotificationCenter {
             });
             blank_window_gesture.released.connect ((n_press, x, y) => {
                 // Emit released
-                if (!blank_window_down) return;
+                if (!blank_window_down) {
+                    return;
+                }
                 blank_window_down = false;
                 if (blank_window_in) {
                     try {
@@ -39,13 +41,15 @@ namespace SwayNotificationCenter {
             });
             blank_window_gesture.update.connect ((gesture, sequence) => {
                 Gtk.GestureSingle gesture_single = (Gtk.GestureSingle) gesture;
-                if (sequence != gesture_single.get_current_sequence ()) return;
+                if (sequence != gesture_single.get_current_sequence ()) {
+                    return;
+                }
                 // Calculate if the clicked coords intersect other monitors
                 double x, y;
                 gesture.get_point (sequence, out x, out y);
                 Graphene.Point click_point = Graphene.Point ()
-                    .init ((float) x, (float) y);
-                Graphene.Rect ? bounds = null;
+                     .init ((float) x, (float) y);
+                Graphene.Rect ?bounds = null;
                 this.compute_bounds (this, out bounds);
                 if (bounds != null && bounds.contains_point (click_point)) {
                     blank_window_in = false;

@@ -26,19 +26,25 @@ namespace SwayNotificationCenter.Widgets {
                 title_widget.set_text ("%s %u".printf (title, length));
             });
 
-            Json.Object ? config = get_config (this);
+            Json.Object ?config = get_config (this);
             if (config != null) {
                 // Get title
-                string ? title = get_prop<string> (config, "text");
-                if (title != null) this.title = title;
+                string ?title = get_prop<string> (config, "text");
+                if (title != null) {
+                    this.title = title;
+                }
                 // Get has clear-all-button
                 bool found_clear_all;
-                bool ? has_clear_all_button = get_prop<bool> (
+                bool ?has_clear_all_button = get_prop<bool> (
                     config, "clear-all-button", out found_clear_all);
-                if (found_clear_all) this.has_clear_all_button = has_clear_all_button;
+                if (found_clear_all) {
+                    this.has_clear_all_button = has_clear_all_button;
+                }
                 // Get button text
-                string ? button_text = get_prop<string> (config, "button-text");
-                if (button_text != null) this.button_text = button_text;
+                string ?button_text = get_prop<string> (config, "button-text");
+                if (button_text != null) {
+                    this.button_text = button_text;
+                }
             }
 
             title_widget = new Gtk.Label (title);

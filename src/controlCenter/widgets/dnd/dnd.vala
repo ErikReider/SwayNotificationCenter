@@ -15,11 +15,13 @@ namespace SwayNotificationCenter.Widgets {
         public Dnd (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             base (suffix, swaync_daemon, noti_daemon);
 
-            Json.Object ? config = get_config (this);
+            Json.Object ?config = get_config (this);
             if (config != null) {
                 // Get title
-                string? title = get_prop<string> (config, "text");
-                if (title != null) this.title = title;
+                string ?title = get_prop<string> (config, "text");
+                if (title != null) {
+                    this.title = title;
+                }
             }
 
             // Title

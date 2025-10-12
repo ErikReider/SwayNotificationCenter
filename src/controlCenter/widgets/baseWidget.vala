@@ -19,12 +19,12 @@ namespace SwayNotificationCenter.Widgets {
             NORMAL;
 
             public static ButtonType parse (string value) {
-              switch (value) {
-                case "toggle":
-                  return ButtonType.TOGGLE;
-                default:
-                  return ButtonType.NORMAL;
-              }
+                switch (value) {
+                    case "toggle":
+                        return ButtonType.TOGGLE;
+                    default:
+                        return ButtonType.NORMAL;
+                }
             }
         }
 
@@ -37,14 +37,16 @@ namespace SwayNotificationCenter.Widgets {
             set_overflow (Gtk.Overflow.HIDDEN);
             add_css_class ("widget");
             add_css_class (css_class_name);
-            if (suffix.length > 0) add_css_class (suffix);
+            if (suffix.length > 0) {
+                add_css_class (suffix);
+            }
         }
 
-        protected Json.Object ? get_config (Gtk.Widget widget) {
+        protected Json.Object ?get_config (Gtk.Widget widget) {
             unowned OrderedHashTable<Json.Object> config
                 = ConfigModel.instance.widget_config;
-            string ? orig_key = null;
-            Json.Object ? props = null;
+            string ?orig_key = null;
+            Json.Object ?props = null;
             bool result = config.lookup_extended (key, out orig_key, out props);
             if (!result || orig_key == null || props == null) {
                 warning ("%s: Config not found! Using default config...\n", key);
@@ -53,9 +55,10 @@ namespace SwayNotificationCenter.Widgets {
             return props;
         }
 
-        public virtual void on_cc_visibility_change (bool value) {}
+        public virtual void on_cc_visibility_change (bool value) {
+        }
 
-        protected T ? get_prop<T> (Json.Object config, string value_key, out bool found = null) {
+        protected T ?get_prop<T> (Json.Object config, string value_key, out bool found = null) {
             found = false;
             if (!config.has_member (value_key)) {
                 debug ("%s: Config doesn't have key: %s!\n", key, value_key);
@@ -67,7 +70,9 @@ namespace SwayNotificationCenter.Widgets {
 
             Type generic_base_type = Functions.get_base_type (typeof (T));
             // Convert all INTs to INT64
-            if (generic_base_type == Type.INT) generic_base_type = Type.INT64;
+            if (generic_base_type == Type.INT) {
+                generic_base_type = Type.INT64;
+            }
 
             if (!base_type.is_a (generic_base_type)) {
                 warning ("%s: Config type %s doesn't match: %s!\n",
@@ -78,11 +83,11 @@ namespace SwayNotificationCenter.Widgets {
             }
             found = true;
             switch (generic_base_type) {
-                case Type.STRING:
+                case Type.STRING :
                     return member.get_string ();
-                case Type.INT64:
+                case Type.INT64 :
                     return (int) member.get_int ();
-                case Type.BOOLEAN:
+                case Type.BOOLEAN :
                     return member.get_boolean ();
                 default:
                     found = false;
@@ -90,7 +95,7 @@ namespace SwayNotificationCenter.Widgets {
             }
         }
 
-        protected Json.Array ? get_prop_array (Json.Object config, string value_key) {
+        protected Json.Array ?get_prop_array (Json.Object config, string value_key) {
             if (!config.has_member (value_key)) {
                 debug ("%s: Config doesn't have key: %s!\n", key, value_key);
                 return null;
@@ -105,13 +110,20 @@ namespace SwayNotificationCenter.Widgets {
         protected Action[] parse_actions (Json.Array actions) {
             Action[] res = new Action[actions.get_length ()];
             for (int i = 0; i < actions.get_length (); i++) {
-                string label = actions.get_object_element (i).get_string_member_with_default ("label", "label");
-                string command = actions.get_object_element (i).get_string_member_with_default ("command", "");
-                string t = actions.get_object_element (i).get_string_member_with_default ("type", "normal");
+                string label =
+                    actions.get_object_element (i).get_string_member_with_default ("label",
+                                                                                   "label");
+                string command =
+                    actions.get_object_element (i).get_string_member_with_default ("command", "");
+                string t = actions.get_object_element (i).get_string_member_with_default ("type",
+                                                                                          "normal");
                 ButtonType type = ButtonType.parse (t);
                 string update_command =
-                    actions.get_object_element (i).get_string_member_with_default ("update-command", "");
-                bool active = actions.get_object_element (i).get_boolean_member_with_default ("active", false);
+                    actions.get_object_element (i).get_string_member_with_default ("update-command",
+                                                                                   "");
+                bool active =
+                    actions.get_object_element (i).get_boolean_member_with_default ("active",
+                                                                                    false);
                 res[i] = Action () {
                     label = label,
                     command = command,
@@ -122,7 +134,6 @@ namespace SwayNotificationCenter.Widgets {
             }
             return res;
         }
-
 
         protected async void execute_command (string cmd, string[] env_additions = {}) {
             string msg = "";

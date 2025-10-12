@@ -16,21 +16,22 @@ namespace SwayNotificationCenter.Widgets {
         public Backlight (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             base (suffix, swaync_daemon, noti_daemon);
 
-            Json.Object ? config = get_config (this);
+            Json.Object ?config = get_config (this);
             if (config != null) {
-                string ? label = get_prop<string> (config, "label");
+                string ?label = get_prop<string> (config, "label");
                 label_widget.set_label (label ?? "Brightness");
                 string device = (get_prop<string> (config, "device") ?? "intel_backlight");
                 string subsystem = (get_prop<string> (config, "subsystem") ?? "backlight");
                 int min = int.max (0, get_prop<int> (config, "min"));
 
                 switch (subsystem) {
-                    default:
+                    default :
                     case "backlight":
-                        if (subsystem != "backlight")
+                        if (subsystem != "backlight") {
                             info ("Invalid subsystem %s for device %s. " +
                                   "Use 'backlight' or 'leds'. Using default: 'backlight'",
                                   subsystem, device);
+                        }
                         client = new BacklightUtil ("backlight", device);
                         slider.set_range (min, 100);
                         break;

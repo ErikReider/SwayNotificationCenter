@@ -13,3 +13,8 @@ tab_width = 4
 # Markup files
 [{*.html,*.xml,*.xml.in,*.yml}]
 tab_width = 2
+
+# Man pages
+[*.scd]
+indent_style = tab
+tab_width = 4

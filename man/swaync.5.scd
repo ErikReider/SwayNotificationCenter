@@ -47,6 +47,20 @@ config file to be able to detect config errors
 	description: Which GTK priority to use when loading the default and user ++
 		CSS files. Pick "user" to override *XDG_CONFIG_HOME/gtk-3.0/gtk.css*
 
+*control-center-positionX* ++
+	type: string ++
+	default: right ++
+	values: left, right, center ++
+	description: Optional: Horizontal position of the control center. ++
+		Supersedes positionX if not set to `none`.
+
+*control-center-positionY* ++
+	type: string ++
+	default: top ++
+	values: top, center, bottom ++
+	description: Optional: Vertical position of the control center. ++
+		Supersedes positionY if not set to `none`.
+
 *control-center-margin-top* ++
 	type: integer ++
 	default: 0 ++

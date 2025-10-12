@@ -64,6 +64,7 @@ Post your setup here: [Config flex 💪](https://github.com/ErikReider/SwayNotif
 - A panel to view previous notifications
 - Show album art for notifications like Spotify
 - Do not disturb
+- Notification action filtering
 - Inhibiting notifications through DBUS or client
 - Restores previous Do not disturb value after restart
 - Click notification to execute default action

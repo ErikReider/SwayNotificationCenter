@@ -24,8 +24,12 @@ namespace SwayNotificationCenter {
             };
             button.add_css_class ("close-button");
             button.add_css_class ("circular");
-            button.clicked.connect (() => this.clicked ());
+            button.clicked.connect (click_cb);
             revealer.set_child (button);
+        }
+
+        private void click_cb () {
+            clicked ();
         }
 
         public signal void clicked ();
@@ -50,7 +54,7 @@ namespace SwayNotificationCenter {
     public enum NotificationType { CONTROL_CENTER, POPUP }
 
     [GtkTemplate (ui = "/org/erikreider/swaync/ui/notification.ui")]
-    public class Notification : Gtk.Box {
+    public class Notification : Adw.Bin {
         [GtkChild]
         unowned Gtk.Revealer revealer;
         [GtkChild]
@@ -206,7 +210,9 @@ namespace SwayNotificationCenter {
             });
             gesture.released.connect ((gesture, _n_press, _x, _y) => {
                 // Emit released
-                if (!default_action_down) return;
+                if (!default_action_down) {
+                    return;
+                }
                 default_action_down = false;
                 if (default_action_in) {
                     // Close notification on middle and right button click
@@ -222,14 +228,16 @@ namespace SwayNotificationCenter {
                     }
                 }
 
-                Gdk.EventSequence ? sequence = gesture.get_current_sequence ();
+                Gdk.EventSequence ?sequence = gesture.get_current_sequence ();
                 if (sequence == null) {
                     default_action_in = false;
                 }
             });
             gesture.update.connect ((gesture, sequence) => {
                 Gtk.GestureSingle gesture_single = (Gtk.GestureSingle) gesture;
-                if (sequence != gesture_single.get_current_sequence ()) return;
+                if (sequence != gesture_single.get_current_sequence ()) {
+                    return;
+                }
 
                 int width = default_action.get_width ();
                 int height = default_action.get_height ();
@@ -276,8 +284,7 @@ namespace SwayNotificationCenter {
                     noti_daemon.manually_close_notification (
                         param.applied_id, false);
                 } catch (Error e) {
-                    printerr ("Error: %s\n", e.message);
-                    this.destroy ();
+                    critical ("Error: %s", e.message);
                 }
             });
 
@@ -290,12 +297,13 @@ namespace SwayNotificationCenter {
             inline_reply_entry.add_controller (reply_key_controller);
             inline_reply_button.clicked.connect (() => {
                 string text = inline_reply_entry.get_text ().strip ();
-                if (text.length == 0) return;
+                if (text.length == 0) {
+                    return;
+                }
                 noti_daemon.NotificationReplied (param.applied_id, text);
                 // Dismiss notification without activating Action
                 action_clicked (null);
             });
-
         }
 
         private void build_noti () {
@@ -314,7 +322,7 @@ namespace SwayNotificationCenter {
 
             // Changes the swipe direction depending on the notifications X position
             switch (ConfigModel.instance.positionX) {
-                case PositionX.LEFT:
+                case PositionX.LEFT :
                     dismissible_widget.set_gesture_direction (SwipeDirection.SWIPE_LEFT);
                     break;
                 default:
@@ -371,7 +379,7 @@ namespace SwayNotificationCenter {
                             // Replaces "~/" with $HOME
                             if (result.index_of ("~/", 0) == 0) {
                                 result = Environment.get_home_dir () +
-                                      result.slice (1, result.length);
+                                    result.slice (1, result.length);
                             }
                             img_paths += result;
                         } while (info.next ());
@@ -405,8 +413,8 @@ namespace SwayNotificationCenter {
 
             // Markup
             try {
-                Pango.AttrList ? attr = null;
-                string ? buf = null;
+                Pango.AttrList ?attr = null;
+                string ?buf = null;
                 try {
                     // Try parsing without any hacks
                     Pango.parse_markup (text, -1, 0, out attr, out buf, null);
@@ -430,7 +438,9 @@ namespace SwayNotificationCenter {
                 }
 
                 this.body.set_text (buf);
-                if (attr != null) this.body.set_attributes (attr);
+                if (attr != null) {
+                    this.body.set_attributes (attr);
+                }
             } catch (Error e) {
                 stderr.printf ("Could not parse Pango markup %s: %s\n",
                                text, e.message);
@@ -442,15 +452,21 @@ namespace SwayNotificationCenter {
         }
 
         /** Returns the first code found, else null */
-        private string ? parse_body_codes () {
-            if (!ConfigModel.instance.notification_2fa_action) return null;
+        private string ?parse_body_codes () {
+            if (!ConfigModel.instance.notification_2fa_action) {
+                return null;
+            }
             string body = this.body.get_text ().strip ();
-            if (body.length == 0) return null;
+            if (body.length == 0) {
+                return null;
+            }
 
             MatchInfo info;
             var result = code_regex.match (body, RegexMatchFlags.NOTEMPTY, out info);
-            string ? match = info.fetch (0);
-            if (!result || match == null) return null;
+            string ?match = info.fetch (0);
+            if (!result || match == null) {
+                return null;
+            }
 
             return Functions.filter_string (
                 match.strip (), (c) => c.isdigit () || c.isspace ()).strip ();
@@ -461,11 +477,13 @@ namespace SwayNotificationCenter {
         }
 
         public void click_alt_action (uint index) {
-            if (!alt_actions_box.visible) return;
+            if (!alt_actions_box.visible) {
+                return;
+            }
 
-            unowned Gtk.Widget? button = null;
+            unowned Gtk.Widget ?button = null;
             int i = 0;
-            for (unowned Gtk.Widget ? child = alt_actions_box.get_first_child ();
+            for (unowned Gtk.Widget ?child = alt_actions_box.get_first_child ();
                  child != null;
                  child = child.get_next_sibling ()) {
                 if (!(child is Gtk.FlowBoxChild)) {
@@ -489,14 +507,14 @@ namespace SwayNotificationCenter {
             action_clicked (param.actions.index (index));
         }
 
-        private void action_clicked (Action ? action) {
+        private void action_clicked (Action ?action) {
             noti_daemon.run_scripts (param, ScriptRunOnType.ACTION);
             if (action != null
                 && action.identifier != null
                 && action.identifier != "") {
                 // Try getting a XDG Activation token so that the application
                 // can request compositor focus
-                string ? token = swaync_daemon.xdg_activation.get_token (this);
+                string ?token = swaync_daemon.xdg_activation.get_token (this);
                 if (token != null) {
                     noti_daemon.ActivationToken (param.applied_id, token);
                 }
@@ -506,11 +524,13 @@ namespace SwayNotificationCenter {
                     try {
                         swaync_daemon.set_visibility (false);
                     } catch (Error e) {
-                        print ("Error: %s\n", e.message);
+                        critical ("Error: %s\n", e.message);
                     }
                 }
             }
-            if (!param.resident) close_notification ();
+            if (!param.resident) {
+                close_notification ();
+            }
         }
 
         private void set_style_urgency () {
@@ -520,14 +540,14 @@ namespace SwayNotificationCenter {
             base_box.remove_css_class ("critical");
 
             switch (param.urgency) {
-                case UrgencyLevels.LOW:
+                case UrgencyLevels.LOW :
                     base_box.add_css_class ("low");
                     break;
-                case UrgencyLevels.NORMAL:
-                default:
+                case UrgencyLevels.NORMAL :
+                    default :
                     base_box.add_css_class ("normal");
                     break;
-                case UrgencyLevels.CRITICAL:
+                case UrgencyLevels.CRITICAL :
                     base_box.add_css_class ("critical");
                     break;
             }
@@ -540,11 +560,13 @@ namespace SwayNotificationCenter {
             // supports ON_DEMAND layer shell keyboard interactivity
             if (!ConfigModel.instance.notification_inline_replies
                 || (ConfigModel.instance.layer_shell
-                   && !swaync_daemon.has_layer_on_demand
-                   && notification_type == NotificationType.POPUP)) {
+                    && !swaync_daemon.has_layer_on_demand
+                    && notification_type == NotificationType.POPUP)) {
                 return;
             }
-            if (param.inline_reply == null) return;
+            if (param.inline_reply == null) {
+                return;
+            }
 
             has_inline_reply = true;
 
@@ -563,7 +585,7 @@ namespace SwayNotificationCenter {
             },
                 null);
 
-            inline_reply_button.set_label (param.inline_reply.name ?? "Reply");
+            inline_reply_button.set_label (param.inline_reply.text ?? "Reply");
         }
 
         private void set_actions () {
@@ -578,7 +600,7 @@ namespace SwayNotificationCenter {
             alt_actions_box.set_max_children_per_line (1);
 
             // Check for security codes
-            string ? code = parse_body_codes ();
+            string ?code = parse_body_codes ();
 
             // Display all of the actions
             if (param.actions.length > 0 || code != null) {
@@ -610,7 +632,7 @@ namespace SwayNotificationCenter {
                     flowbox_child.add_css_class ("notification-action");
                     alt_actions_box.append (flowbox_child);
 
-                    Gtk.Button action_button = new Gtk.Button.with_label (action.name);
+                    Gtk.Button action_button = new Gtk.Button.with_label (action.text);
                     action_button.clicked.connect (() => action_clicked (action));
                     action_button.set_can_focus (false);
                     flowbox_child.set_child (action_button);
@@ -640,19 +662,25 @@ namespace SwayNotificationCenter {
                 // 1m - 1h
                 var val = Math.floor (secs);
                 value = val.to_string () + " min";
-                if (val > 1) value += "s";
+                if (val > 1) {
+                    value += "s";
+                }
                 value += " ago";
             } else if (hours >= 1 && hours < 24) {
                 // 1h - 24h
                 var val = Math.floor (hours);
                 value = val.to_string () + " hour";
-                if (val > 1) value += "s";
+                if (val > 1) {
+                    value += "s";
+                }
                 value += " ago";
             } else {
                 // Days
                 var val = Math.floor (days);
                 value = val.to_string () + " day";
-                if (val > 1) value += "s";
+                if (val > 1) {
+                    value += "s";
+                }
                 value += " ago";
             }
             return value;
@@ -671,8 +699,7 @@ namespace SwayNotificationCenter {
                     noti_daemon.manually_close_notification (param.applied_id,
                                                              is_timeout);
                 } catch (Error e) {
-                    print ("Error: %s\n", e.message);
-                    this.destroy ();
+                    critical ("Error: %s", e.message);
                 }
                 return Source.REMOVE;
             });
@@ -689,8 +716,8 @@ namespace SwayNotificationCenter {
             img_app_icon.clear ();
             img_app_icon.set_visible (true);
 
-            Icon ? app_icon_name = null;
-            string ? app_icon_uri = null;
+            Icon ?app_icon_name = null;
+            string ?app_icon_uri = null;
             if (param.desktop_app_info != null) {
                 app_icon_name = param.desktop_app_info.get_icon ();
             }
@@ -705,7 +732,8 @@ namespace SwayNotificationCenter {
                 return;
             }
 
-            int notification_icon_size = ConfigModel.instance.notification_icon_size.clamp (-1, int.MAX);
+            int notification_icon_size =
+                ConfigModel.instance.notification_icon_size.clamp (-1, int.MAX);
             if (notification_icon_size < 1) {
                 notification_icon_size = -1;
             }
@@ -727,7 +755,8 @@ namespace SwayNotificationCenter {
 
                 // Check if it's a freedesktop.org-compliant icon
                 if (!img_path_exists) {
-                    unowned Gtk.IconTheme icon_theme = Gtk.IconTheme.get_for_display (get_display ());
+                    unowned Gtk.IconTheme icon_theme =
+                        Gtk.IconTheme.get_for_display (get_display ());
                     img_path_exists = icon_theme.has_icon (param.image_path);
                     img_path_is_theme_icon = img_path_exists;
                 }
@@ -755,7 +784,7 @@ namespace SwayNotificationCenter {
                 // Get the app icon
                 if (app_icon_uri != null) {
                     Functions.set_image_uri (app_icon_uri, img,
-                                              app_icon_exists);
+                                             app_icon_exists);
                 } else if (app_icon_name != null) {
                     img.set_from_gicon (app_icon_name);
                 } else if (image_visibility == ImageVisibility.ALWAYS) {
@@ -776,14 +805,16 @@ namespace SwayNotificationCenter {
         }
 
         public void add_notification_timeout () {
-            if (!this.is_timed) return;
+            if (!this.is_timed) {
+                return;
+            }
 
             // Removes the previous timeout
             remove_noti_timeout ();
 
             uint timeout;
             switch (param.urgency) {
-                case UrgencyLevels.LOW:
+                case UrgencyLevels.LOW :
                     timeout = timeout_low_delay * 1000;
                     break;
                 case UrgencyLevels.NORMAL:
@@ -793,12 +824,16 @@ namespace SwayNotificationCenter {
                 case UrgencyLevels.CRITICAL:
                     // Critical notifications should not automatically expire.
                     // Ignores the notifications expire_timeout.
-                    if (timeout_critical_delay == 0) return;
+                    if (timeout_critical_delay == 0) {
+                        return;
+                    }
                     timeout = timeout_critical_delay * 1000;
                     break;
             }
             uint ms = param.expire_timeout > 0 ? param.expire_timeout : timeout;
-            if (ms <= 0) return;
+            if (ms <= 0) {
+                return;
+            }
             timeout_id = Timeout.add (ms, () => {
                 close_notification (true);
                 return Source.REMOVE;

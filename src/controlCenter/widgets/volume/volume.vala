@@ -18,8 +18,8 @@ namespace SwayNotificationCenter.Widgets {
         Gtk.Label no_sink_inputs_label;
         string empty_label = "No active sink input";
 
-        string ? expand_label = null;
-        string ? collapse_label = null;
+        string ?expand_label = null;
+        string ?collapse_label = null;
 
         [Version (deprecated = true, replacement = "CSS root variable")]
         int icon_size = -1;
@@ -27,7 +27,7 @@ namespace SwayNotificationCenter.Widgets {
         Gtk.RevealerTransitionType revealer_type = Gtk.RevealerTransitionType.SLIDE_DOWN;
         int revealer_duration = 250;
 
-        private PulseDevice ? default_sink = null;
+        private PulseDevice ?default_sink = null;
         private PulseDaemon client = new PulseDaemon ();
 
         private bool show_per_app;
@@ -50,42 +50,61 @@ namespace SwayNotificationCenter.Widgets {
         public Volume (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             base (suffix, swaync_daemon, noti_daemon);
 
-            Json.Object ? config = get_config (this);
+            Json.Object ?config = get_config (this);
             if (config != null) {
-                string ? label = get_prop<string> (config, "label");
+                string ?label = get_prop<string> (config, "label");
                 label_widget.set_label (label ?? "Volume");
 
                 bool show_per_app_found;
-                bool ? show_per_app = get_prop<bool> (config, "show-per-app", out show_per_app_found);
-                if (show_per_app_found) this.show_per_app = show_per_app;
+                bool ?show_per_app = get_prop<bool> (config, "show-per-app",
+                                                     out show_per_app_found);
+                if (show_per_app_found) {
+                    this.show_per_app = show_per_app;
+                }
 
                 bool show_per_app_icon_found;
-                bool ? show_per_app_icon = get_prop<bool> (config, "show-per-app-icon", out show_per_app_icon_found);
-                if (show_per_app_icon_found) this.show_per_app_icon = show_per_app_icon;
+                bool ?show_per_app_icon = get_prop<bool> (config, "show-per-app-icon",
+                                                          out show_per_app_icon_found);
+                if (show_per_app_icon_found) {
+                    this.show_per_app_icon = show_per_app_icon;
+                }
 
                 bool show_per_app_label_found;
-                bool ? show_per_app_label = get_prop<bool> (config, "show-per-app-label", out show_per_app_label_found);
-                if (show_per_app_label_found) this.show_per_app_label = show_per_app_label;
+                bool ?show_per_app_label = get_prop<bool> (config, "show-per-app-label",
+                                                           out show_per_app_label_found);
+                if (show_per_app_label_found) {
+                    this.show_per_app_label = show_per_app_label;
+                }
 
-                string ? el = get_prop<string> (config, "empty-list-label");
-                if (el != null) empty_label = el;
+                string ?el = get_prop<string> (config, "empty-list-label");
+                if (el != null) {
+                    empty_label = el;
+                }
 
-                string ? l1 = get_prop<string> (config, "expand-button-label");
-                if (l1 != null) expand_label = l1;
-                string ? l2 = get_prop<string> (config, "collapse-button-label");
-                if (l2 != null) collapse_label = l2;
+                string ?l1 = get_prop<string> (config, "expand-button-label");
+                if (l1 != null) {
+                    expand_label = l1;
+                }
+                string ?l2 = get_prop<string> (config, "collapse-button-label");
+                if (l2 != null) {
+                    collapse_label = l2;
+                }
 
                 int i = int.max (get_prop<int> (config, "icon-size"), 0);
-                if (i != 0) icon_size = i;
+                if (i != 0) {
+                    icon_size = i;
+                }
 
                 revealer_duration = int.max (0, get_prop<int> (config, "animation-duration"));
-                if (revealer_duration == 0) revealer_duration = 250;
+                if (revealer_duration == 0) {
+                    revealer_duration = 250;
+                }
 
-                string ? animation_type = get_prop<string> (config, "animation-type");
+                string ?animation_type = get_prop<string> (config, "animation-type");
                 if (animation_type != null) {
                     switch (animation_type) {
-                        default:
-                        case "none":
+                        default :
+                        case "none" :
                             revealer_type = Gtk.RevealerTransitionType.NONE;
                             break;
                         case "slide_up":

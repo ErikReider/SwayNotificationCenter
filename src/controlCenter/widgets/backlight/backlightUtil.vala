@@ -1,10 +1,10 @@
 namespace SwayNotificationCenter.Widgets {
     class BacklightUtil {
-
         [DBus (name = "org.freedesktop.login1.Session")]
         interface Login1 : Object {
             public abstract async void set_brightness (string subsystem,
-                                                 string name, uint32 brightness) throws GLib.Error;
+                                                       string name,
+                                                       uint32 brightness) throws GLib.Error;
         }
 
         string path_current;
@@ -45,7 +45,8 @@ namespace SwayNotificationCenter.Widgets {
             try {
                 // setup DBus for setting brightness
                 login1 = Bus.get_proxy_sync (BusType.SYSTEM,
-                                             "org.freedesktop.login1", "/org/freedesktop/login1/session/auto");
+                                             "org.freedesktop.login1",
+                                             "/org/freedesktop/login1/session/auto");
             } catch (Error e) {
                 critical ("Error %s\n", e.message);
             }
@@ -74,7 +75,9 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         public void close () {
-            if (monitor != null) monitor.cancel ();
+            if (monitor != null) {
+                monitor.cancel ();
+            }
         }
 
         public async void set_brightness (float percent) {

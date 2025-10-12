@@ -1,7 +1,7 @@
 namespace SwayNotificationCenter {
     [GtkTemplate (ui = "/org/erikreider/swaync/ui/notification_window.ui")]
     public class NotificationWindow : Gtk.ApplicationWindow {
-        private static NotificationWindow ? window = null;
+        private static NotificationWindow ?window = null;
         /**
          * A NotificationWindow singleton due to a nasty notification
          * enter_notify_event bug where GTK still thinks that the cursor is at
@@ -38,12 +38,12 @@ namespace SwayNotificationCenter {
 
         Gee.HashSet<uint32> inline_reply_notifications = new Gee.HashSet<uint32> ();
 
-        private static string ? monitor_name = null;
+        private static string ?monitor_name = null;
 
         private const int MAX_HEIGHT = 600;
 
         private NotificationWindow () {
-            Object (css_name: "notificationwindow");
+            Object (css_name : "notificationwindow");
             if (swaync_daemon.use_layer_shell) {
                 if (!GtkLayerShell.is_supported ()) {
                     stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
@@ -147,7 +147,7 @@ namespace SwayNotificationCenter {
                 GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
                 GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
                 switch (ConfigModel.instance.positionX) {
-                    case PositionX.LEFT:
+                    case PositionX.LEFT :
                         GtkLayerShell.set_anchor (
                             this, GtkLayerShell.Edge.RIGHT, false);
                         GtkLayerShell.set_anchor (
@@ -190,7 +190,8 @@ namespace SwayNotificationCenter {
                     break;
                 default:
                 case PositionX.RIGHT:
-                    list.animation_child_type = AnimatedListItem.ChildAnimationType.SLIDE_FROM_RIGHT;
+                    list.animation_child_type =
+                        AnimatedListItem.ChildAnimationType.SLIDE_FROM_RIGHT;
                     break;
             }
             switch (ConfigModel.instance.positionY) {
@@ -205,7 +206,7 @@ namespace SwayNotificationCenter {
             }
 
             // Set the preferred monitor
-            string ? monitor_name = ConfigModel.instance.notification_window_preferred_output;
+            string ?monitor_name = ConfigModel.instance.notification_window_preferred_output;
             if (NotificationWindow.monitor_name != null) {
                 monitor_name = NotificationWindow.monitor_name;
             }
@@ -224,9 +225,11 @@ namespace SwayNotificationCenter {
         public delegate bool remove_iter_func (Notification notification);
 
         /** Hides all notifications. Only invokes the close action when transient */
-        public void close_all_notifications (remove_iter_func ? func = null) {
+        public void close_all_notifications (remove_iter_func ?func = null) {
             inline_reply_notifications.clear ();
-            if (!this.get_realized ()) return;
+            if (!this.get_realized ()) {
+                return;
+            }
             foreach (unowned AnimatedListItem item in list.children) {
                 if (item.destroying) {
                     continue;
@@ -240,7 +243,7 @@ namespace SwayNotificationCenter {
             close ();
         }
 
-        private void remove_notification (Notification ? noti,
+        private void remove_notification (Notification ?noti,
                                           bool dismiss,
                                           bool transition) {
             // Remove notification and its destruction timeout
@@ -266,7 +269,6 @@ namespace SwayNotificationCenter {
                         Idle.add_once (() => {
                             close ();
                         });
-                        return;
                     }
                 });
             }
@@ -331,8 +333,8 @@ namespace SwayNotificationCenter {
             add_notification (new_params);
         }
 
-        public uint32 ? get_latest_notification () {
-            unowned AnimatedListItem ? item = list.get_first_item ();
+        public uint32 ?get_latest_notification () {
+            unowned AnimatedListItem ?item = list.get_first_item ();
             if (item == null || !(item.child is Notification)) {
                 return null;
             }
@@ -342,7 +344,7 @@ namespace SwayNotificationCenter {
         }
 
         public void latest_notification_action (uint32 action) {
-            unowned AnimatedListItem ? item = list.get_first_item ();
+            unowned AnimatedListItem ?item = list.get_first_item ();
             if (item == null || !(item.child is Notification)) {
                 return;
             }
@@ -352,7 +354,7 @@ namespace SwayNotificationCenter {
             noti.close_notification ();
         }
 
-        public void set_monitor (Gdk.Monitor ? monitor) {
+        public void set_monitor (Gdk.Monitor ?monitor) {
             NotificationWindow.monitor_name = monitor == null ? null : monitor.connector;
             GtkLayerShell.set_monitor (this, monitor);
         }

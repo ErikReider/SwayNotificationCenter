@@ -69,26 +69,44 @@ namespace SwayNotificationCenter {
     }
 
     public class Category : Object {
-        public string ? sound { get; set; default = null; }
-        public string ? icon { get; set; default = null; }
+        public string ?sound { get; set; default = null; }
+        public string ?icon { get; set; default = null; }
 
         public string to_string () {
             string[] fields = {};
-            if (sound != null) fields += "sound: %s".printf (sound);
-            if (icon != null) fields += "icon: %s".printf (icon);
+            if (sound != null) {
+                fields += "sound: %s".printf (sound);
+            }
+            if (icon != null) {
+                fields += "icon: %s".printf (icon);
+            }
             return string.joinv (", ", fields);
         }
     }
 
+    private struct MatchCase {
+        string ?pattern;
+        string ?str;
+
+        public MatchCase (string ?pattern, string ?str) {
+            this.pattern = pattern;
+            this.str = str;
+        }
+
+        public bool is_valid () {
+            return pattern != null && str != null;
+        }
+    }
+
     public class NotificationMatching : Object, Json.Serializable {
-        public string ? app_name { get; set; default = null; }
-        public string ? desktop_entry { get; set; default = null; }
-        public string ? summary { get; set; default = null; }
-        public string ? body { get; set; default = null; }
-        public string ? urgency { get; set; default = null; }
-        public string ? category { get; set; default = null; }
-        public string ? sound_name { get; set; default = null; }
-        public string ? sound_file { get; set; default = null; }
+        public string ?app_name { get; set; default = null; }
+        public string ?desktop_entry { get; set; default = null; }
+        public string ?summary { get; set; default = null; }
+        public string ?body { get; set; default = null; }
+        public string ?urgency { get; set; default = null; }
+        public string ?category { get; set; default = null; }
+        public string ?sound_name { get; set; default = null; }
+        public string ?sound_file { get; set; default = null; }
 
         private const RegexCompileFlags REGEX_COMPILE_OPTIONS =
             RegexCompileFlags.MULTILINE;
@@ -97,79 +115,121 @@ namespace SwayNotificationCenter {
 
         public virtual bool matches_notification (NotifyParams param) {
             if (app_name != null) {
-                if (param.app_name == null) return false;
+                if (param.app_name == null) {
+                    return false;
+                }
                 bool result = Regex.match_simple (
                     app_name, param.app_name,
                     REGEX_COMPILE_OPTIONS,
                     REGEX_MATCH_FLAGS);
-                if (!result) return false;
+                if (!result) {
+                    return false;
+                }
             }
             if (desktop_entry != null) {
-                if (param.desktop_entry == null) return false;
+                if (param.desktop_entry == null) {
+                    return false;
+                }
                 bool result = Regex.match_simple (
                     desktop_entry, param.desktop_entry,
                     REGEX_COMPILE_OPTIONS,
                     REGEX_MATCH_FLAGS);
-                if (!result) return false;
+                if (!result) {
+                    return false;
+                }
             }
             if (summary != null) {
-                if (param.summary == null) return false;
+                if (param.summary == null) {
+                    return false;
+                }
                 bool result = Regex.match_simple (
                     summary, param.summary,
                     REGEX_COMPILE_OPTIONS,
                     REGEX_MATCH_FLAGS);
-                if (!result) return false;
+                if (!result) {
+                    return false;
+                }
             }
             if (body != null) {
-                if (param.body == null) return false;
+                if (param.body == null) {
+                    return false;
+                }
                 bool result = Regex.match_simple (
                     body, param.body,
                     0,
                     REGEX_MATCH_FLAGS);
-                if (!result) return false;
+                if (!result) {
+                    return false;
+                }
             }
             if (urgency != null) {
                 bool result = Regex.match_simple (
                     urgency, param.urgency.to_string (),
                     REGEX_COMPILE_OPTIONS,
                     REGEX_MATCH_FLAGS);
-                if (!result) return false;
+                if (!result) {
+                    return false;
+                }
             }
             if (category != null) {
-                if (param.category == null) return false;
+                if (param.category == null) {
+                    return false;
+                }
                 bool result = Regex.match_simple (
                     category, param.category,
                     REGEX_COMPILE_OPTIONS,
                     REGEX_MATCH_FLAGS);
-                if (!result) return false;
+                if (!result) {
+                    return false;
+                }
             }
             if (sound_file != null) {
-                if (param.sound_file == null) return false;
+                if (param.sound_file == null) {
+                    return false;
+                }
                 bool result = Regex.match_simple (
                     sound_file, param.sound_file,
                     REGEX_COMPILE_OPTIONS,
                     REGEX_MATCH_FLAGS);
-                if (!result) return false;
+                if (!result) {
+                    return false;
+                }
             }
             if (sound_name != null) {
-                if (param.sound_name == null) return false;
+                if (param.sound_name == null) {
+                    return false;
+                }
                 bool result = Regex.match_simple (
                     sound_name, param.sound_name,
                     REGEX_COMPILE_OPTIONS,
                     REGEX_MATCH_FLAGS);
-                if (!result) return false;
+                if (!result) {
+                    return false;
+                }
             }
             return true;
         }
 
         public string to_string () {
             string[] fields = {};
-            if (app_name != null) fields += "app-name: %s".printf (app_name);
-            if (desktop_entry != null) fields += "desktop-entry: %s".printf (desktop_entry);
-            if (summary != null) fields += "summary: %s".printf (summary);
-            if (body != null) fields += "body: %s".printf (body);
-            if (urgency != null) fields += "urgency: %s".printf (urgency);
-            if (category != null) fields += "category: %s".printf (category);
+            if (app_name != null) {
+                fields += "app-name: %s".printf (app_name);
+            }
+            if (desktop_entry != null) {
+                fields += "desktop-entry: %s".printf (desktop_entry);
+            }
+            if (summary != null) {
+                fields += "summary: %s".printf (summary);
+            }
+            if (body != null) {
+                fields += "body: %s".printf (body);
+            }
+            if (urgency != null) {
+                fields += "urgency: %s".printf (urgency);
+            }
+            if (category != null) {
+                fields += "category: %s".printf (category);
+            }
             return string.joinv (", ", fields);
         }
 
@@ -180,13 +240,131 @@ namespace SwayNotificationCenter {
             if (value.type ().is_a (Type.ENUM)) {
                 var node = new Json.Node (Json.NodeType.VALUE);
                 EnumClass enumc = (EnumClass) value.type ().class_ref ();
-                unowned EnumValue ? eval
+                unowned EnumValue ?eval
                     = enumc.get_value (value.get_enum ());
                 if (eval == null) {
                     node.set_value (value);
                     return node;
                 }
                 node.set_string (eval.value_nick);
+                return node;
+            } else if (value.type ().is_a (Type.BOOLEAN)) {
+                // Somehow the default serializer doesn't handle booleans :/
+                var node = new Json.Node (Json.NodeType.VALUE);
+                node.set_boolean (value.get_boolean ());
+                return node;
+            }
+            return default_serialize_property (property_name, value, pspec);
+        }
+    }
+
+    public class ActionMatching : Object, Json.Serializable {
+        public string ?app_name { get; set; default = null; }
+        public string ?desktop_entry { get; set; default = null; }
+        public string ?id_matcher { get; set; }
+        public string ?text_matcher { get; set; }
+        public bool use_regex { get; set; default = false; }
+
+        private const RegexCompileFlags REGEX_COMPILE_OPTIONS =
+            RegexCompileFlags.MULTILINE;
+
+        private const RegexMatchFlags REGEX_MATCH_FLAGS = RegexMatchFlags.NOTEMPTY;
+
+        public bool matches_action (Action action) {
+            MatchCase[] matchers = {
+                MatchCase (id_matcher, action.identifier),
+                MatchCase (text_matcher, action.text),
+            };
+            foreach (MatchCase matcher in matchers) {
+                if (!matcher.is_valid ()) {
+                    continue;
+                }
+                if (use_regex) {
+                    bool result = Regex.match_simple (
+                        matcher.pattern, matcher.str,
+                        REGEX_COMPILE_OPTIONS,
+                        REGEX_MATCH_FLAGS);
+                    if (!result) {
+                        return false;
+                    }
+                } else {
+                    if (matcher.pattern != matcher.str) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        public bool matches_notification (NotifyParams param) {
+            if (id_matcher == null && text_matcher == null) {
+                critical ("Action filter doesn't contain a matcher: %s", this.to_string ());
+                return false;
+            }
+
+            MatchCase[] matchers = {
+                MatchCase (app_name, param.app_name),
+                MatchCase (desktop_entry, param.desktop_entry),
+            };
+            foreach (MatchCase matcher in matchers) {
+                if (!matcher.is_valid ()) {
+                    continue;
+                }
+                if (use_regex) {
+                    bool result = Regex.match_simple (
+                        matcher.pattern, matcher.str,
+                        REGEX_COMPILE_OPTIONS,
+                        REGEX_MATCH_FLAGS);
+                    if (!result) {
+                        return false;
+                    }
+                } else {
+                    if (matcher.pattern != matcher.str) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        public string to_string () {
+            string[] fields = {};
+            if (app_name != null) {
+                fields += "app-name: %s".printf (app_name);
+            }
+            if (desktop_entry != null) {
+                fields += "desktop-entry: %s".printf (desktop_entry);
+            }
+            if (id_matcher != null) {
+                fields += "name_matcher: %s".printf (id_matcher);
+            }
+            if (text_matcher != null) {
+                fields += "text_matcher: %s".printf (text_matcher);
+            }
+            return string.joinv (", ", fields);
+        }
+
+        public override Json.Node serialize_property (string property_name,
+                                                      Value value,
+                                                      ParamSpec pspec) {
+            // Return enum nickname instead of enum int value
+            if (value.type ().is_a (Type.ENUM)) {
+                var node = new Json.Node (Json.NodeType.VALUE);
+                EnumClass enumc = (EnumClass) value.type ().class_ref ();
+                unowned EnumValue ?eval
+                    = enumc.get_value (value.get_enum ());
+                if (eval == null) {
+                    node.set_value (value);
+                    return node;
+                }
+                node.set_string (eval.value_nick);
+                return node;
+            } else if (value.type ().is_a (Type.BOOLEAN)) {
+                // Somehow the default serializer doesn't handle booleans :/
+                var node = new Json.Node (Json.NodeType.VALUE);
+                node.set_boolean (value.get_boolean ());
                 return node;
             }
             return default_serialize_property (property_name, value, pspec);
@@ -202,7 +380,7 @@ namespace SwayNotificationCenter {
         public string to_string () {
             switch (this) {
                 default :
-                    return "enabled";
+                return "enabled";
                 case MUTED:
                     return "muted";
                 case IGNORED:
@@ -264,7 +442,7 @@ namespace SwayNotificationCenter {
 
 #if WANT_SCRIPTING
     public class Script : NotificationMatching {
-        public string ? exec { get; set; default = null; }
+        public string ?exec { get; set; default = null; }
         public ScriptRunOnType run_on { get; set; default = ScriptRunOnType.RECEIVE; }
 
         public async bool run_script (NotifyParams param, out string msg) {
@@ -293,27 +471,33 @@ namespace SwayNotificationCenter {
         }
 
         public override bool matches_notification (NotifyParams param) {
-            if (exec == null) return false;
+            if (exec == null) {
+                return false;
+            }
             return base.matches_notification (param);
         }
     }
 #endif
 
     public class ConfigModel : Object, Json.Serializable {
-        private static ConfigModel ? _instance = null;
+        private static ConfigModel ?_instance = null;
         private static string _path = "";
 
         /** Get the static singleton */
         public static unowned ConfigModel instance {
             get {
-                if (_instance == null) _instance = new ConfigModel ();
-                if (_path.length <= 0) _path = Functions.get_config_path (null);
+                if (_instance == null) {
+                    _instance = new ConfigModel ();
+                }
+                if (_path.length <= 0) {
+                    _path = Functions.get_config_path (null);
+                }
                 return _instance;
             }
         }
 
         /** Get the static singleton and reload the config */
-        public static unowned ConfigModel init (string ? path) {
+        public static unowned ConfigModel init (string ?path) {
             _path = path;
             reload_config ();
             return _instance;
@@ -330,10 +514,12 @@ namespace SwayNotificationCenter {
 
             ConfigModel m = null;
             try {
-                if (path.strip ().length == 0) return;
+                if (path.strip ().length == 0) {
+                    return;
+                }
                 Json.Parser parser = new Json.Parser ();
                 parser.load_from_file (path);
-                Json.Node ? node = parser.get_root ();
+                Json.Node ?node = parser.get_root ();
                 if (node == null) {
                     throw new Json.ParserError.PARSE ("Node is null!");
                 }
@@ -351,7 +537,7 @@ namespace SwayNotificationCenter {
                 m = new ConfigModel ();
             }
 
-            ConfigModel ? previous_config = _instance;
+            ConfigModel ?previous_config = _instance;
 
             _instance = m;
             _path = path;
@@ -556,6 +742,12 @@ namespace SwayNotificationCenter {
             default = new OrderedHashTable<Category> ();
         }
 
+        /** Filter Notification Actions */
+        public OrderedHashTable<ActionMatching> notification_action_filter {
+            get;
+            set;
+            default = new OrderedHashTable<ActionMatching> ();
+        }
 
         /** Notification Status */
         public OrderedHashTable<NotificationVisibility> notification_visibility {
@@ -721,7 +913,16 @@ namespace SwayNotificationCenter {
                             out status);
                     value = result;
                     return status;
-                case "notification-visibility":
+                case "notification-action-filter" :
+                    bool status;
+                    OrderedHashTable<ActionMatching> result =
+                        extract_hashtable<ActionMatching> (
+                            property_name,
+                            property_node,
+                            out status);
+                    value = result;
+                    return status;
+                case "notification-visibility" :
                     bool status;
                     OrderedHashTable<NotificationVisibility> result =
                         extract_hashtable<NotificationVisibility> (
@@ -762,14 +963,18 @@ namespace SwayNotificationCenter {
                         return true;
                     }
                     foreach (var key in obj.get_members ()) {
-                        Json.Node ? node = obj.get_member (key);
-                        if (node.get_node_type () != Json.NodeType.OBJECT) continue;
-                        Json.Object ? o = node.get_object ();
-                        if (o != null) result.insert (key, o);
+                        Json.Node ?node = obj.get_member (key);
+                        if (node.get_node_type () != Json.NodeType.OBJECT) {
+                            continue;
+                        }
+                        Json.Object ?o = node.get_object ();
+                        if (o != null) {
+                            result.insert (key, o);
+                        }
                     }
                     value = result;
                     return true;
-                default:
+                    default :
                     // Handles all other properties
                     return default_deserialize_property (
                         property_name, out value, pspec, property_node);
@@ -785,7 +990,7 @@ namespace SwayNotificationCenter {
             var node = new Json.Node (Json.NodeType.VALUE);
             if (value.type ().is_a (Type.ENUM)) {
                 EnumClass enumc = (EnumClass) pspec.value_type.class_ref ();
-                EnumValue ? eval
+                EnumValue ?eval
                     = enumc.get_value (value.get_enum ());
                 if (eval == null) {
                     node.set_value (value);
@@ -800,6 +1005,11 @@ namespace SwayNotificationCenter {
                     node = new Json.Node (Json.NodeType.OBJECT);
                     var table = (OrderedHashTable<Category>) value;
                     node.set_object (serialize_hashtable<Category> (table));
+                    break;
+                case "notification-action-filter" :
+                    node = new Json.Node (Json.NodeType.OBJECT);
+                    var table = (OrderedHashTable<ActionMatching>) value;
+                    node.set_object (serialize_hashtable<ActionMatching> (table));
                     break;
                 case "notification-visibility":
                     node = new Json.Node (Json.NodeType.OBJECT);
@@ -846,8 +1056,8 @@ namespace SwayNotificationCenter {
          * - GLib.Object
          */
         private OrderedHashTable<T> extract_hashtable<T> (string property_name,
-                                                           Json.Node node,
-                                                           out bool status) {
+                                                          Json.Node node,
+                                                          out bool status) {
             status = false;
             var tmp_table = new OrderedHashTable<T> ();
 
@@ -857,13 +1067,17 @@ namespace SwayNotificationCenter {
                 return tmp_table;
             }
 
-            Json.Object ? root_object = node.get_object ();
-            if (root_object == null) return tmp_table;
+            Json.Object ?root_object = node.get_object ();
+            if (root_object == null) {
+                return tmp_table;
+            }
 
             Type generic_type = Functions.get_base_type (typeof (T));
-            foreach (string * key in root_object.get_members ()) {
-                unowned Json.Node ? member = root_object.get_member (key);
-                if (member == null) continue;
+            foreach (string *key in root_object.get_members ()) {
+                unowned Json.Node ?member = root_object.get_member (key);
+                if (member == null) {
+                    continue;
+                }
 
                 if (!member.get_value_type ().is_a (generic_type)
                     && !member.get_value_type ().is_a (typeof (Json.Object))) {
@@ -871,22 +1085,28 @@ namespace SwayNotificationCenter {
                 }
 
                 switch (generic_type) {
-                    case Type.STRING:
-                        unowned string ? str = member.get_string ();
-                        if (str != null) tmp_table.insert (key, str);
+                    case Type.STRING :
+                        unowned string ?str = member.get_string ();
+                        if (str != null) {
+                            tmp_table.insert (key, str);
+                        }
                         break;
                     case Type.BOOLEAN :
                         tmp_table.insert (key, member.get_boolean ());
                         break;
                     case Type.INT64:
-                        tmp_table.insert (key, (int64 ? ) member.get_int ());
+                        tmp_table.insert (key, (int64 ?) member.get_int ());
                         break;
-                    case Type.OBJECT:
-                        if (!typeof (T).is_a (Type.OBJECT)) break;
+                    case Type.OBJECT :
+                        if (!typeof (T).is_a (Type.OBJECT)) {
+                            break;
+                        }
 
-                        unowned Json.Object ? object =
+                        unowned Json.Object ?object =
                             root_object.get_object_member (key);
-                        if (object == null) break;
+                        if (object == null) {
+                            break;
+                        }
 
                         // Creates a new GLib.Object with all of the properties of T
                         Type type = typeof (T);
@@ -902,7 +1122,9 @@ namespace SwayNotificationCenter {
                                     break;
                                 }
                             }
-                            if (value_spec == null) continue;
+                            if (value_spec == null) {
+                                continue;
+                            }
 
                             unowned Type spec_type = value_spec.value_type;
                             unowned Type val_type = value.type ();
@@ -913,7 +1135,7 @@ namespace SwayNotificationCenter {
                                        && val_type.is_a (Type.STRING)) {
                                 // Set enum from string
                                 EnumClass enumc = (EnumClass) spec_type.class_ref ();
-                                EnumValue ? eval
+                                EnumValue ?eval
                                     = enumc.get_value_by_nick (value.get_string ());
                                 if (eval != null) {
                                     obj.set_property (name, eval.value);
@@ -933,37 +1155,41 @@ namespace SwayNotificationCenter {
         private Json.Object serialize_hashtable<T> (OrderedHashTable<T> table) {
             var json_object = new Json.Object ();
 
-            if (table == null) return json_object;
+            if (table == null) {
+                return json_object;
+            }
 
             foreach (string key in table.get_keys ()) {
                 unowned T item = table.get (key);
-                if (item == null) continue;
+                if (item == null) {
+                    continue;
+                }
 
                 Type generic_type = Functions.get_base_type (typeof (T));
                 switch (generic_type) {
-                    case Type.STRING:
-                        string ? casted = (string) item;
+                    case Type.STRING :
+                        string ?casted = (string) item;
                         if (casted != null) {
                             json_object.set_string_member (key, casted);
                         }
                         break;
                     case Type.BOOLEAN :
-                        bool ? casted = (bool) item;
+                        bool ?casted = (bool) item;
                         if (casted != null) {
                             json_object.set_boolean_member (key, casted);
                         }
                         break;
-                    case Type.INT64 :
-                        int64 ? casted = (int64 ? ) item;
+                    case Type.INT64:
+                        int64 ?casted = (int64 ?) item;
                         if (casted != null) {
                             json_object.set_int_member (key, casted);
                         }
                         break;
-                    case Type.OBJECT:
+                    case Type.OBJECT :
                         var node = Json.gobject_serialize (item as Object);
                         json_object.set_member (key, node);
                         break;
-                    case Type.BOXED:
+                    case Type.BOXED :
                         switch (typeof (T).name ()) {
                             case "JsonObject":
                                 json_object.set_object_member (key,
@@ -1001,8 +1227,10 @@ namespace SwayNotificationCenter {
                 return tmp_array;
             }
 
-            Json.Array ? root_array = node.get_array ();
-            if (root_array == null) return tmp_array;
+            Json.Array ?root_array = node.get_array ();
+            if (root_array == null) {
+                return tmp_array;
+            }
 
             foreach (Json.Node * member in root_array.get_elements ()) {
                 Type generic_type = Functions.get_base_type (typeof (T));
@@ -1012,21 +1240,27 @@ namespace SwayNotificationCenter {
                 }
 
                 switch (generic_type) {
-                    case Type.STRING:
-                        unowned string ? str = member->get_string ();
-                        if (str != null) tmp_array.add (str);
+                    case Type.STRING :
+                        unowned string ?str = member->get_string ();
+                        if (str != null) {
+                            tmp_array.add (str);
+                        }
                         break;
-                    case Type.BOOLEAN :
+                    case Type.BOOLEAN:
                         tmp_array.add (member->get_boolean ());
                         break;
                     case Type.INT64:
                         tmp_array.add (member->get_int ());
                         break;
                     case Type.OBJECT:
-                        if (!typeof (T).is_a (Type.OBJECT)) break;
+                        if (!typeof (T).is_a (Type.OBJECT)) {
+                            break;
+                        }
 
-                        unowned Json.Object ? object = member->get_object ();
-                        if (object == null) break;
+                        unowned Json.Object ?object = member->get_object ();
+                        if (object == null) {
+                            break;
+                        }
 
                         // Creates a new GLib.Object with all of the properties of T
                         Object obj = Object.new (typeof (T));
@@ -1047,26 +1281,30 @@ namespace SwayNotificationCenter {
         private Json.Array serialize_array<T> (GenericArray<T> array) {
             var json_array = new Json.Array ();
 
-            if (array == null) return json_array;
+            if (array == null) {
+                return json_array;
+            }
 
             foreach (T item in array.data) {
-                if (item == null) continue;
+                if (item == null) {
+                    continue;
+                }
                 Type generic_type = Functions.get_base_type (typeof (T));
                 switch (generic_type) {
                     case Type.STRING :
-                        string ? casted = (string) item;
+                        string ?casted = (string) item;
                         if (casted != null) {
                             json_array.add_string_element (casted);
                         }
                         break;
-                    case Type.BOOLEAN :
-                        bool ? casted = (bool) item;
+                    case Type.BOOLEAN:
+                        bool ?casted = (bool) item;
                         if (casted != null) {
                             json_array.add_boolean_element (casted);
                         }
                         break;
-                    case Type.INT64 :
-                        int64 ? casted = (int64) item;
+                    case Type.INT64:
+                        int64 ?casted = (int64) item;
                         if (casted != null) {
                             json_array.add_int_element (casted);
                         }
@@ -1086,28 +1324,30 @@ namespace SwayNotificationCenter {
         public void change_value (string member_name,
                                   Variant value,
                                   bool write = true,
-                                  string ? path = null) {
+                                  string ?path = null) {
             reload_config ((node) => {
                 unowned Json.Object obj = node.get_object ();
-                if (obj == null) return;
+                if (obj == null) {
+                    return;
+                }
                 debug ("Config change: %s %s",
                        member_name, value.get_type_string ());
                 switch (value.get_type_string ()) {
-                        case "i":
-                            int val = value.get_int32 ();
-                            obj.set_int_member (member_name, val);
-                            debug ("Config changed %s", member_name);
-                            break;
-                        case "s":
-                            string val = value.get_string ();
-                            obj.set_string_member (member_name, val);
-                            debug ("Config changed %s", member_name);
-                            break;
-                        case "b":
-                            bool val = value.get_boolean ();
-                            obj.set_boolean_member (member_name, val);
-                            debug ("Config changed %s", member_name);
-                            break;
+                    case "i":
+                        int val = value.get_int32 ();
+                        obj.set_int_member (member_name, val);
+                        debug ("Config changed %s", member_name);
+                        break;
+                    case "s":
+                        string val = value.get_string ();
+                        obj.set_string_member (member_name, val);
+                        debug ("Config changed %s", member_name);
+                        break;
+                    case "b":
+                        bool val = value.get_boolean ();
+                        obj.set_boolean_member (member_name, val);
+                        debug ("Config changed %s", member_name);
+                        break;
                 }
             });
 
@@ -1127,7 +1367,7 @@ namespace SwayNotificationCenter {
          * `path` is "null", the default user accessible config will be used
          * ("~/.config/swaync/config.json")
          */
-        private bool write_to_file (owned string ? path = null) {
+        private bool write_to_file (owned string ?path = null) {
             try {
                 if (path == null) {
                     // Use the default user accessible config

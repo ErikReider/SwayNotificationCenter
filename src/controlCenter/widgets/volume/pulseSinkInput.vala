@@ -1,6 +1,6 @@
 // From SwaySettings PulseAudio page: https://github.com/ErikReider/SwaySettings/blob/2b05776bce2fd55933a7fbdec995f54849e39e7d/src/Pages/Pulse/PulseSinkInput.vala
-using PulseAudio;
 using Gee;
+using PulseAudio;
 
 namespace SwayNotificationCenter.Widgets {
     public class PulseSinkInput : Object {
@@ -16,7 +16,7 @@ namespace SwayNotificationCenter.Widgets {
         /** The name of the application binary: `application.process.binary` */
         public string application_binary;
         /** The application icon. Can be null: `application.icon_name` */
-        public string ? application_icon_name;
+        public string ?application_icon_name;
         /** The name of the media: `media.name` */
         public string media_name;
 
@@ -34,7 +34,7 @@ namespace SwayNotificationCenter.Widgets {
         /** Gets the name to be shown to the user:
          * "application_name"
          */
-        public string ? get_display_name () {
+        public string ?get_display_name () {
             return name;
         }
 

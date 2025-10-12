@@ -15,14 +15,18 @@ namespace SwayNotificationCenter.Widgets {
         public Label (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             base (suffix, swaync_daemon, noti_daemon);
 
-            Json.Object ? config = get_config (this);
+            Json.Object ?config = get_config (this);
             if (config != null) {
                 // Get text
-                string? text = get_prop<string> (config, "text");
-                if (text != null) this.text = text;
+                string ?text = get_prop<string> (config, "text");
+                if (text != null) {
+                    this.text = text;
+                }
                 // Get max lines
-                int? max_lines = get_prop<int> (config, "max-lines");
-                if (max_lines != null) this.max_lines = max_lines;
+                int ?max_lines = get_prop<int> (config, "max-lines");
+                if (max_lines != null) {
+                    this.max_lines = max_lines;
+                }
             }
 
             label_widget = new Gtk.Label (null);

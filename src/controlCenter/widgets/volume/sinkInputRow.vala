@@ -1,6 +1,5 @@
 namespace SwayNotificationCenter.Widgets {
     public class SinkInputRow : Gtk.ListBoxRow {
-
         Gtk.Box container;
         Gtk.Image icon = new Gtk.Image ();
         Gtk.Label label = new Gtk.Label (null);

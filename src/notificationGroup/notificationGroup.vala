@@ -130,7 +130,9 @@ namespace SwayNotificationCenter {
             });
             gesture.released.connect ((gesture, _n_press, _x, _y) => {
                 // Emit released
-                if (!gesture_down) return;
+                if (!gesture_down) {
+                    return;
+                }
                 gesture_down = false;
                 if (gesture_in) {
                     bool single_noti = only_single_notification ();
@@ -141,14 +143,16 @@ namespace SwayNotificationCenter {
                     group.set_sensitive (single_noti || group.is_expanded);
                 }
 
-                Gdk.EventSequence ? sequence = gesture.get_current_sequence ();
+                Gdk.EventSequence ?sequence = gesture.get_current_sequence ();
                 if (sequence == null) {
                     gesture_in = false;
                 }
             });
             gesture.update.connect ((gesture, sequence) => {
                 Gtk.GestureSingle gesture_single = (Gtk.GestureSingle) gesture;
-                if (sequence != gesture_single.get_current_sequence ()) return;
+                if (sequence != gesture_single.get_current_sequence ()) {
+                    return;
+                }
 
                 int width = get_width ();
                 int height = get_height ();
@@ -189,12 +193,14 @@ namespace SwayNotificationCenter {
         }
 
         private void set_icon () {
-            if (is_empty ()) return;
+            if (is_empty ()) {
+                return;
+            }
 
             unowned Notification first = (Notification) group.widgets.first ().data;
             unowned NotifyParams param = first.param;
             // Get the app icon
-            Icon ? icon = null;
+            Icon ?icon = null;
             if (param.desktop_app_info != null
                 && (icon = param.desktop_app_info.get_icon ()) != null) {
                 app_icon.set_from_gicon (icon);
@@ -254,12 +260,14 @@ namespace SwayNotificationCenter {
             return group.widgets.copy ();
         }
 
-        public unowned Notification ? get_latest_notification () {
+        public unowned Notification ?get_latest_notification () {
             return (Notification ?) group.widgets.last ().data;
         }
 
         public int64 get_time () {
-            if (group.widgets.is_empty ()) return -1;
+            if (group.widgets.is_empty ()) {
+                return -1;
+            }
             return ((Notification) group.widgets.last ().data).param.time;
         }
 
@@ -290,7 +298,9 @@ namespace SwayNotificationCenter {
             set_icon ();
             foreach (unowned Gtk.Widget widget in group.widgets) {
                 var noti = (Notification) widget;
-                if (noti != null) noti.set_time ();
+                if (noti != null) {
+                    noti.set_time ();
+                }
             }
         }
 
@@ -341,7 +351,9 @@ namespace SwayNotificationCenter {
         }
 
         public void set_expanded (bool value) {
-            if (is_expanded == value) return;
+            if (is_expanded == value) {
+                return;
+            }
             is_expanded = value;
 
             animate (is_expanded ? 1 : 0);
@@ -413,18 +425,20 @@ namespace SwayNotificationCenter {
             // TODO: Always use natural as minimum?
             // Fixes large (tall) Notification body Pictures
             minimum = (int) Functions.lerp (minimum,
-                                                   target_natural_height,
-                                                   animation_progress_inv);
+                                            target_natural_height,
+                                            animation_progress_inv);
             natural = (int) Functions.lerp (natural,
-                                                   target_natural_height,
-                                                   animation_progress_inv);
+                                            target_natural_height,
+                                            animation_progress_inv);
         }
 
         protected override void size_allocate (int alloc_width, int alloc_height, int baseline) {
             base.size_allocate (alloc_width, alloc_height, baseline);
 
             int length = (int) widgets.length ();
-            if (length == 0) return;
+            if (length == 0) {
+                return;
+            }
 
             Gtk.Allocation allocation = get_alloc (this);
             allocation.width = alloc_width;
@@ -437,7 +451,8 @@ namespace SwayNotificationCenter {
             unowned Gtk.Widget last = widgets.last ().data;
             int target_height = 0;
 
-            last.measure (Gtk.Orientation.VERTICAL, allocation.width, null, out target_height, null, null);
+            last.measure (Gtk.Orientation.VERTICAL, allocation.width, null, out target_height, null,
+                          null);
 
             for (int i = length - 1; i >= 0; i--) {
                 unowned Gtk.Widget widget = widgets.nth_data (i);
@@ -523,8 +538,8 @@ namespace SwayNotificationCenter {
                         animation_progress + Math.pow (0.95, length - 1 - i), 1);
                     // Moves the scaled notification to the center of X and bottom y
                     snapshot.translate (Graphene.Point ().init (
-                        (float) ((widget_alloc.width - width * scale) * 0.5),
-                        (float) (widget_alloc.height * (1 - scale))));
+                                            (float) ((widget_alloc.width - width * scale) * 0.5),
+                                            (float) (widget_alloc.height * (1 - scale))));
                     snapshot.scale ((float) scale, (float) scale);
                 }
 
@@ -547,15 +562,15 @@ namespace SwayNotificationCenter {
                 // cr.push_group ();
                 // widget.draw (cr);
                 // if (i + 1 != length) {
-                //     // Draw Fade Gradient
-                //     cr.save ();
-                //     cr.translate (0, lerped_y);
-                //     cr.scale (1, lerped_height * 0.5);
-                //     cr.set_source (fade_gradient);
-                //     cr.rectangle (0, 0, width, lerped_height * 0.5);
-                //     cr.set_operator (Cairo.Operator.DEST_OUT);
-                //     cr.fill ();
-                //     cr.restore ();
+                //// Draw Fade Gradient
+                // cr.save ();
+                // cr.translate (0, lerped_y);
+                // cr.scale (1, lerped_height * 0.5);
+                // cr.set_source (fade_gradient);
+                // cr.rectangle (0, 0, width, lerped_height * 0.5);
+                // cr.set_operator (Cairo.Operator.DEST_OUT);
+                // cr.fill ();
+                // cr.restore ();
                 // }
                 // cr.pop_group_to_source ();
                 // cr.paint ();

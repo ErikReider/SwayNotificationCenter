@@ -1,6 +1,6 @@
 // From SwaySettings PulseAudio page: https://github.com/ErikReider/SwaySettings/blob/407c9e99dd3e50a0f09c64d94a9e6ff741488378/src/Pages/Pulse/PulseDaemon.vala
-using PulseAudio;
 using Gee;
+using PulseAudio;
 
 namespace SwayNotificationCenter.Widgets {
     /**
@@ -8,7 +8,7 @@ namespace SwayNotificationCenter.Widgets {
      * https://github.com/elementary/switchboard-plug-sound
      */
     public class PulseDaemon : Object {
-        private Context ? context;
+        private Context ?context;
         private GLibMainLoop mainloop;
         private bool quitting = false;
 
@@ -17,7 +17,7 @@ namespace SwayNotificationCenter.Widgets {
         private string default_sink_name { get; private set; }
         private string default_source_name { get; private set; }
 
-        private PulseDevice ? default_sink = null;
+        private PulseDevice ?default_sink = null;
 
         public HashMap<string, PulseDevice> sinks { get; private set; }
 
@@ -62,36 +62,36 @@ namespace SwayNotificationCenter.Widgets {
             ctx.set_state_callback ((ctx) => {
                 debug ("Pulse Status: %s\n", ctx.get_state ().to_string ());
                 switch (ctx.get_state ()) {
-                        case Context.State.CONNECTING:
-                        case Context.State.AUTHORIZING:
-                        case Context.State.SETTING_NAME:
+                    case Context.State.CONNECTING :
+                    case Context.State.AUTHORIZING :
+                    case Context.State.SETTING_NAME:
+                        break;
+                    case Context.State.READY:
+                        ctx.set_subscribe_callback (subscription);
+                        ctx.subscribe (Context.SubscriptionMask.SINK_INPUT |
+                                       Context.SubscriptionMask.SINK |
+                                       Context.SubscriptionMask.CARD |
+                                       Context.SubscriptionMask.SERVER);
+                        // Init data
+                        ctx.get_server_info (this.get_server_info);
+                        running = true;
+                        break;
+                    case Context.State.TERMINATED:
+                    case Context.State.FAILED:
+                        running = false;
+                        if (quitting) {
+                            quitting = false;
                             break;
-                        case Context.State.READY:
-                            ctx.set_subscribe_callback (subscription);
-                            ctx.subscribe (Context.SubscriptionMask.SINK_INPUT |
-                                           Context.SubscriptionMask.SINK |
-                                           Context.SubscriptionMask.CARD |
-                                           Context.SubscriptionMask.SERVER);
-                            // Init data
-                            ctx.get_server_info (this.get_server_info);
-                            running = true;
-                            break;
-                        case Context.State.TERMINATED:
-                        case Context.State.FAILED:
-                            running = false;
-                            if (quitting) {
-                                quitting = false;
-                                break;
-                            }
-                            stderr.printf (
-                                "PulseAudio connection lost. Will retry connection.\n");
-                            get_context ();
-                            break;
-                        default:
-                            running = false;
-                            stderr.printf ("Connection failure: %s\n",
-                                           PulseAudio.strerror (ctx.errno ()));
-                            break;
+                        }
+                        stderr.printf (
+                            "PulseAudio connection lost. Will retry connection.\n");
+                        get_context ();
+                        break;
+                    default:
+                        running = false;
+                        stderr.printf ("Connection failure: %s\n",
+                                       PulseAudio.strerror (ctx.errno ()));
+                        break;
                 }
             });
             if (ctx.connect (
@@ -120,7 +120,9 @@ namespace SwayNotificationCenter.Widgets {
                             var iter = active_sinks.map_iterator ();
                             while (iter.next ()) {
                                 var sink_input = iter.get_value ();
-                                if (sink_input.index != index) continue;
+                                if (sink_input.index != index) {
+                                    continue;
+                                }
                                 this.remove_active_sink (sink_input);
                                 iter.unset ();
                                 break;
@@ -137,7 +139,9 @@ namespace SwayNotificationCenter.Widgets {
                             break;
                         case Context.SubscriptionEventType.REMOVE:
                             foreach (var sink in sinks.values) {
-                                if (sink.device_index != index) continue;
+                                if (sink.device_index != index) {
+                                    continue;
+                                }
                                 sink.removed = true;
                                 sink.is_default = false;
                                 this.remove_device (sink);
@@ -158,7 +162,9 @@ namespace SwayNotificationCenter.Widgets {
                             var iter = sinks.map_iterator ();
                             while (iter.next ()) {
                                 var device = iter.get_value ();
-                                if (device.card_index != index) continue;
+                                if (device.card_index != index) {
+                                    continue;
+                                }
                                 device.removed = true;
                                 device.is_default = false;
                                 iter.unset ();
@@ -183,7 +189,7 @@ namespace SwayNotificationCenter.Widgets {
          * Gets called when any server value changes like default devices
          * Calls `get_card_info_list` and `get_sink_info_list`
          */
-        private void get_server_info (Context ctx, ServerInfo ? info) {
+        private void get_server_info (Context ctx, ServerInfo ?info) {
             if (this.default_sink_name == null) {
                 this.default_sink_name = info.default_sink_name;
             }
@@ -208,8 +214,10 @@ namespace SwayNotificationCenter.Widgets {
             }
         }
 
-        private void get_sink_input_info (Context ctx, SinkInputInfo ? info, int eol) {
-            if (info == null || eol != 0) return;
+        private void get_sink_input_info (Context ctx, SinkInputInfo ?info, int eol) {
+            if (info == null || eol != 0) {
+                return;
+            }
 
             uint32 id = PulseSinkInput.get_hash_map_key (info.index);
             PulseSinkInput sink_input = null;
@@ -226,9 +234,9 @@ namespace SwayNotificationCenter.Widgets {
 
             sink_input.name = info.proplist.gets ("application.name");
             sink_input.application_binary = info.proplist
-                                             .gets ("application.process.binary");
+                 .gets ("application.process.binary");
             sink_input.application_icon_name = info.proplist
-                                                .gets ("application.icon_name");
+                 .gets ("application.icon_name");
             sink_input.media_name = info.proplist.gets ("media.name");
 
             sink_input.is_muted = info.mute == 1;
@@ -236,7 +244,7 @@ namespace SwayNotificationCenter.Widgets {
             sink_input.cvolume = info.volume;
             sink_input.channel_map = info.channel_map;
             sink_input.balance = sink_input.cvolume
-                                  .get_balance (sink_input.channel_map);
+                 .get_balance (sink_input.channel_map);
             sink_input.volume_operations.foreach ((op) => {
                 if (op.get_state () != Operation.State.RUNNING) {
                     sink_input.volume_operations.remove (op);
@@ -257,17 +265,21 @@ namespace SwayNotificationCenter.Widgets {
             }
         }
 
-        private void get_card_info (Context ctx, CardInfo ? info, int eol) {
-            if (info == null || eol != 0) return;
+        private void get_card_info (Context ctx, CardInfo ?info, int eol) {
+            if (info == null || eol != 0) {
+                return;
+            }
 
-            unowned string ? description = info.proplist
-                                            .gets ("device.description");
-            unowned string ? props_icon = info.proplist
-                                           .gets ("device.icon_name");
+            unowned string ?description = info.proplist
+                 .gets ("device.description");
+            unowned string ?props_icon = info.proplist
+                 .gets ("device.icon_name");
 
             PulseDevice[] ports = {};
             foreach (var port in info.ports) {
-                if (port->available == PortAvailable.NO) continue;
+                if (port->available == PortAvailable.NO) {
+                    continue;
+                }
 
                 bool is_input = port->direction == Direction.INPUT;
                 HashMap<string, PulseDevice> devices = this.sinks;
@@ -296,10 +308,12 @@ namespace SwayNotificationCenter.Widgets {
                 // Get port profiles2 (profiles is "Superseded by profiles2")
                 // and sort largest priority first
                 var profiles = new ArrayList<unowned CardProfileInfo2 *>
-                                .wrap (port->profiles2);
+                     .wrap (port->profiles2);
 
                 profiles.sort ((a, b) => {
-                    if (a->priority == b->priority) return 0;
+                    if (a->priority == b->priority) {
+                        return 0;
+                    }
                     return a.priority > b.priority ? -1 : 1;
                 });
                 string[] new_profiles = {};
@@ -317,7 +331,7 @@ namespace SwayNotificationCenter.Widgets {
                 device.profiles = pulse_profiles;
 
                 device.icon_name = port->proplist.gets ("device.icon_name")
-                                   ?? props_icon;
+                    ?? props_icon;
                 if (device.icon_name == null) {
                     device.icon_name = is_input
                         ? "microphone-sensitivity-high"
@@ -334,7 +348,9 @@ namespace SwayNotificationCenter.Widgets {
             var iter = sinks.map_iterator ();
             while (iter.next ()) {
                 var device = iter.get_value ();
-                if (device.card_index != info.index) continue;
+                if (device.card_index != info.index) {
+                    continue;
+                }
                 bool found = false;
                 foreach (var p in ports) {
                     if (device.get_current_hash_key ()
@@ -351,8 +367,10 @@ namespace SwayNotificationCenter.Widgets {
             }
         }
 
-        private void get_sink_info (Context ctx, SinkInfo ? info, int eol) {
-            if (info == null || eol != 0) return;
+        private void get_sink_info (Context ctx, SinkInfo ?info, int eol) {
+            if (info == null || eol != 0) {
+                return;
+            }
 
             bool found = false;
             foreach (PulseDevice device in sinks.values) {
@@ -379,7 +397,7 @@ namespace SwayNotificationCenter.Widgets {
                         device.cvolume = info.volume;
                         device.channel_map = info.channel_map;
                         device.balance = device.cvolume
-                                          .get_balance (device.channel_map);
+                             .get_balance (device.channel_map);
                         device.volume_operations.foreach ((op) => {
                             if (op.get_state () != Operation.State.RUNNING) {
                                 device.volume_operations.remove (op);
@@ -400,7 +418,9 @@ namespace SwayNotificationCenter.Widgets {
                 }
             }
             // If not found, it's a cardless device
-            if (found) return;
+            if (found) {
+                return;
+            }
 
             HashMap<string, PulseDevice> devices = this.sinks;
             string id = PulseDevice.get_hash_map_key (
@@ -431,7 +451,7 @@ namespace SwayNotificationCenter.Widgets {
             device.cvolume = info.volume;
             device.channel_map = info.channel_map;
             device.balance = device.cvolume
-                              .get_balance (device.channel_map);
+                 .get_balance (device.channel_map);
             device.volume_operations.foreach ((op) => {
                 if (op.get_state () != Operation.State.RUNNING) {
                     device.volume_operations.remove (op);
@@ -470,7 +490,7 @@ namespace SwayNotificationCenter.Widgets {
 
             var cvol = sink_input.cvolume;
             cvol.scale (double_to_volume (volume));
-            Operation ? operation = null;
+            Operation ?operation = null;
             operation = context.set_sink_input_volume (
                 sink_input.index, cvol);
             if (operation != null) {
@@ -490,7 +510,7 @@ namespace SwayNotificationCenter.Widgets {
 
             var cvol = device.cvolume;
             cvol.scale (double_to_volume (volume));
-            Operation ? operation = null;
+            Operation ?operation = null;
             if (device.direction == Direction.OUTPUT) {
                 operation = context.set_sink_volume_by_name (
                     device.device_name, cvol);
@@ -502,7 +522,9 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         public async void set_default_device (PulseDevice device) {
-            if (device == null) return;
+            if (device == null) {
+                return;
+            }
             bool is_input = device.direction == Direction.INPUT;
 
             // Only set port and card profile if the device is attached to a card
@@ -618,7 +640,9 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         public void set_device_mute (bool state, PulseDevice device) {
-            if (device.is_muted == state) return;
+            if (device.is_muted == state) {
+                return;
+            }
             if (device.direction == Direction.OUTPUT) {
                 context.set_sink_mute_by_index (
                     device.device_index, state);
@@ -626,7 +650,9 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         public void set_sink_input_mute (bool state, PulseSinkInput sink_input) {
-            if (sink_input.is_muted == state) return;
+            if (sink_input.is_muted == state) {
+                return;
+            }
             context.set_sink_input_mute (sink_input.index, state);
         }
 

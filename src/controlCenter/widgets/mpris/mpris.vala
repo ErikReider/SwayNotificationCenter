@@ -34,7 +34,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         private const int FADE_WIDTH = 20;
 
         const string MPRIS_PREFIX = "org.mpris.MediaPlayer2.";
-        HashTable<string, MprisPlayer> players = new HashTable<string, MprisPlayer> (str_hash, str_equal);
+        HashTable<string, MprisPlayer> players = new HashTable<string, MprisPlayer> (str_hash,
+                                                                                     str_equal);
 
         DBusInterface dbus_iface;
 
@@ -85,7 +86,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                     return;
                 }
                 button_prev.sensitive = (index > 0) || mpris_config.loop_carousel;
-                button_next.sensitive = (index < carousel.n_pages - 1) || mpris_config.loop_carousel;
+                button_next.sensitive = (index < carousel.n_pages - 1) ||
+                    mpris_config.loop_carousel;
             });
 
             carousel_box.append (button_prev);
@@ -101,22 +103,23 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             append (carousel_dots);
 
             // Config
-            Json.Object ? config = get_config (this);
+            Json.Object ?config = get_config (this);
             if (config != null) {
                 // Get image-size
                 bool image_size_found;
-                int? image_size = get_prop<int> (config, "image-size", out image_size_found);
+                int ?image_size = get_prop<int> (config, "image-size", out image_size_found);
                 if (image_size_found && image_size != null) {
                     mpris_config.image_size = image_size;
                 }
 
                 bool show_art_found;
-                string? show_album_art = get_prop<string> (config, "show-album-art", out show_art_found);
+                string ?show_album_art = get_prop<string> (config, "show-album-art",
+                                                           out show_art_found);
                 if (show_art_found && show_album_art != null) {
                     mpris_config.show_album_art = AlbumArtState.parse (show_album_art);
                 }
 
-                Json.Array ? blacklist = get_prop_array (config, "blacklist");
+                Json.Array ?blacklist = get_prop_array (config, "blacklist");
                 if (blacklist != null) {
                     mpris_config.blacklist = new string[blacklist.get_length ()];
                     for (int i = 0; i < blacklist.get_length (); i++) {
@@ -130,13 +133,18 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
                 // Get autohide
                 bool autohide_found;
-                bool? autohide = get_prop<bool> (config, "autohide", out autohide_found);
-                if (autohide_found) mpris_config.autohide = autohide;
+                bool ?autohide = get_prop<bool> (config, "autohide", out autohide_found);
+                if (autohide_found) {
+                    mpris_config.autohide = autohide;
+                }
 
                 // Get loop
                 bool loop_carousel_found;
-                bool? loop_carousel = get_prop<bool> (config, "loop-carousel", out loop_carousel_found);
-                if (loop_carousel_found) mpris_config.loop_carousel = loop_carousel;
+                bool ?loop_carousel = get_prop<bool> (config, "loop-carousel",
+                                                      out loop_carousel_found);
+                if (loop_carousel_found) {
+                    mpris_config.loop_carousel = loop_carousel;
+                }
             }
 
             hide ();
@@ -153,37 +161,57 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                                              "/org/freedesktop/DBus");
             string[] names = dbus_iface.list_names ();
             foreach (string name in names) {
-                if (!name.has_prefix (MPRIS_PREFIX)) continue;
-                if (is_blacklisted (name)) continue;
-                if (check_player_exists (name)) return;
-                MprisSource ? source = MprisSource.get_player (name);
-                if (source != null) add_player (name, source);
+                if (!name.has_prefix (MPRIS_PREFIX)) {
+                    continue;
+                }
+                if (is_blacklisted (name)) {
+                    continue;
+                }
+                if (check_player_exists (name)) {
+                    return;
+                }
+                MprisSource ?source = MprisSource.get_player (name);
+                if (source != null) {
+                    add_player (name, source);
+                }
             }
 
             dbus_iface.name_owner_changed.connect ((name, old_owner, new_owner) => {
-                if (!name.has_prefix (MPRIS_PREFIX)) return;
+                if (!name.has_prefix (MPRIS_PREFIX)) {
+                    return;
+                }
                 if (old_owner != "") {
                     remove_player (name);
                     return;
                 }
-                if (is_blacklisted (name)) return;
-                if (check_player_exists (name)) return;
-                MprisSource ? source = MprisSource.get_player (name);
-                if (source != null) add_player (name, source);
+                if (is_blacklisted (name)) {
+                    return;
+                }
+                if (check_player_exists (name)) {
+                    return;
+                }
+                MprisSource ?source = MprisSource.get_player (name);
+                if (source != null) {
+                    add_player (name, source);
+                }
             });
         }
 
         private bool check_player_exists (string name) {
             foreach (string name_check in players.get_keys_as_array ()) {
                 if (name_check.has_prefix (name)
-                    || name.has_prefix (name_check)) return true;
+                    || name.has_prefix (name_check)) {
+                    return true;
+                }
             }
             return false;
         }
 
         private bool check_player_metadata_empty (string name) {
-            MprisPlayer ? player = players.lookup (name);
-            if (player == null) return true;
+            MprisPlayer ?player = players.lookup (name);
+            if (player == null) {
+                return true;
+            }
             HashTable<string, Variant> metadata = player.source.media_player.metadata;
             if (metadata == null || metadata.size () == 0) {
                 debug ("Metadata is empty");
@@ -197,8 +225,10 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         }
 
         private void add_player_to_carousel (string name) {
-            MprisPlayer ? player = players.lookup (name);
-            if (player == null || check_carousel_has_player (player)) return;
+            MprisPlayer ?player = players.lookup (name);
+            if (player == null || check_carousel_has_player (player)) {
+                return;
+            }
             // HACK: The carousel doesn't focus the prepended player when not mapped.
             carousel.append (player);
             carousel.reorder (player, 0);
@@ -209,10 +239,11 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 carousel_dots.set_visible (true);
                 // Scroll to the new player
                 carousel.scroll_to (player, false);
-
             }
 
-            if (!visible) show ();
+            if (!visible) {
+                show ();
+            }
         }
 
         private void add_player (string name, MprisSource source) {
@@ -228,15 +259,19 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                         remove_player_from_carousel (name);
                     }
                 });
-                if (check_player_metadata_empty (name)) return;
+                if (check_player_metadata_empty (name)) {
+                    return;
+                }
             }
 
             add_player_to_carousel (name);
         }
 
         private void remove_player_from_carousel (string name) {
-            MprisPlayer ? player = players.lookup (name);
-            if (player == null || !check_carousel_has_player (player)) return;
+            MprisPlayer ?player = players.lookup (name);
+            if (player == null || !check_carousel_has_player (player)) {
+                return;
+            }
             carousel.remove (player);
 
             uint children_length = carousel.n_pages;
@@ -251,10 +286,12 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         }
 
         private void remove_player (string name) {
-            string ? key;
-            MprisPlayer ? player;
+            string ?key;
+            MprisPlayer ?player;
             bool result = players.lookup_extended (name, out key, out player);
-            if (!result || key == null || player == null) return;
+            if (!result || key == null || player == null) {
+                return;
+            }
 
             remove_player_from_carousel (name);
 
@@ -264,13 +301,15 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
         private void change_carousel_position (int delta) {
             uint children_length = carousel.n_pages;
-            if (children_length == 0) return;
+            if (children_length == 0) {
+                return;
+            }
             uint position;
             if (mpris_config.loop_carousel) {
                 position = ((uint) carousel.position + delta) % children_length;
             } else {
                 position = ((uint) carousel.position + delta)
-                    .clamp (0, (children_length - 1));
+                     .clamp (0, (children_length - 1));
             }
             carousel.scroll_to (carousel.get_nth_page (position), true);
         }
@@ -280,7 +319,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 if (blacklistedPattern == null || blacklistedPattern.length == 0) {
                     continue;
                 }
-                if (GLib.Regex.match_simple (blacklistedPattern, name, RegexCompileFlags.DEFAULT, 0)) {
+                if (GLib.Regex.match_simple (blacklistedPattern, name, RegexCompileFlags.DEFAULT,
+                                             0)) {
                     message ("\"%s\" is blacklisted", name);
                     return true;
                 }

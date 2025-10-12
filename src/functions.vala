@@ -38,9 +38,18 @@ namespace SwayNotificationCenter {
             if (!is_theme_icon && (is_uri || file_exists)) {
                 // Try as a URI (file:// is the only URI schema supported right now)
                 try {
-                    if (is_uri) uri = uri.slice (URI_PREFIX.length, uri.length);
+                    if (is_uri) {
+                        uri = uri.slice (URI_PREFIX.length, uri.length);
+                    }
 
-                    Gdk.Texture texture = Gdk.Texture.from_filename (Uri.unescape_string (uri));
+                    Gtk.Requisition natural_size;
+                    img.get_preferred_size (null, out natural_size);
+
+                    Gdk.Pixbuf pixbuf = new Gdk.Pixbuf.from_file_at_size (
+                        Uri.unescape_string (uri),
+                        natural_size.width, natural_size.height);
+
+                    Gdk.Texture texture = Gdk.Texture.for_pixbuf (pixbuf);
                     img.set_from_paintable (texture);
                 } catch (Error e) {
                     stderr.printf (e.message + "\n");
@@ -59,14 +68,22 @@ namespace SwayNotificationCenter {
 
         public static void set_image_data (ImageData data,
                                            Gtk.Image img) {
-            Gdk.MemoryFormat format = Gdk.MemoryFormat.R8G8B8;
-            if (data.has_alpha) {
-                format = Gdk.MemoryFormat.R8G8B8A8;
-            }
-            var texture = new Gdk.MemoryTexture (data.width, data.height,
-                                                 format,
-                                                 new Bytes.static (data.data),
-                                                 data.rowstride);
+            Gtk.Requisition natural_size;
+            img.get_preferred_size (null, out natural_size);
+
+            Gdk.Pixbuf pixbuf = new Gdk.Pixbuf.with_unowned_data (data.data,
+                                                                  Gdk.Colorspace.RGB,
+                                                                  data.has_alpha,
+                                                                  data.bits_per_sample,
+                                                                  data.width,
+                                                                  data.height,
+                                                                  data.rowstride,
+                                                                  null);
+            Gdk.Pixbuf scaled = pixbuf.scale_simple (natural_size.width,
+                                                     natural_size.height,
+                                                     Gdk.InterpType.BILINEAR);
+
+            Gdk.Texture texture = Gdk.Texture.for_pixbuf (scaled);
             img.set_from_paintable (texture);
         }
 
@@ -74,7 +91,7 @@ namespace SwayNotificationCenter {
          * Without this, an empty user CSS file would result in widgets
          * with default GTK style properties
          */
-        public static bool load_css (string ? style_path) {
+        public static bool load_css (string ?style_path) {
             int css_priority = ConfigModel.instance.cssPriority.get_priority ();
 
             // Load packaged CSS as backup
@@ -107,13 +124,13 @@ namespace SwayNotificationCenter {
             return true;
         }
 
-        public static string get_style_path (owned string ? custom_path,
+        public static string get_style_path (owned string ?custom_path,
                                              bool only_system = false) {
             string[] paths = {};
             if (custom_path != null && custom_path.length > 0) {
                 // Replaces the home directory relative path with a absolute path
                 if (custom_path.get (0) == '~') {
-                    custom_path = Environment.get_home_dir () + custom_path[1:];
+                    custom_path = Environment.get_home_dir () + custom_path[1 :];
                 }
                 paths += custom_path;
             }
@@ -148,18 +165,18 @@ namespace SwayNotificationCenter {
             return path;
         }
 
-        public static string get_config_path (owned string ? custom_path) {
+        public static string get_config_path (owned string ?custom_path) {
             string[] paths = {};
             if (custom_path != null && (custom_path = custom_path.strip ()).length > 0) {
                 // Replaces the home directory relative path with a absolute path
                 if (custom_path.get (0) == '~') {
-                    custom_path = Environment.get_home_dir () + custom_path[1:];
+                    custom_path = Environment.get_home_dir () + custom_path[1 :];
                 }
 
                 if (File.new_for_path (custom_path).query_exists ()) {
                     paths += custom_path;
                 } else {
-                    critical ("Custom config file \"%s\" not found, skipping...", custom_path);
+                    warning ("Custom config file \"%s\" not found, skipping...", custom_path);
                 }
             }
             paths += Path.build_path (Path.DIR_SEPARATOR.to_string (),
@@ -265,13 +282,16 @@ namespace SwayNotificationCenter {
         public static string filter_string (string body, FilterFunc func) {
             string result = "";
             foreach (char char in (char[]) body.data) {
-                if (!func (char)) continue;
+                if (!func (char)) {
+                    continue;
+                }
                 result += char.to_string ();
             }
             return result;
         }
 
-        public static async bool execute_command (string cmd, string[] env_additions = {}, out string msg) {
+        public static async bool execute_command (string cmd, string[] env_additions = {},
+                                                  out string msg) {
             msg = "";
             try {
                 string[] spawn_env = Environ.get ();
@@ -283,8 +303,9 @@ namespace SwayNotificationCenter {
                 string[] argvp;
                 Shell.parse_argv ("/bin/sh -c \"%s\"".printf (cmd), out argvp);
 
-                if (argvp[0].has_prefix ("~"))
+                if (argvp[0].has_prefix ("~")) {
                     argvp[0] = Environment.get_home_dir () + argvp[0].substring (1);
+                }
 
                 Pid child_pid;
                 int std_output;
@@ -349,7 +370,7 @@ namespace SwayNotificationCenter {
             error ("Only supports Wayland!");
         }
 
-        public static Wl.Surface * get_wl_surface (Gdk.Surface surface) {
+        public static Wl.Surface *get_wl_surface (Gdk.Surface surface) {
             if (surface is Gdk.Wayland.Surface) {
                 return ((Gdk.Wayland.Surface) surface).get_wl_surface ();
             }
@@ -360,14 +381,16 @@ namespace SwayNotificationCenter {
             return a * (1.0 - t) + b * t;
         }
 
-        public static unowned Gdk.Monitor ? try_get_monitor (string name) {
+        public static unowned Gdk.Monitor ?try_get_monitor (string name) {
             if (name == null || name.length == 0) {
                 return null;
             }
 
             for (int i = 0; i < monitors.get_n_items (); i++) {
-                Object ? obj = monitors.get_item (i);
-                if (obj == null || !(obj is Gdk.Monitor)) continue;
+                Object ?obj = monitors.get_item (i);
+                if (obj == null || !(obj is Gdk.Monitor)) {
+                    continue;
+                }
                 unowned Gdk.Monitor monitor = (Gdk.Monitor) obj;
 
                 if (monitor.connector == name) {

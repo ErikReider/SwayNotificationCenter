@@ -54,12 +54,18 @@ namespace SwayNotificationCenter {
     }
 
     public class Action : Object {
-        public string identifier { get; set; }
-        public string name { get; set; }
+        public string identifier { get; construct set; }
+        public string text { get; construct set; }
+
+        public Action (string identifier, string text) {
+            Object (identifier: identifier, text: text);
+        }
 
         public string to_string () {
-            if (identifier == null || name == null) return "None";
-            return "Name: %s, Id: %s".printf (name, identifier);
+            if (identifier == null || text == null) {
+                return "None";
+            }
+            return "Name: %s, Id: %s".printf (text, identifier);
         }
     }
 
@@ -68,7 +74,7 @@ namespace SwayNotificationCenter {
         public string app_name { get; set; }
         public uint32 replaces_id { get; set; }
         public string app_icon { get; set; }
-        public Action ? default_action { get; set; }
+        public Action ?default_action { get; set; }
         public string summary { get; set; }
         public string body { get; set; }
         public HashTable<string, Variant> hints { get; set; }
@@ -127,7 +133,7 @@ namespace SwayNotificationCenter {
          * - x-canonical-private-synchronous
          * - synchronous
          */
-        public string ? synchronous { get; set; }
+        public string ?synchronous { get; set; }
         /** Used for notification progress bar (0->100) */
         public int value {
             get {
@@ -141,8 +147,8 @@ namespace SwayNotificationCenter {
         public bool has_synch { public get; private set; }
 
         /** Inline-replies */
-        public Action ? inline_reply { get; set; }
-        public string ? inline_reply_placeholder { get; set; }
+        public Action ?inline_reply { get; set; }
+        public string ?inline_reply_placeholder { get; set; }
 
         // Custom hints
         /** Disables scripting for notification */
@@ -153,7 +159,7 @@ namespace SwayNotificationCenter {
 
         public Array<Action> actions { get; set; }
 
-        public DesktopAppInfo ? desktop_app_info = null;
+        public DesktopAppInfo ?desktop_app_info = null;
 
         public string name_id;
 
@@ -207,7 +213,7 @@ namespace SwayNotificationCenter {
             this.name_id = this.desktop_entry ?? this.app_name ?? "";
 
             // Set display_name
-            string ? display_name = this.desktop_entry ?? this.app_name;
+            string ?display_name = this.desktop_entry ?? this.app_name;
             if (desktop_app_info != null) {
                 display_name = desktop_app_info.get_display_name ();
             }
@@ -221,21 +227,21 @@ namespace SwayNotificationCenter {
             foreach (var hint in hints.get_keys ()) {
                 Variant hint_value = hints[hint];
                 switch (hint) {
-                    case "SWAYNC_NO_SCRIPT":
+                    case "SWAYNC_NO_SCRIPT" :
                         if (hint_value.is_of_type (VariantType.INT32)) {
                             swaync_no_script = hint_value.get_int32 () == 1;
                         } else if (hint_value.is_of_type (VariantType.BOOLEAN)) {
                             swaync_no_script = hint_value.get_boolean ();
                         }
                         break;
-                    case "SWAYNC_BYPASS_DND":
+                    case "SWAYNC_BYPASS_DND" :
                         if (hint_value.is_of_type (VariantType.INT32)) {
                             swaync_bypass_dnd = hint_value.get_int32 () == 1;
                         } else if (hint_value.is_of_type (VariantType.BOOLEAN)) {
                             swaync_bypass_dnd = hint_value.get_boolean ();
                         }
                         break;
-                    case "value":
+                    case "value" :
                         if (hint_value.is_of_type (VariantType.INT32)) {
                             this.has_synch = true;
                             value = hint_value.get_int32 ();
@@ -258,7 +264,9 @@ namespace SwayNotificationCenter {
                     case "image-data":
                     case "image_data":
                     case "icon_data":
-                        if (image_data.is_initialized) break;
+                        if (image_data.is_initialized) {
+                            break;
+                        }
                         var img_d = ImageData ();
                         // Read each value
                         // https://specifications.freedesktop.org/notification-spec/latest/ar01s05.html
@@ -334,31 +342,56 @@ namespace SwayNotificationCenter {
 
         private void parse_actions (string[] actions) {
             Array<Action> parsed_actions = new Array<Action> ();
-            if (actions.length > 1 && actions.length % 2 == 0) {
-                for (int i = 0; i < actions.length; i++) {
-                    var action = new Action ();
-                    action.identifier = actions[i];
-                    action.name = actions[i + 1];
-                    if (action.name != null && action.identifier != null) {
-                        string id = action.identifier.down ();
-                        switch (id) {
-                            case "default":
-                                default_action = action;
-                                break;
-                            case "inline-reply":
-                                if (action.name == "") {
-                                    action.name = "Reply";
-                                }
-                                inline_reply = action;
-                                break;
-                            default:
-                                parsed_actions.append_val (action);
-                                break;
-                        }
-                    }
-                    i++;
+            if (actions.length <= 1 || actions.length % 2 != 0) {
+                this.actions = parsed_actions;
+                return;
+            }
+
+            // Find all the matching filters
+            List<unowned ActionMatching> valid_matchers = new List<unowned ActionMatching> ();
+            unowned OrderedHashTable<ActionMatching> filters =
+                ConfigModel.instance.notification_action_filter;
+            foreach (string key in filters.get_keys ()) {
+                unowned ActionMatching matcher = filters[key];
+                if (matcher.matches_notification (this)) {
+                    valid_matchers.append (matcher);
                 }
             }
+
+            for (int i = 0; i < actions.length; i += 2) {
+                Action action = new Action (actions[i], actions[i + 1]);
+
+                // Filtering
+                bool matches = false;
+                foreach (unowned ActionMatching matcher in valid_matchers) {
+                    if (matcher.matches_action (action)) {
+                        matches = true;
+                        break;
+                    }
+                }
+                if (matches) {
+                    continue;
+                }
+
+                if (action.text != null && action.identifier != null) {
+                    string id = action.identifier.down ();
+                    switch (id) {
+                        case "default":
+                            default_action = action;
+                            break;
+                        case "inline-reply":
+                            if (action.text == "") {
+                                action.text = "Reply";
+                            }
+                            inline_reply = action;
+                            break;
+                        default:
+                            parsed_actions.append_val (action);
+                            break;
+                    }
+                }
+            }
+
             this.actions = parsed_actions;
         }
 
@@ -410,7 +443,7 @@ namespace SwayNotificationCenter {
 
             string[] result = {};
             foreach (var k in params.get_keys ()) {
-                string ? v = params[k];
+                string ?v = params[k];
                 result += "%s:\t\t %s".printf (k, v);
             }
             return "\n" + string.joinv ("\n", result);

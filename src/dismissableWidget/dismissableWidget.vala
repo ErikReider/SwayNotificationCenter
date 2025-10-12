@@ -25,15 +25,22 @@ public class DismissibleWidget : Gtk.Widget, Adw.Swipeable {
 
     // Animation
     Adw.SpringAnimation animation;
-    Adw.AnimationTarget target;
 
     // Swipe Gesture
     Adw.SwipeTracker swipe_tracker;
 
     bool transition_running = false;
     bool gesture_active = false;
-    double child_offset = 0;
-    double swipe_progress = 0.0;
+    private double _swipe_progress = 0.0;
+    public double swipe_progress {
+        get {
+            return _swipe_progress;
+        }
+        set {
+            _swipe_progress = value;
+            queue_allocate ();
+        }
+    }
 
     SwipeDirection swipe_direction = SwipeDirection.SWIPE_RIGHT;
 
@@ -52,12 +59,21 @@ public class DismissibleWidget : Gtk.Widget, Adw.Swipeable {
         swipe_tracker.end_swipe.connect (swipe_end_swipe_cb);
 
         double[] snap_dir = get_snap_points ();
-        target = new Adw.CallbackAnimationTarget (animate_value_cb);
+        Adw.PropertyAnimationTarget target = new Adw.PropertyAnimationTarget (this,
+                                                                              "swipe-progress");
         animation = new Adw.SpringAnimation (this, snap_dir[0], snap_dir[1],
                                              new Adw.SpringParams (1, 0.5, 500),
                                              target);
         animation.set_clamp (true);
         animation.done.connect (animation_done_cb);
+    }
+
+    public override void dispose () {
+        if (child != null) {
+            child.unparent ();
+            child = null;
+        }
+        base.dispose ();
     }
 
     public signal void dismissed ();
@@ -106,7 +122,7 @@ public class DismissibleWidget : Gtk.Widget, Adw.Swipeable {
         }
 
         Gsk.Transform transform = new Gsk.Transform ()
-                                   .translate (Graphene.Point ().init ((float) x, 0));
+             .translate (Graphene.Point ().init ((float) x, 0));
 
         child.allocate (child_width, child_height, baseline, transform);
     }
@@ -120,10 +136,6 @@ public class DismissibleWidget : Gtk.Widget, Adw.Swipeable {
     /*
      * Callbacks
      */
-
-    private void animate_value_cb (double value) {
-        set_position (value);
-    }
 
     private void animation_done_cb () {
         transition_running = false;
@@ -142,7 +154,7 @@ public class DismissibleWidget : Gtk.Widget, Adw.Swipeable {
     }
 
     private void swipe_update_swipe_cb (double distance) {
-        set_position (distance);
+        swipe_progress = distance;
     }
 
     private void swipe_end_swipe_cb (double velocity, double to) {
@@ -166,15 +178,10 @@ public class DismissibleWidget : Gtk.Widget, Adw.Swipeable {
      * Methods
      */
 
-    private void set_position (double value) {
-        this.swipe_progress = value;
-        queue_allocate ();
-    }
-
     public void set_gesture_direction (SwipeDirection swipe_direction) {
         this.swipe_direction = swipe_direction;
         // Reset the position
-        set_position (0.0);
+        swipe_progress = 0.0;
     }
 
     /*

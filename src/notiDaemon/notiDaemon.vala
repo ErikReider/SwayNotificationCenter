@@ -18,7 +18,9 @@ namespace SwayNotificationCenter {
             this.notify["dnd"].connect (() => on_dnd_toggle (dnd));
 
             on_dnd_toggle.connect ((dnd) => {
-                if (!dnd || NotificationWindow.is_null) return;
+                if (!dnd || NotificationWindow.is_null) {
+                    return;
+                }
                 NotificationWindow.instance.close_all_notifications ((noti) => {
                     return noti.param.urgency != UrgencyLevels.CRITICAL;
                 });
@@ -83,8 +85,10 @@ namespace SwayNotificationCenter {
         /** Closes latest popup notification */
         public void hide_latest_notification (bool close)
         throws DBusError, IOError {
-            uint32 ? id = NotificationWindow.instance.get_latest_notification ();
-            if (id == null) return;
+            uint32 ?id = NotificationWindow.instance.get_latest_notification ();
+            if (id == null) {
+                return;
+            }
             manually_close_notification (id, !close);
         }
 
@@ -152,7 +156,9 @@ namespace SwayNotificationCenter {
                                         HashTable<string, Variant> hints,
                                         int expire_timeout) throws DBusError, IOError {
             uint32 id = replaces_id;
-            if (replaces_id == 0 || replaces_id > noti_id) id = ++noti_id;
+            if (replaces_id == 0 || replaces_id > noti_id) {
+                id = ++noti_id;
+            }
 
             var param = new NotifyParams (
                 id,
@@ -171,7 +177,9 @@ namespace SwayNotificationCenter {
                 ConfigModel.instance.notification_visibility;
             foreach (string key in visibilities.get_keys ()) {
                 unowned NotificationVisibility vis = visibilities[key];
-                if (!vis.matches_notification (param)) continue;
+                if (!vis.matches_notification (param)) {
+                    continue;
+                }
                 state = vis.state;
                 if (vis.override_urgency != UNSET) {
                     debug ("override urgency to %s\n", vis.override_urgency.to_string ());
@@ -181,7 +189,7 @@ namespace SwayNotificationCenter {
             }
 
             debug ("Notification (ID:%u, state: %s): %s\n",
-                param.applied_id, state.to_string (), param.to_string ());
+                   param.applied_id, state.to_string (), param.to_string ());
 
             // Get the notification id to replace
             uint32 replace_notification = 0;
@@ -199,11 +207,12 @@ namespace SwayNotificationCenter {
                 synchronous_ids.set (param.synchronous, id);
             }
 
-            string ? hide_notification_reason = null;
+            string ?hide_notification_reason = null;
             bool show_notification = state == NotificationStatusEnum.ENABLED
-                                     || state == NotificationStatusEnum.TRANSIENT;
+                || state == NotificationStatusEnum.TRANSIENT;
             if (!show_notification) {
-                hide_notification_reason = "Notification status is not Enabled or Transient in Config";
+                hide_notification_reason =
+                    "Notification status is not Enabled or Transient in Config";
             }
 
             // Don't show the notification window if the control center is open
@@ -231,19 +240,19 @@ namespace SwayNotificationCenter {
                 NotificationWindow.instance.close_notification (replace_notification, false);
             } else {
                 debug ("Not displaying Notification: ID:%u, Reason: \"%s\"\n",
-                    param.applied_id, hide_notification_reason);
+                       param.applied_id, hide_notification_reason);
             }
 
             // Only add notification to CC if it isn't IGNORED and not transient/TRANSIENT
             if (state != NotificationStatusEnum.IGNORED
                 && state != NotificationStatusEnum.TRANSIENT
                 && !param.transient) {
-                    if (replace_notification > 0) {
-                        debug ("Replacing CC Notification: ID:%u\n", param.applied_id);
-                        control_center.replace_notification (replace_notification, param);
-                    } else {
-                        control_center.add_notification (param);
-                    }
+                if (replace_notification > 0) {
+                    debug ("Replacing CC Notification: ID:%u\n", param.applied_id);
+                    control_center.replace_notification (replace_notification, param);
+                } else {
+                    control_center.add_notification (param);
+                }
             } else if (replace_notification > 0) {
                 // Remove the old notification due to it not being replaced
                 control_center.close_notification (replace_notification, false);
@@ -258,7 +267,9 @@ namespace SwayNotificationCenter {
             }
             // Run the first script if notification meets requirements
             OrderedHashTable<Script> scripts = ConfigModel.instance.scripts;
-            if (scripts.length == 0) return id;
+            if (scripts.length == 0) {
+                return id;
+            }
             this.run_scripts (param, ScriptRunOnType.RECEIVE);
 #endif
             debug ("\n");
@@ -277,16 +288,24 @@ namespace SwayNotificationCenter {
             }
             // Run the first script if notification meets requirements
             OrderedHashTable<Script> scripts = ConfigModel.instance.scripts;
-            if (scripts.length == 0) return;
+            if (scripts.length == 0) {
+                return;
+            }
             foreach (string key in scripts.get_keys ()) {
                 unowned Script script = scripts[key];
-                if (!script.matches_notification (param)) continue;
-                if (script.run_on != run_on) continue;
+                if (!script.matches_notification (param)) {
+                    continue;
+                }
+                if (script.run_on != run_on) {
+                    continue;
+                }
 
                 script.run_script.begin (param, (obj, res) => {
                     // Gets the end status
                     string error_msg;
-                    if (script.run_script.end (res, out error_msg)) return;
+                    if (script.run_script.end (res, out error_msg)) {
+                        return;
+                    }
 
                     if (!ConfigModel.instance.script_fail_notify) {
                         stderr.printf (

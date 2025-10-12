@@ -60,17 +60,17 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
     // Scroll bottom animation
     Adw.CallbackAnimationTarget scroll_btm_target;
     Adw.TimedAnimation scroll_btm_anim;
-    AnimationData ? scroll_btm_anim_data = null;
+    AnimationData ?scroll_btm_anim_data = null;
 
     // Scroll top animation
     Adw.CallbackAnimationTarget scroll_top_target;
     Adw.TimedAnimation scroll_top_anim;
-    AnimationData ? scroll_top_anim_data = null;
+    AnimationData ?scroll_top_anim_data = null;
 
     // Adding an item to the top compensation
     Adw.CallbackAnimationTarget scroll_comp_target;
     Adw.TimedAnimation scroll_comp_anim;
-    AnimationData ? scroll_comp_anim_data = null;
+    AnimationData ?scroll_comp_anim_data = null;
 
     // When true, the size_allocate method will scroll to the top/bottom
     private bool set_initial_scroll_value = false;
@@ -120,9 +120,9 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
 
     public AnimatedList () {
         Object (
-            css_name: "animatedlist",
-            accessible_role: Gtk.AccessibleRole.LIST,
-            transition_children: true,
+            css_name : "animatedlist",
+            accessible_role : Gtk.AccessibleRole.LIST,
+            transition_children : true,
             use_card_animation: true,
             direction: AnimatedListDirection.TOP_TO_BOTTOM,
             scroll_to_append: false
@@ -134,6 +134,8 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
             transition_children = false;
             remove.begin (child, false);
         }
+
+        base.dispose ();
     }
 
     public bool get_border (out Gtk.Border border) {
@@ -384,8 +386,8 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
             }
 
             Gsk.Transform transform = new Gsk.Transform ()
-                .translate (Graphene.Point ().init (x, y))
-                .scale (scale, scale);
+                 .translate (Graphene.Point ().init (x, y))
+                 .scale (scale, scale);
             child.allocate (width, child_height, baseline, transform);
             child.set_opacity (opacity);
 
@@ -537,8 +539,8 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
      * TOP_TO_BOTTOM: Bottom
      * BOTTOM_TO_TOP: Top
      */
-    public async AnimatedListItem ? prepend (Gtk.Widget widget) {
-        if (widget == null) {
+    public async AnimatedListItem ?prepend (Gtk.Widget widget) {
+        if (widget == null || widget.parent != null) {
             warn_if_reached ();
             return null;
         }
@@ -561,6 +563,7 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
         }
 
         yield item.added (transition_children);
+
         return item;
     }
 
@@ -569,8 +572,8 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
      * TOP_TO_BOTTOM: Top
      * BOTTOM_TO_TOP: Bottom
      */
-    public async AnimatedListItem ? append (Gtk.Widget widget) {
-        if (widget == null) {
+    public async AnimatedListItem ?append (Gtk.Widget widget) {
+        if (widget == null || widget.parent != null) {
             warn_if_reached ();
             return null;
         }
@@ -593,32 +596,33 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
         } else if (scroll_to_append) {
             // Scrolls to the item if enabled
             switch (direction) {
-                case AnimatedListDirection.TOP_TO_BOTTOM:
+                case AnimatedListDirection.TOP_TO_BOTTOM :
                     play_scroll_top_anim (item);
                     break;
-                case AnimatedListDirection.BOTTOM_TO_TOP:
+                case AnimatedListDirection.BOTTOM_TO_TOP :
                     play_scroll_bottom_anim (item);
                     break;
             }
         }
 
         yield item.added (transition_children);
+
         return item;
     }
 
-    private AnimatedListItem ? try_get_ancestor (Gtk.Widget widget) {
+    private AnimatedListItem ?try_get_ancestor (Gtk.Widget widget) {
         AnimatedListItem item;
         if (widget is AnimatedListItem) {
             item = widget as AnimatedListItem;
         } else if (widget.parent is AnimatedListItem) {
             item = widget.parent as AnimatedListItem;
         } else {
-            unowned Gtk.Widget ? ancestor
+            unowned Gtk.Widget ?ancestor
                 = widget.get_ancestor (typeof (AnimatedListItem));
             if (!(ancestor is AnimatedListItem)) {
                 warning ("Widget %p of type  \"%s\" is not an ancestor of %s!",
-                    widget, widget.get_type ().name (),
-                    typeof (AnimatedListItem).name ());
+                         widget, widget.get_type ().name (),
+                         typeof (AnimatedListItem).name ());
                 return null;
             }
             item = ancestor as AnimatedListItem;
@@ -637,7 +641,7 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
             return false;
         }
 
-        AnimatedListItem ? item = try_get_ancestor (widget);
+        AnimatedListItem ?item = try_get_ancestor (widget);
         if (item == null) {
             return false;
         }
@@ -645,9 +649,9 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
         // Will unparent itself when done animating
         bool result = yield item.removed (transition_children && transition);
 
+        item.unparent ();
         children.remove (item);
         n_children--;
-        item.destroy ();
         queue_resize ();
         return result;
     }
@@ -658,7 +662,7 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
             return false;
         }
 
-        AnimatedListItem ? item = try_get_ancestor (widget);
+        AnimatedListItem ?item = try_get_ancestor (widget);
         if (item == null) {
             warn_if_reached ();
             return false;
@@ -686,13 +690,13 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
         scroll_to_source_id = Idle.add_once (() => {
             scroll_to_source_id = 0;
 
-            unowned AnimatedListItem ? item = get_first_item ();
+            unowned AnimatedListItem ?item = get_first_item ();
             return_if_fail (item != null);
             switch (direction) {
-                case AnimatedListDirection.TOP_TO_BOTTOM:
+                case AnimatedListDirection.TOP_TO_BOTTOM :
                     play_scroll_top_anim (item);
                     break;
-                case AnimatedListDirection.BOTTOM_TO_TOP:
+                case AnimatedListDirection.BOTTOM_TO_TOP :
                     play_scroll_bottom_anim (item);
                     break;
             }
@@ -703,14 +707,14 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
         return children.is_empty ();
     }
 
-    public unowned AnimatedListItem ? get_first_item () {
+    public unowned AnimatedListItem ?get_first_item () {
         if (children.is_empty ()) {
             return null;
         }
         return children.first ().data;
     }
 
-    public unowned AnimatedListItem ? get_last_item () {
+    public unowned AnimatedListItem ?get_last_item () {
         if (children.is_empty ()) {
             return null;
         }

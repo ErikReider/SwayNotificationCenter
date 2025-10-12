@@ -23,7 +23,7 @@ namespace SwayNotificationCenter.Widgets {
 
         private IterListBoxController list_box_controller;
 
-        private unowned NotificationGroup ? expanded_group = null;
+        private unowned NotificationGroup ?expanded_group = null;
         private uint scroll_timer_id = 0;
 
         private HashTable<uint32, unowned NotificationGroup> noti_groups_id =
@@ -59,12 +59,14 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         public void reload_config () {
-            Json.Object ? config = get_config (this);
+            Json.Object ?config = get_config (this);
             if (config != null) {
                 // Get vexpand
                 bool found_vexpand;
-                bool? vexpand = get_prop<bool> (config, "vexpand", out found_vexpand);
-                if (found_vexpand) this.vertical_expand = vexpand;
+                bool ?vexpand = get_prop<bool> (config, "vexpand", out found_vexpand);
+                if (found_vexpand) {
+                    this.vertical_expand = vexpand;
+                }
             }
 
             set_vexpand (this.vertical_expand);
@@ -85,7 +87,9 @@ namespace SwayNotificationCenter.Widgets {
         public void close_all_notifications () {
             foreach (unowned Gtk.Widget w in list_box_controller.get_children ()) {
                 NotificationGroup group = (NotificationGroup) w;
-                if (group != null) group.close_all_notifications ();
+                if (group != null) {
+                    group.close_all_notifications ();
+                }
             }
 
             try {
@@ -173,7 +177,7 @@ namespace SwayNotificationCenter.Widgets {
                                                  NotificationType.CONTROL_CENTER);
             noti.set_time ();
 
-            NotificationGroup ? group = null;
+            NotificationGroup ?group = null;
             if (param.name_id.length > 0) {
                 noti_groups_name.lookup_extended (param.name_id, null, out group);
             }
@@ -254,7 +258,7 @@ namespace SwayNotificationCenter.Widgets {
             }
             var group = (NotificationGroup) list_box.get_focus_child ();
             switch (Gdk.keyval_name (keyval)) {
-                case "Return":
+                case "Return" :
                     if (group != null) {
                         var noti = group.get_latest_notification ();
                         if (group.only_single_notification () && noti != null) {
@@ -264,8 +268,8 @@ namespace SwayNotificationCenter.Widgets {
                         group.on_expand_change (group.toggle_expanded ());
                     }
                     break;
-                case "Delete":
-                case "BackSpace":
+                case "Delete" :
+                case "BackSpace" :
                     if (group != null && !children.is_empty ()) {
                         var noti = group.get_latest_notification ();
                         if (group.only_single_notification () && noti != null) {
@@ -335,9 +339,13 @@ namespace SwayNotificationCenter.Widgets {
             // Check time
             var a_time = a_group.get_time ();
             var b_time = b_group.get_time ();
-            if (a_time < 0 || b_time < 0) return 0;
+            if (a_time < 0 || b_time < 0) {
+                return 0;
+            }
             // Sort the list in reverse if needed
-            if (a_time == b_time) return 0;
+            if (a_time == b_time) {
+                return 0;
+            }
             return a_time > b_time ? val : val * -1;
         }
 
@@ -372,7 +380,7 @@ namespace SwayNotificationCenter.Widgets {
                 return;
             }
 
-            unowned Gtk.ListBoxRow ? widget = list_box.get_row_at_index (i);
+            unowned Gtk.ListBoxRow ?widget = list_box.get_row_at_index (i);
             if (widget == null) {
                 // Try getting the last widget
                 if (list_reverse) {
@@ -389,7 +397,7 @@ namespace SwayNotificationCenter.Widgets {
             }
         }
 
-        private void navigate_up (NotificationGroup ? focused_group,
+        private void navigate_up (NotificationGroup ?focused_group,
                                   bool fallback_other_dir = false) {
             if (list_box_controller.length == 1) {
                 focus_first_notification ();
@@ -408,7 +416,7 @@ namespace SwayNotificationCenter.Widgets {
             focused_group.move_focus (Gtk.DirectionType.TAB_BACKWARD);
         }
 
-        private void navigate_down (NotificationGroup ? focused_group,
+        private void navigate_down (NotificationGroup ?focused_group,
                                     bool fallback_other_dir = false) {
             if (list_box_controller.length == 1) {
                 focus_first_notification ();
@@ -429,13 +437,13 @@ namespace SwayNotificationCenter.Widgets {
 
         private void navigate_to_first_notification () {
             int i = (list_reverse ? list_box_controller.length - 1 : 0)
-                .clamp (0, list_box_controller.length);
+                 .clamp (0, list_box_controller.length);
             navigate_list (i);
         }
 
         private void navigate_to_last_notification () {
             int i = (list_reverse ? 0 : list_box_controller.length - 1)
-                .clamp (0, list_box_controller.length);
+                 .clamp (0, list_box_controller.length);
             navigate_list (i);
         }
 
@@ -444,7 +452,9 @@ namespace SwayNotificationCenter.Widgets {
 
             foreach (unowned Gtk.Widget w in list_box_controller.get_children ()) {
                 var group = (NotificationGroup) w;
-                if (group != null) group.update ();
+                if (group != null) {
+                    group.update ();
+                }
             }
         }
     }

@@ -24,6 +24,27 @@ jobs:
         conf: .vala-lint.conf
         fail: true
 
+  uncrustify:
+    container: registry.fedoraproject.org/fedora-minimal:latest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install uncrustify
+        run: |
+          microdnf -y install --nodocs --setopt=install_weak_deps=0 \
+            @development-tools git \
+            uncrustify
+
+      - name: Check out sources
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: swaync
+
+      - name: Run uncrustify
+        run: |
+          cd swaync
+          uncrustify -c ./.uncrustify.cfg -l vala $(find . -name "*.vala" -type f) --check
+
   rpmlint:
     container: registry.fedoraproject.org/fedora-minimal:latest
     runs-on: ubuntu-latest

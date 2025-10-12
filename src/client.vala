@@ -7,7 +7,6 @@ public struct SwayncDaemonData {
 
 [DBus (name = "org.erikreider.swaync.cc")]
 interface CcDaemon : Object {
-
     public abstract bool reload_css () throws Error;
 
     public abstract void reload_config () throws Error;
@@ -73,11 +72,13 @@ private void print_help (string[] args) {
     print ("  -Ir, \t --inhibitor-remove [APP_ID] \t Remove an inhibitor\n");
     print ("  -Ic, \t --inhibitors-clear \t\t Clears all inhibitors\n");
     print ("  -c, \t --count \t\t\t Print the current notification count\n");
-    print ("      \t --hide-latest \t\t\t Hides latest notification. Still shown in Control Center\n");
+    print (
+        "      \t --hide-latest \t\t\t Hides latest notification. Still shown in Control Center\n");
     print ("      \t --hide-all \t\t\t Hides all notifications. Still shown in Control Center\n");
     print ("      \t --close-latest \t\t Closes latest notification\n");
     print ("  -C, \t --close-all \t\t\t Closes all notifications\n");
-    print ("  -a, \t --action [ACTION_INDEX]\t Invokes the action [ACTION_INDEX] of the latest notification\n");
+    print ("  -a, \t --action [ACTION_INDEX]\t " +
+           "Invokes the action [ACTION_INDEX] of the latest notification\n");
     print ("  -sw, \t --skip-wait \t\t\t Doesn't wait when swaync hasn't been started\n");
     print ("  -s, \t --subscribe \t\t\t Subscribe to notification add and close events\n");
     print ("  -swb,  --subscribe-waybar \t\t Subscribe to notification add and close events "
@@ -91,7 +92,7 @@ private void print_help (string[] args) {
 private void on_subscribe (uint count, bool dnd, bool cc_open, bool inhibited) {
     stdout.printf (
         "{ \"count\": %u, \"dnd\": %s, \"visible\": %s, \"inhibited\": %s }\n",
-         count, dnd.to_string (), cc_open.to_string (), inhibited.to_string ());
+        count, dnd.to_string (), cc_open.to_string (), inhibited.to_string ());
     stdout.flush ();
 }
 
@@ -106,8 +107,8 @@ private void print_subscribe () {
 
 private void on_subscribe_waybar (uint count, bool dnd, bool cc_open, bool inhibited) {
     string state = (dnd ? "dnd-" : "")
-                   + (inhibited ? "inhibited-" : "")
-                   + (count > 0 ? "notification" : "none");
+        + (inhibited ? "inhibited-" : "")
+        + (count > 0 ? "notification" : "none");
 
     string tooltip = "";
     if (count > 0) {
@@ -317,7 +318,9 @@ public int command_line (ref string[] args, bool skip_wait) {
         }
     } catch (Error e) {
         stderr.printf (e.message + "\n");
-        if (skip_wait) Process.exit (1);
+        if (skip_wait) {
+            Process.exit (1);
+        }
         return 1;
     }
 
@@ -341,7 +344,7 @@ int try_connect (owned string[] args) {
         bool one_arg = true;
         while (args.length > 0) {
             if (args[0] == "--skip-wait" || args[0] == "-sw") {
-                args = args[1:];
+                args = args[1 :];
                 continue;
             }
             if (!one_arg) {
@@ -366,14 +369,16 @@ int try_connect (owned string[] args) {
 }
 
 public int main (string[] args) {
-    if (try_connect (args[1:]) == 1) {
+    if (try_connect (args[1 :]) == 1) {
         MainLoop loop = new MainLoop ();
         Bus.watch_name (
             BusType.SESSION,
             "org.erikreider.swaync.cc",
             BusNameWatcherFlags.NONE,
             (conn, name, name_owner) => {
-            if (try_connect (args[1:]) == 0) loop.quit ();
+            if (try_connect (args[1 :]) == 0) {
+                loop.quit ();
+            }
         },
             null);
         loop.run ();

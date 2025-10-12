@@ -27,7 +27,8 @@ namespace SwayNotificationCenter {
         public SwayncDaemon () {
             // Init noti_daemon
             this.use_layer_shell = ConfigModel.instance.layer_shell;
-            this.has_layer_on_demand = use_layer_shell && GtkLayerShell.get_protocol_version () >= 4;
+            this.has_layer_on_demand = use_layer_shell &&
+                GtkLayerShell.get_protocol_version () >= 4;
             this.noti_daemon = new NotiDaemon (this);
             this.xdg_activation = new XdgActivationHelper ();
             Bus.own_name (BusType.SESSION, "org.freedesktop.Notifications",
@@ -45,9 +46,9 @@ namespace SwayNotificationCenter {
             noti_daemon.on_dnd_toggle.connect ((dnd) => {
                 try {
                     subscribe_v2 (noti_daemon.control_center.notification_count (),
-                               dnd,
-                               get_visibility (),
-                               inhibited);
+                                  dnd,
+                                  get_visibility (),
+                                  inhibited);
                 } catch (Error e) {
                     stderr.printf (e.message + "\n");
                 }
@@ -56,9 +57,9 @@ namespace SwayNotificationCenter {
             // Update on start
             try {
                 subscribe_v2 (notification_count (),
-                           get_dnd (),
-                           get_visibility (),
-                           inhibited);
+                              get_dnd (),
+                              get_visibility (),
+                              inhibited);
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }
@@ -105,7 +106,7 @@ namespace SwayNotificationCenter {
         }
 
         [DBus (visible = false)]
-        public void show_blank_windows (Gdk.Monitor ? ref_monitor) {
+        public void show_blank_windows (Gdk.Monitor ?ref_monitor) {
             if (!use_layer_shell || !ConfigModel.instance.layer_shell_cover_screen) {
                 return;
             }
@@ -118,7 +119,9 @@ namespace SwayNotificationCenter {
 
         [DBus (visible = false)]
         public void hide_blank_windows () {
-            if (!use_layer_shell) return;
+            if (!use_layer_shell) {
+                return;
+            }
             foreach (unowned BlankWindow win in blank_windows.data) {
                 win.hide ();
             }
@@ -175,7 +178,7 @@ namespace SwayNotificationCenter {
         public void change_config_value (string name,
                                          Variant value,
                                          bool write_to_file = true,
-                                         string ? path = null) throws Error {
+                                         string ?path = null) throws Error {
             ConfigModel.instance.change_value (name,
                                                value,
                                                write_to_file,
@@ -219,7 +222,9 @@ namespace SwayNotificationCenter {
         /** Sets the visibility of the controlcenter */
         public void set_visibility (bool visibility) throws DBusError, IOError {
             noti_daemon.control_center.set_visibility (visibility);
-            if (visibility) noti_daemon.set_noti_window_visibility (false);
+            if (visibility) {
+                noti_daemon.set_noti_window_visibility (false);
+            }
         }
 
         /** Toggles the current Do Not Disturb state */
@@ -255,14 +260,16 @@ namespace SwayNotificationCenter {
          * @return  false if the `application_id` already exists, otherwise true.
          */
         public bool add_inhibitor (string application_id) throws DBusError, IOError {
-            if (inhibitors.contains (application_id)) return false;
+            if (inhibitors.contains (application_id)) {
+                return false;
+            }
             inhibitors.add (application_id);
             inhibited = inhibitors.length > 0;
             inhibited_changed (inhibitors.length);
             subscribe_v2 (noti_daemon.control_center.notification_count (),
-                       noti_daemon.dnd,
-                       get_visibility (),
-                       inhibited);
+                          noti_daemon.dnd,
+                          get_visibility (),
+                          inhibited);
             return true;
         }
 
@@ -273,13 +280,15 @@ namespace SwayNotificationCenter {
          * @return  false if the `application_id` doesn't exist, otherwise true
          */
         public bool remove_inhibitor (string application_id) throws DBusError, IOError {
-            if (!inhibitors.remove (application_id)) return false;
+            if (!inhibitors.remove (application_id)) {
+                return false;
+            }
             inhibited = inhibitors.length > 0;
             inhibited_changed (inhibitors.length);
             subscribe_v2 (noti_daemon.control_center.notification_count (),
-                       noti_daemon.dnd,
-                       get_visibility (),
-                       inhibited);
+                          noti_daemon.dnd,
+                          get_visibility (),
+                          inhibited);
             return true;
         }
 
@@ -295,19 +304,21 @@ namespace SwayNotificationCenter {
 
         /** Clear all inhibitors */
         public bool clear_inhibitors () throws DBusError, IOError {
-            if (inhibitors.length == 0) return false;
+            if (inhibitors.length == 0) {
+                return false;
+            }
             inhibitors.remove_all ();
             inhibited = false;
             inhibited_changed (0);
             subscribe_v2 (noti_daemon.control_center.notification_count (),
-                       noti_daemon.dnd,
-                       get_visibility (),
-                       inhibited);
+                          noti_daemon.dnd,
+                          get_visibility (),
+                          inhibited);
             return true;
         }
 
         public bool set_cc_monitor (string name) throws DBusError, IOError {
-            unowned Gdk.Monitor ? monitor = Functions.try_get_monitor (name);
+            unowned Gdk.Monitor ?monitor = Functions.try_get_monitor (name);
             if (monitor == null) {
                 return false;
             }
@@ -317,7 +328,7 @@ namespace SwayNotificationCenter {
         }
 
         public bool set_noti_window_monitor (string name) throws DBusError, IOError {
-            unowned Gdk.Monitor ? monitor = Functions.try_get_monitor (name);
+            unowned Gdk.Monitor ?monitor = Functions.try_get_monitor (name);
             if (monitor == null) {
                 return false;
             }

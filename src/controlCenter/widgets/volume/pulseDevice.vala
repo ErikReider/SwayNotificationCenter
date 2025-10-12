@@ -1,6 +1,6 @@
 // From SwaySettings PulseAudio page: https://github.com/ErikReider/SwaySettings/blob/407c9e99dd3e50a0f09c64d94a9e6ff741488378/src/Pages/Pulse/PulseDevice.vala
-using PulseAudio;
 using Gee;
+using PulseAudio;
 
 namespace SwayNotificationCenter.Widgets {
     public class PulseCardProfile : Object {
@@ -10,7 +10,7 @@ namespace SwayNotificationCenter.Widgets {
         public uint32 priority;
         int available;
 
-        public PulseCardProfile (CardProfileInfo2 * profile) {
+        public PulseCardProfile (CardProfileInfo2 *profile) {
             this.name = profile->name;
             this.description = profile->description;
             this.n_sinks = profile->n_sinks;
@@ -28,7 +28,6 @@ namespace SwayNotificationCenter.Widgets {
     }
 
     public class PulseDevice : Object {
-
         public bool removed { get; set; default = false; }
 
         public bool has_card { get; set; default = true; }
@@ -61,7 +60,7 @@ namespace SwayNotificationCenter.Widgets {
         public string card_sink_port_name { get; set; }
 
         /** The Sink name: `Name` */
-        public string ? device_name { get; set; }
+        public string ?device_name { get; set; }
         /** The Sink description: `Description` */
         public string device_description { get; set; }
         /** If the Sink is muted: `Mute` */
@@ -76,7 +75,7 @@ namespace SwayNotificationCenter.Widgets {
         /** Gets the name to be shown to the user:
          * "port_description - card_description"
          */
-        public string ? get_display_name () {
+        public string ?get_display_name () {
             if (card_name == null) {
                 return device_description;
             }
@@ -126,7 +125,7 @@ namespace SwayNotificationCenter.Widgets {
         /** All port profiles */
         public string[] port_profiles { get; set; }
         public Array<PulseCardProfile> profiles { get; set; }
-        public PulseCardProfile ? active_profile { get; set; }
+        public PulseCardProfile ?active_profile { get; set; }
 
         construct {
             volume_operations = new LinkedList<Operation> ();

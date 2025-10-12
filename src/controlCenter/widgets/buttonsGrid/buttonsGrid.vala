@@ -1,7 +1,6 @@
 using GLib;
 
 namespace SwayNotificationCenter.Widgets {
-
     public class ButtonsGrid : BaseWidget {
         public override string widget_name {
             get {
@@ -17,14 +16,18 @@ namespace SwayNotificationCenter.Widgets {
         public ButtonsGrid (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             base (suffix, swaync_daemon, noti_daemon);
 
-            Json.Object ? config = get_config (this);
+            Json.Object ?config = get_config (this);
             if (config != null) {
                 Json.Array a = get_prop_array (config, "actions");
-                if (a != null) actions = parse_actions (a);
+                if (a != null) {
+                    actions = parse_actions (a);
+                }
 
                 bool bpr_found = false;
                 int bpr = get_prop<int> (config, "buttons-per-row", out bpr_found);
-                if (bpr_found) buttons_per_row = bpr;
+                if (bpr_found) {
+                    buttons_per_row = bpr;
+                }
             }
 
             Gtk.FlowBox container = new Gtk.FlowBox ();
@@ -36,8 +39,9 @@ namespace SwayNotificationCenter.Widgets {
             // add action to container
             foreach (var act in actions) {
                 switch (act.type) {
-                    case ButtonType.TOGGLE:
-                        ToggleButton tb = new ToggleButton (act.label, act.command, act.update_command, act.active);
+                    case ButtonType.TOGGLE :
+                        ToggleButton tb = new ToggleButton (act.label, act.command,
+                                                            act.update_command, act.active);
                         container.insert (tb, -1);
                         toggle_buttons.append (tb);
                         break;

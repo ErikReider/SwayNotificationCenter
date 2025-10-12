@@ -59,7 +59,8 @@ public class DismissibleWidget : Gtk.Widget, Adw.Swipeable {
         swipe_tracker.end_swipe.connect (swipe_end_swipe_cb);
 
         double[] snap_dir = get_snap_points ();
-        Adw.PropertyAnimationTarget target = new Adw.PropertyAnimationTarget (this, "swipe-progress");
+        Adw.PropertyAnimationTarget target = new Adw.PropertyAnimationTarget (this,
+                                                                              "swipe-progress");
         animation = new Adw.SpringAnimation (this, snap_dir[0], snap_dir[1],
                                              new Adw.SpringParams (1, 0.5, 500),
                                              target);
@@ -121,7 +122,7 @@ public class DismissibleWidget : Gtk.Widget, Adw.Swipeable {
         }
 
         Gsk.Transform transform = new Gsk.Transform ()
-                                   .translate (Graphene.Point ().init ((float) x, 0));
+             .translate (Graphene.Point ().init ((float) x, 0));
 
         child.allocate (child_width, child_height, baseline, transform);
     }

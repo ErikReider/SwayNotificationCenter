@@ -32,13 +32,13 @@ public class AnimatedListItem : Gtk.Widget {
     private Adw.TimedAnimation animation;
     private double animation_value = 1.0;
     private ulong animation_done_cb_id = 0;
-    private unowned SourceFunc ? removed_cb = null;
-    private unowned SourceFunc ? added_cb = null;
+    private unowned SourceFunc ?removed_cb = null;
+    private unowned SourceFunc ?added_cb = null;
 
     public AnimatedListItem () {
         Object (
-            css_name: "animatedlistitem",
-            accessible_role: Gtk.AccessibleRole.LIST_ITEM,
+            css_name : "animatedlistitem",
+            accessible_role : Gtk.AccessibleRole.LIST_ITEM,
             overflow: Gtk.Overflow.HIDDEN,
             animation_duration: DEFAULT_ANIMATION_DURATION,
             animation_easing: Adw.Easing.EASE_OUT_QUINT,
@@ -111,13 +111,13 @@ public class AnimatedListItem : Gtk.Widget {
             case ChildAnimationType.SLIDE_FROM_RIGHT:
                 transform = transform.translate_3d (
                     Graphene.Point3D ()
-                        .init (child_width * (float) (1 - animation_value), 0, 0)
+                     .init (child_width * (float) (1 - animation_value), 0, 0)
                 );
                 break;
             case ChildAnimationType.SLIDE_FROM_LEFT:
                 transform = transform.translate_3d (
                     Graphene.Point3D ()
-                        .init (-child_width * (float) (1 - animation_value), 0, 0)
+                     .init (-child_width * (float) (1 - animation_value), 0, 0)
                 );
                 break;
             case ChildAnimationType.NONE:
@@ -184,6 +184,7 @@ public class AnimatedListItem : Gtk.Widget {
     }
 
     delegate void animation_done (Adw.Animation animation);
+
     private void set_animation_done_cb (animation_done handler) {
         remove_animation_done_cb ();
         animation_done_cb_id = animation.done.connect (handler);

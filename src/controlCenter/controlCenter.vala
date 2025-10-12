@@ -21,7 +21,7 @@ namespace SwayNotificationCenter {
         private List<Widgets.BaseWidget> widgets;
         private const string[] DEFAULT_WIDGETS = { "title", "dnd", "notifications" };
 
-        private string ? monitor_name = null;
+        private string ?monitor_name = null;
 
         public ControlCenter (SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
             Object (css_name: "blankwindow");
@@ -74,15 +74,17 @@ namespace SwayNotificationCenter {
             blank_window_gesture.pressed.connect ((n_press, x, y) => {
                 // Calculate if the clicked coords intersect the ControlCenter
                 Graphene.Point click_point = Graphene.Point ()
-                    .init ((float) x, (float) y);
-                Graphene.Rect ? bounds = null;
+                     .init ((float) x, (float) y);
+                Graphene.Rect ?bounds = null;
                 window.compute_bounds (this, out bounds);
                 blank_window_in = !(bounds != null && bounds.contains_point (click_point));
                 blank_window_down = true;
             });
             blank_window_gesture.released.connect ((n_press, x, y) => {
                 // Emit released
-                if (!blank_window_down) return;
+                if (!blank_window_down) {
+                    return;
+                }
                 blank_window_down = false;
                 if (blank_window_in) {
                     try {
@@ -99,13 +101,15 @@ namespace SwayNotificationCenter {
             });
             blank_window_gesture.update.connect ((gesture, sequence) => {
                 Gtk.GestureSingle gesture_single = (Gtk.GestureSingle) gesture;
-                if (sequence != gesture_single.get_current_sequence ()) return;
+                if (sequence != gesture_single.get_current_sequence ()) {
+                    return;
+                }
                 // Calculate if the clicked coords intersect the ControlCenter
                 double x, y;
                 gesture.get_point (sequence, out x, out y);
                 Graphene.Point click_point = Graphene.Point ()
-                    .init ((float) x, (float) y);
-                Graphene.Rect ? bounds = null;
+                     .init ((float) x, (float) y);
+                Graphene.Rect ?bounds = null;
                 window.compute_bounds (this, out bounds);
                 if (bounds != null && bounds.contains_point (click_point)) {
                     blank_window_in = false;
@@ -141,14 +145,14 @@ namespace SwayNotificationCenter {
         private void key_released_event_cb (uint keyval, uint keycode, Gdk.ModifierType state) {
             if (this.get_focus () is Gtk.Entry) {
                 switch (Gdk.keyval_name (keyval)) {
-                    case "Escape":
+                    case "Escape" :
                         this.set_focus (null);
                         return;
                 }
                 return;
             }
             switch (Gdk.keyval_name (keyval)) {
-                case "Escape":
+                case "Escape" :
                 case "Caps_Lock":
                     this.set_visibility (false);
                     return;
@@ -189,23 +193,27 @@ namespace SwayNotificationCenter {
             });
 
             string[] w = ConfigModel.instance.widgets.data;
-            if (w.length == 0) w = DEFAULT_WIDGETS;
+            if (w.length == 0) {
+                w = DEFAULT_WIDGETS;
+            }
 
             // Add the notifications widget if not found in the list
             if (!("notifications" in w)) {
-                warning ("Notification widget not included in \"widgets\" config. Using default bottom position");
+                warning ("Notification widget not included in \"widgets\" config. " +
+                         "Using default bottom position");
                 w += "notifications";
             }
             bool has_notifications = false;
             foreach (string key in w) {
                 // Add the widget if it is valid
                 bool is_notifications;
-                Widgets.BaseWidget ? widget = Widgets.get_widget_from_key (
+                Widgets.BaseWidget ?widget = Widgets.get_widget_from_key (
                     key, swaync_daemon, noti_daemon, out is_notifications);
 
                 if (is_notifications) {
                     if (has_notifications) {
-                        warning ("Cannot have multiple \"notifications\" widgets! Skipping\"%s\"", key);
+                        warning ("Cannot have multiple \"notifications\" widgets! Skipping\"%s\"",
+                                 key);
                         continue;
                     }
                     has_notifications = true;
@@ -231,9 +239,13 @@ namespace SwayNotificationCenter {
         /** Resets the UI positions */
         private void set_anchor () {
             PositionX pos_x = ConfigModel.instance.control_center_positionX;
-            if (pos_x == PositionX.NONE) pos_x = ConfigModel.instance.positionX;
+            if (pos_x == PositionX.NONE) {
+                pos_x = ConfigModel.instance.positionX;
+            }
             PositionY pos_y = ConfigModel.instance.control_center_positionY;
-            if (pos_y == PositionY.NONE) pos_y = ConfigModel.instance.positionY;
+            if (pos_y == PositionY.NONE) {
+                pos_y = ConfigModel.instance.positionY;
+            }
 
             if (swaync_daemon.use_layer_shell) {
                 // Set the exlusive zone
@@ -242,8 +254,8 @@ namespace SwayNotificationCenter {
                 // Grabs the keyboard input until closed
                 bool keyboard_shortcuts = ConfigModel.instance.keyboard_shortcuts;
                 var mode = keyboard_shortcuts ?
-                           GtkLayerShell.KeyboardMode.EXCLUSIVE :
-                           GtkLayerShell.KeyboardMode.NONE;
+                    GtkLayerShell.KeyboardMode.EXCLUSIVE :
+                    GtkLayerShell.KeyboardMode.NONE;
                 GtkLayerShell.set_keyboard_mode (this, mode);
 
                 // Set layer
@@ -260,7 +272,7 @@ namespace SwayNotificationCenter {
                 } else {
                     // Fallback to conventional positioning
                     switch (pos_x) {
-                        case PositionX.LEFT:
+                        case PositionX.LEFT :
                             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.LEFT, true);
                             GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.RIGHT, false);
                             break;
@@ -337,7 +349,9 @@ namespace SwayNotificationCenter {
                     break;
             }
             // Fit the ControlCenter to the monitor height
-            if (ConfigModel.instance.fit_to_screen) align_y = Gtk.Align.FILL;
+            if (ConfigModel.instance.fit_to_screen) {
+                align_y = Gtk.Align.FILL;
+            }
             // Set the ControlCenter alignment
             window.set_halign (align_x);
             window.set_valign (align_y);
@@ -347,12 +361,12 @@ namespace SwayNotificationCenter {
                 ConfigModel.instance.control_center_height < 1
                 || ConfigModel.instance.fit_to_screen);
             window.set_size_request (ConfigModel.instance.control_center_width,
-                                  ConfigModel.instance.control_center_height);
+                                     ConfigModel.instance.control_center_height);
             box.set_size_request (ConfigModel.instance.control_center_width,
                                   ConfigModel.instance.control_center_height);
 
             // Set the preferred monitor
-            string ? monitor_name = ConfigModel.instance.control_center_preferred_output;
+            string ?monitor_name = ConfigModel.instance.control_center_preferred_output;
             if (this.monitor_name != null) {
                 monitor_name = this.monitor_name;
             }
@@ -391,7 +405,9 @@ namespace SwayNotificationCenter {
         }
 
         public void set_visibility (bool visibility) {
-            if (this.visible == visibility) return;
+            if (this.visible == visibility) {
+                return;
+            }
             if (visibility) {
                 // Destroy the wl_surface to get a new "enter-monitor" signal
                 ((Gtk.Widget) this).unrealize ();
@@ -417,7 +433,7 @@ namespace SwayNotificationCenter {
             return this.visible;
         }
 
-        public void set_monitor (Gdk.Monitor ? monitor) {
+        public void set_monitor (Gdk.Monitor ?monitor) {
             this.monitor_name = monitor == null ? null : monitor.connector;
             GtkLayerShell.set_monitor (this, monitor);
         }

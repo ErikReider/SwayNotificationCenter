@@ -62,7 +62,9 @@ namespace SwayNotificationCenter {
         }
 
         public string to_string () {
-            if (identifier == null || text == null) return "None";
+            if (identifier == null || text == null) {
+                return "None";
+            }
             return "Name: %s, Id: %s".printf (text, identifier);
         }
     }
@@ -72,7 +74,7 @@ namespace SwayNotificationCenter {
         public string app_name { get; set; }
         public uint32 replaces_id { get; set; }
         public string app_icon { get; set; }
-        public Action ? default_action { get; set; }
+        public Action ?default_action { get; set; }
         public string summary { get; set; }
         public string body { get; set; }
         public HashTable<string, Variant> hints { get; set; }
@@ -131,7 +133,7 @@ namespace SwayNotificationCenter {
          * - x-canonical-private-synchronous
          * - synchronous
          */
-        public string ? synchronous { get; set; }
+        public string ?synchronous { get; set; }
         /** Used for notification progress bar (0->100) */
         public int value {
             get {
@@ -145,8 +147,8 @@ namespace SwayNotificationCenter {
         public bool has_synch { public get; private set; }
 
         /** Inline-replies */
-        public Action ? inline_reply { get; set; }
-        public string ? inline_reply_placeholder { get; set; }
+        public Action ?inline_reply { get; set; }
+        public string ?inline_reply_placeholder { get; set; }
 
         // Custom hints
         /** Disables scripting for notification */
@@ -157,7 +159,7 @@ namespace SwayNotificationCenter {
 
         public Array<Action> actions { get; set; }
 
-        public DesktopAppInfo ? desktop_app_info = null;
+        public DesktopAppInfo ?desktop_app_info = null;
 
         public string name_id;
 
@@ -211,7 +213,7 @@ namespace SwayNotificationCenter {
             this.name_id = this.desktop_entry ?? this.app_name ?? "";
 
             // Set display_name
-            string ? display_name = this.desktop_entry ?? this.app_name;
+            string ?display_name = this.desktop_entry ?? this.app_name;
             if (desktop_app_info != null) {
                 display_name = desktop_app_info.get_display_name ();
             }
@@ -225,21 +227,21 @@ namespace SwayNotificationCenter {
             foreach (var hint in hints.get_keys ()) {
                 Variant hint_value = hints[hint];
                 switch (hint) {
-                    case "SWAYNC_NO_SCRIPT":
+                    case "SWAYNC_NO_SCRIPT" :
                         if (hint_value.is_of_type (VariantType.INT32)) {
                             swaync_no_script = hint_value.get_int32 () == 1;
                         } else if (hint_value.is_of_type (VariantType.BOOLEAN)) {
                             swaync_no_script = hint_value.get_boolean ();
                         }
                         break;
-                    case "SWAYNC_BYPASS_DND":
+                    case "SWAYNC_BYPASS_DND" :
                         if (hint_value.is_of_type (VariantType.INT32)) {
                             swaync_bypass_dnd = hint_value.get_int32 () == 1;
                         } else if (hint_value.is_of_type (VariantType.BOOLEAN)) {
                             swaync_bypass_dnd = hint_value.get_boolean ();
                         }
                         break;
-                    case "value":
+                    case "value" :
                         if (hint_value.is_of_type (VariantType.INT32)) {
                             this.has_synch = true;
                             value = hint_value.get_int32 ();
@@ -262,7 +264,9 @@ namespace SwayNotificationCenter {
                     case "image-data":
                     case "image_data":
                     case "icon_data":
-                        if (image_data.is_initialized) break;
+                        if (image_data.is_initialized) {
+                            break;
+                        }
                         var img_d = ImageData ();
                         // Read each value
                         // https://specifications.freedesktop.org/notification-spec/latest/ar01s05.html
@@ -439,7 +443,7 @@ namespace SwayNotificationCenter {
 
             string[] result = {};
             foreach (var k in params.get_keys ()) {
-                string ? v = params[k];
+                string ?v = params[k];
                 result += "%s:\t\t %s".printf (k, v);
             }
             return "\n" + string.joinv ("\n", result);

@@ -1,11 +1,11 @@
-using XDG.Activation;
 using SwayNotificationCenter;
+using XDG.Activation;
 
 public class XdgActivationHelper : Object {
     private static Wl.RegistryListener registry_listener = Wl.RegistryListener () {
         global = registry_handle_global,
     };
-    private Activation * xdg_activation = null;
+    private Activation *xdg_activation = null;
 
     public XdgActivationHelper () {
         unowned Wl.Display wl_display = Functions.get_wl_display ();
@@ -33,9 +33,9 @@ public class XdgActivationHelper : Object {
         }
     }
 
-    private static void handle_done (void * data, Token activation_token,
+    private static void handle_done (void *data, Token activation_token,
                                      string token) {
-        Value * value = (Value *) data;
+        Value *value = (Value *) data;
         value->set_string (token.dup ());
     }
 
@@ -43,13 +43,13 @@ public class XdgActivationHelper : Object {
         handle_done,
     };
 
-    public string ? get_token (Gtk.Widget widget) {
+    public string ?get_token (Gtk.Widget widget) {
         if (xdg_activation == null) {
             return null;
         }
 
         unowned Wl.Display wl_display = Functions.get_wl_display ();
-        unowned Gtk.Root ? root = widget.get_root ();
+        unowned Gtk.Root ?root = widget.get_root ();
         if (root == null) {
             warning ("GDK Window is null");
             return null;
@@ -59,7 +59,7 @@ public class XdgActivationHelper : Object {
         Value token_value = Value (typeof (string));
         token_value.set_string (null);
 
-        Token * token = xdg_activation->get_activation_token ();
+        Token *token = xdg_activation->get_activation_token ();
         token->add_listener (TOKEN_LISTENER, &token_value);
         token->set_surface (wl_surface);
         token->commit ();

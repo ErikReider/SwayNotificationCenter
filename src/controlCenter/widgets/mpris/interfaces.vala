@@ -16,9 +16,9 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 (i, c, inv) => properties_changed (i, c, inv));
         }
 
-        public static MprisSource ? get_player (string bus_name) {
-            MprisMediaPlayer ? player;
-            DbusPropChange ? props;
+        public static MprisSource ?get_player (string bus_name) {
+            MprisMediaPlayer ?player;
+            DbusPropChange ?props;
             try {
                 player = Bus.get_proxy_sync (BusType.SESSION, bus_name, INTERFACE_PATH);
             } catch (Error e) {
@@ -31,18 +31,20 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 message (e.message);
                 return null;
             }
-            if (player == null || props == null) return null;
+            if (player == null || props == null) {
+                return null;
+            }
             return new MprisSource (player, props);
         }
 
-        public Variant ? get_mpris_player_prop (string property_name) {
+        public Variant ?get_mpris_player_prop (string property_name) {
             try {
                 return props.get ("org.mpris.MediaPlayer2.Player", property_name);
             } catch (Error e) {}
             return null;
         }
 
-        public Variant ? get_mpris_prop (string property_name) {
+        public Variant ?get_mpris_prop (string property_name) {
             try {
                 return props.get ("org.mpris.MediaPlayer2", property_name);
             } catch (Error e) {}

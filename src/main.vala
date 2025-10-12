@@ -1,25 +1,24 @@
 namespace SwayNotificationCenter {
     static SwayncDaemon swaync_daemon;
-    static unowned ListModel ? monitors = null;
+    static unowned ListModel ?monitors = null;
     static Swaync app;
     static Settings self_settings;
 
     // Args
-    static string ? style_path;
-    static string ? config_path;
+    static string ?style_path;
+    static string ?config_path;
     // Dev args
     static bool skip_packaged_css = false;
-    static string ? custom_packaged_css;
+    static string ?custom_packaged_css;
 
     public class Swaync : Gtk.Application {
-
         static bool activated = false;
 
-        public signal void config_reload (ConfigModel ? old_config, ConfigModel new_config);
+        public signal void config_reload (ConfigModel ?old_config, ConfigModel new_config);
 
         public Swaync () {
             Object (
-                application_id: "org.erikreider.swaync",
+                application_id : "org.erikreider.swaync",
                 flags: ApplicationFlags.DEFAULT_FLAGS
             );
 
@@ -43,7 +42,7 @@ namespace SwayNotificationCenter {
 
             hold ();
 
-            unowned Gdk.Display ? display = Gdk.Display.get_default ();
+            unowned Gdk.Display ?display = Gdk.Display.get_default ();
             if (display == null) {
                 error ("Could not get Display!");
             }
@@ -77,7 +76,7 @@ namespace SwayNotificationCenter {
                 for (uint i = 1; i < args.length; i++) {
                     string arg = args[i];
                     switch (arg) {
-                        case "-s":
+                        case "-s" :
                         case "--style":
                             style_path = args[++i];
                             break;
@@ -138,9 +137,9 @@ namespace SwayNotificationCenter {
             print ("\t -s, --style \t\t Use a custom Stylesheet file\n");
             print ("\t -c, --config \t\t Use a custom config file\n");
             print ("\t --skip-system-css \t Skip trying to parse the packaged Stylesheet file."
-                + " Useful for CSS debugging\n");
+                   + " Useful for CSS debugging\n");
             print ("\t --custom-system-css \t Pick a custom CSS file to use as the \"system\" CSS."
-                + " Useful for CSS debugging\n");
+                   + " Useful for CSS debugging\n");
         }
     }
 }

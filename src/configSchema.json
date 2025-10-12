@@ -702,6 +702,11 @@
           "default": false,
           "description": "Show application name in per app control"
         },
+        "expand-per-app": {
+          "type": "boolean",
+          "default": false,
+          "description": "If the per app section should start expanded"
+        },
         "empty-list-label": {
           "type": "string",
           "default": "No active sink input",

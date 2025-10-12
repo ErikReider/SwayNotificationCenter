@@ -30,9 +30,10 @@ namespace SwayNotificationCenter.Widgets {
         private PulseDevice ?default_sink = null;
         private PulseDaemon client = new PulseDaemon ();
 
-        private bool show_per_app;
+        private bool show_per_app = false;
         private bool show_per_app_icon = true;
         private bool show_per_app_label = false;
+        private bool expand_per_app = false;
 
         construct {
             this.client.change_default_device.connect (default_device_changed);
@@ -74,6 +75,13 @@ namespace SwayNotificationCenter.Widgets {
                                                            out show_per_app_label_found);
                 if (show_per_app_label_found) {
                     this.show_per_app_label = show_per_app_label;
+                }
+
+                bool expand_per_app_found;
+                bool ?expand_per_app = get_prop<bool> (config, "expand-per-app",
+                                                       out expand_per_app_found);
+                if (expand_per_app_found) {
+                    this.expand_per_app = expand_per_app;
                 }
 
                 string ?el = get_prop<string> (config, "empty-list-label");
@@ -155,6 +163,9 @@ namespace SwayNotificationCenter.Widgets {
                 this.client.remove_active_sink.connect (active_sink_removed);
 
                 reveal_button = new Gtk.ToggleButton ();
+                reveal_button.set_active (expand_per_app);
+                revealer.set_reveal_child (expand_per_app);
+
                 set_button_icon ();
                 reveal_button.toggled.connect (() => {
                     set_button_icon ();
@@ -186,9 +197,9 @@ namespace SwayNotificationCenter.Widgets {
                 this.client.start ();
             } else {
                 this.client.close ();
-                if (show_per_app) {
-                    reveal_button.set_active (false);
-                }
+            }
+            if (show_per_app) {
+                reveal_button.set_active (expand_per_app);
             }
         }
 

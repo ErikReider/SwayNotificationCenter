@@ -293,10 +293,10 @@ namespace SwayNotificationCenter {
                 }
             }
 
-            if (!this.get_mapped () || !this.get_realized ()) {
-                this.set_anchor ();
-                this.show ();
+            if (!get_visible () || !get_mapped () || !get_realized ()) {
+                set_anchor ();
             }
+            show ();
 
             list.append.begin (noti);
         }

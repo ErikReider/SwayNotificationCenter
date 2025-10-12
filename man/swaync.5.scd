@@ -679,6 +679,11 @@ config file to be able to detect config errors
 					optional: true ++
 					default: false ++
 					description: Show application name in per app control ++
+				expand-per-app: ++
+					type: bool ++
+					optional: true ++
+					default: false ++
+					description: If the per app section should start expanded ++
 				empty-list-label: ++
 					type: string ++
 					optional: true ++

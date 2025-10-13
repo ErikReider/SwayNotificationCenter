@@ -258,6 +258,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 }
                 prev_art_data = art_data;
 
+                debug ("MPRIS album art: \"%s\"", art_data);
+
                 // Cancel previous download, reset the state and download again
                 album_art_cancellable.cancel ();
                 album_art_cancellable.reset ();
@@ -347,6 +349,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 if (icon_info != null) {
                     album_art.set_from_gicon (icon);
                     background_picture.set_paintable (icon_info);
+
+                    debug ("MPRIS album art: using .desktop icon");
                     return;
                 }
             }
@@ -358,6 +362,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 icon_name, null, 128, get_scale_factor (),
                 Gtk.TextDirection.NONE, 0);
             background_picture.set_paintable (icon_info);
+
+            debug ("MPRIS album art: using default icon");
         }
 
         private void update_button_shuffle (HashTable<string, Variant> metadata) {

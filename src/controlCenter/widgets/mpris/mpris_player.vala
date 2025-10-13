@@ -34,7 +34,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         public const string ICON_PAUSE = "media-playback-pause-symbolic";
 
         private Cancellable album_art_cancellable = new Cancellable ();
-        private string prev_art_url;
+        private string prev_art_data;
         private DesktopAppInfo ?desktop_entry = null;
 
         private unowned Config mpris_config;
@@ -252,11 +252,11 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
         private async void update_album_art (HashTable<string, Variant> metadata) {
             if ("mpris:artUrl" in metadata) {
-                string url = metadata["mpris:artUrl"].get_string ();
-                if (url == prev_art_url) {
+                string art_data = metadata["mpris:artUrl"].get_string ();
+                if (art_data == prev_art_data) {
                     return;
                 }
-                prev_art_url = url;
+                prev_art_data = art_data;
 
                 // Cancel previous download, reset the state and download again
                 album_art_cancellable.cancel ();
@@ -264,15 +264,50 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
                 Gdk.Texture ?album_art_texture = null;
                 try {
-                    File file = File.new_for_uri (url);
-                    InputStream stream = yield file.read_async (Priority.DEFAULT,
-                                                                album_art_cancellable);
+                    Uri uri = Uri.parse (art_data, UriFlags.NONE);
+                    if (uri.get_scheme () == "data") {
+                        // Load base64 images
+                        art_data = uri.get_path ();
+                        int comma_index = art_data.index_of_char (',');
+                        if (comma_index < 0) {
+                            throw new UriError.FAILED ("Could not parse \"data\" uri");
+                        }
+                        string meta_data = art_data.substring (0, comma_index);
+                        if (!meta_data.contains (";base64")) {
+                            throw new UriError.FAILED ("\"data\" uri doesn't contain base64 data");
+                        }
 
-                    Gdk.Pixbuf pixbuf = yield new Gdk.Pixbuf.from_stream_async (
-                        stream, album_art_cancellable);
-                    album_art_texture = Gdk.Texture.for_pixbuf (pixbuf);
+                        string data_part = art_data.substring (comma_index + 1);
+                        uchar[] data = Base64.decode (data_part);
+
+                        // Try to parse the mime-type if it exists
+                        Gdk.PixbufLoader loader;
+                        string uri_hints[2] = meta_data.split (";");
+                        unowned string mime_type = uri_hints[0];
+                        if (mime_type.length > 0 && mime_type in pixbuf_mime_types) {
+                            loader = new Gdk.PixbufLoader.with_mime_type (mime_type);
+                        } else {
+                            loader = new Gdk.PixbufLoader ();
+                        }
+                        loader.write (data);
+                        loader.close ();
+
+                        unowned Gdk.Pixbuf ?pixbuf = loader.get_pixbuf ();
+                        if (pixbuf != null) {
+                            album_art_texture = Gdk.Texture.for_pixbuf (pixbuf);
+                        }
+                    } else {
+                        // Load as a regular file/URL
+                        File file = File.new_for_uri (art_data);
+                        InputStream stream = yield file.read_async (Priority.DEFAULT,
+                                                                    album_art_cancellable);
+
+                        Gdk.Pixbuf pixbuf = yield new Gdk.Pixbuf.from_stream_async (
+                            stream, album_art_cancellable);
+                        album_art_texture = Gdk.Texture.for_pixbuf (pixbuf);
+                    }
                 } catch (Error e) {
-                    critical ("Could not download album art for %s. Using fallback... (%s)",
+                    critical ("MPRIS (%s) album art error: %s. Using fallback...",
                               source.media_player.identity, e.message);
                 }
                 if (album_art_texture != null) {

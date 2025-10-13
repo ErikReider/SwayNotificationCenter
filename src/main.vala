@@ -4,6 +4,8 @@ namespace SwayNotificationCenter {
     static Swaync app;
     static Settings self_settings;
 
+    static HashTable<string, unowned Gdk.PixbufFormat> pixbuf_mime_types;
+
     // Args
     static string ?style_path;
     static string ?config_path;
@@ -39,6 +41,15 @@ namespace SwayNotificationCenter {
             }
             activated = true;
             Functions.load_css (style_path);
+
+            pixbuf_mime_types =
+                new HashTable<string, unowned Gdk.PixbufFormat> (str_hash, str_equal);
+            SList<weak Gdk.PixbufFormat> formats = Gdk.Pixbuf.get_formats ();
+            foreach (weak Gdk.PixbufFormat format in formats) {
+                foreach (string mime_type in format.get_mime_types ()) {
+                    pixbuf_mime_types.set (mime_type, format);
+                }
+            }
 
             hold ();
 

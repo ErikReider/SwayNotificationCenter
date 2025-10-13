@@ -31,8 +31,6 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             }
         }
 
-        private const int FADE_WIDTH = 20;
-
         const string MPRIS_PREFIX = "org.mpris.MediaPlayer2.";
         HashTable<string, MprisPlayer> players = new HashTable<string, MprisPlayer> (str_hash,
                                                                                      str_equal);

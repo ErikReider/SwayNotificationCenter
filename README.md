@@ -413,23 +413,23 @@ action = "toggle_paused"
 
 ## Waybar Example
 
-This example requires `NotoSansMono Nerd Font` to get the icons looking right
+This example requires a [Nerd Fonts](https://www.nerdfonts.com/) font to get the icons looking right
 
 Waybar config
 
 ```json
   "custom/notification": {
-    "tooltip": false,
-    "format": "{icon}",
+    "tooltip": true,
+    "format": "<span size='16pt'>{icon}</span>",
     "format-icons": {
-      "notification": "<span foreground='red'><sup></sup></span>",
-      "none": "",
-      "dnd-notification": "<span foreground='red'><sup></sup></span>",
-      "dnd-none": "",
-      "inhibited-notification": "<span foreground='red'><sup></sup></span>",
-      "inhibited-none": "",
-      "dnd-inhibited-notification": "<span foreground='red'><sup></sup></span>",
-      "dnd-inhibited-none": ""
+      "notification": "󱅫",
+      "none": "󰂜",
+      "dnd-notification": "󰂠",
+      "dnd-none": "󰪓",
+      "inhibited-notification": "󰂛",
+      "inhibited-none": "󰪑",
+      "dnd-inhibited-notification": "󰂛",
+      "dnd-inhibited-none": "󰪑"
     },
     "return-type": "json",
     "exec-if": "which swaync-client",

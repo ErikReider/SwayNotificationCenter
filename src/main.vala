@@ -13,6 +13,18 @@ namespace SwayNotificationCenter {
     static bool skip_packaged_css = false;
     static string ?custom_packaged_css;
 
+    private struct EnvironmentVariable {
+        string name;
+
+        public EnvironmentVariable (string name) {
+            this.name = name;
+        }
+
+        public string to_string (string[] envp) {
+            return "%s=%s".printf (name, Environ.get_variable (envp, name) ?? "");
+        }
+    }
+
     public class Swaync : Gtk.Application {
         static bool activated = false;
 
@@ -116,6 +128,8 @@ namespace SwayNotificationCenter {
                 }
             }
 
+            print_startup_info ();
+
             // Register custom Widgets so that they can be used in .ui template files
             typeof (AnimatedList).ensure ();
             typeof (AnimatedListItem).ensure ();
@@ -136,6 +150,78 @@ namespace SwayNotificationCenter {
 
             app = new Swaync ();
             return app.run ();
+        }
+
+        private static void print_startup_info () {
+            print ("Starting SwayNotificationCenter version %s\n", Constants.VERSION);
+
+            // Log distro information
+            string info_paths[5] = {
+                "/etc/lsb-release",
+                "/etc/os-release",
+                "/etc/debian_version",
+                "/etc/redhat-release",
+                "/etc/gentoo-release",
+            };
+            foreach (unowned string path in info_paths) {
+                File ?file = File.new_for_path (path);
+                if (file == null) {
+                    continue;
+                }
+                string lines = "";
+                try {
+                    FileInputStream file_stream = file.read (null);
+                    DataInputStream data_stream = new DataInputStream (file_stream);
+                    string ?line = null;
+                    while ((line = data_stream.read_line (null, null)) != null) {
+                        lines += "%s\n".printf (line);
+                    }
+                } catch (Error e) {
+                    continue;
+                }
+                info ("Contents of %s:\n%s", path, lines);
+                break;
+            }
+
+            // Log important environment variables
+            EnvironmentVariable[] variables = {
+                EnvironmentVariable ("XDG_CURRENT_DESKTOP"),
+                EnvironmentVariable ("XDG_SESSION_DESKTOP"),
+                EnvironmentVariable ("DESKTOP_SESSION"),
+                EnvironmentVariable ("XDG_SESSION_TYPE"),
+                EnvironmentVariable ("XDG_BACKEND"),
+                EnvironmentVariable ("XDG_DATA_HOME"),
+                EnvironmentVariable ("XDG_DATA_DIRS"),
+                EnvironmentVariable ("SHELL"),
+                // From: https://docs.gtk.org/gtk4/running.html
+                EnvironmentVariable ("GTK_DEBUG"),
+                EnvironmentVariable ("GTK_PATH"),
+                EnvironmentVariable ("GTK_IM_MODULE"),
+                EnvironmentVariable ("GTK_MEDIA"),
+                EnvironmentVariable ("GTK_EXE_PREFIX"),
+                EnvironmentVariable ("GTK_DATA_PREFIX"),
+                EnvironmentVariable ("GTK_THEME"),
+                EnvironmentVariable ("GDK_PIXBUF_MODULE_FILE"),
+                EnvironmentVariable ("GDK_DEBUG"),
+                EnvironmentVariable ("GSK_DEBUG"),
+                EnvironmentVariable ("GDK_BACKEND"),
+                EnvironmentVariable ("GDK_DISABLE"),
+                EnvironmentVariable ("GDK_GL_DISABLE"),
+                EnvironmentVariable ("GDK_VULKAN_DISABLE"),
+                EnvironmentVariable ("GDK_WAYLAND_DISABLE"),
+                EnvironmentVariable ("GSK_RENDERER"),
+                EnvironmentVariable ("GSK_GPU_DISABLE"),
+                EnvironmentVariable ("GSK_CACHE_TIMEOUT"),
+                EnvironmentVariable ("GTK_CSD"),
+                EnvironmentVariable ("GTK_A11Y"),
+                EnvironmentVariable ("DESKTOP_STARTUP_ID"),
+            };
+            string[] envp = Environ.get ();
+            string env_variables = "";
+            foreach (unowned EnvironmentVariable variable in variables) {
+                env_variables += "%s\n".printf (variable.to_string (envp));
+            }
+            info ("important environment variables:\n%s", env_variables);
         }
 
         private static void print_help (string[] args) {

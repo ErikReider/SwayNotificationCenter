@@ -85,47 +85,7 @@ namespace SwayNotificationCenter {
             base.size_allocate (w, h, baseline);
 
             // Set the input region to only be the size of the ScrolledWindow
-            Graphene.Rect bounds;
-            scrolled_window.compute_bounds (this, out bounds);
-            if (!bounds.equal (this.scrolled_window_bounds)) {
-                this.scrolled_window_bounds = bounds;
-                unowned Gdk.Surface ?surface = window.get_surface ();
-                if (surface == null) {
-                    return;
-                }
-
-                Cairo.Region region = new Cairo.Region ();
-                foreach (AnimatedListItem item in list.visible_children) {
-                    if (item.destroying) {
-                        continue;
-                    }
-                    Graphene.Rect out_bounds;
-                    item.compute_bounds (this, out out_bounds);
-                    Cairo.RectangleInt item_rect = Cairo.RectangleInt () {
-                        x = (int) out_bounds.get_x (),
-                        y = (int) out_bounds.get_y (),
-                        width = (int) out_bounds.get_width (),
-                        height = (int) out_bounds.get_height (),
-                    };
-                    region.union_rectangle (item_rect);
-                }
-
-                // The input region should only cover each preview widget
-                Graphene.Rect scrollbar_bounds;
-                unowned Gtk.Widget scrollbar = scrolled_window.get_vscrollbar ();
-                if (scrollbar.should_layout ()) {
-                    scrollbar.compute_bounds (this, out scrollbar_bounds);
-                    Cairo.RectangleInt rect = Cairo.RectangleInt () {
-                        x = (int) scrollbar_bounds.get_x (),
-                        y = (int) scrollbar_bounds.get_y (),
-                        width = (int) scrollbar_bounds.get_width (),
-                        height = (int) scrollbar_bounds.get_height (),
-                    };
-                    region.union_rectangle (rect);
-                }
-
-                surface.set_input_region (region);
-            }
+            set_input_region ();
         }
 
         protected override void snapshot (Gtk.Snapshot snapshot) {
@@ -213,6 +173,50 @@ namespace SwayNotificationCenter {
             set_monitor (Functions.try_get_monitor (monitor_name));
         }
 
+        private void set_input_region () {
+            Graphene.Rect bounds;
+            scrolled_window.compute_bounds (this, out bounds);
+            if (!bounds.equal (this.scrolled_window_bounds)) {
+                this.scrolled_window_bounds = bounds;
+                unowned Gdk.Surface ?surface = window.get_surface ();
+                if (surface == null) {
+                    return;
+                }
+
+                Cairo.Region region = new Cairo.Region ();
+                foreach (AnimatedListItem item in list.visible_children) {
+                    if (item.destroying) {
+                        continue;
+                    }
+                    Graphene.Rect out_bounds;
+                    item.compute_bounds (this, out out_bounds);
+                    Cairo.RectangleInt item_rect = Cairo.RectangleInt () {
+                        x = (int) out_bounds.get_x (),
+                        y = (int) out_bounds.get_y (),
+                        width = (int) out_bounds.get_width (),
+                        height = (int) out_bounds.get_height (),
+                    };
+                    region.union_rectangle (item_rect);
+                }
+
+                // The input region should only cover each preview widget
+                Graphene.Rect scrollbar_bounds;
+                unowned Gtk.Widget scrollbar = scrolled_window.get_vscrollbar ();
+                if (scrollbar.should_layout ()) {
+                    scrollbar.compute_bounds (this, out scrollbar_bounds);
+                    Cairo.RectangleInt rect = Cairo.RectangleInt () {
+                        x = (int) scrollbar_bounds.get_x (),
+                        y = (int) scrollbar_bounds.get_y (),
+                        width = (int) scrollbar_bounds.get_width (),
+                        height = (int) scrollbar_bounds.get_height (),
+                    };
+                    region.union_rectangle (rect);
+                }
+
+                surface.set_input_region (region);
+            }
+        }
+
         public void change_visibility (bool value) {
             if (!value) {
                 close_all_notifications ();
@@ -269,7 +273,9 @@ namespace SwayNotificationCenter {
                         Idle.add_once (() => {
                             close ();
                         });
+                        return;
                     }
+                    set_input_region ();
                 });
             }
         }
@@ -298,7 +304,10 @@ namespace SwayNotificationCenter {
             }
             show ();
 
-            list.append.begin (noti);
+            list.append.begin (noti, (obj, res) => {
+                return_if_fail (list.append.end (res) != null);
+                set_input_region ();
+            });
         }
 
         public void close_notification (uint32 id, bool dismiss) {
@@ -359,6 +368,8 @@ namespace SwayNotificationCenter {
             debug ("Setting monitor for ControlCenter: %s", Functions.monitor_to_string (monitor));
             NotificationWindow.monitor_name = monitor == null ? null : monitor.connector;
             GtkLayerShell.set_monitor (this, monitor);
+
+            set_input_region ();
         }
     }
 }

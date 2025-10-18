@@ -330,6 +330,7 @@ namespace SwayNotificationCenter {
             }
 
             // Display a new notification if the old one isn't visible
+            debug ("Could not find floating notification to replace: %u", id);
             add_notification (new_params);
         }
 
@@ -355,6 +356,7 @@ namespace SwayNotificationCenter {
         }
 
         public void set_monitor (Gdk.Monitor ?monitor) {
+            debug ("Setting monitor for ControlCenter: %s", Functions.monitor_to_string (monitor));
             NotificationWindow.monitor_name = monitor == null ? null : monitor.connector;
             GtkLayerShell.set_monitor (this, monitor);
         }

@@ -70,6 +70,9 @@ namespace SwayNotificationCenter {
                 error ("Could not get Display!");
             }
             monitors = display.get_monitors ();
+            assert_nonnull (monitors);
+
+            print_monitors ();
 
             swaync_daemon = new SwayncDaemon ();
             Bus.own_name (BusType.SESSION, "org.erikreider.swaync.cc",
@@ -83,6 +86,19 @@ namespace SwayNotificationCenter {
             });
 
             add_window (swaync_daemon.noti_daemon.control_center);
+        }
+
+        private void print_monitors () {
+            uint num_monitors = monitors.get_n_items ();
+            string monitors_string = "";
+            for (uint i = 0; i < num_monitors; i++) {
+                Gdk.Monitor ?mon = (Gdk.Monitor) monitors.get_item (i);
+                if (mon == null) {
+                    continue;
+                }
+                monitors_string += Functions.monitor_to_string (mon);
+            }
+            info ("Monitors:\n%s", monitors_string);
         }
 
         void on_cc_bus_aquired (DBusConnection conn) {

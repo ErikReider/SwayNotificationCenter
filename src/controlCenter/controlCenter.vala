@@ -434,6 +434,7 @@ namespace SwayNotificationCenter {
         }
 
         public void set_monitor (Gdk.Monitor ?monitor) {
+            debug ("Setting monitor for ControlCenter: %s", Functions.monitor_to_string (monitor));
             this.monitor_name = monitor == null ? null : monitor.connector;
             GtkLayerShell.set_monitor (this, monitor);
         }

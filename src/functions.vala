@@ -409,5 +409,16 @@ namespace SwayNotificationCenter {
 
             return null;
         }
+
+        public static string ?monitor_to_string (Gdk.Monitor ?monitor) {
+            if (monitor == null) {
+                return null;
+            }
+            return "%s, %ix%i, x:%i y:%i, scale:%f\n".printf (
+                monitor.get_description (),
+                monitor.geometry.width, monitor.geometry.height,
+                monitor.geometry.x, monitor.geometry.y,
+                monitor.scale);
+        }
     }
 }

@@ -116,7 +116,7 @@ namespace SwayNotificationCenter {
                     string arg = args[i];
                     switch (arg) {
                         case "-s" :
-                        case "--style":
+                        case "--style" :
                             style_path = args[++i];
                             break;
                         case "--skip-system-css":
@@ -238,6 +238,13 @@ namespace SwayNotificationCenter {
                 env_variables += "%s\n".printf (variable.to_string (envp));
             }
             info ("important environment variables:\n%s", env_variables);
+
+            info ("Gtk4LayerShell version: %u.%u.%u",
+                  GtkLayerShell.get_major_version (),
+                  GtkLayerShell.get_minor_version (),
+                  GtkLayerShell.get_micro_version ());
+            info ("LayerShell version supported by compositor: %u",
+                  GtkLayerShell.get_protocol_version ());
         }
 
         private static void print_help (string[] args) {

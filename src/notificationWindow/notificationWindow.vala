@@ -34,8 +34,6 @@ namespace SwayNotificationCenter {
         [GtkChild]
         unowned AnimatedList list;
 
-        private Graphene.Rect scrolled_window_bounds = Graphene.Rect.zero ();
-
         Gee.HashSet<uint32> inline_reply_notifications = new Gee.HashSet<uint32> ();
 
         private static string ?monitor_name = null;
@@ -174,47 +172,42 @@ namespace SwayNotificationCenter {
         }
 
         private void set_input_region () {
-            Graphene.Rect bounds;
-            scrolled_window.compute_bounds (this, out bounds);
-            if (!bounds.equal (this.scrolled_window_bounds)) {
-                this.scrolled_window_bounds = bounds;
-                unowned Gdk.Surface ?surface = window.get_surface ();
-                if (surface == null) {
-                    return;
-                }
-
-                Cairo.Region region = new Cairo.Region ();
-                foreach (AnimatedListItem item in list.visible_children) {
-                    if (item.destroying) {
-                        continue;
-                    }
-                    Graphene.Rect out_bounds;
-                    item.compute_bounds (this, out out_bounds);
-                    Cairo.RectangleInt item_rect = Cairo.RectangleInt () {
-                        x = (int) out_bounds.get_x (),
-                        y = (int) out_bounds.get_y (),
-                        width = (int) out_bounds.get_width (),
-                        height = (int) out_bounds.get_height (),
-                    };
-                    region.union_rectangle (item_rect);
-                }
-
-                // The input region should only cover each preview widget
-                Graphene.Rect scrollbar_bounds;
-                unowned Gtk.Widget scrollbar = scrolled_window.get_vscrollbar ();
-                if (scrollbar.should_layout ()) {
-                    scrollbar.compute_bounds (this, out scrollbar_bounds);
-                    Cairo.RectangleInt rect = Cairo.RectangleInt () {
-                        x = (int) scrollbar_bounds.get_x (),
-                        y = (int) scrollbar_bounds.get_y (),
-                        width = (int) scrollbar_bounds.get_width (),
-                        height = (int) scrollbar_bounds.get_height (),
-                    };
-                    region.union_rectangle (rect);
-                }
-
-                surface.set_input_region (region);
+            unowned Gdk.Surface ?surface = window.get_surface ();
+            if (surface == null) {
+                return;
             }
+
+            Cairo.Region region = new Cairo.Region ();
+            foreach (AnimatedListItem item in list.visible_children) {
+                if (item.destroying) {
+                    continue;
+                }
+                Graphene.Rect out_bounds;
+                item.compute_bounds (this, out out_bounds);
+                Cairo.RectangleInt item_rect = Cairo.RectangleInt () {
+                    x = (int) out_bounds.get_x (),
+                    y = (int) out_bounds.get_y (),
+                    width = (int) out_bounds.get_width (),
+                    height = (int) out_bounds.get_height (),
+                };
+                region.union_rectangle (item_rect);
+            }
+
+            // The input region should only cover each preview widget
+            Graphene.Rect scrollbar_bounds;
+            unowned Gtk.Widget scrollbar = scrolled_window.get_vscrollbar ();
+            if (scrollbar.should_layout ()) {
+                scrollbar.compute_bounds (this, out scrollbar_bounds);
+                Cairo.RectangleInt rect = Cairo.RectangleInt () {
+                    x = (int) scrollbar_bounds.get_x (),
+                    y = (int) scrollbar_bounds.get_y (),
+                    width = (int) scrollbar_bounds.get_width (),
+                    height = (int) scrollbar_bounds.get_height (),
+                };
+                region.union_rectangle (rect);
+            }
+
+            surface.set_input_region (region);
         }
 
         public void change_visibility (bool value) {

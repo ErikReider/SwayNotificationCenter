@@ -15,6 +15,37 @@ private struct WidgetHeights {
 private struct WidgetAlloc {
     float y;
     int height;
+
+    public WidgetAlloc () {
+        y = 0;
+        height = 0;
+    }
+}
+
+private class AnimationValueTarget : Object {
+    private double _progress = 0;
+    public double progress {
+        get {
+            return _progress;
+        }
+        set {
+            _progress = value;
+            cb (_progress);
+        }
+    }
+
+    public delegate void callback (double value);
+
+    private unowned callback ?cb;
+
+    public AnimationValueTarget (float init_value, callback cb) {
+        this._progress = init_value;
+        this.cb = cb;
+    }
+
+    public Adw.PropertyAnimationTarget get_animation_target () {
+        return new Adw.PropertyAnimationTarget (this, "progress");
+    }
 }
 
 public class AnimatedList : Gtk.Widget, Gtk.Scrollable {

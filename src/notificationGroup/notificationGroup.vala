@@ -22,7 +22,8 @@ namespace SwayNotificationCenter {
 
         public signal void on_expand_change (bool state);
 
-        public NotificationGroup (string name_id, string display_name) {
+        public NotificationGroup (string name_id, string display_name,
+                                  Gtk.Viewport viewport) {
             this.name_id = name_id;
             add_css_class ("notification-group");
 
@@ -104,16 +105,10 @@ namespace SwayNotificationCenter {
 
             set_activatable (false);
 
-            group = new ExpandableGroup (Constants.ANIMATION_DURATION, (state) => {
-                revealer.set_reveal_child (state);
-
-                // Change CSS Class
-                if (parent != null) {
-                    set_classes ();
-                }
-            });
-            set_classes ();
+            group = new ExpandableGroup (viewport, Constants.ANIMATION_DURATION);
             box.append (group);
+
+            set_classes ();
 
             /*
              * Handling of group presses
@@ -204,7 +199,6 @@ namespace SwayNotificationCenter {
             if (param.desktop_app_info != null
                 && (icon = param.desktop_app_info.get_icon ()) != null) {
                 app_icon.set_from_gicon (icon);
-                app_icon.show ();
             } else {
                 app_icon.set_from_icon_name ("application-x-executable-symbolic");
             }
@@ -217,6 +211,12 @@ namespace SwayNotificationCenter {
 
         public void set_expanded (bool state) {
             group.set_expanded (state);
+            revealer.set_reveal_child (state);
+            // Change CSS Class
+            if (parent != null) {
+                set_classes ();
+            }
+
             group.set_sensitive (only_single_notification () || group.is_expanded);
             dismissible.set_can_dismiss (!state);
         }
@@ -261,14 +261,14 @@ namespace SwayNotificationCenter {
         }
 
         public unowned Notification ?get_latest_notification () {
-            return (Notification ?) group.widgets.last ().data;
+            return (Notification ?) group.widgets.first ().data;
         }
 
         public int64 get_time () {
             if (group.widgets.is_empty ()) {
                 return -1;
             }
-            return ((Notification) group.widgets.last ().data).param.time;
+            return ((Notification) group.widgets.first ().data).param.time;
         }
 
         public bool get_is_urgent () {

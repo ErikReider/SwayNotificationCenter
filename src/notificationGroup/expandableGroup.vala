@@ -11,30 +11,64 @@ namespace SwayNotificationCenter {
                 return (1 - animation_progress);
             }
         }
+        private AnimationValueTarget animation_target;
         private Adw.TimedAnimation animation;
-        private Adw.CallbackAnimationTarget animation_target;
 
-        private unowned on_expand_change change_cb;
-
-        public List<unowned Gtk.Widget> widgets = new List<unowned Gtk.Widget> ();
+        public uint n_children { get; private set; }
+        public List<Gtk.Widget> widgets = new List<Gtk.Widget> ();
+        public List<unowned Gtk.Widget> visible_widgets = new List<unowned Gtk.Widget> ();
 
         public delegate void on_expand_change (bool state);
 
-        public ExpandableGroup (uint animation_duration, on_expand_change change_cb) {
+        private unowned Gtk.Viewport viewport;
+
+        public ExpandableGroup (Gtk.Viewport viewport,
+                                uint animation_duration) {
+            this.viewport = viewport;
+
             base.set_can_focus (true);
 
-            this.change_cb = change_cb;
-
-            animation_target = new Adw.CallbackAnimationTarget (animation_value_cb);
+            animation_target = new AnimationValueTarget (1.0f, animation_value_cb);
             animation = new Adw.TimedAnimation (this, 1.0, 0.0,
                                                 animation_duration,
-                                                animation_target);
+                                                animation_target.get_animation_target ());
             animation.set_easing (Adw.Easing.EASE_IN_OUT_CUBIC);
             animation.done.connect (animation_done_cb);
 
-            this.show ();
-
             set_expanded (false);
+        }
+
+        public override void dispose () {
+            while (!widgets.is_empty ()) {
+                widgets.delete_link (widgets.nth (0));
+            }
+            warn_if_fail (widgets.is_empty ());
+            while (!visible_widgets.is_empty ()) {
+                visible_widgets.delete_link (visible_widgets.nth (0));
+            }
+            warn_if_fail (visible_widgets.is_empty ());
+
+            base.dispose ();
+        }
+
+        protected override Gtk.SizeRequestMode get_request_mode () {
+            foreach (unowned Gtk.Widget item in widgets) {
+                if (item.get_request_mode () != Gtk.SizeRequestMode.CONSTANT_SIZE) {
+                    return Gtk.SizeRequestMode.HEIGHT_FOR_WIDTH;
+                }
+            }
+            return Gtk.SizeRequestMode.CONSTANT_SIZE;
+        }
+
+        protected override void compute_expand_internal (out bool hexpand_p,
+                                                         out bool vexpand_p) {
+            hexpand_p = false;
+            vexpand_p = false;
+
+            foreach (unowned Gtk.Widget item in widgets) {
+                hexpand_p |= item.compute_expand (Gtk.Orientation.HORIZONTAL);
+                vexpand_p |= item.compute_expand (Gtk.Orientation.VERTICAL);
+            }
         }
 
         public void set_expanded (bool value) {
@@ -46,13 +80,12 @@ namespace SwayNotificationCenter {
             animate (is_expanded ? 1 : 0);
 
             this.queue_resize ();
-
-            change_cb (is_expanded);
         }
 
         public void add (Gtk.Widget widget) {
             widget.set_parent (this);
-            widgets.append (widget);
+            widgets.prepend (widget);
+            n_children++;
         }
 
         public void remove (Gtk.Widget widget) {
@@ -61,22 +94,192 @@ namespace SwayNotificationCenter {
             if (this.get_visible () && widget.get_visible ()) {
                 queue_resize ();
             }
+            n_children--;
         }
 
-        private Gtk.Allocation get_alloc (Gtk.Widget w) {
-            Gtk.Allocation alloc = Gtk.Allocation ();
+        private delegate void compute_height_iter_cb (Gtk.Widget child,
+                                                      WidgetAlloc widget_alloc,
+                                                      int index,
+                                                      WidgetAlloc first_alloc);
+
+        private void compute_height (int width,
+                                     int height,
+                                     compute_height_iter_cb iter_callback) {
+            int num_vexpand_children = 0;
+            WidgetHeights measured_height = WidgetHeights ();
+            WidgetHeights[] heights = new WidgetHeights[n_children];
+            int total_min = 0;
+            int total_nat = 0;
+
+            int i = 0;
+            foreach (unowned Gtk.Widget child in widgets) {
+                if (!child.should_layout ()) {
+                    continue;
+                }
+
+                // Get the largest minimum height and use it for the fade distance
+                int nat_width;
+                // First, get the minimum width of our widget
+                child.measure (Gtk.Orientation.HORIZONTAL, -1,
+                               null, out nat_width, null, null);
+                // Now use the natural width to retrieve the minimum and
+                // natural height to display.
+                int min_height, nat_height;
+                child.measure (Gtk.Orientation.VERTICAL, nat_width,
+                               out min_height, out nat_height, null, null);
+
+                int min, nat;
+                child.measure (Gtk.Orientation.VERTICAL, width,
+                               out min, out nat, null, null);
+                heights[i] = WidgetHeights () {
+                    min_height = min,
+                    nat_height = nat,
+                };
+                total_min += min;
+                total_nat += nat;
+
+                if (child.compute_expand (Gtk.Orientation.VERTICAL)) {
+                    num_vexpand_children++;
+                }
+
+                i++;
+            }
+
+            bool allocate_nat = false;
+            int extra_height = 0;
+            if (height >= measured_height.nat_height) {
+                allocate_nat = true;
+                extra_height = height - measured_height.nat_height;
+            } else {
+                warn_if_reached ();
+            }
+
+            WidgetAlloc first_allocation = WidgetAlloc ();
+            int y = 0;
+            i = 0;
+            foreach (unowned Gtk.Widget child in widgets) {
+                WidgetHeights computed_height = heights[i];
+                WidgetAlloc child_allocation = WidgetAlloc () {
+                    y = 0,
+                    height = computed_height.min_height,
+                };
+                if (allocate_nat) {
+                    child_allocation.height = computed_height.nat_height;
+                }
+
+                if (child.compute_expand (Gtk.Orientation.VERTICAL)) {
+                    child_allocation.height += extra_height / num_vexpand_children;
+                }
+
+                child_allocation.y = y;
+
+                if (i == 0) {
+                    first_allocation = child_allocation;
+                }
+                iter_callback (child, child_allocation, i, first_allocation);
+
+                y += child_allocation.height;
+                i++;
+            }
+        }
+
+        private inline bool is_outside_bounds (float y, int height, float max_height) {
+            return y + height < 0 || y > max_height;
+        }
+
+        protected override void size_allocate (int width, int height, int baseline) {
+            base.size_allocate (width, height, baseline);
+
+            // Recalculate which children are visible, so clear the old list
+            while (!visible_widgets.is_empty ()) {
+                visible_widgets.delete_link (visible_widgets.nth (0));
+            }
+            warn_if_fail (visible_widgets.is_empty ());
+
+
+            if (n_children == 0) {
+                return;
+            }
+
             Graphene.Rect bounds;
-            w.compute_bounds (this, out bounds);
+            this.compute_bounds (viewport, out bounds);
+            float max_height = viewport.get_height ();
 
-            alloc.width = w.get_width ();
-            alloc.height = w.get_height ();
-            alloc.x = (int) bounds.origin.x;
-            alloc.y = (int) bounds.origin.y;
-            return alloc;
-        }
+            compute_height (width, height, (child, child_allocation, index, target_alloc) => {
+                // Allocate the size and position of each item
+                if (!child.should_layout ()) {
+                    return;
+                }
 
-        public override Gtk.SizeRequestMode get_request_mode () {
-            return Gtk.SizeRequestMode.HEIGHT_FOR_WIDTH;
+                // Expand or shrink stacked notifications to the expected height
+                // (the most recent notification when collapsed)
+                int child_height = (int) Adw.lerp (target_alloc.height, child_allocation.height,
+                                                   animation_progress);
+
+                //
+                // Cull non-visible widgets
+                //
+
+                Graphene.Point viewport_relative_coords;
+                this.compute_point (
+                    viewport,
+                    Graphene.Point ().init (0, child_allocation.y),
+                    out viewport_relative_coords);
+
+                bool skip_child = false;
+                bool outside_bounds
+                    = is_outside_bounds (viewport_relative_coords.y, child_height, max_height);
+                if (animation_progress > 0 && animation_progress < 1) {
+                    // Skip out of bounds notifications
+                    if (index >= NUM_STACKED_NOTIFICATIONS && outside_bounds) {
+                        skip_child = true;
+                    }
+                } else if (!is_expanded) {
+                    // Skip out of bounds notifications, except for the first 3
+                    if (index >= NUM_STACKED_NOTIFICATIONS) {
+                        skip_child = true;
+                    }
+                } else if (outside_bounds) {
+                    // Skip out of bounds notifications
+                    skip_child = true;
+                }
+
+                if (skip_child) {
+                    return;
+                }
+
+                //
+                // Allocate the widget
+                //
+
+                visible_widgets.prepend (child);
+
+                float scale = 1.0f;
+                float opacity = 1.0f;
+                float x = 0;
+                float y = (float) Adw.lerp (0, child_allocation.y, animation_progress);
+
+                // Add the collapsed offset to only stacked notifications.
+                // Excludes notifications index > NUM_STACKED_NOTIFICATIONS
+                if (index < NUM_STACKED_NOTIFICATIONS) {
+                    scale = (float) double.min (
+                        animation_progress + Math.pow (0.95, index), 1);
+                    // Moves the scaled notification to the center of X and bottom y
+                    x = (width - width * scale) * 0.5f;
+                    y += child_height * (1 - scale);
+                    // Apply a vertical offset to the notification
+                    y += (int) Adw.lerp (COLLAPSED_NOTIFICATION_OFFSET, 0,
+                                         animation_progress) * index;
+                } else {
+                    opacity = (float) (1.5f * animation_progress);
+                }
+
+                Gsk.Transform transform = new Gsk.Transform ()
+                     .translate (Graphene.Point ().init (x, y))
+                     .scale (scale, scale);
+                child.allocate (width, child_height, baseline, transform);
+                child.set_opacity (opacity);
+            });
         }
 
         protected override void measure (Gtk.Orientation orientation, int for_size,
@@ -87,193 +290,45 @@ namespace SwayNotificationCenter {
             minimum_baseline = -1;
             natural_baseline = -1;
 
-            if (orientation == Gtk.Orientation.HORIZONTAL) {
+            if (orientation == Gtk.Orientation.HORIZONTAL || n_children == 0) {
                 return;
             }
 
             foreach (unowned Gtk.Widget widget in widgets) {
-                if (widget != null && widget.get_visible ()) {
-                    int widget_minimum_height = 0;
-                    int widget_natural_height = 0;
-                    widget.measure (orientation, for_size,
-                                    out widget_minimum_height,
-                                    out widget_natural_height,
-                                    null, null);
-
-                    minimum += widget_minimum_height;
-                    natural += widget_natural_height;
-                }
-            }
-
-            int target_natural_height;
-            int target_minimum_height;
-            get_height_for_latest_notifications (for_size, out target_minimum_height,
-                                                 out target_natural_height);
-            // TODO: Always use natural as minimum?
-            // Fixes large (tall) Notification body Pictures
-            minimum = (int) Functions.lerp (minimum,
-                                            target_natural_height,
-                                            animation_progress_inv);
-            natural = (int) Functions.lerp (natural,
-                                            target_natural_height,
-                                            animation_progress_inv);
-        }
-
-        protected override void size_allocate (int alloc_width, int alloc_height, int baseline) {
-            base.size_allocate (alloc_width, alloc_height, baseline);
-
-            int length = (int) widgets.length ();
-            if (length == 0) {
-                return;
-            }
-
-            Gtk.Allocation allocation = get_alloc (this);
-            allocation.width = alloc_width;
-            allocation.height = alloc_height;
-
-            Gtk.Allocation prev_allocation = Gtk.Allocation ();
-            prev_allocation.y = allocation.y;
-
-            // The height of the most recent notification
-            unowned Gtk.Widget last = widgets.last ().data;
-            int target_height = 0;
-
-            last.measure (Gtk.Orientation.VERTICAL, allocation.width, null, out target_height, null,
-                          null);
-
-            for (int i = length - 1; i >= 0; i--) {
-                unowned Gtk.Widget widget = widgets.nth_data (i);
-                if (widget != null && widget.get_visible ()) {
-                    int height;
-                    widget.measure (Gtk.Orientation.VERTICAL, allocation.width,
-                                    null, out height,
-                                    null, null);
-
-                    Gtk.Allocation alloc = Gtk.Allocation ();
-                    alloc.x = allocation.x;
-                    alloc.y = (int) (prev_allocation.y +
-                                     animation_progress * prev_allocation.height);
-                    alloc.width = allocation.width;
-                    alloc.height = height;
-                    // Expand smaller stacked notifications to the expected height
-                    // But only when the animation has finished
-                    if (target_height > height && !is_expanded && animation_progress == 0) {
-                        alloc.height = target_height;
-                    }
-
-                    // Add the collapsed offset to only stacked notifications.
-                    // Excludes notifications index > NUM_STACKED_NOTIFICATIONS
-                    if (i < length - 1 && length - 1 - i < NUM_STACKED_NOTIFICATIONS) {
-                        alloc.y += (int) (animation_progress_inv * COLLAPSED_NOTIFICATION_OFFSET);
-                    }
-
-                    prev_allocation = alloc;
-                    Gsk.Transform transform = new Gsk.Transform ();
-                    transform = transform.translate (Graphene.Point ().init (alloc.x, alloc.y));
-                    widget.allocate (alloc.width, alloc.height, baseline, transform);
-
-                    if (get_realized ()) {
-                        widget.show ();
-                    }
-                }
-                if (get_realized ()) {
-                    widget.set_child_visible (true);
-                }
-            }
-        }
-
-        // Draw the widget
-        protected override void snapshot (Gtk.Snapshot snapshot) {
-            int length = (int) widgets.length ();
-            if (length == 0) {
-                return;
-            }
-
-            Graphene.Rect bounds = Graphene.Rect ();
-            if (!compute_bounds (this, out bounds)) {
-                return;
-            }
-            Gtk.Allocation alloc = get_alloc (this);
-            int width = alloc.width;
-
-            unowned Gtk.Widget latest = widgets.nth_data (length - 1);
-            Gtk.Allocation latest_alloc = get_alloc (latest);
-
-            for (int i = 0; i < length; i++) {
-                // Skip drawing excess notifications
-                if (!is_expanded &&
-                    animation_progress == 0 &&
-                    i < length - NUM_STACKED_NOTIFICATIONS) {
+                if (!widget.should_layout ()) {
                     continue;
                 }
 
-                unowned Gtk.Widget widget = widgets.nth_data (i);
-                Gtk.Allocation widget_alloc = get_alloc (widget);
+                int min_height = 0;
+                int nat_height = 0;
+                widget.measure (orientation, for_size,
+                                out min_height,
+                                out nat_height,
+                                null, null);
+                minimum += min_height;
+                natural += nat_height;
+            }
 
-                int height_diff = latest_alloc.height - widget_alloc.height;
+            int target_nat_height;
+            int target_min_height;
+            get_height_for_latest_notifications (for_size, out target_min_height,
+                                                 out target_nat_height);
+            // TODO: Always use natural as minimum?
+            // Fixes large (tall) Notification body Pictures
+            minimum = (int) Functions.lerp (minimum,
+                                            target_nat_height,
+                                            animation_progress_inv);
+            natural = (int) Functions.lerp (natural,
+                                            target_nat_height,
+                                            animation_progress_inv);
+        }
 
-                snapshot.save ();
-
-                // Move down even more if the height is larger than the latest
-                // in the stack (helps with only rendering the bottom portion)
-                double translate_y = height_diff * animation_progress_inv;
-                snapshot.translate (Graphene.Point ().init (0, (float) translate_y));
-
-                // Scale down lower notifications in the stack
-                if (i + 1 != length) {
-                    double scale = double.min (
-                        animation_progress + Math.pow (0.95, length - 1 - i), 1);
-                    // Moves the scaled notification to the center of X and bottom y
-                    snapshot.translate (Graphene.Point ().init (
-                                            (float) ((widget_alloc.width - width * scale) * 0.5),
-                                            (float) (widget_alloc.height * (1 - scale))));
-                    snapshot.scale ((float) scale, (float) scale);
+        protected override void snapshot (Gtk.Snapshot snapshot) {
+            foreach (unowned Gtk.Widget child in visible_widgets) {
+                if (!child.should_layout ()) {
+                    continue;
                 }
-
-                int lerped_y = (int) Functions.lerp (-height_diff, 0, animation_progress);
-                lerped_y += (int) widget_alloc.y - alloc.y;
-                int lerped_height = (int) Functions.lerp (latest_alloc.height,
-                                                          widget_alloc.height,
-                                                          animation_progress);
-                // Clip to the size of the latest notification
-                // (fixes issue where a larger bottom notification would
-                // be visible above)
-                Graphene.Rect clip_bounds = Graphene.Rect ().init (0f,
-                                                                   (float) lerped_y,
-                                                                   (float) width,
-                                                                   (float) lerped_height);
-                snapshot.push_clip (clip_bounds);
-
-                // TODO: Fades from the bottom at 0.5 -> top at 0.0 opacity
-                // Draw patterns on the notification
-                // cr.push_group ();
-                // widget.draw (cr);
-                // if (i + 1 != length) {
-                //// Draw Fade Gradient
-                // cr.save ();
-                // cr.translate (0, lerped_y);
-                // cr.scale (1, lerped_height * 0.5);
-                // cr.set_source (fade_gradient);
-                // cr.rectangle (0, 0, width, lerped_height * 0.5);
-                // cr.set_operator (Cairo.Operator.DEST_OUT);
-                // cr.fill ();
-                // cr.restore ();
-                // }
-                // cr.pop_group_to_source ();
-                // cr.paint ();
-
-                // Cross-fades in the non visible stacked notifications when expanded
-                if (i < length - NUM_STACKED_NOTIFICATIONS) {
-                    snapshot.push_opacity (1.5 * animation_progress);
-                }
-                snapshot_child (widget, snapshot);
-
-                if (i < length - NUM_STACKED_NOTIFICATIONS) {
-                    snapshot.pop (); // Cross-fade
-                }
-                snapshot.pop (); // Clip
-
-                snapshot.restore ();
+                snapshot_child (child, snapshot);
             }
         }
 
@@ -284,21 +339,20 @@ namespace SwayNotificationCenter {
             minimum = 0;
             natural = 0;
 
-            int length = (int) widgets.length ();
-            if (length == 0) {
+            if (n_children == 0) {
                 return;
             }
 
-            unowned GLib.List<weak Gtk.Widget> last = widgets.last ();
-            if (last != null) {
-                unowned Gtk.Widget last_widget = widgets.last ().data;
+            unowned List<Gtk.Widget> first = widgets.first ();
+            if (first != null) {
+                unowned Gtk.Widget last_widget = first.data;
 
                 last_widget.measure (Gtk.Orientation.VERTICAL, for_size,
                                      out minimum, out natural,
                                      null, null);
             }
 
-            int offset = (length - 1).clamp (0, NUM_STACKED_NOTIFICATIONS - 1)
+            int offset = (int) (n_children - 1).clamp (0, NUM_STACKED_NOTIFICATIONS - 1)
                 * COLLAPSED_NOTIFICATION_OFFSET;
 
             natural += offset;

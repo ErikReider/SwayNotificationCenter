@@ -68,6 +68,7 @@ app_sources = [
   'dismissableWidget/dismissableWidget.vala',
   'notification/notification.vala',
   'notificationGroup/notificationGroup.vala',
+  'notificationGroup/expandableGroup.vala',
   'controlCenter/controlCenter.vala',
   widget_sources,
   'blankWindow/blankWindow.vala',

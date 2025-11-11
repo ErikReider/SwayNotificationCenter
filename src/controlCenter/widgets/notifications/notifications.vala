@@ -182,7 +182,7 @@ namespace SwayNotificationCenter.Widgets {
                 noti_groups_name.lookup_extended (param.name_id, null, out group);
             }
             if (group == null || ConfigModel.instance.notification_grouping == false) {
-                group = new NotificationGroup (param.name_id, param.display_name);
+                group = new NotificationGroup (param.name_id, param.display_name, viewport);
                 // Collapse other groups on expand
                 group.on_expand_change.connect ((expanded) => {
                     if (!expanded) {

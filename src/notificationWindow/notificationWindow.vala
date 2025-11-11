@@ -172,7 +172,7 @@ namespace SwayNotificationCenter {
         }
 
         private void set_input_region () {
-            unowned Gdk.Surface ?surface = window.get_surface ();
+            unowned Gdk.Surface ?surface = get_surface ();
             if (surface == null) {
                 return;
             }

@@ -26,6 +26,8 @@ namespace SwayNotificationCenter {
                                 uint animation_duration) {
             this.viewport = viewport;
 
+            viewport.vadjustment.value_changed.connect (() => queue_allocate ());
+
             base.set_can_focus (true);
 
             animation_target = new AnimationValueTarget (1.0f, animation_value_cb);

@@ -289,7 +289,7 @@ window that'll allow you to see all of the CSS classes + other information.
 
 ## Toggle Buttons
 
-To add toggle buttons to your control center you can set the "type" in any acton to "toggle".
+To add toggle buttons to your control center you can set the "type" of any action to "toggle".
 The toggle button supports different commands depending on the state of the button and
 an "update-command" to update the state in case of changes from outside swaync. The update-command
 is called every time the control center is opened.

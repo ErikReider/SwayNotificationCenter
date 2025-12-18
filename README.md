@@ -34,6 +34,7 @@ https://github.com/user-attachments/assets/5c054ac3-90bb-483e-a8f2-5af191805f04
      * [Debian](#debian)
      * [Guix](#guix)
      * [rde](#rde)
+     * [NixOS](#nixos)
      * [Other](#other)
   * [Sway Usage](#sway-usage)
   * [Run](#run)
@@ -188,6 +189,41 @@ But we recommend to use [Guix Home](https://guix.gnu.org/manual/devel/en/html_no
 ;; Include the following code into the list of your rde features:
 (feature-swaynotificationcenter)
 ```
+
+### nixOS
+
+Add it as a flake: 
+```
+swaync-flake.url = "github:ErikReider/SwayNotificationCenter" # use optional ?ref= to point to a particular version
+```
+And in your config: 
+```
+# https://mynixos.com/home-manager/options/services.swaync
+services.swaync = {
+  enable = true;  # Starts the daemon and sets up the service
+  package = inputs.swaync-flake.packages.${pkgs.system}.default;
+
+  settings = {
+    positionX = "right";
+    positionY = "top";
+    control-center-margin-top = 10;
+    notification-icon-size = 64;
+    # Add widgets, timeouts, etc. here (full options via the schema link above)
+    widgets = [ "title" "dnd" "notifications" "mpris" "buttons-grid" ];
+    # Example toggle button
+    "buttons-grid" = {
+      actions = [
+        {
+          label = "WiFi";
+          type = "toggle";
+          command = "nmcli radio wifi off";  # Simplified example
+        }
+      ];
+    };
+  };
+};
+```
+
 
 ### Other
 

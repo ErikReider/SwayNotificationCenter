@@ -34,6 +34,7 @@ https://github.com/user-attachments/assets/5c054ac3-90bb-483e-a8f2-5af191805f04
      * [Debian](#debian)
      * [Guix](#guix)
      * [rde](#rde)
+     * [Void](#void)
      * [Other](#other)
   * [Sway Usage](#sway-usage)
   * [Run](#run)
@@ -187,6 +188,12 @@ But we recommend to use [Guix Home](https://guix.gnu.org/manual/devel/en/html_no
 
 ;; Include the following code into the list of your rde features:
 (feature-swaynotificationcenter)
+```
+
+### Void
+
+```zsh
+sudo xbps-install -S SwayNotificationCenter
 ```
 
 ### Other

@@ -121,7 +121,7 @@ namespace SwayNotificationCenter.Widgets {
                 if (noti != null && noti.param.applied_id == id) {
                     if (dismiss) {
                         // TODO: Fix loop:
-                        //      swayncdaemon -> here -> notification -> swayncdaemon -> here...
+                        // swayncdaemon -> here -> notification -> swayncdaemon -> here...
                         noti.close_notification (false);
                     }
                     group.remove_notification (noti);

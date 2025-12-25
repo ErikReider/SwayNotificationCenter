@@ -13,7 +13,7 @@ namespace SwayNotificationCenter {
         private const int MAX_HEIGHT = 600;
 
         public NotificationWindow () {
-            Object (css_name : "notificationwindow");
+            Object (css_name: "notificationwindow");
             if (app.use_layer_shell) {
                 if (!GtkLayerShell.is_supported ()) {
                     stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
@@ -254,7 +254,7 @@ namespace SwayNotificationCenter {
                 list.remove.begin (noti, transition, (obj, res) => {
                     if (dismiss && param.ignore_cc ()) {
                         noti_daemon.NotificationClosed (param.applied_id,
-                                                                      ClosedReasons.DISMISSED);
+                                                        ClosedReasons.DISMISSED);
                     }
                     if (list.is_empty ()) {
                         set_visible (false);

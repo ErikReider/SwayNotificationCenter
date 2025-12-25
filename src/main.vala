@@ -158,9 +158,9 @@ namespace SwayNotificationCenter {
 
                 try {
                     swaync_daemon.subscribe_v2 (swaync_daemon.notification_count (),
-                                  dnd,
-                                  swaync_daemon.get_visibility (),
-                                  swaync_daemon.inhibited);
+                                                dnd,
+                                                swaync_daemon.get_visibility (),
+                                                swaync_daemon.inhibited);
                 } catch (Error e) {
                     stderr.printf (e.message + "\n");
                 }
@@ -168,9 +168,9 @@ namespace SwayNotificationCenter {
             // Update on start
             try {
                 swaync_daemon.subscribe_v2 (swaync_daemon.notification_count (),
-                              swaync_daemon.get_dnd (),
-                              swaync_daemon.get_visibility (),
-                              swaync_daemon.inhibited);
+                                            swaync_daemon.get_dnd (),
+                                            swaync_daemon.get_visibility (),
+                                            swaync_daemon.inhibited);
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }
@@ -251,7 +251,7 @@ namespace SwayNotificationCenter {
                         case "--style" :
                             style_path = args[++i];
                             break;
-                        case "--skip-system-css":
+                        case "--skip-system-css" :
                             skip_packaged_css = true;
                             break;
                         case "--custom-system-css":

@@ -1,8 +1,5 @@
 namespace SwayNotificationCenter.Widgets {
-    public static BaseWidget ?get_widget_from_key (owned string key,
-                                                   SwayncDaemon swaync_daemon,
-                                                   NotiDaemon noti_daemon,
-                                                   out bool is_notifications) {
+    public static BaseWidget ?get_widget_from_key (owned string key, out bool is_notifications) {
         is_notifications = false;
 
         string[] key_seperated = key.split ("#");
@@ -20,36 +17,36 @@ namespace SwayNotificationCenter.Widgets {
                 message ("Loading widget: widget-notifications");
                 return null;
             case "title":
-                widget = new Title (suffix, swaync_daemon, noti_daemon);
+                widget = new Title (suffix);
                 break;
             case "dnd":
-                widget = new Dnd (suffix, swaync_daemon, noti_daemon);
+                widget = new Dnd (suffix);
                 break;
             case "label":
-                widget = new Label (suffix, swaync_daemon, noti_daemon);
+                widget = new Label (suffix);
                 break;
             case "mpris":
-                widget = new Mpris.Mpris (suffix, swaync_daemon, noti_daemon);
+                widget = new Mpris.Mpris (suffix);
                 break;
             case "menubar":
-                widget = new Menubar (suffix, swaync_daemon, noti_daemon);
+                widget = new Menubar (suffix);
                 break;
             case "buttons-grid":
-                widget = new ButtonsGrid (suffix, swaync_daemon, noti_daemon);
+                widget = new ButtonsGrid (suffix);
                 break;
             case "slider":
-                widget = new Slider (suffix, swaync_daemon, noti_daemon);
+                widget = new Slider (suffix);
                 break;
 #if HAVE_PULSE_AUDIO
             case "volume":
-                widget = new Volume (suffix, swaync_daemon, noti_daemon);
+                widget = new Volume (suffix);
                 break;
 #endif
             case "backlight":
-                widget = new Backlight (suffix, swaync_daemon, noti_daemon);
+                widget = new Backlight (suffix);
                 break;
             case "inhibitors":
-                widget = new Inhibitors (suffix, swaync_daemon, noti_daemon);
+                widget = new Inhibitors (suffix);
                 break;
             default:
                 warning ("Could not find widget: \"%s\"!", key);

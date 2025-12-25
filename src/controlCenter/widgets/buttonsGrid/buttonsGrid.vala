@@ -13,8 +13,8 @@ namespace SwayNotificationCenter.Widgets {
         int buttons_per_row = 7;
         List<ToggleButton> toggle_buttons;
 
-        public ButtonsGrid (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
-            base (suffix, swaync_daemon, noti_daemon);
+        public ButtonsGrid (string suffix) {
+            base (suffix);
 
             Json.Object ?config = get_config (this);
             if (config != null) {

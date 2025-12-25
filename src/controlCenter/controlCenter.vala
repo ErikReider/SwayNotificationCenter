@@ -6,34 +6,25 @@ namespace SwayNotificationCenter {
         [GtkChild]
         unowned IterBox box;
 
-        private unowned Widgets.Notifications notifications;
-
         private Gtk.GestureClick blank_window_gesture;
         private bool blank_window_down = false;
         private bool blank_window_in = false;
 
         private Gtk.EventControllerKey key_controller;
 
-        private SwayncDaemon swaync_daemon;
-        private NotiDaemon noti_daemon;
-
         /** Unsorted list of copies of all notifications */
-        private List<Widgets.BaseWidget> widgets;
+        private List<unowned Widgets.BaseWidget> widgets;
         private const string[] DEFAULT_WIDGETS = { "title", "dnd", "notifications" };
 
         private string ?monitor_name = null;
 
-        public ControlCenter (SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
+        public ControlCenter () {
             Object (css_name: "blankwindow");
-            this.swaync_daemon = swaync_daemon;
-            this.noti_daemon = noti_daemon;
 
+            widgets = new List<unowned Widgets.BaseWidget> ();
+            widgets.append (notifications_widget);
 
-            widgets = new List<Widgets.BaseWidget> ();
-            widgets.append (new Widgets.Notifications (swaync_daemon, noti_daemon));
-            this.notifications = (Widgets.Notifications) widgets.nth_data (0);
-
-            if (swaync_daemon.use_layer_shell) {
+            if (app.use_layer_shell) {
                 if (!GtkLayerShell.is_supported ()) {
                     stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
                     stderr.printf ("Swaync only works on Wayland!\n");
@@ -60,16 +51,16 @@ namespace SwayNotificationCenter {
                     surface.disconnect (id);
                     debug ("ControlCenter mapped on monitor: %s",
                            Functions.monitor_to_string (monitor));
-                    swaync_daemon.show_blank_windows (monitor);
+                    app.show_blank_windows (monitor);
                 });
             });
             this.unmap.connect (() => {
                 debug ("ControlCenter un-mapped");
-                swaync_daemon.hide_blank_windows ();
+                app.hide_blank_windows ();
             });
 
             /*
-             * Handling of bank window presses (pressing outside of ControlCenter)
+             * Handling of bank window presses (pressing outside of Control Center)
              */
             blank_window_gesture = new Gtk.GestureClick ();
             ((Gtk.Widget) this).add_controller (blank_window_gesture);
@@ -78,7 +69,7 @@ namespace SwayNotificationCenter {
             blank_window_gesture.button = Gdk.BUTTON_PRIMARY;
             blank_window_gesture.propagation_phase = Gtk.PropagationPhase.BUBBLE;
             blank_window_gesture.pressed.connect ((n_press, x, y) => {
-                // Calculate if the clicked coords intersect the ControlCenter
+                // Calculate if the clicked coords intersect the Control Center
                 Graphene.Point click_point = Graphene.Point ()
                      .init ((float) x, (float) y);
                 Graphene.Rect ?bounds = null;
@@ -110,7 +101,7 @@ namespace SwayNotificationCenter {
                 if (sequence != gesture_single.get_current_sequence ()) {
                     return;
                 }
-                // Calculate if the clicked coords intersect the ControlCenter
+                // Calculate if the clicked coords intersect the Control Center
                 double x, y;
                 gesture.get_point (sequence, out x, out y);
                 Graphene.Point click_point = Graphene.Point ()
@@ -178,7 +169,7 @@ namespace SwayNotificationCenter {
                     }
                     break;
                 default:
-                    return notifications.key_press_event_cb (keyval, keycode, state);
+                    return notifications_widget.key_press_event_cb (keyval, keycode, state);
             }
             // Override the builtin list navigation
             return true;
@@ -191,7 +182,7 @@ namespace SwayNotificationCenter {
                 if (widget.get_parent () == box) {
                     box.remove (widget);
                 }
-                // Except for notifications. Otherwise we'd loose notifications
+                // Except for notifications. Otherwise we'd lose notifications
                 if (widget is Widgets.Notifications) {
                     return;
                 }
@@ -214,7 +205,7 @@ namespace SwayNotificationCenter {
                 // Add the widget if it is valid
                 bool is_notifications;
                 Widgets.BaseWidget ?widget = Widgets.get_widget_from_key (
-                    key, swaync_daemon, noti_daemon, out is_notifications);
+                    key, out is_notifications);
 
                 if (is_notifications) {
                     if (has_notifications) {
@@ -224,10 +215,10 @@ namespace SwayNotificationCenter {
                     }
                     has_notifications = true;
 
-                    notifications.reload_config ();
+                    notifications_widget.reload_config ();
 
                     // Append the notifications widget to the box in the order of the provided list
-                    box.append (notifications);
+                    box.append (notifications_widget);
                     continue;
                 }
                 if (widget == null) {
@@ -254,7 +245,7 @@ namespace SwayNotificationCenter {
                 pos_y = ConfigModel.instance.positionY;
             }
 
-            if (swaync_daemon.use_layer_shell) {
+            if (app.use_layer_shell) {
                 // Set the exlusive zone
                 int exclusive_zone = ConfigModel.instance.control_center_exclusive_zone ? 0 : 100;
                 GtkLayerShell.set_exclusive_zone (this, exclusive_zone);
@@ -349,17 +340,17 @@ namespace SwayNotificationCenter {
                 case PositionY.TOP:
                     align_y = Gtk.Align.START;
                     // Set cc widget position
-                    notifications.set_list_is_reversed (false);
+                    notifications_widget.set_list_is_reversed (false);
                     break;
                 case PositionY.CENTER:
                     align_y = Gtk.Align.CENTER;
                     // Set cc widget position
-                    notifications.set_list_is_reversed (false);
+                    notifications_widget.set_list_is_reversed (false);
                     break;
                 case PositionY.BOTTOM:
                     align_y = Gtk.Align.END;
                     // Set cc widget position
-                    notifications.set_list_is_reversed (true);
+                    notifications_widget.set_list_is_reversed (true);
                     break;
             }
             // Fit the ControlCenter to the monitor height
@@ -380,14 +371,6 @@ namespace SwayNotificationCenter {
                                   ConfigModel.instance.control_center_height);
         }
 
-        public uint notification_count () {
-            return notifications.notification_count ();
-        }
-
-        public void close_all_notifications () {
-            notifications.close_all_notifications ();
-        }
-
         private void on_visibility_change () {
             // Updates all widgets on visibility change
             foreach (var widget in widgets) {
@@ -399,7 +382,7 @@ namespace SwayNotificationCenter {
             } else {
                 remove_css_class ("open");
             }
-            swaync_daemon.subscribe_v2 (notification_count (),
+            swaync_daemon.subscribe_v2 (notifications_widget.notification_count (),
                                         noti_daemon.dnd,
                                         this.visible,
                                         swaync_daemon.inhibited);
@@ -422,18 +405,6 @@ namespace SwayNotificationCenter {
             this.set_visible (visibility);
 
             on_visibility_change ();
-        }
-
-        public void close_notification (uint32 id, bool dismiss) {
-            notifications.close_notification (id, dismiss);
-        }
-
-        public void replace_notification (uint32 id, NotifyParams new_params) {
-            notifications.replace_notification (id, new_params);
-        }
-
-        public void add_notification (NotifyParams param) {
-            notifications.add_notification (param);
         }
 
         public bool get_visibility () {

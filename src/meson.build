@@ -67,6 +67,7 @@ app_sources = [
   'notificationWindow/notificationWindow.vala',
   'dismissableWidget/dismissableWidget.vala',
   'notification/notification.vala',
+  'notificationCloseButton/notificationCloseButton.vala',
   'notificationGroup/notificationGroup.vala',
   'notificationGroup/expandableGroup.vala',
   'controlCenter/controlCenter.vala',

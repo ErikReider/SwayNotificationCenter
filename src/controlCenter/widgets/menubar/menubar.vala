@@ -43,8 +43,8 @@ namespace SwayNotificationCenter.Widgets {
         List<ConfigObject ?> menu_objects;
         List<ToggleButton> toggle_buttons;
 
-        public Menubar (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
-            base (suffix, swaync_daemon, noti_daemon);
+        public Menubar (string suffix) {
+            base (suffix);
             set_orientation (Gtk.Orientation.VERTICAL);
             set_hexpand (true);
 

@@ -318,6 +318,12 @@ namespace SwayNotificationCenter {
         }
 
         public bool set_cc_monitor (string name) throws DBusError, IOError {
+            if (!use_layer_shell) {
+                critical (
+                    "Setting Control Center monitor isn't supported "
+                    + "when layer shell is disabled!");
+                return false;
+            }
             unowned Gdk.Monitor ?monitor = Functions.try_get_monitor (name);
             if (monitor == null) {
                 return false;
@@ -328,6 +334,12 @@ namespace SwayNotificationCenter {
         }
 
         public bool set_noti_window_monitor (string name) throws DBusError, IOError {
+            if (!use_layer_shell) {
+                critical (
+                    "Setting Notification Window monitor isn't supported "
+                    + "when layer shell is disabled!");
+                return false;
+            }
             unowned Gdk.Monitor ?monitor = Functions.try_get_monitor (name);
             if (monitor == null) {
                 return false;

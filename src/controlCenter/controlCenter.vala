@@ -307,6 +307,13 @@ namespace SwayNotificationCenter {
                         }
                     }
                 }
+
+                // Set the preferred monitor
+                string ?monitor_name = ConfigModel.instance.control_center_preferred_output;
+                if (this.monitor_name != null) {
+                    monitor_name = this.monitor_name;
+                }
+                set_monitor (Functions.try_get_monitor (monitor_name));
             }
 
             // Set the window margins
@@ -364,13 +371,6 @@ namespace SwayNotificationCenter {
                                      ConfigModel.instance.control_center_height);
             box.set_size_request (ConfigModel.instance.control_center_width,
                                   ConfigModel.instance.control_center_height);
-
-            // Set the preferred monitor
-            string ?monitor_name = ConfigModel.instance.control_center_preferred_output;
-            if (this.monitor_name != null) {
-                monitor_name = this.monitor_name;
-            }
-            set_monitor (Functions.try_get_monitor (monitor_name));
         }
 
         public uint notification_count () {
@@ -434,7 +434,8 @@ namespace SwayNotificationCenter {
         }
 
         public void set_monitor (Gdk.Monitor ?monitor) {
-            debug ("Setting monitor for ControlCenter: %s", Functions.monitor_to_string (monitor));
+            debug ("Setting monitor for ControlCenter: %s",
+                   Functions.monitor_to_string (monitor) ?? "Monitor Picked by Compositor");
             this.monitor_name = monitor == null ? null : monitor.connector;
             GtkLayerShell.set_monitor (this, monitor);
         }

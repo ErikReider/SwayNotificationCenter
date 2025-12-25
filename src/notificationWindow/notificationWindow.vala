@@ -136,6 +136,13 @@ namespace SwayNotificationCenter {
                         scrolled_window.set_valign (Gtk.Align.END);
                         break;
                 }
+
+                // Set the preferred monitor
+                string ?monitor_name = ConfigModel.instance.notification_window_preferred_output;
+                if (NotificationWindow.monitor_name != null) {
+                    monitor_name = NotificationWindow.monitor_name;
+                }
+                set_monitor (Functions.try_get_monitor (monitor_name));
             }
 
             list.animation_reveal_type = AnimatedListItem.RevealAnimationType.SLIDE;
@@ -163,12 +170,7 @@ namespace SwayNotificationCenter {
                     break;
             }
 
-            // Set the preferred monitor
-            string ?monitor_name = ConfigModel.instance.notification_window_preferred_output;
-            if (NotificationWindow.monitor_name != null) {
-                monitor_name = NotificationWindow.monitor_name;
-            }
-            set_monitor (Functions.try_get_monitor (monitor_name));
+            set_input_region ();
         }
 
         private void set_input_region () {
@@ -365,7 +367,8 @@ namespace SwayNotificationCenter {
         }
 
         public void set_monitor (Gdk.Monitor ?monitor) {
-            debug ("Setting monitor for ControlCenter: %s", Functions.monitor_to_string (monitor));
+            debug ("Setting monitor for Floating Notifications: %s",
+                   Functions.monitor_to_string (monitor) ?? "Monitor Picked by Compositor");
             NotificationWindow.monitor_name = monitor == null ? null : monitor.connector;
             GtkLayerShell.set_monitor (this, monitor);
 

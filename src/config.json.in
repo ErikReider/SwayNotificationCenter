@@ -34,10 +34,12 @@
   "script-fail-notify": true,
   "scripts": {
     "example-script": {
+      "app-name": "example.app.id",
       "exec": "echo 'Do something...'",
       "urgency": "Normal"
     },
     "example-action-script": {
+      "app-name": "example.app.id",
       "exec": "echo 'Do something actionable!'",
       "urgency": "Normal",
       "run-on": "action"
@@ -46,8 +48,8 @@
   "notification-visibility": {
     "example-name": {
       "state": "muted",
-      "urgency": "Low",
-      "app-name": "Spotify"
+      "urgency": "Normal",
+      "app-name": "example.app.id"
     }
   },
   "widgets": [

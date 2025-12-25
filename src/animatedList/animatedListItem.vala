@@ -187,7 +187,7 @@ public class AnimatedListItem : Gtk.Widget {
 
     private void set_animation_done_cb (animation_done handler) {
         remove_animation_done_cb ();
-        animation_done_cb_id = animation.done.connect (handler);
+        animation_done_cb_id = animation.done.connect (() => handler);
     }
 
     private void added_finished_cb () {

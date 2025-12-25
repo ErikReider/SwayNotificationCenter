@@ -55,6 +55,25 @@ namespace SwayNotificationCenter {
             }
             this.set_anchor ();
 
+            this.map.connect (() => {
+                set_anchor ();
+
+                unowned Gdk.Surface surface = get_surface ();
+                if (!(surface is Gdk.Surface)) {
+                    warn_if_reached ();
+                    return;
+                }
+                ulong id = 0;
+                id = surface.enter_monitor.connect ((monitor) => {
+                    surface.disconnect (id);
+                    debug ("NotificationWindow mapped on monitor: %s",
+                           Functions.monitor_to_string (monitor));
+                });
+            });
+            this.unmap.connect (() => {
+                debug ("NotificationWindow un-mapped");
+            });
+
             // -1 should set it to the content size unless it exceeds max_height
             scrolled_window.set_min_content_height (-1);
             scrolled_window.set_max_content_height (
@@ -99,6 +118,7 @@ namespace SwayNotificationCenter {
         }
 
         private void set_anchor () {
+            debug ("NotificationWindow set_anchor");
             if (swaync_daemon.use_layer_shell) {
                 GtkLayerShell.set_layer (this, ConfigModel.instance.layer.to_layer ());
 

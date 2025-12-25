@@ -51,16 +51,22 @@ namespace SwayNotificationCenter {
 
                 unowned Gdk.Surface surface = get_surface ();
                 if (!(surface is Gdk.Surface)) {
+                    warn_if_reached ();
                     return;
                 }
 
                 ulong id = 0;
                 id = surface.enter_monitor.connect ((monitor) => {
                     surface.disconnect (id);
+                    debug ("ControlCenter mapped on monitor: %s",
+                           Functions.monitor_to_string (monitor));
                     swaync_daemon.show_blank_windows (monitor);
                 });
             });
-            this.unmap.connect (swaync_daemon.hide_blank_windows);
+            this.unmap.connect (() => {
+                debug ("ControlCenter un-mapped");
+                swaync_daemon.hide_blank_windows ();
+            });
 
             /*
              * Handling of bank window presses (pressing outside of ControlCenter)
@@ -238,6 +244,7 @@ namespace SwayNotificationCenter {
 
         /** Resets the UI positions */
         private void set_anchor () {
+            debug ("ControlCenter set_anchor");
             PositionX pos_x = ConfigModel.instance.control_center_positionX;
             if (pos_x == PositionX.NONE) {
                 pos_x = ConfigModel.instance.positionX;

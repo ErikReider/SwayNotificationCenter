@@ -72,6 +72,10 @@ namespace SwayNotificationCenter {
             monitors = display.get_monitors ();
             assert_nonnull (monitors);
 
+            monitors.items_changed.connect (() => {
+                info ("Monitors Changed:");
+                print_monitors ();
+            });
             print_monitors ();
 
             swaync_daemon = new SwayncDaemon ();

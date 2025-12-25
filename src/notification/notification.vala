@@ -280,12 +280,7 @@ namespace SwayNotificationCenter {
             // Remove notification when it has been swiped
             dismissible_widget.dismissed.connect (() => {
                 remove_noti_timeout ();
-                try {
-                    noti_daemon.manually_close_notification (
-                        param.applied_id, false);
-                } catch (Error e) {
-                    critical ("Error: %s", e.message);
-                }
+                noti_daemon.manually_close_notification (param, false);
             });
 
             Gtk.EventControllerKey reply_key_controller = new Gtk.EventControllerKey ();
@@ -695,12 +690,7 @@ namespace SwayNotificationCenter {
             remove_noti_timeout ();
             this.revealer.set_reveal_child (false);
             Timeout.add (this.transition_time, () => {
-                try {
-                    noti_daemon.manually_close_notification (param.applied_id,
-                                                             is_timeout);
-                } catch (Error e) {
-                    critical ("Error: %s", e.message);
-                }
+                noti_daemon.manually_close_notification (param, is_timeout);
                 return Source.REMOVE;
             });
         }

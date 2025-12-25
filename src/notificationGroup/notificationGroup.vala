@@ -276,7 +276,7 @@ namespace SwayNotificationCenter {
         }
 
         public uint get_num_notifications () {
-            return group.widgets.length ();
+            return group.n_children;
         }
 
         public bool is_empty () {

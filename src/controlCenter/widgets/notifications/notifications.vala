@@ -74,6 +74,11 @@ namespace SwayNotificationCenter.Widgets {
             stack.set_vhomogeneous (this.vertical_expand);
         }
 
+        public inline bool is_empty () {
+            return list_box_controller.length == 0;
+        }
+
+        /** Counts all notifications in each group */
         public uint notification_count () {
             uint count = 0;
             foreach (unowned Gtk.Widget widget in list_box_controller.get_children ()) {
@@ -115,6 +120,8 @@ namespace SwayNotificationCenter.Widgets {
                 var noti = (Notification) w;
                 if (noti != null && noti.param.applied_id == id) {
                     if (dismiss) {
+                        // TODO: Fix loop:
+                        //      swayncdaemon -> here -> notification -> swayncdaemon -> here...
                         noti.close_notification (false);
                     }
                     group.remove_notification (noti);

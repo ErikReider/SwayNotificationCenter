@@ -3,6 +3,8 @@ namespace SwayNotificationCenter {
     public class NotificationWindow : Gtk.ApplicationWindow {
         private static NotificationWindow ?window = null;
         /**
+         * TODO: Even needed to anymore with GTK 4?
+         *
          * A NotificationWindow singleton due to a nasty notification
          * enter_notify_event bug where GTK still thinks that the cursor is at
          * that location after closing the last notification. The next notification
@@ -239,19 +241,11 @@ namespace SwayNotificationCenter {
             surface.set_input_region (region);
         }
 
-        public void change_visibility (bool value) {
-            if (!value) {
-                close_all_notifications ();
-            } else {
-                this.set_anchor ();
-            }
-        }
-
         /** Return true to remove notification, false to skip */
         public delegate bool remove_iter_func (Notification notification);
 
         /** Hides all notifications. Only invokes the close action when transient */
-        public void close_all_notifications (remove_iter_func ?func = null) {
+        public void hide_all_notifications (remove_iter_func ?func = null) {
             inline_reply_notifications.clear ();
             if (!this.get_realized ()) {
                 return;
@@ -262,7 +256,7 @@ namespace SwayNotificationCenter {
                 }
                 Notification notification = (Notification) item.child;
                 if (func == null || func (notification)) {
-                    remove_notification (notification, notification.param.transient, false);
+                    remove_notification (notification, notification.param.ignore_cc (), false);
                 }
             }
 
@@ -274,8 +268,10 @@ namespace SwayNotificationCenter {
                                           bool transition) {
             // Remove notification and its destruction timeout
             if (noti != null) {
+                NotifyParams param = noti.param;
+
                 if (noti.has_inline_reply) {
-                    inline_reply_notifications.remove (noti.param.applied_id);
+                    inline_reply_notifications.remove (param.applied_id);
                     if (inline_reply_notifications.size == 0
                         && swaync_daemon.use_layer_shell
                         && GtkLayerShell.get_keyboard_mode (this)
@@ -365,14 +361,14 @@ namespace SwayNotificationCenter {
             add_notification (new_params);
         }
 
-        public uint32 ?get_latest_notification () {
+        public NotifyParams ?get_latest_notification () {
             unowned AnimatedListItem ?item = list.get_first_item ();
             if (item == null || !(item.child is Notification)) {
                 return null;
             }
 
             Notification noti = (Notification) item.child;
-            return noti.param.applied_id;
+            return noti.param;
         }
 
         public void latest_notification_action (uint32 action) {

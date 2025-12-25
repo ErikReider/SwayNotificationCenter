@@ -12,8 +12,8 @@ namespace SwayNotificationCenter.Widgets {
         string text = "Label Text";
         int max_lines = 5;
 
-        public Label (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
-            base (suffix, swaync_daemon, noti_daemon);
+        public Label (string suffix) {
+            base (suffix);
 
             Json.Object ?config = get_config (this);
             if (config != null) {

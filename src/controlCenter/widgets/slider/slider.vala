@@ -17,8 +17,8 @@ namespace SwayNotificationCenter.Widgets {
         private string cmd_setter;
         private string cmd_getter;
 
-        public Slider (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
-            base (suffix, swaync_daemon, noti_daemon);
+        public Slider (string suffix) {
+            base (suffix);
 
             int ?round_digits = 0;
 

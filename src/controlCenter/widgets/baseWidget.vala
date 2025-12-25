@@ -11,9 +11,6 @@ namespace SwayNotificationCenter.Widgets {
         public string key { get; private set; }
         public string suffix { get; private set; }
 
-        public unowned SwayncDaemon swaync_daemon;
-        public unowned NotiDaemon noti_daemon;
-
         public enum ButtonType {
             TOGGLE,
             NORMAL;
@@ -28,11 +25,9 @@ namespace SwayNotificationCenter.Widgets {
             }
         }
 
-        protected BaseWidget (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
+        protected BaseWidget (string suffix) {
             this.suffix = suffix;
             this.key = widget_name + (suffix.length > 0 ? "#%s".printf (suffix) : "");
-            this.swaync_daemon = swaync_daemon;
-            this.noti_daemon = noti_daemon;
 
             set_overflow (Gtk.Overflow.HIDDEN);
             add_css_class ("widget");

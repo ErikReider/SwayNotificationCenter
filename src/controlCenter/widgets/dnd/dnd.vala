@@ -12,8 +12,8 @@ namespace SwayNotificationCenter.Widgets {
         // Default config values
         string title = "Do Not Disturb";
 
-        public Dnd (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
-            base (suffix, swaync_daemon, noti_daemon);
+        public Dnd (string suffix) {
+            base (suffix);
 
             Json.Object ?config = get_config (this);
             if (config != null) {

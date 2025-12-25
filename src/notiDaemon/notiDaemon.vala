@@ -2,39 +2,19 @@ namespace SwayNotificationCenter {
     [DBus (name = "org.freedesktop.Notifications")]
     public class NotiDaemon : Object {
         private uint32 noti_id = 0;
+        private HashTable<string, uint32> synchronous_ids =
+            new HashTable<string, uint32> (str_hash, str_equal);
 
         /** Do Not Disturb state */
         internal bool dnd { get; set; default = false; }
         /** Called when Do Not Disturb state changes */
         internal signal void on_dnd_toggle (bool dnd);
 
-        private HashTable<string, uint32> synchronous_ids =
-            new HashTable<string, uint32> (str_hash, str_equal);
-
-        public Widgets.Notifications notifications_widget;
-        public ControlCenter control_center;
-
-        public unowned SwayncDaemon swaync_daemon;
-
-        public NotiDaemon (SwayncDaemon swaync_daemon) {
-            this.swaync_daemon = swaync_daemon;
-
+        public NotiDaemon () {
             this.notify["dnd"].connect (() => on_dnd_toggle (dnd));
-
-            on_dnd_toggle.connect ((dnd) => {
-                if (!dnd || NotificationWindow.is_null) {
-                    return;
-                }
-                NotificationWindow.instance.hide_all_notifications ((noti) => {
-                    return noti.param.urgency != UrgencyLevels.CRITICAL;
-                });
-            });
 
             // Init dnd from gsettings
             self_settings.bind ("dnd-state", this, "dnd", SettingsBindFlags.DEFAULT);
-
-            this.notifications_widget = new Widgets.Notifications (swaync_daemon, this);
-            this.control_center = new ControlCenter (swaync_daemon, this);
         }
 
         /** Method to close notification and send DISMISSED signal */

@@ -14,8 +14,8 @@ namespace SwayNotificationCenter.Widgets {
         bool has_clear_all_button = true;
         string button_text = "Clear All";
 
-        public Title (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
-            base (suffix, swaync_daemon, noti_daemon);
+        public Title (string suffix) {
+            base (suffix);
 
             Json.Object ?config = get_config (this);
             if (config != null) {
@@ -48,10 +48,8 @@ namespace SwayNotificationCenter.Widgets {
                 clear_all_button.clicked.connect (() => {
                     noti_daemon.close_all_notifications ();
                 });
-                if (noti_daemon.control_center != null) {
-                    clear_all_button.set_sensitive (
-                        noti_daemon.notifications_widget.is_empty ());
-                }
+                clear_all_button.set_sensitive (!notifications_widget.is_empty ());
+
                 swaync_daemon.subscribe_v2.connect ((count) => {
                     clear_all_button.set_sensitive (count > 0);
                 });

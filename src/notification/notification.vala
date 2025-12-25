@@ -121,7 +121,6 @@ namespace SwayNotificationCenter {
         public bool is_timed { get; construct; default = false; }
 
         public NotifyParams param { get; private set; }
-        public unowned NotiDaemon noti_daemon { get; construct; }
 
         public NotificationType notification_type {
             get;
@@ -157,23 +156,19 @@ namespace SwayNotificationCenter {
 
         /** Show a non-timed notification */
         public Notification.regular (NotifyParams param,
-                                     NotiDaemon noti_daemon,
                                      NotificationType notification_type) {
-            Object (noti_daemon: noti_daemon,
-                    notification_type: notification_type);
+            Object (notification_type: notification_type);
             this.param = param;
             build_noti ();
         }
 
         /** Show a timed notification */
         public Notification.timed (NotifyParams param,
-                                   NotiDaemon noti_daemon,
                                    NotificationType notification_type,
                                    uint timeout,
                                    uint timeout_low,
                                    uint timeout_critical) {
-            Object (noti_daemon: noti_daemon,
-                    notification_type: notification_type,
+            Object (notification_type: notification_type,
                     is_timed: true,
                     timeout_delay: timeout,
                     timeout_low_delay: timeout_low,
@@ -509,7 +504,7 @@ namespace SwayNotificationCenter {
                 && action.identifier != "") {
                 // Try getting a XDG Activation token so that the application
                 // can request compositor focus
-                string ?token = swaync_daemon.xdg_activation.get_token (this);
+                string ?token = app.xdg_activation.get_token (this);
                 if (token != null) {
                     noti_daemon.ActivationToken (param.applied_id, token);
                 }
@@ -555,7 +550,7 @@ namespace SwayNotificationCenter {
             // supports ON_DEMAND layer shell keyboard interactivity
             if (!ConfigModel.instance.notification_inline_replies
                 || (ConfigModel.instance.layer_shell
-                    && !swaync_daemon.has_layer_on_demand
+                    && !app.has_layer_on_demand
                     && notification_type == NotificationType.POPUP)) {
                 return;
             }

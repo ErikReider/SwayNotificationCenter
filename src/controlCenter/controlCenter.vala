@@ -12,25 +12,19 @@ namespace SwayNotificationCenter {
 
         private Gtk.EventControllerKey key_controller;
 
-        private SwayncDaemon swaync_daemon;
-        private NotiDaemon noti_daemon;
-
         /** Unsorted list of copies of all notifications */
         private List<unowned Widgets.BaseWidget> widgets;
         private const string[] DEFAULT_WIDGETS = { "title", "dnd", "notifications" };
 
         private string ?monitor_name = null;
 
-        public ControlCenter (SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
+        public ControlCenter () {
             Object (css_name: "blankwindow");
-            this.swaync_daemon = swaync_daemon;
-            this.noti_daemon = noti_daemon;
-
 
             widgets = new List<unowned Widgets.BaseWidget> ();
-            widgets.append (noti_daemon.notifications_widget);
+            widgets.append (notifications_widget);
 
-            if (swaync_daemon.use_layer_shell) {
+            if (app.use_layer_shell) {
                 if (!GtkLayerShell.is_supported ()) {
                     stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
                     stderr.printf ("Swaync only works on Wayland!\n");
@@ -57,12 +51,12 @@ namespace SwayNotificationCenter {
                     surface.disconnect (id);
                     debug ("ControlCenter mapped on monitor: %s",
                            Functions.monitor_to_string (monitor));
-                    swaync_daemon.show_blank_windows (monitor);
+                    app.show_blank_windows (monitor);
                 });
             });
             this.unmap.connect (() => {
                 debug ("ControlCenter un-mapped");
-                swaync_daemon.hide_blank_windows ();
+                app.hide_blank_windows ();
             });
 
             /*
@@ -175,7 +169,7 @@ namespace SwayNotificationCenter {
                     }
                     break;
                 default:
-                    return noti_daemon.notifications_widget.key_press_event_cb (keyval, keycode, state);
+                    return notifications_widget.key_press_event_cb (keyval, keycode, state);
             }
             // Override the builtin list navigation
             return true;
@@ -211,7 +205,7 @@ namespace SwayNotificationCenter {
                 // Add the widget if it is valid
                 bool is_notifications;
                 Widgets.BaseWidget ?widget = Widgets.get_widget_from_key (
-                    key, swaync_daemon, noti_daemon, out is_notifications);
+                    key, out is_notifications);
 
                 if (is_notifications) {
                     if (has_notifications) {
@@ -221,10 +215,10 @@ namespace SwayNotificationCenter {
                     }
                     has_notifications = true;
 
-                    noti_daemon.notifications_widget.reload_config ();
+                    notifications_widget.reload_config ();
 
                     // Append the notifications widget to the box in the order of the provided list
-                    box.append (noti_daemon.notifications_widget);
+                    box.append (notifications_widget);
                     continue;
                 }
                 if (widget == null) {
@@ -251,7 +245,7 @@ namespace SwayNotificationCenter {
                 pos_y = ConfigModel.instance.positionY;
             }
 
-            if (swaync_daemon.use_layer_shell) {
+            if (app.use_layer_shell) {
                 // Set the exlusive zone
                 int exclusive_zone = ConfigModel.instance.control_center_exclusive_zone ? 0 : 100;
                 GtkLayerShell.set_exclusive_zone (this, exclusive_zone);
@@ -346,17 +340,17 @@ namespace SwayNotificationCenter {
                 case PositionY.TOP:
                     align_y = Gtk.Align.START;
                     // Set cc widget position
-                    noti_daemon.notifications_widget.set_list_is_reversed (false);
+                    notifications_widget.set_list_is_reversed (false);
                     break;
                 case PositionY.CENTER:
                     align_y = Gtk.Align.CENTER;
                     // Set cc widget position
-                    noti_daemon.notifications_widget.set_list_is_reversed (false);
+                    notifications_widget.set_list_is_reversed (false);
                     break;
                 case PositionY.BOTTOM:
                     align_y = Gtk.Align.END;
                     // Set cc widget position
-                    noti_daemon.notifications_widget.set_list_is_reversed (true);
+                    notifications_widget.set_list_is_reversed (true);
                     break;
             }
             // Fit the ControlCenter to the monitor height
@@ -388,7 +382,7 @@ namespace SwayNotificationCenter {
             } else {
                 remove_css_class ("open");
             }
-            swaync_daemon.subscribe_v2 (noti_daemon.notifications_widget.notification_count (),
+            swaync_daemon.subscribe_v2 (notifications_widget.notification_count (),
                                         noti_daemon.dnd,
                                         this.visible,
                                         swaync_daemon.inhibited);

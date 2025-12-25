@@ -44,7 +44,7 @@ namespace SwayNotificationCenter {
 
         private NotificationWindow () {
             Object (css_name : "notificationwindow");
-            if (swaync_daemon.use_layer_shell) {
+            if (app.use_layer_shell) {
                 if (!GtkLayerShell.is_supported ()) {
                     stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
                     stderr.printf ("Swaync only works on Wayland!\n");
@@ -121,7 +121,7 @@ namespace SwayNotificationCenter {
 
         private void set_anchor () {
             debug ("NotificationWindow set_anchor");
-            if (swaync_daemon.use_layer_shell) {
+            if (app.use_layer_shell) {
                 GtkLayerShell.set_layer (this, ConfigModel.instance.layer.to_layer ());
 
                 GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
@@ -273,7 +273,7 @@ namespace SwayNotificationCenter {
                 if (noti.has_inline_reply) {
                     inline_reply_notifications.remove (param.applied_id);
                     if (inline_reply_notifications.size == 0
-                        && swaync_daemon.use_layer_shell
+                        && app.use_layer_shell
                         && GtkLayerShell.get_keyboard_mode (this)
                         != GtkLayerShell.KeyboardMode.NONE) {
                         GtkLayerShell.set_keyboard_mode (
@@ -300,7 +300,6 @@ namespace SwayNotificationCenter {
 
         public void add_notification (NotifyParams param) {
             var noti = new Notification.timed (param,
-                                               swaync_daemon.noti_daemon,
                                                NotificationType.POPUP,
                                                ConfigModel.instance.timeout,
                                                ConfigModel.instance.timeout_low,
@@ -308,10 +307,10 @@ namespace SwayNotificationCenter {
             if (noti.has_inline_reply) {
                 inline_reply_notifications.add (param.applied_id);
 
-                if (swaync_daemon.use_layer_shell &&
+                if (app.use_layer_shell &&
                     GtkLayerShell.get_keyboard_mode (this)
                     != GtkLayerShell.KeyboardMode.ON_DEMAND
-                    && swaync_daemon.has_layer_on_demand) {
+                    && app.has_layer_on_demand) {
                     GtkLayerShell.set_keyboard_mode (
                         this, GtkLayerShell.KeyboardMode.ON_DEMAND);
                 }

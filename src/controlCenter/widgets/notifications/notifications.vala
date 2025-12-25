@@ -37,8 +37,8 @@ namespace SwayNotificationCenter.Widgets {
         // Default config values
         bool vertical_expand = true;
 
-        public Notifications (SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
-            base ("", swaync_daemon, noti_daemon);
+        public Notifications () {
+            base ("");
 
             list_box_controller = new IterListBoxController (list_box);
 
@@ -100,14 +100,14 @@ namespace SwayNotificationCenter.Widgets {
             try {
                 swaync_daemon.subscribe_v2 (notification_count (),
                                             swaync_daemon.get_dnd (),
-                                            noti_daemon.control_center.get_visibility (),
+                                            control_center.get_visibility (),
                                             swaync_daemon.inhibited);
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }
 
             if (ConfigModel.instance.hide_on_clear) {
-                noti_daemon.control_center.set_visibility (false);
+                control_center.set_visibility (false);
             }
         }
 
@@ -179,9 +179,7 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         public void add_notification (NotifyParams param) {
-            var noti = new Notification.regular (param,
-                                                 noti_daemon,
-                                                 NotificationType.CONTROL_CENTER);
+            var noti = new Notification.regular (param, NotificationType.CONTROL_CENTER);
             noti.set_time ();
 
             NotificationGroup ?group = null;
@@ -239,7 +237,7 @@ namespace SwayNotificationCenter.Widgets {
             try {
                 swaync_daemon.subscribe_v2 (notification_count (),
                                             swaync_daemon.get_dnd (),
-                                            noti_daemon.control_center.get_visibility (),
+                                            control_center.get_visibility (),
                                             swaync_daemon.inhibited);
             } catch (Error e) {
                 stderr.printf (e.message + "\n");

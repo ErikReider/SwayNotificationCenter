@@ -674,17 +674,29 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
 
         AnimatedListItem ?item = try_get_ancestor (widget);
         if (item == null) {
+            warn_if_reached ();
             return false;
         }
 
         // Will unparent itself when done animating
-        bool result = yield item.removed (transition_children && transition);
+        if (!yield item.removed (transition_children && transition)) {
+            debug ("Skipping extra removal of AnimatedListItem");
+            return false;
+        }
 
         item.unparent ();
         children.remove (item);
         n_children--;
+
+        // Make sure that we don't render/compute the bounds of this destroyed widget.
+        // queue_resize might not finish in-time before iterating the visible children
+        unowned List<unowned AnimatedListItem> visible_item = visible_children.find (item);
+        if (visible_item != null) {
+            visible_children.delete_link (visible_item);
+        }
+
         queue_resize ();
-        return result;
+        return true;
     }
 
     public bool move_to_beginning (Gtk.Widget widget, bool scroll_to) {

@@ -178,19 +178,26 @@ namespace SwayNotificationCenter {
             }
 
             Cairo.Region region = new Cairo.Region ();
-            foreach (AnimatedListItem item in list.visible_children) {
+            foreach (unowned AnimatedListItem item in list.visible_children) {
+                if (item == null || !(item is Object)) {
+                    critical (
+                        "Could not iter over AnimatedListItem (%p) while setting input region\n",
+                        item);
+                    continue;
+                }
                 if (item.destroying) {
                     continue;
                 }
                 Graphene.Rect out_bounds;
-                item.compute_bounds (this, out out_bounds);
-                Cairo.RectangleInt item_rect = Cairo.RectangleInt () {
-                    x = (int) out_bounds.get_x (),
-                    y = (int) out_bounds.get_y (),
-                    width = (int) out_bounds.get_width (),
-                    height = (int) out_bounds.get_height (),
-                };
-                region.union_rectangle (item_rect);
+                if (item.compute_bounds (this, out out_bounds)) {
+                    Cairo.RectangleInt item_rect = Cairo.RectangleInt () {
+                        x = (int) out_bounds.get_x (),
+                        y = (int) out_bounds.get_y (),
+                        width = (int) out_bounds.get_width (),
+                        height = (int) out_bounds.get_height (),
+                    };
+                    region.union_rectangle (item_rect);
+                }
             }
 
             // The input region should only cover each preview widget

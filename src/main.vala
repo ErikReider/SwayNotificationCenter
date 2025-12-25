@@ -3,6 +3,7 @@ namespace SwayNotificationCenter {
     static SwayncDaemon swaync_daemon;
     static Widgets.Notifications notifications_widget;
     static ControlCenter control_center;
+    static NotificationWindow floating_notifications;
 
     static unowned ListModel ?monitors = null;
     static Swaync app;
@@ -141,6 +142,7 @@ namespace SwayNotificationCenter {
 
             xdg_activation = new XdgActivationHelper ();
 
+            floating_notifications = new NotificationWindow ();
             notifications_widget = new Widgets.Notifications ();
             control_center = new ControlCenter ();
 
@@ -148,8 +150,8 @@ namespace SwayNotificationCenter {
 
             noti_daemon.on_dnd_toggle.connect ((dnd) => {
                 // Hide all non-critical notifications on toggle
-                if (dnd && !NotificationWindow.is_null) {
-                    NotificationWindow.instance.hide_all_notifications ((noti) => {
+                if (dnd && floating_notifications.visible) {
+                    floating_notifications.hide_all_notifications ((noti) => {
                         return noti.param.urgency != UrgencyLevels.CRITICAL;
                     });
                 }

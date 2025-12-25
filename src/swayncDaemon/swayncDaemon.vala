@@ -98,7 +98,7 @@ namespace SwayNotificationCenter {
         /** Toggles the visibility of the controlcenter */
         public void toggle_visibility () throws DBusError, IOError {
             if (control_center.toggle_visibility ()) {
-                NotificationWindow.instance.hide_all_notifications ();
+                floating_notifications.hide_all_notifications ();
             }
         }
 
@@ -106,7 +106,7 @@ namespace SwayNotificationCenter {
         public void set_visibility (bool visibility) throws DBusError, IOError {
             control_center.set_visibility (visibility);
             if (visibility) {
-                NotificationWindow.instance.hide_all_notifications ();
+                floating_notifications.hide_all_notifications ();
             }
         }
 
@@ -229,7 +229,7 @@ namespace SwayNotificationCenter {
                 return false;
             }
 
-            NotificationWindow.instance.set_monitor (monitor);
+            floating_notifications.set_monitor (monitor);
             return true;
         }
     }

@@ -1,36 +1,6 @@
 namespace SwayNotificationCenter {
     [GtkTemplate (ui = "/org/erikreider/swaync/ui/notification_window.ui")]
     public class NotificationWindow : Gtk.ApplicationWindow {
-        private static NotificationWindow ?window = null;
-        /**
-         * TODO: Even needed to anymore with GTK 4?
-         *
-         * A NotificationWindow singleton due to a nasty notification
-         * enter_notify_event bug where GTK still thinks that the cursor is at
-         * that location after closing the last notification. The next notification
-         * would sometimes automatically be hovered...
-         * The only way to "solve" this is to close the window and reopen a new one.
-         */
-        public static NotificationWindow instance {
-            get {
-                if (window == null) {
-                    window = new NotificationWindow ();
-                } else if (!window.get_mapped () ||
-                           !window.get_realized () ||
-                           !(window.get_child () is Gtk.Widget)) {
-                    window.destroy ();
-                    window = new NotificationWindow ();
-                }
-                return window;
-            }
-        }
-
-        public static bool is_null {
-            get {
-                return window == null;
-            }
-        }
-
         [GtkChild]
         unowned Gtk.ScrolledWindow scrolled_window;
         [GtkChild]
@@ -42,7 +12,7 @@ namespace SwayNotificationCenter {
 
         private const int MAX_HEIGHT = 600;
 
-        private NotificationWindow () {
+        public NotificationWindow () {
             Object (css_name : "notificationwindow");
             if (app.use_layer_shell) {
                 if (!GtkLayerShell.is_supported ()) {
@@ -75,12 +45,6 @@ namespace SwayNotificationCenter {
             this.unmap.connect (() => {
                 debug ("NotificationWindow un-mapped");
             });
-
-            // -1 should set it to the content size unless it exceeds max_height
-            scrolled_window.set_min_content_height (-1);
-            scrolled_window.set_max_content_height (
-                int.max (ConfigModel.instance.notification_window_height, -1));
-            scrolled_window.set_propagate_natural_height (true);
 
             // TODO: Make option
             list.use_card_animation = true;
@@ -192,6 +156,12 @@ namespace SwayNotificationCenter {
                     break;
             }
 
+            // -1 should set it to the content size unless it exceeds max_height
+            scrolled_window.set_min_content_height (-1);
+            scrolled_window.set_max_content_height (
+                int.max (ConfigModel.instance.notification_window_height, -1));
+            scrolled_window.set_propagate_natural_height (true);
+
             set_input_region ();
         }
 
@@ -260,7 +230,7 @@ namespace SwayNotificationCenter {
                 }
             }
 
-            close ();
+            set_visible (false);
         }
 
         private void remove_notification (Notification ?noti,
@@ -282,15 +252,12 @@ namespace SwayNotificationCenter {
                 }
                 noti.remove_noti_timeout ();
                 list.remove.begin (noti, transition, (obj, res) => {
-                    if (list.remove.end (res)
-                        && dismiss
-                        && (!get_realized ()
-                            || !get_mapped ()
-                            || !(get_child () is Gtk.Widget)
-                            || list.is_empty ())) {
-                        Idle.add_once (() => {
-                            close ();
-                        });
+                    if (dismiss && param.ignore_cc ()) {
+                        noti_daemon.NotificationClosed (param.applied_id,
+                                                                      ClosedReasons.DISMISSED);
+                    }
+                    if (list.is_empty ()) {
+                        set_visible (false);
                         return;
                     }
                     set_input_region ();
@@ -316,15 +283,9 @@ namespace SwayNotificationCenter {
                 }
             }
 
-            if (!get_visible () || !get_mapped () || !get_realized ()) {
-                set_anchor ();
-            }
-            show ();
+            set_visible (true);
 
-            list.append.begin (noti, (obj, res) => {
-                return_if_fail (list.append.end (res) != null);
-                set_input_region ();
-            });
+            list.append.begin (noti);
         }
 
         public void close_notification (uint32 id, bool dismiss) {
@@ -378,7 +339,6 @@ namespace SwayNotificationCenter {
 
             Notification noti = (Notification) item.child;
             noti.click_alt_action (action);
-            noti.close_notification ();
         }
 
         public void set_monitor (Gdk.Monitor ?monitor) {

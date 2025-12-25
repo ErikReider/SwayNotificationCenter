@@ -19,7 +19,7 @@ namespace SwayNotificationCenter {
 
         /** Method to close notification and send DISMISSED signal */
         internal void manually_close_notification (NotifyParams param, bool is_timeout) {
-            NotificationWindow.instance.close_notification (param.applied_id, true);
+            floating_notifications.close_notification (param.applied_id, true);
             if (param.ignore_cc ()) {
                 NotificationClosed (param.applied_id,
                                     is_timeout ? ClosedReasons.EXPIRED : ClosedReasons.DISMISSED);
@@ -36,7 +36,7 @@ namespace SwayNotificationCenter {
 
         /** Method to close notification and send DISMISSED signal */
         internal void manually_close_notification_id (uint32 id) {
-            NotificationWindow.instance.close_notification (id, true);
+            floating_notifications.close_notification (id, true);
             notifications_widget.close_notification (id, true);
 
             NotificationClosed (id, ClosedReasons.DISMISSED);
@@ -49,13 +49,13 @@ namespace SwayNotificationCenter {
 
         /** Closes all popup and controlcenter notifications */
         internal void close_all_notifications () {
-            NotificationWindow.instance.hide_all_notifications ();
+            floating_notifications.hide_all_notifications ();
             notifications_widget.close_all_notifications ();
         }
 
         /** Closes latest popup notification */
         internal void hide_latest_notification (bool close) {
-            NotifyParams ?param = NotificationWindow.instance.get_latest_notification ();
+            NotifyParams ?param = floating_notifications.get_latest_notification ();
             if (param == null) {
                 return;
             }
@@ -64,12 +64,12 @@ namespace SwayNotificationCenter {
 
         /** Closes all popup notifications */
         internal void hide_all_notifications () {
-            NotificationWindow.instance.hide_all_notifications ();
+            floating_notifications.hide_all_notifications ();
         }
 
         /** Activates the `action_index` action of the latest notification */
         internal void latest_invoke_action (uint32 action_index) {
-            NotificationWindow.instance.latest_notification_action (action_index);
+            floating_notifications.latest_notification_action (action_index);
         }
 
         /*
@@ -182,13 +182,13 @@ namespace SwayNotificationCenter {
             if (show_notification) {
                 if (replace_notification > 0) {
                     debug ("Replacing Notification: ID:%u\n", param.applied_id);
-                    NotificationWindow.instance.replace_notification (replace_notification, param);
+                    floating_notifications.replace_notification (replace_notification, param);
                 } else {
-                    NotificationWindow.instance.add_notification (param);
+                    floating_notifications.add_notification (param);
                 }
             } else if (replace_notification > 0) {
                 // Remove the old notification due to it not being replaced
-                NotificationWindow.instance.close_notification (replace_notification, false);
+                floating_notifications.close_notification (replace_notification, false);
             } else {
                 debug ("Not displaying Notification: ID:%u, Reason: \"%s\"\n",
                        param.applied_id, hide_notification_reason);
@@ -303,7 +303,7 @@ namespace SwayNotificationCenter {
          */
         [DBus (name = "CloseNotification")]
         public void close_notification (uint32 id) throws DBusError, IOError {
-            NotificationWindow.instance.close_notification (id, true);
+            floating_notifications.close_notification (id, true);
             notifications_widget.close_notification (id, true);
             NotificationClosed (id, ClosedReasons.CLOSED_BY_CLOSENOTIFICATION);
         }

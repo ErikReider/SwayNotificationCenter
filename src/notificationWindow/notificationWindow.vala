@@ -131,17 +131,20 @@ namespace SwayNotificationCenter {
                 set_monitor (Functions.try_get_monitor (monitor_name));
             }
 
-            list.animation_reveal_type = AnimatedListItem.RevealAnimationType.SLIDE;
+            list.animation_add_reveal_type = AnimatedListItem.RevealAnimationType.SLIDE;
+            list.animation_remove_reveal_type = AnimatedListItem.RevealAnimationType.SLIDE;
+            list.animation_remove_child_type = AnimatedListItem.ChildAnimationType.NONE;
             switch (ConfigModel.instance.positionX) {
                 case PositionX.LEFT:
-                    list.animation_child_type = AnimatedListItem.ChildAnimationType.SLIDE_FROM_LEFT;
+                    list.animation_add_child_type =
+                        AnimatedListItem.ChildAnimationType.SLIDE_FROM_LEFT;
                     break;
                 case PositionX.CENTER:
-                    list.animation_child_type = AnimatedListItem.ChildAnimationType.NONE;
+                    list.animation_add_child_type = AnimatedListItem.ChildAnimationType.NONE;
                     break;
                 default:
                 case PositionX.RIGHT:
-                    list.animation_child_type =
+                    list.animation_add_child_type =
                         AnimatedListItem.ChildAnimationType.SLIDE_FROM_RIGHT;
                     break;
             }
@@ -211,58 +214,54 @@ namespace SwayNotificationCenter {
             surface.set_input_region (region);
         }
 
-        /** Return true to remove notification, false to skip */
-        public delegate bool remove_iter_func (Notification notification);
-
-        /** Hides all notifications. Only invokes the close action when transient */
-        public void hide_all_notifications (remove_iter_func ?func = null) {
+        /**
+         * Hides all notifications. Only invokes the NotificationClosed signal when transient.
+         * The optional callback is used to remove select notifications where each
+         * iteration returns a bool. True to remove notification, false to skip.
+         */
+        public void remove_all_notifications (bool transition,
+                                              notification_filter_func ?filter_func) {
             inline_reply_notifications.clear ();
-            if (!this.get_realized ()) {
-                return;
-            }
             foreach (unowned AnimatedListItem item in list.children) {
                 if (item.destroying) {
                     continue;
                 }
-                Notification notification = (Notification) item.child;
-                if (func == null || func (notification)) {
-                    remove_notification (notification, notification.param.ignore_cc (), false);
+                unowned Notification notification = (Notification) item.child;
+                if (notification != null
+                    && (filter_func == null || filter_func (notification))) {
+                    remove_notification_internal (notification, transition);
                 }
             }
 
             set_visible (false);
         }
 
-        private void remove_notification (Notification ?noti,
-                                          bool dismiss,
-                                          bool transition) {
-            // Remove notification and its destruction timeout
-            if (noti != null) {
-                NotifyParams param = noti.param;
+        private void remove_notification_internal (Notification notification, bool transition) {
+            return_if_fail (notification != null);
 
-                if (noti.has_inline_reply) {
-                    inline_reply_notifications.remove (param.applied_id);
-                    if (inline_reply_notifications.size == 0
-                        && app.use_layer_shell
-                        && GtkLayerShell.get_keyboard_mode (this)
-                        != GtkLayerShell.KeyboardMode.NONE) {
-                        GtkLayerShell.set_keyboard_mode (
-                            this, GtkLayerShell.KeyboardMode.NONE);
-                    }
+            NotifyParams param = notification.param;
+            // Disable transitions when not mapped
+            transition &= get_mapped ();
+
+            if (notification.has_inline_reply) {
+                inline_reply_notifications.remove (param.applied_id);
+                if (inline_reply_notifications.is_empty
+                    && app.use_layer_shell
+                    && GtkLayerShell.get_keyboard_mode (this)
+                    != GtkLayerShell.KeyboardMode.NONE) {
+                    GtkLayerShell.set_keyboard_mode (
+                        this, GtkLayerShell.KeyboardMode.NONE);
                 }
-                noti.remove_noti_timeout ();
-                list.remove.begin (noti, transition, (obj, res) => {
-                    if (dismiss && param.ignore_cc ()) {
-                        noti_daemon.NotificationClosed (param.applied_id,
-                                                        ClosedReasons.DISMISSED);
-                    }
-                    if (list.is_empty ()) {
-                        set_visible (false);
-                        return;
-                    }
-                    set_input_region ();
-                });
             }
+            // Remove notification and its destruction timeout
+            notification.remove_noti_timeout ();
+            list.remove.begin (notification, transition, (obj, res) => {
+                if (list.is_empty ()) {
+                    set_visible (false);
+                    return;
+                }
+                set_input_region ();
+            });
         }
 
         public void add_notification (NotifyParams param) {
@@ -288,14 +287,15 @@ namespace SwayNotificationCenter {
             list.append.begin (noti);
         }
 
-        public void close_notification (uint32 id, bool dismiss) {
+        /** Removes the notification widget with ID. Doesn't dismiss */
+        public void remove_notification (uint32 id) {
             foreach (unowned AnimatedListItem item in list.children) {
                 if (item.destroying) {
                     continue;
                 }
-                var noti = (Notification) item.child;
-                if (noti != null && noti.param.applied_id == id) {
-                    remove_notification (noti, dismiss, true);
+                unowned Notification notification = (Notification) item.child;
+                if (notification != null && notification.param.applied_id == id) {
+                    remove_notification_internal (notification, true);
                     break;
                 }
             }
@@ -324,6 +324,7 @@ namespace SwayNotificationCenter {
         public NotifyParams ?get_latest_notification () {
             unowned AnimatedListItem ?item = list.get_first_item ();
             if (item == null || !(item.child is Notification)) {
+                warn_if_reached ();
                 return null;
             }
 
@@ -334,6 +335,7 @@ namespace SwayNotificationCenter {
         public void latest_notification_action (uint32 action) {
             unowned AnimatedListItem ?item = list.get_first_item ();
             if (item == null || !(item.child is Notification)) {
+                warn_if_reached ();
                 return;
             }
 

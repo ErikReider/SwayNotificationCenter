@@ -46,7 +46,7 @@ namespace SwayNotificationCenter.Widgets {
             if (has_clear_all_button) {
                 clear_all_button = new Gtk.Button.with_label (button_text);
                 clear_all_button.clicked.connect (() => {
-                    noti_daemon.close_all_notifications ();
+                    noti_daemon.request_dismiss_all_notifications (ClosedReasons.DISMISSED);
                 });
                 clear_all_button.set_sensitive (!notifications_widget.is_empty ());
 

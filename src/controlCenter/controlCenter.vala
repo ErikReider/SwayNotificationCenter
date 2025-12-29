@@ -84,12 +84,7 @@ namespace SwayNotificationCenter {
                 }
                 blank_window_down = false;
                 if (blank_window_in) {
-                    try {
-                        swaync_daemon.set_visibility (false);
-                    } catch (Error e) {
-                        stderr.printf ("ControlCenter BlankWindow Click Error: %s\n",
-                                       e.message);
-                    }
+                    set_visibility (false);
                 }
 
                 if (blank_window_gesture.get_current_sequence () == null) {
@@ -382,10 +377,7 @@ namespace SwayNotificationCenter {
             } else {
                 remove_css_class ("open");
             }
-            swaync_daemon.subscribe_v2 (notifications_widget.notification_count (),
-                                        noti_daemon.dnd,
-                                        this.visible,
-                                        swaync_daemon.inhibited);
+            swaync_daemon.emit_subscribe ();
         }
 
         public bool toggle_visibility () {
@@ -407,7 +399,7 @@ namespace SwayNotificationCenter {
             on_visibility_change ();
         }
 
-        public bool get_visibility () {
+        public inline bool get_visibility () {
             return this.visible;
         }
 

@@ -100,6 +100,9 @@ namespace SwayNotificationCenter {
             "amp;" // &
         };
 
+        public bool dismissed { get; private set; default = false; }
+        public bool dismissed_by_swipe { get; private set; default = false; }
+
         private Notification () {}
 
         /** Show a non-timed notification */
@@ -140,6 +143,11 @@ namespace SwayNotificationCenter {
                 stderr.printf ("Invalid regex: %s", e.message);
             }
 
+            bind_property ("dismissed",
+                           this, "sensitive",
+                           BindingFlags.SYNC_CREATE | BindingFlags.INVERT_BOOLEAN,
+                           null, null);
+
             // Build the default_action gesture
             gesture = new Gtk.GestureClick ();
             default_action.add_controller (gesture);
@@ -166,7 +174,7 @@ namespace SwayNotificationCenter {
                             break;
                         case Gdk.BUTTON_MIDDLE:
                         case Gdk.BUTTON_SECONDARY:
-                            this.close_notification ();
+                            request_dismiss_notification (ClosedReasons.DISMISSED, false);
                             break;
                     }
                 }
@@ -206,7 +214,9 @@ namespace SwayNotificationCenter {
 
             default_action.unmap.connect (() => default_action_in = false);
 
-            close_button.clicked.connect (() => close_notification ());
+            close_button.clicked.connect (() => {
+                request_dismiss_notification (ClosedReasons.DISMISSED, false);
+            });
 
             motion_controller = new Gtk.EventControllerMotion ();
             base_widget.add_controller (motion_controller);
@@ -222,8 +232,7 @@ namespace SwayNotificationCenter {
 
             // Remove notification when it has been swiped
             dismissible_widget.dismissed.connect (() => {
-                remove_noti_timeout ();
-                noti_daemon.manually_close_notification (param, false);
+                request_dismiss_notification (ClosedReasons.DISMISSED, true);
             });
 
             Gtk.EventControllerKey reply_key_controller = new Gtk.EventControllerKey ();
@@ -245,6 +254,11 @@ namespace SwayNotificationCenter {
         }
 
         private void build_noti () {
+            lock (this.dismissed) {
+                this.dismissed = false;
+                this.dismissed_by_swipe = false;
+            }
+
             this.body.set_wrap (true);
             this.body.set_wrap_mode (Pango.WrapMode.WORD_CHAR);
             this.body.set_natural_wrap_mode (Gtk.NaturalWrapMode.WORD);
@@ -280,9 +294,8 @@ namespace SwayNotificationCenter {
             set_actions ();
             set_style_urgency ();
 
-            Timeout.add (0, () => {
+            Idle.add_once (() => {
                 revealer.set_reveal_child (true);
-                return Source.REMOVE;
             });
 
             remove_noti_timeout ();
@@ -467,7 +480,7 @@ namespace SwayNotificationCenter {
                 }
             }
             if (!param.resident) {
-                close_notification ();
+                request_dismiss_notification (ClosedReasons.DISMISSED, false);
             }
         }
 
@@ -629,13 +642,40 @@ namespace SwayNotificationCenter {
             return dtime.format_iso8601 ();
         }
 
-        public void close_notification (bool is_timeout = false) {
+        // Sends a request to dismiss the notification, doesn't remove self
+        public void request_dismiss_notification (ClosedReasons reason, bool by_swipe) {
             remove_noti_timeout ();
-            this.revealer.set_reveal_child (false);
-            Timeout.add (this.transition_time, () => {
-                noti_daemon.manually_close_notification (param, is_timeout);
-                return Source.REMOVE;
-            });
+            lock (dismissed) {
+                if (dismissed) {
+                    debug ("Trying to dismiss already dismissed notification. Skipping...");
+                    return;
+                }
+                dismissed_by_swipe = by_swipe;
+                dismissed = true;
+                noti_daemon.request_dismiss_notification (param, reason);
+            }
+        }
+
+        // TODO: Inherit AnimatedListItem instead
+        public async void remove_notification (bool animated) {
+            // Disable animation when dismissed by swipe
+            animated &= !dismissed_by_swipe && get_mapped ();
+            lock (dismissed) {
+                // The notification got replaced in-between dismissal and removal
+                if (!dismissed) {
+                    return;
+                }
+                remove_noti_timeout ();
+                if (animated && revealer.child_revealed) {
+                    ulong id = 0;
+                    id = revealer.notify["child-revealed"].connect (() => {
+                        revealer.disconnect (id);
+                        remove_notification.callback ();
+                    });
+                    revealer.set_reveal_child (false);
+                    yield;
+                }
+            }
         }
 
         public void replace_notification (NotifyParams new_params) {
@@ -767,9 +807,8 @@ namespace SwayNotificationCenter {
             if (ms <= 0) {
                 return;
             }
-            timeout_id = Timeout.add (ms, () => {
-                close_notification (true);
-                return Source.REMOVE;
+            timeout_id = Timeout.add_once (ms, () => {
+                request_dismiss_notification (ClosedReasons.EXPIRED, false);
             });
         }
 

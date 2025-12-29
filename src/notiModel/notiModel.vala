@@ -124,7 +124,8 @@ namespace SwayNotificationCenter {
         public bool resident { get; private set; }
         /**
          * When set the server will treat the notification as transient and by-pass
-         * the server's persistence capability, if it should exist. (Always be visible)
+         * the server's persistence capability, if it should exist.
+         * (Only floating and always expire)
          */
         public bool transient { get; private set; }
         /** The urgency level. */
@@ -416,8 +417,9 @@ namespace SwayNotificationCenter {
 
         /** Only add notification to CC if it isn't IGNORED and not transient/TRANSIENT */
         public bool ignore_cc () {
-            return status_state == NotificationStatusEnum.IGNORED || status_state ==
-                   NotificationStatusEnum.TRANSIENT || transient;
+            return status_state == NotificationStatusEnum.IGNORED
+                   || status_state == NotificationStatusEnum.TRANSIENT
+                   || (transient && status_state != NotificationStatusEnum.MUTED);
         }
 
         public string to_string () {

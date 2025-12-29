@@ -151,29 +151,15 @@ namespace SwayNotificationCenter {
             noti_daemon.on_dnd_toggle.connect ((dnd) => {
                 // Hide all non-critical notifications on toggle
                 if (dnd && floating_notifications.visible) {
-                    floating_notifications.hide_all_notifications ((noti) => {
+                    noti_daemon.remove_all_floating_notifications (true, (noti) => {
                         return noti.param.urgency != UrgencyLevels.CRITICAL;
                     });
                 }
 
-                try {
-                    swaync_daemon.subscribe_v2 (swaync_daemon.notification_count (),
-                                                dnd,
-                                                swaync_daemon.get_visibility (),
-                                                swaync_daemon.inhibited);
-                } catch (Error e) {
-                    stderr.printf (e.message + "\n");
-                }
+                swaync_daemon.emit_subscribe ();
             });
             // Update on start
-            try {
-                swaync_daemon.subscribe_v2 (swaync_daemon.notification_count (),
-                                            swaync_daemon.get_dnd (),
-                                            swaync_daemon.get_visibility (),
-                                            swaync_daemon.inhibited);
-            } catch (Error e) {
-                stderr.printf (e.message + "\n");
-            }
+            swaync_daemon.emit_subscribe ();
 
             monitors.items_changed.connect (monitors_changed);
             Idle.add_once (() => monitors_changed (0, 0, monitors.get_n_items ()));

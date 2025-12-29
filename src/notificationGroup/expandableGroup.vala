@@ -91,9 +91,10 @@ namespace SwayNotificationCenter {
         }
 
         public void remove (Gtk.Widget widget) {
+            bool widget_visible = widget.get_visible ();
             widget.unparent ();
             widgets.remove (widget);
-            if (this.get_visible () && widget.get_visible ()) {
+            if (get_visible () && widget_visible) {
                 queue_resize ();
             }
             n_children--;

@@ -266,7 +266,7 @@ namespace SwayNotificationCenter {
 
         public void add_notification (NotifyParams param) {
             var noti = new Notification.timed (param,
-                                               NotificationType.POPUP,
+                                               NotificationType.FLOATING,
                                                ConfigModel.instance.timeout,
                                                ConfigModel.instance.timeout_low,
                                                ConfigModel.instance.timeout_critical);

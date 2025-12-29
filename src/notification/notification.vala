@@ -1,5 +1,5 @@
 namespace SwayNotificationCenter {
-    public enum NotificationType { CONTROL_CENTER, POPUP }
+    public enum NotificationType { CONTROL_CENTER, FLOATING }
 
     [GtkTemplate (ui = "/org/erikreider/swaync/ui/notification.ui")]
     public class Notification : Adw.Bin {
@@ -73,7 +73,7 @@ namespace SwayNotificationCenter {
         public NotificationType notification_type {
             get;
             construct;
-            default = NotificationType.POPUP;
+            default = NotificationType.FLOATING;
         }
 
         public uint timeout_delay { get; construct; }
@@ -512,7 +512,7 @@ namespace SwayNotificationCenter {
             if (!ConfigModel.instance.notification_inline_replies
                 || (ConfigModel.instance.layer_shell
                     && !app.has_layer_on_demand
-                    && notification_type == NotificationType.POPUP)) {
+                    && notification_type == NotificationType.FLOATING)) {
                 return;
             }
             if (param.inline_reply == null) {

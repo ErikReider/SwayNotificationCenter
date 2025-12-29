@@ -49,8 +49,6 @@ private class AnimationValueTarget : Object {
 }
 
 public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
-    public const int SCROLL_ANIMATION_DURATION = 500;
-
     public Gtk.Adjustment hadjustment { get; set construct; }
     public Gtk.ScrollablePolicy hscroll_policy { get; set; }
     public Gtk.Adjustment vadjustment { get; set construct; }
@@ -78,12 +76,22 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
     /** Scroll to the latest item added to the list */
     public bool scroll_to_append { get; construct set; }
     /** The default item reveal animation type */
-    public AnimatedListItem.RevealAnimationType animation_reveal_type {
+    public AnimatedListItem.RevealAnimationType animation_add_reveal_type {
         get;
         construct set;
     }
     /** The default item animation type */
-    public AnimatedListItem.ChildAnimationType animation_child_type {
+    public AnimatedListItem.ChildAnimationType animation_add_child_type {
+        get;
+        construct set;
+    }
+    /** The default item reveal animation type */
+    public AnimatedListItem.RevealAnimationType animation_remove_reveal_type {
+        get;
+        construct set;
+    }
+    /** The default item animation type */
+    public AnimatedListItem.ChildAnimationType animation_remove_child_type {
         get;
         construct set;
     }
@@ -135,17 +143,17 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
 
         scroll_btm_target = new Adw.CallbackAnimationTarget (scroll_bottom_value_cb);
         scroll_btm_anim = new Adw.TimedAnimation (
-            this, 0.0, 1.0, SCROLL_ANIMATION_DURATION, scroll_btm_target);
+            this, 0.0, 1.0, Constants.ANIMATION_DURATION, scroll_btm_target);
         scroll_btm_anim.set_easing (Adw.Easing.EASE_OUT_QUINT);
 
         scroll_top_target = new Adw.CallbackAnimationTarget (scroll_top_value_cb);
         scroll_top_anim = new Adw.TimedAnimation (
-            this, 0.0, 1.0, SCROLL_ANIMATION_DURATION, scroll_top_target);
+            this, 0.0, 1.0, Constants.ANIMATION_DURATION, scroll_top_target);
         scroll_top_anim.set_easing (Adw.Easing.EASE_OUT_QUINT);
 
         scroll_comp_target = new Adw.CallbackAnimationTarget (scroll_comp_value_cb);
         scroll_comp_anim = new Adw.TimedAnimation (
-            this, 0.0, 1.0, SCROLL_ANIMATION_DURATION, scroll_comp_target);
+            this, 0.0, 1.0, Constants.ANIMATION_DURATION, scroll_comp_target);
         scroll_comp_anim.set_easing (Adw.Easing.EASE_OUT_QUINT);
     }
 
@@ -556,8 +564,11 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
             item.child = widget;
 
             // Set the defaults
-            item.animation_reveal_type = animation_reveal_type;
-            item.animation_child_type = animation_child_type;
+            item.animation_add_reveal_type = animation_add_reveal_type;
+            item.animation_add_child_type = animation_add_child_type;
+            item.animation_remove_reveal_type = animation_remove_reveal_type;
+            item.animation_remove_child_type = animation_remove_child_type;
+            item.animation_child_fade = true;
 
             widget.unparent ();
             widget.set_parent (item);

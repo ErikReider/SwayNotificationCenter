@@ -14,8 +14,8 @@ namespace SwayNotificationCenter.Widgets {
         bool has_clear_all_button = true;
         string button_text = "Clear All";
 
-        public Inhibitors (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
-            base (suffix, swaync_daemon, noti_daemon);
+        public Inhibitors (string suffix) {
+            base (suffix);
 
             swaync_daemon.inhibited_changed.connect ((length) => {
                 if (!swaync_daemon.inhibited) {

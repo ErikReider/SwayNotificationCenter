@@ -1,9 +1,25 @@
 namespace SwayNotificationCenter {
-    public class NotificationGroup : Gtk.ListBoxRow {
-        const string STYLE_CLASS_URGENT = "critical";
-        const string STYLE_CLASS_COLLAPSED = "collapsed";
+    public enum NotificationGroupState {
+        EMPTY = 0,
+        SINLGE = 1,
+        MANY = 2;
+    }
 
+    public class NotificationGroup : Gtk.ListBoxRow {
         public string name_id;
+
+        public Gee.HashSet<uint32> notification_ids {
+            get;
+            private set;
+            default = new Gee.HashSet<uint32> ();
+        }
+
+        public NotificationGroupState state {
+            get; private set; default = NotificationGroupState.EMPTY;
+        }
+
+        public bool dismissed { get; private set; default = false; }
+        public bool dismissed_by_swipe { get; private set; default = false; }
 
         private NotificationCloseButton close_button;
         private DismissibleWidget dismissible;
@@ -17,8 +33,12 @@ namespace SwayNotificationCenter {
         private bool gesture_down = false;
         private bool gesture_in = false;
 
-        private HashTable<uint32, bool> urgent_notifications
-            = new HashTable<uint32, bool> (direct_hash, direct_equal);
+        private Gee.HashSet<uint32> urgent_notifications = new Gee.HashSet<uint32> ();
+
+        // Remove animation
+        private AnimationValueTarget animation_target;
+        private Adw.TimedAnimation remove_animation;
+        private ulong remove_animation_done_id = 0;
 
         public signal void on_expand_change (bool state);
 
@@ -27,8 +47,18 @@ namespace SwayNotificationCenter {
             this.name_id = name_id;
             add_css_class ("notification-group");
 
+            // Remove Animation
+            animation_target = new AnimationValueTarget (1.0f, animation_value_changed);
+            remove_animation = new Adw.TimedAnimation (this, 1.0, 0.0,
+                                                       Constants.ANIMATION_DURATION,
+                                                       animation_target.get_animation_target ());
+            remove_animation.set_easing (Adw.Easing.EASE_IN_OUT_CUBIC);
+
             dismissible = new DismissibleWidget ();
-            dismissible.dismissed.connect (close_all_notifications);
+            dismissible.dismissed.connect (() => {
+                dismissed_by_swipe = true;
+                request_dismiss_all_notifications ();
+            });
             set_child (dismissible);
 
             Gtk.Overlay overlay = new Gtk.Overlay ();
@@ -40,7 +70,7 @@ namespace SwayNotificationCenter {
             overlay.set_child (box);
 
             close_button = new NotificationCloseButton ();
-            close_button.clicked.connect (close_all_notifications);
+            close_button.clicked.connect (request_dismiss_all_notifications);
             close_button.add_css_class ("notification-group-close-button");
             overlay.add_overlay (close_button);
 
@@ -75,7 +105,7 @@ namespace SwayNotificationCenter {
             close_all_button.set_halign (Gtk.Align.END);
             close_all_button.set_valign (Gtk.Align.CENTER);
             close_all_button.clicked.connect (() => {
-                close_all_notifications ();
+                request_dismiss_all_notifications ();
                 on_expand_change (false);
             });
             end_box.append (close_all_button);
@@ -106,9 +136,10 @@ namespace SwayNotificationCenter {
             set_activatable (false);
 
             group = new ExpandableGroup (viewport, Constants.ANIMATION_DURATION);
+            group.notify["is-expanded"].connect (update_state);
             box.append (group);
 
-            set_classes ();
+            update_state ();
 
             /*
              * Handling of group presses
@@ -130,12 +161,10 @@ namespace SwayNotificationCenter {
                 }
                 gesture_down = false;
                 if (gesture_in) {
-                    bool single_noti = only_single_notification ();
-                    if (!group.is_expanded && !single_noti) {
+                    if (!group.is_expanded && state == NotificationGroupState.MANY) {
                         set_expanded (true);
                         on_expand_change (true);
                     }
-                    group.set_sensitive (single_noti || group.is_expanded);
                 }
 
                 Gdk.EventSequence ?sequence = gesture.get_current_sequence ();
@@ -171,24 +200,86 @@ namespace SwayNotificationCenter {
             motion_controller = new Gtk.EventControllerMotion ();
             this.add_controller (motion_controller);
             motion_controller.motion.connect ((event) => {
-                close_button.set_reveal (!group.is_expanded && !only_single_notification ());
+                close_button.set_reveal (!group.is_expanded &&
+                                         state == NotificationGroupState.MANY);
             });
             motion_controller.leave.connect ((controller) => {
                 close_button.set_reveal (false);
             });
         }
 
-        private void set_classes () {
-            remove_css_class (STYLE_CLASS_COLLAPSED);
-            if (!group.is_expanded) {
-                if (!has_css_class (STYLE_CLASS_COLLAPSED)) {
-                    add_css_class (STYLE_CLASS_COLLAPSED);
-                }
+        private void animation_value_changed (double progress) {
+            queue_resize ();
+        }
+
+        private async bool play_remove_animation (bool transition) {
+            if (remove_animation_done_id > 0) {
+                // Already running animation
+                return false;
+            }
+
+            set_can_focus (false);
+            set_can_target (false);
+
+            if (get_mapped () && transition) {
+                remove_animation_done_id = remove_animation.done.connect ((e) => {
+                    play_remove_animation.callback ();
+                });
+                remove_animation.value_from
+                    = remove_animation.state == Adw.AnimationState.PLAYING
+                        ? animation_target.progress : 1.0;
+                remove_animation.value_to = 0.0;
+                remove_animation.play ();
+                yield;
+            } else {
+                animation_value_changed (0.0);
+            }
+
+            if (remove_animation_done_id > 0) {
+                remove_animation.disconnect (remove_animation_done_id);
+                remove_animation_done_id = 0;
+            }
+            // Fixes the animation keeping a reference of the widget
+            remove_animation = null;
+
+            return true;
+        }
+
+        protected override void snapshot (Gtk.Snapshot snapshot) {
+            if (!base.should_layout ()) {
+                return;
+            }
+
+            snapshot.push_opacity (animation_target.progress);
+            base.snapshot (snapshot);
+            snapshot.pop ();
+        }
+
+        private void update_state () {
+            state = group.n_children >
+                NotificationGroupState.SINLGE ? NotificationGroupState.MANY :
+                (NotificationGroupState) group.n_children;
+
+            group.set_sensitive (!dismissed &&
+                                 (state < NotificationGroupState.MANY || group.is_expanded));
+
+            // Set CSS classes
+            const string STYLE_CLASS_URGENT = "critical";
+            const string STYLE_CLASS_COLLAPSED = "collapsed";
+            if (group.is_expanded) {
+                remove_css_class (STYLE_CLASS_COLLAPSED);
+            } else if (!has_css_class (STYLE_CLASS_COLLAPSED)) {
+                add_css_class (STYLE_CLASS_COLLAPSED);
+            }
+            if (urgent_notifications.is_empty) {
+                remove_css_class (STYLE_CLASS_URGENT);
+            } else if (!has_css_class (STYLE_CLASS_URGENT)) {
+                add_css_class (STYLE_CLASS_URGENT);
             }
         }
 
         private void set_icon () {
-            if (is_empty ()) {
+            if (state == NotificationGroupState.EMPTY) {
                 return;
             }
 
@@ -204,20 +295,22 @@ namespace SwayNotificationCenter {
             }
         }
 
-        /// Returns if there's more than one notification
-        public bool only_single_notification () {
-            return group.widgets.nth_data (0) != null && group.widgets.nth_data (1) == null;
+        private unowned Notification ?find_notification (uint32 id) {
+            foreach (unowned Gtk.Widget widget in group.widgets) {
+                unowned Notification notification = (Notification) widget;
+                if (notification != null && notification.param.applied_id == id) {
+                    return notification;
+                }
+            }
+            return null;
         }
 
         public void set_expanded (bool state) {
+            if (dismissed) {
+                state = false;
+            }
             group.set_expanded (state);
             revealer.set_reveal_child (state);
-            // Change CSS Class
-            if (parent != null) {
-                set_classes ();
-            }
-
-            group.set_sensitive (only_single_notification () || group.is_expanded);
             dismissible.set_can_dismiss (!state);
         }
 
@@ -229,35 +322,107 @@ namespace SwayNotificationCenter {
 
         public void add_notification (Notification noti) {
             if (noti.param.urgency == UrgencyLevels.CRITICAL) {
-                urgent_notifications.insert (noti.param.applied_id, true);
-                if (!has_css_class (STYLE_CLASS_URGENT)) {
-                    add_css_class (STYLE_CLASS_URGENT);
-                }
+                urgent_notifications.add (noti.param.applied_id);
             }
+            notification_ids.add (noti.param.applied_id);
             group.add (noti);
-            if (!only_single_notification ()) {
-                if (!group.is_expanded) {
-                    group.set_sensitive (false);
-                }
-            } else {
-                set_icon ();
-            }
+
+            update_state ();
+            set_icon ();
         }
 
-        public void remove_notification (Notification noti) {
-            urgent_notifications.remove (noti.param.applied_id);
-            if (urgent_notifications.length == 0) {
-                remove_css_class (STYLE_CLASS_URGENT);
+        public bool replace_notification (uint32 id, NotifyParams new_params) {
+            unowned Notification ?notification = find_notification (id);
+            if (notification == null) {
+                return false;
             }
-            group.remove (noti);
-            if (only_single_notification ()) {
+            notification_ids.remove (id);
+            notification_ids.add (new_params.applied_id);
+            notification.replace_notification (new_params);
+            return true;
+        }
+
+        public async bool remove_notification (uint32 id) {
+            update_state ();
+
+            unowned Notification ?notification = find_notification (id);
+            if (notification == null) {
+                warn_if_reached ();
+                return false;
+            }
+
+            urgent_notifications.remove (notification.param.applied_id);
+            notification_ids.remove (notification.param.applied_id);
+            notification.remove_noti_timeout ();
+
+            // Only animate individual notifications when there are more than one,
+            // otherwise, animate the whole group (collapsed single-notification)
+            if (state == NotificationGroupState.MANY) {
+                yield notification.remove_notification (!dismissed_by_swipe);
+            } else if (state == NotificationGroupState.SINLGE) {
+                dismissed = true;
+                if (!yield play_remove_animation (!notification.dismissed_by_swipe)) {
+                    debug ("Trying to play group removal animation twice. Ignoring");
+                    return false;
+                }
+            } else {
+                // No notifications to remove, bug.
+                warn_if_reached ();
+            }
+            group.remove (notification);
+
+            update_state ();
+            if (state == NotificationGroupState.SINLGE) {
                 set_expanded (false);
                 on_expand_change (false);
             }
+            return true;
         }
 
-        public List<weak Gtk.Widget> get_notifications () {
-            return group.widgets.copy ();
+        public async bool remove_all_notifications (bool transition) {
+            dismissed = true;
+            close_button.set_reveal (false);
+            urgent_notifications.clear ();
+            notification_ids.clear ();
+
+            bool dismissed_by_swipe = this.dismissed_by_swipe;
+            if (state == NotificationGroupState.SINLGE) {
+                unowned Notification ?noti = get_latest_notification ();
+                if (noti != null) {
+                    dismissed_by_swipe |= noti.dismissed_by_swipe;
+                }
+            }
+
+            if (group.widgets.is_empty ()) {
+                debug ("Skiping removal of all notifications as the group is already empty");
+                return false;
+            }
+
+            if (!yield play_remove_animation (transition && !dismissed_by_swipe)) {
+                debug ("Trying to play group removal animation twice. Ignoring");
+                return false;
+            }
+
+            while (!group.widgets.is_empty ()) {
+                unowned List<Gtk.Widget> link = group.widgets.nth (0);
+                unowned Notification ?notification = (Notification) link.data;
+                if (notification != null) {
+                    notification.remove_noti_timeout ();
+                }
+                group.widgets.delete_link (link);
+            }
+            warn_if_fail (group.widgets.is_empty ());
+
+            return true;
+        }
+
+        public void request_dismiss_all_notifications () {
+            if (dismissed) {
+                return;
+            }
+            dismissed = true;
+            noti_daemon.request_dismiss_notification_group (name_id, notification_ids,
+                                                            ClosedReasons.DISMISSED);
         }
 
         public unowned Notification ?get_latest_notification () {
@@ -272,26 +437,11 @@ namespace SwayNotificationCenter {
         }
 
         public bool get_is_urgent () {
-            return urgent_notifications.length > 0;
+            return !urgent_notifications.is_empty;
         }
 
         public uint get_num_notifications () {
-            return group.widgets.length ();
-        }
-
-        public bool is_empty () {
-            return group.widgets.is_empty ();
-        }
-
-        public void close_all_notifications () {
-            close_button.set_reveal (false);
-            urgent_notifications.remove_all ();
-            foreach (unowned Gtk.Widget widget in group.widgets) {
-                var noti = (Notification) widget;
-                if (noti != null) {
-                    noti.close_notification (false);
-                }
-            }
+            return group.n_children;
         }
 
         public void update () {

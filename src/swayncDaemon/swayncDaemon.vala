@@ -8,130 +8,31 @@ namespace SwayNotificationCenter {
 
     [DBus (name = "org.erikreider.swaync.cc")]
     public class SwayncDaemon : Object {
-        public NotiDaemon noti_daemon;
-        public XdgActivationHelper xdg_activation;
-
         private GenericSet<string> inhibitors = new GenericSet<string> (str_hash, str_equal);
-        public bool inhibited { get; set; default = false; }
-        [DBus (visible = false)]
-        public signal void inhibited_changed (uint length);
-
-        private Array<BlankWindow> blank_windows = new Array<BlankWindow> ();
-
-        // Only set on swaync start due to some limitations of GtkLayerShell
-        [DBus (visible = false)]
-        public bool use_layer_shell { get; private set; }
-        [DBus (visible = false)]
-        public bool has_layer_on_demand { get; private set; }
+        public bool inhibited { get; private set; default = false; }
+        internal signal void inhibited_changed (uint length);
 
         public SwayncDaemon () {
-            // Init noti_daemon
-            this.use_layer_shell = ConfigModel.instance.layer_shell;
-            this.has_layer_on_demand = use_layer_shell &&
-                GtkLayerShell.get_protocol_version () >= 4;
-            this.noti_daemon = new NotiDaemon (this);
-            this.xdg_activation = new XdgActivationHelper ();
-            Bus.own_name (BusType.SESSION, "org.freedesktop.Notifications",
-                          BusNameOwnerFlags.NONE,
-                          on_noti_bus_aquired,
-                          () => {},
-                          () => {
-                stderr.printf (
-                    "Could not acquire notification name. " +
-                    "Please close any other notification daemon " +
-                    "like mako or dunst\n");
-                Process.exit (1);
+            subscribe_v2.connect ((count, dnd, visible, inhibited) => {
+                debug ("Emitted subscribe_v2: %u, %s, %s, %s",
+                       count, dnd.to_string (), visible.to_string (), inhibited.to_string ());
             });
+        }
 
-            noti_daemon.on_dnd_toggle.connect ((dnd) => {
-                try {
-                    subscribe_v2 (noti_daemon.control_center.notification_count (),
-                                  dnd,
-                                  get_visibility (),
-                                  inhibited);
-                } catch (Error e) {
-                    stderr.printf (e.message + "\n");
-                }
-            });
-
-            // Update on start
+        internal inline void emit_subscribe () {
             try {
-                subscribe_v2 (notification_count (),
-                              get_dnd (),
-                              get_visibility (),
-                              inhibited);
+                swaync_daemon.subscribe_v2 (noti_daemon.n_notifications,
+                                            get_dnd (),
+                                            get_visibility (),
+                                            inhibited);
             } catch (Error e) {
                 stderr.printf (e.message + "\n");
             }
-
-            monitors.items_changed.connect (monitors_changed);
-            Idle.add_once (() => monitors_changed (0, 0, monitors.get_n_items ()));
         }
-
-        private void on_noti_bus_aquired (DBusConnection conn) {
-            try {
-                conn.register_object (
-                    "/org/freedesktop/Notifications", noti_daemon);
-            } catch (IOError e) {
-                stderr.printf ("Could not register notification service\n");
-                Process.exit (1);
-            }
-        }
-
-        private void monitors_changed (uint position, uint removed, uint added) {
-            bool visible = noti_daemon.control_center.get_visibility ();
-
-            for (uint i = 0; i < removed; i++) {
-                unowned BlankWindow win = blank_windows.index (position + i);
-                win.close ();
-                blank_windows.remove_index (position + i);
-            }
-
-            for (uint i = 0; i < added; i++) {
-                Gdk.Monitor monitor = (Gdk.Monitor) monitors.get_item (position + i);
-                BlankWindow win = new BlankWindow (monitor);
-                win.set_visible (visible);
-                blank_windows.insert_val (position + i, win);
-            }
-
-            // Set preferred output
-            try {
-                set_cc_monitor (
-                    ConfigModel.instance.control_center_preferred_output);
-                set_noti_window_monitor (
-                    ConfigModel.instance.notification_window_preferred_output);
-            } catch (Error e) {
-                critical (e.message);
-            }
-        }
-
-        [DBus (visible = false)]
-        public void show_blank_windows (Gdk.Monitor ?ref_monitor) {
-            if (!use_layer_shell || !ConfigModel.instance.layer_shell_cover_screen) {
-                return;
-            }
-            foreach (unowned BlankWindow win in blank_windows.data) {
-                if (win.monitor != ref_monitor) {
-                    win.show ();
-                }
-            }
-        }
-
-        [DBus (visible = false)]
-        public void hide_blank_windows () {
-            if (!use_layer_shell) {
-                return;
-            }
-            foreach (unowned BlankWindow win in blank_windows.data) {
-                win.hide ();
-            }
-        }
-
-        /// DBus
 
         /** Gets subscribe data but in one call */
         [DBus (name = "GetSubscribeData")]
-        public Data get_subscribe_data () throws Error {
+        public inline Data get_subscribe_data () throws Error {
             return Data () {
                        dnd = get_dnd (),
                        cc_open = get_visibility (),
@@ -164,7 +65,7 @@ namespace SwayNotificationCenter {
             print ("\n");
             message ("Reloading config\n");
             ConfigModel.reload_config ();
-            noti_daemon.control_center.add_widgets ();
+            control_center.add_widgets ();
         }
 
         /**
@@ -175,82 +76,82 @@ namespace SwayNotificationCenter {
          * if it's a valid path. Otherwise the changes will only
          * apply to the current instance.
          */
-        public void change_config_value (string name,
-                                         Variant value,
-                                         bool write_to_file = true,
-                                         string ?path = null) throws Error {
+        public inline void change_config_value (string name,
+                                                Variant value,
+                                                bool write_to_file = true,
+                                                string ?path = null) throws Error {
             ConfigModel.instance.change_value (name,
                                                value,
                                                write_to_file,
                                                path);
         }
 
-        /** Gets the controlcenter visibility */
-        public bool get_visibility () throws DBusError, IOError {
-            return noti_daemon.control_center.get_visibility ();
+        /** Gets the Control Center visibility */
+        public inline bool get_visibility () throws DBusError, IOError {
+            return control_center.get_visibility ();
         }
 
         /** Closes latest popup notification */
-        public void hide_latest_notifications (bool close)
+        public inline void hide_latest_notifications (bool close)
         throws DBusError, IOError {
-            noti_daemon.hide_latest_notification (close);
+            noti_daemon.hide_latest_floating_notification (close);
         }
 
-        /** Closes all popup notifications */
-        public void hide_all_notifications ()
-        throws DBusError, IOError {
-            noti_daemon.hide_all_notifications ();
+        /** Hides all popup notifications (closes transient) */
+        public inline void hide_all_notifications () throws DBusError, IOError {
+            noti_daemon.remove_all_floating_notifications (true, null);
         }
 
-        /** Closes all popup and controlcenter notifications */
-        public void close_all_notifications () throws DBusError, IOError {
-            noti_daemon.close_all_notifications ();
+        /** Closes all popup and Control Center notifications */
+        public inline void close_all_notifications () throws DBusError, IOError {
+            noti_daemon.request_dismiss_all_notifications (ClosedReasons.DISMISSED);
         }
 
-        /** Gets the current controlcenter notification count */
-        public uint notification_count () throws DBusError, IOError {
-            return noti_daemon.control_center.notification_count ();
+        /** Gets the current Control Center notification count */
+        public inline uint notification_count () throws DBusError, IOError {
+            return noti_daemon.n_notifications;
         }
 
-        /** Toggles the visibility of the controlcenter */
+        /** Toggles the visibility of the Control Center */
         public void toggle_visibility () throws DBusError, IOError {
-            if (noti_daemon.control_center.toggle_visibility ()) {
-                noti_daemon.set_noti_window_visibility (false);
+            if (control_center.toggle_visibility ()) {
+                noti_daemon.remove_all_floating_notifications (false, null);
             }
         }
 
-        /** Sets the visibility of the controlcenter */
+        /** Sets the visibility of the Control Center */
         public void set_visibility (bool visibility) throws DBusError, IOError {
-            noti_daemon.control_center.set_visibility (visibility);
+            control_center.set_visibility (visibility);
             if (visibility) {
-                noti_daemon.set_noti_window_visibility (false);
+                noti_daemon.remove_all_floating_notifications (false, null);
             }
         }
 
         /** Toggles the current Do Not Disturb state */
-        public bool toggle_dnd () throws DBusError, IOError {
-            return noti_daemon.toggle_dnd ();
+        public inline bool toggle_dnd () throws DBusError, IOError {
+            noti_daemon.dnd = !noti_daemon.dnd;
+            return noti_daemon.dnd;
         }
 
         /** Sets the current Do Not Disturb state */
-        public void set_dnd (bool state) throws DBusError, IOError {
-            noti_daemon.set_do_not_disturb (state);
+        public inline void set_dnd (bool state) throws DBusError, IOError {
+            noti_daemon.dnd = state;
         }
 
         /** Gets the current Do Not Disturb state */
-        public bool get_dnd () throws DBusError, IOError {
-            return noti_daemon.get_do_not_disturb ();
+        public inline bool get_dnd () throws DBusError, IOError {
+            return noti_daemon.dnd;
         }
 
         /** Closes a specific notification with the `id` */
-        public void close_notification (uint32 id) throws DBusError, IOError {
-            noti_daemon.control_center.close_notification (id, true);
+        public inline void close_notification (uint32 id) throws DBusError, IOError {
+            noti_daemon.close_notification (id);
         }
 
-        /** Activates the `action_index` action of the latest notification */
-        public void latest_invoke_action (uint32 action_index)
+        /** Activates the `action_index` action of the latest floating notification */
+        public inline void latest_invoke_action (uint32 action_index)
         throws DBusError, IOError {
-            noti_daemon.latest_invoke_action (action_index);
+            noti_daemon.invoke_latest_floating_action (action_index);
         }
 
         /**
@@ -266,10 +167,7 @@ namespace SwayNotificationCenter {
             inhibitors.add (application_id);
             inhibited = inhibitors.length > 0;
             inhibited_changed (inhibitors.length);
-            subscribe_v2 (noti_daemon.control_center.notification_count (),
-                          noti_daemon.dnd,
-                          get_visibility (),
-                          inhibited);
+            emit_subscribe ();
             return true;
         }
 
@@ -285,20 +183,17 @@ namespace SwayNotificationCenter {
             }
             inhibited = inhibitors.length > 0;
             inhibited_changed (inhibitors.length);
-            subscribe_v2 (noti_daemon.control_center.notification_count (),
-                          noti_daemon.dnd,
-                          get_visibility (),
-                          inhibited);
+            emit_subscribe ();
             return true;
         }
 
         /** Get the number of inhibitors */
-        public uint number_of_inhibitors () throws DBusError, IOError {
+        public inline uint number_of_inhibitors () throws DBusError, IOError {
             return inhibitors.length;
         }
 
         /** Get if is inhibited */
-        public bool is_inhibited () throws DBusError, IOError {
+        public inline bool is_inhibited () throws DBusError, IOError {
             return inhibited;
         }
 
@@ -310,15 +205,12 @@ namespace SwayNotificationCenter {
             inhibitors.remove_all ();
             inhibited = false;
             inhibited_changed (0);
-            subscribe_v2 (noti_daemon.control_center.notification_count (),
-                          noti_daemon.dnd,
-                          get_visibility (),
-                          inhibited);
+            emit_subscribe ();
             return true;
         }
 
         public bool set_cc_monitor (string name) throws DBusError, IOError {
-            if (!use_layer_shell) {
+            if (!app.use_layer_shell) {
                 critical (
                     "Setting Control Center monitor isn't supported "
                     + "when layer shell is disabled!");
@@ -329,12 +221,12 @@ namespace SwayNotificationCenter {
                 return false;
             }
 
-            noti_daemon.control_center.set_monitor (monitor);
+            control_center.set_monitor (monitor);
             return true;
         }
 
         public bool set_noti_window_monitor (string name) throws DBusError, IOError {
-            if (!use_layer_shell) {
+            if (!app.use_layer_shell) {
                 critical (
                     "Setting Notification Window monitor isn't supported "
                     + "when layer shell is disabled!");
@@ -345,7 +237,7 @@ namespace SwayNotificationCenter {
                 return false;
             }
 
-            NotificationWindow.instance.set_monitor (monitor);
+            floating_notifications.set_monitor (monitor);
             return true;
         }
     }

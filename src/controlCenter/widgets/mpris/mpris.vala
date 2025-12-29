@@ -51,8 +51,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             loop_carousel = false,
         };
 
-        public Mpris (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
-            base (suffix, swaync_daemon, noti_daemon);
+        public Mpris (string suffix) {
+            base (suffix);
             set_orientation (Gtk.Orientation.VERTICAL);
             set_valign (Gtk.Align.START);
             set_vexpand (false);

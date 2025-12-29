@@ -1,10 +1,14 @@
 public class AnimatedListItem : Gtk.Widget {
-    public const int DEFAULT_ANIMATION_DURATION = 350;
-
+    // The vertical reveal animation
     public enum RevealAnimationType {
-        NONE, SLIDE, SLIDE_WITH
+        NONE,
+        // Transitions its vertical size, clipping the item content
+        SLIDE,
+        // Transitions its vertical size while the items content slides with
+        SLIDE_WITH
     }
 
+    // The items transform
     public enum ChildAnimationType {
         NONE, SLIDE_FROM_LEFT, SLIDE_FROM_RIGHT
     }
@@ -22,10 +26,12 @@ public class AnimatedListItem : Gtk.Widget {
             }
         }
     }
-    public int animation_duration { get; construct set; }
+    public uint animation_duration { get; construct set; }
     public Adw.Easing animation_easing { get; construct set; }
-    public RevealAnimationType animation_reveal_type { get; construct set; }
-    public ChildAnimationType animation_child_type { get; construct set; }
+    public RevealAnimationType animation_add_reveal_type { get; construct set; }
+    public ChildAnimationType animation_add_child_type { get; construct set; }
+    public RevealAnimationType animation_remove_reveal_type { get; construct set; }
+    public ChildAnimationType animation_remove_child_type { get; construct set; }
     public bool animation_child_fade { get; construct set; }
     public bool destroying { get; private set; default = false; }
 
@@ -40,10 +46,12 @@ public class AnimatedListItem : Gtk.Widget {
             css_name : "animatedlistitem",
             accessible_role : Gtk.AccessibleRole.LIST_ITEM,
             overflow: Gtk.Overflow.HIDDEN,
-            animation_duration: DEFAULT_ANIMATION_DURATION,
+            animation_duration: Constants.ANIMATION_DURATION,
             animation_easing: Adw.Easing.EASE_OUT_QUINT,
-            animation_reveal_type: RevealAnimationType.SLIDE,
-            animation_child_type: ChildAnimationType.SLIDE_FROM_RIGHT,
+            animation_add_reveal_type: RevealAnimationType.SLIDE,
+            animation_add_child_type: ChildAnimationType.SLIDE_FROM_RIGHT,
+            animation_remove_reveal_type: RevealAnimationType.SLIDE,
+            animation_remove_child_type: ChildAnimationType.SLIDE_FROM_RIGHT,
             animation_child_fade: true
         );
 
@@ -97,6 +105,8 @@ public class AnimatedListItem : Gtk.Widget {
         }
 
         Gsk.Transform transform = new Gsk.Transform ();
+        RevealAnimationType animation_reveal_type =
+            destroying ? animation_remove_reveal_type : animation_add_reveal_type;
         switch (animation_reveal_type) {
             case RevealAnimationType.SLIDE_WITH:
                 transform = transform.translate_3d (
@@ -107,6 +117,8 @@ public class AnimatedListItem : Gtk.Widget {
             case RevealAnimationType.NONE:
                 break;
         }
+        ChildAnimationType animation_child_type =
+            destroying ? animation_remove_child_type : animation_add_child_type;
         switch (animation_child_type) {
             case ChildAnimationType.SLIDE_FROM_RIGHT:
                 transform = transform.translate_3d (
@@ -187,7 +199,7 @@ public class AnimatedListItem : Gtk.Widget {
 
     private void set_animation_done_cb (animation_done handler) {
         remove_animation_done_cb ();
-        animation_done_cb_id = animation.done.connect (handler);
+        animation_done_cb_id = animation.done.connect (() => handler);
     }
 
     private void added_finished_cb () {

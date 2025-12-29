@@ -13,8 +13,8 @@ namespace SwayNotificationCenter.Widgets {
         Gtk.Label label_widget = new Gtk.Label (null);
         Gtk.Scale slider = new Gtk.Scale.with_range (Gtk.Orientation.HORIZONTAL, 0, 100, 1);
 
-        public Backlight (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
-            base (suffix, swaync_daemon, noti_daemon);
+        public Backlight (string suffix) {
+            base (suffix);
 
             Json.Object ?config = get_config (this);
             if (config != null) {

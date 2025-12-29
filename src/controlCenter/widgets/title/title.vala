@@ -14,8 +14,8 @@ namespace SwayNotificationCenter.Widgets {
         bool has_clear_all_button = true;
         string button_text = "Clear All";
 
-        public Title (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
-            base (suffix, swaync_daemon, noti_daemon);
+        public Title (string suffix) {
+            base (suffix);
 
             Json.Object ?config = get_config (this);
             if (config != null) {
@@ -46,16 +46,10 @@ namespace SwayNotificationCenter.Widgets {
             if (has_clear_all_button) {
                 clear_all_button = new Gtk.Button.with_label (button_text);
                 clear_all_button.clicked.connect (() => {
-                    try {
-                        swaync_daemon.close_all_notifications ();
-                    } catch (Error e) {
-                        critical ("Error: %s\n", e.message);
-                    }
+                    noti_daemon.request_dismiss_all_notifications (ClosedReasons.DISMISSED);
                 });
-                if (noti_daemon.control_center != null) {
-                    clear_all_button.set_sensitive (
-                        noti_daemon.control_center.notification_count () > 0);
-                }
+                clear_all_button.set_sensitive (!notifications_widget.is_empty ());
+
                 swaync_daemon.subscribe_v2.connect ((count) => {
                     clear_all_button.set_sensitive (count > 0);
                 });

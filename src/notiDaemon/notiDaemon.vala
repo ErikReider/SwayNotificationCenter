@@ -1,107 +1,124 @@
 namespace SwayNotificationCenter {
+    /** Return true to remove notification, false to skip */
+    public delegate bool notification_filter_func (Notification notification);
+
     [DBus (name = "org.freedesktop.Notifications")]
     public class NotiDaemon : Object {
         private uint32 noti_id = 0;
-
-        public bool dnd { get; set; default = false; }
-
         private HashTable<string, uint32> synchronous_ids =
             new HashTable<string, uint32> (str_hash, str_equal);
+        private Gee.HashSet<uint32> notification_ids = new Gee.HashSet<uint32> ();
 
-        public ControlCenter control_center;
+        /** Do Not Disturb state */
+        internal bool dnd { get; set; default = false; }
+        /** Called when Do Not Disturb state changes */
+        internal signal void on_dnd_toggle (bool dnd);
 
-        public unowned SwayncDaemon swaync_daemon;
-
-        public NotiDaemon (SwayncDaemon swaync_daemon) {
-            this.swaync_daemon = swaync_daemon;
-
+        public NotiDaemon () {
             this.notify["dnd"].connect (() => on_dnd_toggle (dnd));
-
-            on_dnd_toggle.connect ((dnd) => {
-                if (!dnd || NotificationWindow.is_null) {
-                    return;
-                }
-                NotificationWindow.instance.close_all_notifications ((noti) => {
-                    return noti.param.urgency != UrgencyLevels.CRITICAL;
-                });
-            });
 
             // Init dnd from gsettings
             self_settings.bind ("dnd-state", this, "dnd", SettingsBindFlags.DEFAULT);
-
-            this.control_center = new ControlCenter (swaync_daemon, this);
         }
 
-        /**
-         * Changes the popup-notification window visibility.
-         * Closes all notifications and hides window if `value` is false
-         */
-        public void set_noti_window_visibility (bool value)
-        throws DBusError, IOError {
-            NotificationWindow.instance.change_visibility (value);
-        }
-
-        /** Toggles the current Do Not Disturb state */
-        public bool toggle_dnd () throws DBusError, IOError {
-            return dnd = !dnd;
-        }
-
-        /** Sets the current Do Not Disturb state */
-        [DBus (name = "SetDnd")]
-        public void set_do_not_disturb (bool state) throws DBusError, IOError {
-            dnd = state;
-        }
-
-        /** Gets the current Do Not Disturb state */
-        [DBus (name = "GetDnd")]
-        public bool get_do_not_disturb () throws DBusError, IOError {
-            return dnd;
-        }
-
-        /** Called when Do Not Disturb state changes */
-        public signal void on_dnd_toggle (bool dnd);
-
-        /** Method to close notification and send DISMISSED signal */
-        public void manually_close_notification (uint32 id, bool timeout)
-        throws DBusError, IOError {
-            NotificationWindow.instance.close_notification (id, true);
-            if (!timeout) {
-                control_center.close_notification (id, true);
-                NotificationClosed (id, ClosedReasons.DISMISSED);
-
-                swaync_daemon.subscribe_v2 (control_center.notification_count (),
-                                            dnd,
-                                            control_center.get_visibility (),
-                                            swaync_daemon.inhibited);
+        internal uint n_notifications {
+            get {
+                return notifications_widget.n_notifications;
             }
         }
 
-        /** Closes all popup and controlcenter notifications */
-        public void close_all_notifications () throws DBusError, IOError {
-            NotificationWindow.instance.close_all_notifications ();
-            control_center.close_all_notifications ();
-        }
-
-        /** Closes latest popup notification */
-        public void hide_latest_notification (bool close)
-        throws DBusError, IOError {
-            uint32 ?id = NotificationWindow.instance.get_latest_notification ();
-            if (id == null) {
+        internal void request_dismiss_notification_id (uint32 id,
+                                                       ClosedReasons reason,
+                                                       bool ignore_cc) {
+            // Expired, non-transient notifications should not be fully dismissed, only hidden
+            if (reason == ClosedReasons.EXPIRED && !ignore_cc) {
+                debug ("Hiding floating notification with ID:%u, reason:%s",
+                       id, reason.to_string ());
+                floating_notifications.remove_notification (id);
                 return;
             }
-            manually_close_notification (id, !close);
+
+            debug ("Dismissing notification with ID:%u, reason:%s",
+                   id, reason.to_string ());
+            NotificationClosed (id, reason);
+            notification_ids.remove (id);
+
+            notifications_widget.remove_notification (id);
+            floating_notifications.remove_notification (id);
+
+            swaync_daemon.emit_subscribe ();
         }
 
-        /** Closes all popup notifications */
-        public void hide_all_notifications ()
-        throws DBusError, IOError {
-            NotificationWindow.instance.close_all_notifications ();
+        internal inline void request_dismiss_notification (NotifyParams param,
+                                                           ClosedReasons reason) {
+            request_dismiss_notification_id (param.applied_id, reason, param.ignore_cc ());
+        }
+
+        internal void request_dismiss_notification_group (string group_name_id,
+                                                          Gee.HashSet<uint32> ids,
+                                                          ClosedReasons reason) {
+            debug ("Dismissing notification group with ID:%s, reason:%s",
+                   group_name_id, reason.to_string ());
+            foreach (unowned uint32 id in ids) {
+                NotificationClosed (id, reason);
+                notification_ids.remove (id);
+            }
+            notifications_widget.remove_group (group_name_id);
+
+            swaync_daemon.emit_subscribe ();
+        }
+
+        internal void request_dismiss_all_notifications (ClosedReasons reason) {
+            debug ("Dismissing all notifications, reason:%s", reason.to_string ());
+            foreach (uint32 id in notification_ids) {
+                NotificationClosed (id, reason);
+            }
+            notification_ids.clear ();
+
+            remove_all_floating_notifications (false, null);
+            notifications_widget.remove_all_notifications (true);
+
+            swaync_daemon.emit_subscribe ();
+        }
+
+        /** Hides all floating notifications (closes transient) */
+        internal inline void remove_all_floating_notifications (bool transition,
+                                                                notification_filter_func ?func) {
+            debug ("Hiding all floating notifications");
+            floating_notifications.remove_all_notifications (transition, (notification) => {
+                if (func == null || func (notification)) {
+                    // Send DISMISSED to valid TRANSIENT notifications
+                    unowned NotifyParams param = notification.param;
+                    if (param.applied_id > 0 && param.ignore_cc ()) {
+                        debug ("Closing floating-only notification with ID:%u while hiding",
+                               param.applied_id);
+                        NotificationClosed (param.applied_id, ClosedReasons.DISMISSED);
+                        notification_ids.remove (param.applied_id);
+                    }
+                    return true;
+                }
+                return false;
+            });
+        }
+
+        /** Hides/closes latest floating notification */
+        internal void hide_latest_floating_notification (bool close) {
+            NotifyParams ?param = floating_notifications.get_latest_notification ();
+            if (param == null) {
+                return;
+            }
+
+            // note: Hiding a TRANSIENT notification acts as closing it
+            if (close || param.ignore_cc ()) {
+                request_dismiss_notification (param, ClosedReasons.DISMISSED);
+            } else {
+                floating_notifications.remove_notification (param.applied_id);
+            }
         }
 
         /** Activates the `action_index` action of the latest notification */
-        public void latest_invoke_action (uint32 action_index)
-        throws DBusError, IOError {
-            NotificationWindow.instance.latest_notification_action (action_index);
+        internal void invoke_latest_floating_action (uint32 action_index) {
+            floating_notifications.latest_notification_action (action_index);
         }
 
         /*
@@ -159,6 +176,7 @@ namespace SwayNotificationCenter {
             if (replaces_id == 0 || replaces_id > noti_id) {
                 id = ++noti_id;
             }
+            id = uint32.max (id, 1);
 
             var param = new NotifyParams (
                 id,
@@ -171,30 +189,13 @@ namespace SwayNotificationCenter {
                 hints,
                 expire_timeout);
 
-            // The notification visibility state
-            NotificationStatusEnum state = NotificationStatusEnum.ENABLED;
-            unowned OrderedHashTable<NotificationVisibility> visibilities =
-                ConfigModel.instance.notification_visibility;
-            foreach (string key in visibilities.get_keys ()) {
-                unowned NotificationVisibility vis = visibilities[key];
-                if (!vis.matches_notification (param)) {
-                    continue;
-                }
-                state = vis.state;
-                if (vis.override_urgency != UNSET) {
-                    debug ("override urgency to %s\n", vis.override_urgency.to_string ());
-                    param.urgency = UrgencyLevels.from_value (vis.override_urgency.to_byte ());
-                }
-                break;
-            }
-
             debug ("Notification (ID:%u, state: %s): %s\n",
-                   param.applied_id, state.to_string (), param.to_string ());
+                   param.applied_id, param.status_state.to_string (), param.to_string ());
 
             // Get the notification id to replace
-            uint32 replace_notification = 0;
+            uint32 notification_id_to_replace = 0;
             if (id == replaces_id) {
-                replace_notification = id;
+                notification_id_to_replace = replaces_id;
             } else if (param.synchronous != null
                        && param.synchronous.length > 0) {
                 // Tries replacing without replaces_id instead
@@ -202,62 +203,89 @@ namespace SwayNotificationCenter {
                 // if there is any notification to replace
                 if (synchronous_ids.lookup_extended (
                         param.synchronous, null, out r_id)) {
-                    replace_notification = r_id;
+                    notification_id_to_replace = r_id;
                 }
                 synchronous_ids.set (param.synchronous, id);
             }
 
-            string ?hide_notification_reason = null;
-            bool show_notification = state == NotificationStatusEnum.ENABLED
-                || state == NotificationStatusEnum.TRANSIENT;
-            if (!show_notification) {
-                hide_notification_reason =
+            // Don't show the floating notification if disabled and not transient
+            string[] hide_floating_notification_reasons = {};
+            if (param.status_state != NotificationStatusEnum.ENABLED
+                && param.status_state != NotificationStatusEnum.TRANSIENT) {
+                hide_floating_notification_reasons +=
                     "Notification status is not Enabled or Transient in Config";
             }
-
             // Don't show the notification window if the control center is open
             if (control_center.get_visibility ()) {
-                hide_notification_reason = "Control Center is visible";
-                show_notification = false;
+                hide_floating_notification_reasons += "Control Center is visible";
             }
-
-            bool bypass_dnd = param.urgency == UrgencyLevels.CRITICAL || param.swaync_bypass_dnd;
             // Don't show the notification window if dnd or inhibited
+            bool bypass_dnd = param.urgency == UrgencyLevels.CRITICAL || param.swaync_bypass_dnd;
             if (!bypass_dnd && (dnd || swaync_daemon.inhibited)) {
-                hide_notification_reason = "Do Not Disturb is enabled or an Inhibitor is running";
-                show_notification = false;
+                hide_floating_notification_reasons +=
+                    "Do Not Disturb is enabled or an Inhibitor is running";
             }
 
-            if (show_notification) {
-                if (replace_notification > 0) {
-                    debug ("Replacing Notification: ID:%u\n", param.applied_id);
-                    NotificationWindow.instance.replace_notification (replace_notification, param);
+            bool added = false;
+            bool removed = false;
+
+            if (hide_floating_notification_reasons.length == 0) {
+                added = true;
+                if (notification_id_to_replace > 0) {
+                    debug ("Replacing Notification: ID:%u -> ID:%u\n",
+                           notification_id_to_replace, param.applied_id);
+                    floating_notifications.replace_notification (notification_id_to_replace, param);
                 } else {
-                    NotificationWindow.instance.add_notification (param);
+                    debug ("Adding Floating Notification: ID:%u\n", param.applied_id);
+                    floating_notifications.add_notification (param);
                 }
-            } else if (replace_notification > 0) {
-                // Remove the old notification due to it not being replaced
-                NotificationWindow.instance.close_notification (replace_notification, false);
             } else {
-                debug ("Not displaying Notification: ID:%u, Reason: \"%s\"\n",
-                       param.applied_id, hide_notification_reason);
+                debug ("Not displaying floating Notification: ID:%u, Reasons: {\"%s\"}\n",
+                       param.applied_id,
+                       string.joinv ("\", \"", hide_floating_notification_reasons));
+                if (notification_id_to_replace > 0) {
+                    removed = true;
+
+                    // Remove the old notification due to the replacement possibly
+                    // being Control Center-only
+                    debug ("Removing replaced Floating Notification: ID:%u\n",
+                           notification_id_to_replace);
+                    floating_notifications.remove_notification (notification_id_to_replace);
+                }
             }
 
-            // Only add notification to CC if it isn't IGNORED and not transient/TRANSIENT
-            if (state != NotificationStatusEnum.IGNORED
-                && state != NotificationStatusEnum.TRANSIENT
-                && !param.transient) {
-                if (replace_notification > 0) {
-                    debug ("Replacing CC Notification: ID:%u\n", param.applied_id);
-                    control_center.replace_notification (replace_notification, param);
+            if (!param.ignore_cc ()) {
+                added = true;
+                if (notification_id_to_replace > 0) {
+                    debug ("Replacing CC Notification: ID:%u -> ID:%u\n",
+                           notification_id_to_replace, param.applied_id);
+                    notifications_widget.replace_notification (notification_id_to_replace, param);
                 } else {
-                    control_center.add_notification (param);
+                    debug ("Adding Control Center Notification: ID:%u\n", param.applied_id);
+                    notifications_widget.add_notification (param);
                 }
-            } else if (replace_notification > 0) {
-                // Remove the old notification due to it not being replaced
-                control_center.close_notification (replace_notification, false);
             } else {
                 debug ("Not Placing Notification in CC: ID:%u\n", param.applied_id);
+                if (notification_id_to_replace > 0) {
+                    removed = true;
+
+                    // Remove the old notification due to it possibly being floating-only
+                    debug ("Removing replaced CC Notification: ID:%u\n",
+                           notification_id_to_replace);
+                    notifications_widget.remove_notification (notification_id_to_replace);
+                }
+            }
+
+            // Store notification IDs
+            if (added || removed) {
+                if (notification_id_to_replace > 0) {
+                    notification_ids.remove (notification_id_to_replace);
+                }
+                if (added) {
+                    notification_ids.add (id);
+                }
+
+                swaync_daemon.emit_subscribe ();
             }
 
 #if WANT_SCRIPTING
@@ -279,8 +307,7 @@ namespace SwayNotificationCenter {
         /**
          * Runs scripts that meet the requirements of the given `param`.
          */
-        [DBus (visible = false)]
-        public void run_scripts (NotifyParams param, ScriptRunOnType run_on) {
+        internal void run_scripts (NotifyParams param, ScriptRunOnType run_on) {
 #if WANT_SCRIPTING
             if (param.swaync_no_script) {
                 debug ("Skipped action scripts for this notification\n");
@@ -356,9 +383,7 @@ namespace SwayNotificationCenter {
          */
         [DBus (name = "CloseNotification")]
         public void close_notification (uint32 id) throws DBusError, IOError {
-            NotificationWindow.instance.close_notification (id, true);
-            control_center.close_notification (id, true);
-            NotificationClosed (id, ClosedReasons.CLOSED_BY_CLOSENOTIFICATION);
+            request_dismiss_notification_id (id, ClosedReasons.CLOSED_BY_CLOSENOTIFICATION, false);
         }
 
         /**

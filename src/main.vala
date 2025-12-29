@@ -1,5 +1,10 @@
 namespace SwayNotificationCenter {
+    static NotiDaemon noti_daemon;
     static SwayncDaemon swaync_daemon;
+    static Widgets.Notifications notifications_widget;
+    static ControlCenter control_center;
+    static NotificationWindow floating_notifications;
+
     static unowned ListModel ?monitors = null;
     static Swaync app;
     static Settings self_settings;
@@ -26,7 +31,14 @@ namespace SwayNotificationCenter {
     }
 
     public class Swaync : Gtk.Application {
-        static bool activated = false;
+        private bool activated = false;
+        private Array<BlankWindow> blank_windows = new Array<BlankWindow> ();
+
+        // Only set on swaync start due to some limitations of GtkLayerShell
+        public bool use_layer_shell = true;
+        public bool has_layer_on_demand = true;
+
+        public XdgActivationHelper xdg_activation;
 
         public signal void config_reload (ConfigModel ?old_config, ConfigModel new_config);
 
@@ -52,6 +64,10 @@ namespace SwayNotificationCenter {
                 return;
             }
             activated = true;
+            init.begin ();
+        }
+
+        private async void init () {
             Functions.load_css (style_path);
 
             pixbuf_mime_types =
@@ -71,25 +87,132 @@ namespace SwayNotificationCenter {
             }
             monitors = display.get_monitors ();
             assert_nonnull (monitors);
-
-            monitors.items_changed.connect (() => {
-                info ("Monitors Changed:");
-                print_monitors ();
-            });
             print_monitors ();
 
+            use_layer_shell = ConfigModel.instance.layer_shell;
+            has_layer_on_demand = use_layer_shell &&
+                GtkLayerShell.get_protocol_version () >= 4;
+
+            DBusConnection conn;
+            try {
+                conn = Bus.get_sync (GLib.BusType.SESSION, null);
+            } catch (Error e) {
+                error ("Could not connect to DBus!... (%s)\n", e.message);
+            }
+
+            noti_daemon = new NotiDaemon ();
             swaync_daemon = new SwayncDaemon ();
-            Bus.own_name (BusType.SESSION, "org.erikreider.swaync.cc",
-                          BusNameOwnerFlags.NONE,
-                          on_cc_bus_aquired,
-                          () => {},
-                          () => {
+            // Notification Daemon
+            Bus.own_name_on_connection (conn,
+                                        "org.freedesktop.Notifications",
+                                        BusNameOwnerFlags.NONE,
+                                        () => {
+                try {
+                    conn.register_object ("/org/freedesktop/Notifications", noti_daemon);
+                    init.callback ();
+                } catch (Error e) {
+                    error ("Could not register notification service: \"%s\"", e.message);
+                }
+            },
+                                        () => {
                 stderr.printf (
-                    "Could not acquire swaync name!...\n");
+                    "Could not acquire notification name. " +
+                    "Please close any other notification daemon " +
+                    "like mako or dunst\n");
                 Process.exit (1);
             });
+            yield;
 
-            add_window (swaync_daemon.noti_daemon.control_center);
+            // Swaync Daemon
+            Bus.own_name_on_connection (conn,
+                                        "org.erikreider.swaync.cc",
+                                        BusNameOwnerFlags.NONE,
+                                        () => {
+                try {
+                    conn.register_object ("/org/erikreider/swaync/cc", swaync_daemon);
+                    init.callback ();
+                } catch (Error e) {
+                    error ("Could not register CC service: \"%s\"", e.message);
+                }
+            },
+                                        () => {
+                error ("Could not acquire swaync name!");
+            });
+            yield;
+
+            xdg_activation = new XdgActivationHelper ();
+
+            floating_notifications = new NotificationWindow ();
+            notifications_widget = new Widgets.Notifications ();
+            control_center = new ControlCenter ();
+
+            add_window (control_center);
+
+            noti_daemon.on_dnd_toggle.connect ((dnd) => {
+                // Hide all non-critical notifications on toggle
+                if (dnd && floating_notifications.visible) {
+                    noti_daemon.remove_all_floating_notifications (true, (noti) => {
+                        return noti.param.urgency != UrgencyLevels.CRITICAL;
+                    });
+                }
+
+                swaync_daemon.emit_subscribe ();
+            });
+            // Update on start
+            swaync_daemon.emit_subscribe ();
+
+            monitors.items_changed.connect (monitors_changed);
+            Idle.add_once (() => monitors_changed (0, 0, monitors.get_n_items ()));
+        }
+
+        private void monitors_changed (uint position, uint removed, uint added) {
+            info ("Monitors Changed:");
+            print_monitors ();
+
+            bool visible = control_center.get_visibility ();
+
+            for (uint i = 0; i < removed; i++) {
+                unowned BlankWindow win = blank_windows.index (position + i);
+                win.close ();
+                blank_windows.remove_index (position + i);
+            }
+
+            for (uint i = 0; i < added; i++) {
+                Gdk.Monitor monitor = (Gdk.Monitor) monitors.get_item (position + i);
+                BlankWindow win = new BlankWindow (monitor);
+                win.set_visible (visible);
+                blank_windows.insert_val (position + i, win);
+            }
+
+            // Set preferred output
+            try {
+                swaync_daemon.set_cc_monitor (
+                    ConfigModel.instance.control_center_preferred_output);
+                swaync_daemon.set_noti_window_monitor (
+                    ConfigModel.instance.notification_window_preferred_output);
+            } catch (Error e) {
+                critical (e.message);
+            }
+        }
+
+        public void show_blank_windows (Gdk.Monitor ?ref_monitor) {
+            if (!use_layer_shell || !ConfigModel.instance.layer_shell_cover_screen) {
+                return;
+            }
+            foreach (unowned BlankWindow win in blank_windows.data) {
+                if (win.monitor != ref_monitor) {
+                    win.show ();
+                }
+            }
+        }
+
+        public void hide_blank_windows () {
+            if (!use_layer_shell) {
+                return;
+            }
+            foreach (unowned BlankWindow win in blank_windows.data) {
+                win.hide ();
+            }
         }
 
         private void print_monitors () {
@@ -105,15 +228,6 @@ namespace SwayNotificationCenter {
             info ("Monitors:\n%s", monitors_string);
         }
 
-        void on_cc_bus_aquired (DBusConnection conn) {
-            try {
-                conn.register_object ("/org/erikreider/swaync/cc", swaync_daemon);
-            } catch (IOError e) {
-                stderr.printf ("Could not register CC service\n");
-                Process.exit (1);
-            }
-        }
-
         public static int main (string[] args) {
             if (args.length > 0) {
                 for (uint i = 1; i < args.length; i++) {
@@ -123,7 +237,7 @@ namespace SwayNotificationCenter {
                         case "--style" :
                             style_path = args[++i];
                             break;
-                        case "--skip-system-css":
+                        case "--skip-system-css" :
                             skip_packaged_css = true;
                             break;
                         case "--custom-system-css":

@@ -48,8 +48,8 @@ namespace SwayNotificationCenter.Widgets {
             });
         }
 
-        public Volume (string suffix, SwayncDaemon swaync_daemon, NotiDaemon noti_daemon) {
-            base (suffix, swaync_daemon, noti_daemon);
+        public Volume (string suffix) {
+            base (suffix);
 
             Json.Object ?config = get_config (this);
             if (config != null) {

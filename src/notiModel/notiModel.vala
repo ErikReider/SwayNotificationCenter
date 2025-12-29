@@ -70,16 +70,16 @@ namespace SwayNotificationCenter {
     }
 
     public class NotifyParams : Object {
-        public uint32 applied_id { get; set; }
-        public string app_name { get; set; }
-        public uint32 replaces_id { get; set; }
-        public string app_icon { get; set; }
-        public Action ?default_action { get; set; }
-        public string summary { get; set; }
-        public string body { get; set; }
-        public HashTable<string, Variant> hints { get; set; }
-        public int expire_timeout { get; set; }
-        public int64 time { get; set; } // Epoch in seconds
+        public uint32 applied_id { get; private set; }
+        public string app_name { get; private set; }
+        public uint32 replaces_id { get; private set; }
+        public string app_icon { get; private set; }
+        public Action ?default_action { get; private set; }
+        public string summary { get; private set; }
+        public string body { get; private set; }
+        public HashTable<string, Variant> hints { get; private set; }
+        public int expire_timeout { get; private set; }
+        public int64 time { get; private set; } // Epoch in seconds
 
         // Hints: https://specifications.freedesktop.org/notification-spec/latest/hints.html
         /**
@@ -88,15 +88,15 @@ namespace SwayNotificationCenter {
          * name will be used to annotate the icon for accessibility purposes.
          * The icon name should be compliant with the Freedesktop.org Icon Naming Specification.
          */
-        public bool action_icons { get; set; }
+        public bool action_icons { get; private set; }
         /**
          * This is a raw data image format which describes the
          * width, height, rowstride, has alpha, bits per sample, channels
          * and image data respectively.
          */
-        public ImageData image_data { get; set; }
-        public ImageData icon_data { get; set; }
-        public string image_path { get; set; }
+        public ImageData image_data { get; private set; }
+        public ImageData icon_data { get; private set; }
+        public string image_path { get; private set; }
         /**
          * This specifies the name of the desktop filename representing the calling program.
          * This should be the same as the prefix used for the application's .desktop file.
@@ -104,42 +104,43 @@ namespace SwayNotificationCenter {
          * by the daemon to retrieve the correct icon for the application, for
          * logging purposes, etc.
          */
-        public string desktop_entry { get; set; }
+        public string desktop_entry { get; private set; }
         /** The type of notification this is. */
-        public string category { get; set; }
+        public string category { get; private set; }
         /**
          * A themeable named sound from the freedesktop.org sound naming specification
          * to play when the notification pops up. Similar to icon-name, only for sounds.
          * An example would be "message-new-instant".
          */
-        public string sound_name { get; set; }
+        public string sound_name { get; private set; }
         /** The path to a sound file to play when the notification pops up. */
-        public string sound_file { get; set; }
+        public string sound_file { get; private set; }
         /**
          * When set the server will not automatically remove the notification
          * when an action has been invoked. The notification will remain resident
          * in the server until it is explicitly removed by the user or by the sender.
          * This hint is likely only useful when the server has the "persistence" capability.
          */
-        public bool resident { get; set; }
+        public bool resident { get; private set; }
         /**
          * When set the server will treat the notification as transient and by-pass
-         * the server's persistence capability, if it should exist. (Always be visible)
+         * the server's persistence capability, if it should exist.
+         * (Only floating and always expire)
          */
-        public bool transient { get; set; }
+        public bool transient { get; private set; }
         /** The urgency level. */
-        public UrgencyLevels urgency { get; set; }
+        public UrgencyLevels urgency { get; private set; }
         /** Replaces the old notification with the same value of:
          * - x-canonical-private-synchronous
          * - synchronous
          */
-        public string ?synchronous { get; set; }
+        public string ?synchronous { get; private set; }
         /** Used for notification progress bar (0->100) */
         public int value {
             get {
                 return priv_value;
             }
-            set {
+            private set {
                 priv_value = value.clamp (0, 100);
             }
         }
@@ -147,23 +148,25 @@ namespace SwayNotificationCenter {
         public bool has_synch { public get; private set; }
 
         /** Inline-replies */
-        public Action ?inline_reply { get; set; }
-        public string ?inline_reply_placeholder { get; set; }
+        public Action ?inline_reply { get; private set; }
+        public string ?inline_reply_placeholder { get; private set; }
 
         // Custom hints
         /** Disables scripting for notification */
-        public bool swaync_no_script { get; set; }
+        public bool swaync_no_script { get; private set; }
 
         /** Always show the notification, regardless of dnd/inhibit state */
-        public bool swaync_bypass_dnd { get; set; }
+        public bool swaync_bypass_dnd { get; private set; }
 
-        public Array<Action> actions { get; set; }
+        public Array<Action> actions { get; private set; }
 
-        public DesktopAppInfo ?desktop_app_info = null;
+        public DesktopAppInfo ?desktop_app_info { get; private set; default = null; }
 
-        public string name_id;
+        public string name_id { get; private set; }
 
-        public string display_name;
+        public string display_name { get; private set; }
+
+        public NotificationStatusEnum status_state { get; private set; }
 
         public NotifyParams (uint32 applied_id,
                              string app_name,
@@ -221,6 +224,23 @@ namespace SwayNotificationCenter {
                 display_name = "Unknown";
             }
             this.display_name = display_name;
+
+            // The notification visibility state
+            status_state = NotificationStatusEnum.ENABLED;
+            unowned OrderedHashTable<NotificationVisibility> visibilities =
+                ConfigModel.instance.notification_visibility;
+            foreach (string key in visibilities.get_keys ()) {
+                unowned NotificationVisibility vis = visibilities[key];
+                if (!vis.matches_notification (this)) {
+                    continue;
+                }
+                status_state = vis.state;
+                if (vis.override_urgency != UNSET) {
+                    debug ("override urgency to %s\n", vis.override_urgency.to_string ());
+                    this.urgency = UrgencyLevels.from_value (vis.override_urgency.to_byte ());
+                }
+                break;
+            }
         }
 
         private void parse_hints () {
@@ -393,6 +413,13 @@ namespace SwayNotificationCenter {
             }
 
             this.actions = parsed_actions;
+        }
+
+        /** Only add notification to CC if it isn't IGNORED and not transient/TRANSIENT */
+        public bool ignore_cc () {
+            return status_state == NotificationStatusEnum.IGNORED
+                   || status_state == NotificationStatusEnum.TRANSIENT
+                   || (transient && status_state != NotificationStatusEnum.MUTED);
         }
 
         public string to_string () {

@@ -278,9 +278,6 @@ namespace SwayNotificationCenter.Widgets {
             list_box.invalidate_sort ();
 
             scroll_to_start ();
-
-            // Focus the incoming notification
-            group.grab_focus ();
         }
 
         public void set_list_is_reversed (bool reversed) {

@@ -62,6 +62,7 @@ namespace SwayNotificationCenter {
             foreach (unowned uint32 id in ids) {
                 NotificationClosed (id, reason);
                 notification_ids.remove (id);
+                floating_notifications.remove_notification (id);
             }
             notifications_widget.remove_group (group_name_id);
 

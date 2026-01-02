@@ -366,7 +366,23 @@ namespace SwayNotificationCenter {
                                   ConfigModel.instance.control_center_height);
         }
 
-        private void on_visibility_change () {
+        public bool toggle_visibility () {
+            var cc_visibility = !this.visible;
+            set_visibility (cc_visibility);
+            return cc_visibility;
+        }
+
+        public void set_visibility (bool visibility) {
+            if (this.visible == visibility) {
+                return;
+            }
+            // Destroy the wl_surface to get a new "enter-monitor" signal and
+            // fixes issues where keyboard shortcuts stop working after clearing
+            // all notifications.
+            ((Gtk.Widget) this).unrealize ();
+
+            this.set_visible (visibility);
+
             // Updates all widgets on visibility change
             foreach (var widget in widgets) {
                 widget.on_cc_visibility_change (visible);
@@ -378,25 +394,6 @@ namespace SwayNotificationCenter {
                 remove_css_class ("open");
             }
             swaync_daemon.emit_subscribe ();
-        }
-
-        public bool toggle_visibility () {
-            var cc_visibility = !this.visible;
-            set_visibility (cc_visibility);
-            return cc_visibility;
-        }
-
-        public void set_visibility (bool visibility) {
-            if (this.visible == visibility) {
-                return;
-            }
-            if (visibility) {
-                // Destroy the wl_surface to get a new "enter-monitor" signal
-                ((Gtk.Widget) this).unrealize ();
-            }
-            this.set_visible (visibility);
-
-            on_visibility_change ();
         }
 
         public inline bool get_visibility () {

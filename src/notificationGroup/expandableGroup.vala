@@ -15,8 +15,9 @@ namespace SwayNotificationCenter {
         private Adw.TimedAnimation animation;
 
         public uint n_children { get; private set; }
-        public List<Gtk.Widget> widgets = new List<Gtk.Widget> ();
         public List<unowned Gtk.Widget> visible_widgets = new List<unowned Gtk.Widget> ();
+
+        List<Gtk.Widget> widgets = new List<Gtk.Widget> ();
 
         public delegate void on_expand_change (bool state);
 
@@ -94,10 +95,40 @@ namespace SwayNotificationCenter {
             bool widget_visible = widget.get_visible ();
             widget.unparent ();
             widgets.remove (widget);
-            if (get_visible () && widget_visible) {
+            if (widget_visible) {
                 queue_resize ();
             }
             n_children--;
+        }
+
+        public void remove_all () {
+            while (!widgets.is_empty ()) {
+                unowned List<Gtk.Widget> link = widgets.nth (0);
+                if (link.data != null && link.data is Gtk.Widget) {
+                    remove (link.data);
+                } else {
+                    widgets.delete_link (link);
+                }
+            }
+            warn_if_fail (widgets.is_empty ());
+            n_children = 0;
+        }
+
+        public delegate bool WidgetFilterDelegate (Gtk.Widget widget);
+
+        public unowned Gtk.Widget ?get_first_widget (WidgetFilterDelegate ? filter = null) {
+            for (unowned List<Gtk.Widget> ?link = widgets.first ();
+                 link != null;
+                 link = link.next) {
+                if (link.data != null && (filter == null || filter (link.data))) {
+                    return link.data;
+                }
+            }
+            return null;
+        }
+
+        public inline bool is_empty () {
+            return widgets.is_empty ();
         }
 
         private delegate void compute_height_iter_cb (Gtk.Widget child,

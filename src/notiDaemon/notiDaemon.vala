@@ -55,7 +55,7 @@ namespace SwayNotificationCenter {
         }
 
         internal void request_dismiss_notification_group (string group_name_id,
-                                                          Gee.HashSet<uint32> ids,
+                                                          Gee.Set<uint32> ids,
                                                           ClosedReasons reason) {
             debug ("Dismissing notification group with ID:%s, reason:%s",
                    group_name_id, reason.to_string ());

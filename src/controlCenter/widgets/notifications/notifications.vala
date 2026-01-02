@@ -114,7 +114,7 @@ namespace SwayNotificationCenter.Widgets {
 
         private void prepare_group_removal (NotificationGroup group) {
             if (group.name_id.length > 0) {
-                noti_groups_name.unset (group.name_id, null);
+                noti_groups_name.unset (group.name_id);
             }
             if (expanded_group == group) {
                 expanded_group = null;
@@ -175,8 +175,8 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         private void remove_group_internal (NotificationGroup group) {
-            foreach (uint32 id in group.notification_ids) {
-                if (noti_groups_id.unset (id, null)) {
+            foreach (uint32 id in group.notification_ids.keys) {
+                if (noti_groups_id.unset (id)) {
                     n_notifications--;
                 }
             }
@@ -197,6 +197,7 @@ namespace SwayNotificationCenter.Widgets {
                 return;
             }
             if (group.state == NotificationGroupState.MANY) {
+                noti_groups_id.unset (id);
                 n_notifications--;
                 group.remove_notification.begin (id, (obj, result) => {
                     // Continue the removal logic even if the async result failed
@@ -215,8 +216,10 @@ namespace SwayNotificationCenter.Widgets {
         public void replace_notification (uint32 id, NotifyParams new_params) {
             unowned NotificationGroup ?group = noti_groups_id.get (id);
             if (group != null) {
-                noti_groups_id.unset (id, null);
+                noti_groups_id.unset (id);
                 if (group.replace_notification (id, new_params)) {
+                    // Replace the ID, could be changed depending on the
+                    // replacement method used
                     noti_groups_id.set (new_params.applied_id, group);
                     // Position the notification in the beginning of the list
                     list_box.invalidate_sort ();
@@ -268,10 +271,10 @@ namespace SwayNotificationCenter.Widgets {
                 group.add_css_class ("not-expanded");
             }
 
-            noti_groups_id.set (param.applied_id, group);
-
             group.add_notification (noti);
+            noti_groups_id.set (param.applied_id, group);
             n_notifications++;
+
             list_box.invalidate_sort ();
 
             scroll_to_start ();

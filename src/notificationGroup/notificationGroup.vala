@@ -8,10 +8,10 @@ namespace SwayNotificationCenter {
     public class NotificationGroup : Gtk.ListBoxRow {
         public string name_id;
 
-        public Gee.HashSet<uint32> notification_ids {
+        public Gee.HashMap<uint32, unowned Notification> notification_ids {
             get;
             private set;
-            default = new Gee.HashSet<uint32> ();
+            default = new Gee.HashMap<uint32, unowned Notification> ();
         }
 
         public NotificationGroupState state {
@@ -283,12 +283,11 @@ namespace SwayNotificationCenter {
                 return;
             }
 
-            unowned Notification first = (Notification) group.widgets.first ().data;
-            unowned NotifyParams param = first.param;
+            unowned Notification ?latest = get_latest_notification ();
             // Get the app icon
             Icon ?icon = null;
-            if (param.desktop_app_info != null
-                && (icon = param.desktop_app_info.get_icon ()) != null) {
+            if (latest != null && latest.param.desktop_app_info != null
+                && (icon = latest.param.desktop_app_info.get_icon ()) != null) {
                 app_icon.set_from_gicon (icon);
             } else {
                 app_icon.set_from_icon_name ("application-x-executable-symbolic");
@@ -296,13 +295,11 @@ namespace SwayNotificationCenter {
         }
 
         private unowned Notification ?find_notification (uint32 id) {
-            foreach (unowned Gtk.Widget widget in group.widgets) {
-                unowned Notification notification = (Notification) widget;
-                if (notification != null && notification.param.applied_id == id) {
-                    return notification;
-                }
+            unowned Notification ?notification = notification_ids.get (id);
+            if (notification == null || notification.param.applied_id != id) {
+                return null;
             }
-            return null;
+            return notification;
         }
 
         public void set_expanded (bool state) {
@@ -324,8 +321,8 @@ namespace SwayNotificationCenter {
             if (noti.param.urgency == UrgencyLevels.CRITICAL) {
                 urgent_notifications.add (noti.param.applied_id);
             }
-            notification_ids.add (noti.param.applied_id);
             group.add (noti);
+            notification_ids.set (noti.param.applied_id, noti);
 
             update_state ();
             set_icon ();
@@ -336,8 +333,8 @@ namespace SwayNotificationCenter {
             if (notification == null) {
                 return false;
             }
-            notification_ids.remove (id);
-            notification_ids.add (new_params.applied_id);
+            notification_ids.unset (id);
+            notification_ids.set (new_params.applied_id, notification);
             notification.replace_notification (new_params);
             return true;
         }
@@ -352,7 +349,7 @@ namespace SwayNotificationCenter {
             }
 
             urgent_notifications.remove (notification.param.applied_id);
-            notification_ids.remove (notification.param.applied_id);
+            notification_ids.unset (notification.param.applied_id);
             notification.remove_noti_timeout ();
 
             // Only animate individual notifications when there are more than one,
@@ -393,7 +390,7 @@ namespace SwayNotificationCenter {
                 }
             }
 
-            if (group.widgets.is_empty ()) {
+            if (group.is_empty ()) {
                 debug ("Skiping removal of all notifications as the group is already empty");
                 return false;
             }
@@ -403,16 +400,7 @@ namespace SwayNotificationCenter {
                 return false;
             }
 
-            while (!group.widgets.is_empty ()) {
-                unowned List<Gtk.Widget> link = group.widgets.nth (0);
-                unowned Notification ?notification = (Notification) link.data;
-                if (notification != null) {
-                    notification.remove_noti_timeout ();
-                }
-                group.widgets.delete_link (link);
-            }
-            warn_if_fail (group.widgets.is_empty ());
-
+            group.remove_all ();
             return true;
         }
 
@@ -421,19 +409,23 @@ namespace SwayNotificationCenter {
                 return;
             }
             dismissed = true;
-            noti_daemon.request_dismiss_notification_group (name_id, notification_ids,
+            noti_daemon.request_dismiss_notification_group (name_id, notification_ids.keys,
                                                             ClosedReasons.DISMISSED);
         }
 
         public unowned Notification ?get_latest_notification () {
-            return (Notification ?) group.widgets.first ().data;
+            return (Notification ?) group.get_first_widget ((widget) => {
+                unowned Notification ?notification = (Notification ?) widget;
+                return notification != null && !notification.dismissed;
+            });
         }
 
         public int64 get_time () {
-            if (group.widgets.is_empty ()) {
+            unowned Notification ?notification = get_latest_notification ();
+            if (notification_ids.is_empty || notification == null) {
                 return -1;
             }
-            return ((Notification) group.widgets.first ().data).param.time;
+            return notification.param.time;
         }
 
         public bool get_is_urgent () {
@@ -446,10 +438,9 @@ namespace SwayNotificationCenter {
 
         public void update () {
             set_icon ();
-            foreach (unowned Gtk.Widget widget in group.widgets) {
-                var noti = (Notification) widget;
-                if (noti != null) {
-                    noti.set_time ();
+            foreach (unowned Notification ?notification in notification_ids.values) {
+                if (notification != null) {
+                    notification.set_time ();
                 }
             }
         }

@@ -7,6 +7,8 @@ namespace SwayNotificationCenter {
         unowned AnimatedList list;
 
         Gee.HashSet<uint32> inline_reply_notifications = new Gee.HashSet<uint32> ();
+        Gee.HashMap<uint32, unowned Notification> notification_ids
+            = new Gee.HashMap<uint32, unowned Notification> ();
 
         private static string ?monitor_name = null;
 
@@ -214,6 +216,18 @@ namespace SwayNotificationCenter {
             surface.set_input_region (region);
         }
 
+        private inline unowned Notification ?find_notification (uint32 id) {
+            unowned Notification ?notification = notification_ids.get (id);
+            if (notification == null || notification.param.applied_id != id) {
+                return null;
+            }
+            unowned AnimatedListItem ?item = (AnimatedListItem ?) notification.get_parent ();
+            if (item == null || item.destroying) {
+                return null;
+            }
+            return notification;
+        }
+
         /**
          * Hides all notifications. Only invokes the NotificationClosed signal when transient.
          * The optional callback is used to remove select notifications where each
@@ -221,6 +235,7 @@ namespace SwayNotificationCenter {
          */
         public void remove_all_notifications (bool transition,
                                               notification_filter_func ?filter_func) {
+            notification_ids.clear ();
             inline_reply_notifications.clear ();
             foreach (unowned AnimatedListItem item in list.children) {
                 if (item.destroying) {
@@ -240,6 +255,7 @@ namespace SwayNotificationCenter {
             return_if_fail (notification != null);
 
             NotifyParams param = notification.param;
+            notification_ids.unset (param.applied_id);
             // Disable transitions when not mapped
             transition &= get_mapped ();
 
@@ -285,35 +301,30 @@ namespace SwayNotificationCenter {
             set_visible (true);
 
             list.append.begin (noti);
+            notification_ids.set (param.applied_id, noti);
         }
 
         /** Removes the notification widget with ID. Doesn't dismiss */
         public void remove_notification (uint32 id) {
-            foreach (unowned AnimatedListItem item in list.children) {
-                if (item.destroying) {
-                    continue;
-                }
-                unowned Notification notification = (Notification) item.child;
-                if (notification != null && notification.param.applied_id == id) {
-                    remove_notification_internal (notification, true);
-                    break;
-                }
+            unowned Notification ?notification = find_notification (id);
+            if (notification != null) {
+                remove_notification_internal (notification, true);
             }
         }
 
         public void replace_notification (uint32 id, NotifyParams new_params) {
-            foreach (unowned AnimatedListItem item in list.children) {
-                if (item.destroying) {
-                    continue;
-                }
-                var noti = (Notification) item.child;
-                if (noti != null && noti.param.applied_id == id) {
-                    noti.replace_notification (new_params);
-                    // Position the notification in the beginning/end of the list
-                    // and scroll to the new item
-                    list.move_to_beginning (noti, true);
-                    return;
-                }
+            unowned Notification ?notification = find_notification (id);
+            if (notification != null) {
+                // Replace the ID, could be changed depending on the
+                // replacement method used
+                notification_ids.unset (id);
+                notification_ids.set (new_params.applied_id, notification);
+
+                notification.replace_notification (new_params);
+                // Position the notification in the beginning/end of the list
+                // and scroll to the new item
+                list.move_to_beginning (notification, true);
+                return;
             }
 
             // Display a new notification if the old one isn't visible

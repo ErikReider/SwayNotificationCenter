@@ -762,17 +762,25 @@ public class AnimatedList : Gtk.Widget, Gtk.Scrollable {
     }
 
     public unowned AnimatedListItem ?get_first_item () {
-        if (children.is_empty ()) {
-            return null;
+        for (unowned List<AnimatedListItem> ?link = children.first ();
+             link != null;
+             link = link.next) {
+            if (link.data != null && !link.data.destroying) {
+                return link.data;
+            }
         }
-        return children.first ().data;
+        return null;
     }
 
     public unowned AnimatedListItem ?get_last_item () {
-        if (children.is_empty ()) {
-            return null;
+        for (unowned List<AnimatedListItem> ?link = children.last ();
+             link != null;
+             link = link.prev) {
+            if (link.data != null && !link.data.destroying) {
+                return link.data;
+            }
         }
-        return children.last ().data;
+        return null;
     }
 
     private bool should_card_animate () {

@@ -100,6 +100,7 @@ This package installs Fish completion files for %{name}
 %config(noreplace) %{_sysconfdir}/xdg/swaync/style.css
 %{_userunitdir}/swaync.service
 %{_datadir}/dbus-1/services/org.erikreider.swaync.service
+%{_datadir}/dbus-1/services/org.erikreider.swaync.cc.service
 %{_datadir}/glib-2.0/schemas/org.erikreider.swaync.gschema.xml
 %{_mandir}/man1/swaync-client.1.gz
 %{_mandir}/man1/swaync.1.gz

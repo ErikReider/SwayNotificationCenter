@@ -152,7 +152,7 @@ namespace SwayNotificationCenter {
         }
 
         private bool key_press_event_cb (uint keyval, uint keycode, Gdk.ModifierType state) {
-            if (get_focus () is Gtk.Text) {
+            if (get_focus () is Gtk.Editable) {
                 return false;
             }
             switch (Gdk.keyval_name (keyval)) {

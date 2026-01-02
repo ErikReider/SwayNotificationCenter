@@ -382,9 +382,10 @@ namespace SwayNotificationCenter {
             urgent_notifications.clear ();
             notification_ids.clear ();
 
+            // Skip animation if the notification was dismissed by swipe
             bool dismissed_by_swipe = this.dismissed_by_swipe;
             if (state == NotificationGroupState.SINLGE) {
-                unowned Notification ?noti = get_latest_notification ();
+                unowned Notification ?noti = (Notification ?) group.get_first_widget ();
                 if (noti != null) {
                     dismissed_by_swipe |= noti.dismissed_by_swipe;
                 }
@@ -413,6 +414,7 @@ namespace SwayNotificationCenter {
                                                             ClosedReasons.DISMISSED);
         }
 
+        /** Gets the latest, non-dismissed notification */
         public unowned Notification ?get_latest_notification () {
             return (Notification ?) group.get_first_widget ((widget) => {
                 unowned Notification ?notification = (Notification ?) widget;

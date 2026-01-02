@@ -31,10 +31,17 @@ libdir = get_option('libdir')
 conf_data = configuration_data()
 conf_data.set('bindir', join_paths(get_option('prefix'), get_option('bindir')))
 
-# Dbus service
+# D-Bus Notification service
 configure_file(
   configuration: conf_data,
   input: 'services/dbus/org.erikreider.swaync.service.in',
+  output: '@BASENAME@',
+  install_dir: datadir + '/dbus-1/services'
+)
+# D-Bus Control Center service
+configure_file(
+  configuration: conf_data,
+  input: 'services/dbus/org.erikreider.swaync.cc.service.in',
   output: '@BASENAME@',
   install_dir: datadir + '/dbus-1/services'
 )

@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=org.erikreider.swaync.cc
+Exec=@bindir@/swaync
+SystemdService=swaync.service

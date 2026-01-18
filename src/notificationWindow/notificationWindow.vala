@@ -46,6 +46,11 @@ namespace SwayNotificationCenter {
             });
             this.unmap.connect (() => {
                 debug ("NotificationWindow un-mapped");
+
+                // Destroy the wl_surface to get a new "enter-monitor" signal and
+                // fixes issues where keyboard shortcuts stop working after clearing
+                // all notifications.
+                ((Gtk.Widget) this).unrealize ();
             });
 
             // TODO: Make option

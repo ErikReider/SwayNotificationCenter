@@ -14,6 +14,8 @@ _swaync() {
         --version
         --style
         --config
+        --skip-system-css
+        --custom-system-css
     )
     case $prev in
         -s | --style)
@@ -21,6 +23,10 @@ _swaync() {
             return
             ;;
         -c | --config)
+            _filedir
+            return
+            ;;
+        custom-system-css)
             _filedir
             return
             ;;

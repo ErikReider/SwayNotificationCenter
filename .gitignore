@@ -1,5 +1,6 @@
 *.ui~
 *.ui#
+gschemas.compiled
 pkg
 build
 SwayNotificationCenter

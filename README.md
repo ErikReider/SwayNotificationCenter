@@ -224,8 +224,25 @@ sudo xbps-install -S SwayNotificationCenter
 
 ```zsh
 meson setup build --prefix=/usr
-ninja -C build
+meson compile -C build
 meson install -C build
+```
+
+## Development
+
+### Setup and build
+
+```sh
+meson setup build
+meson compile -C build
+```
+
+### Set the environment
+
+```sh
+# Sets the correct environment variables
+meson devenv -C build -w .
+# Now you can start nvim, vscode, etc in the development environment
 ```
 
 ## Sway Usage

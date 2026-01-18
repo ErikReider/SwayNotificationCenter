@@ -23,44 +23,27 @@ if get_option('buildtype') != 'release'
   dev_env.set('GSETTINGS_SCHEMA_DIR', meson.current_source_dir())
 endif
 
-# SCSS Dependency
-sassc = find_program('sassc')
-assert(sassc.found())
+style_files = []
+subdir('style')
 
-# SCSS Compilation
-style_css = custom_target(
-  'SCSS Compilation',
-  build_by_default: true,
-  build_always_stale: true,
-  input : 'style/style.scss',
-  output : 'style.css',
-  install: true,
-  install_dir: config_path,
-  command : [
-    sassc,
-    '-t',
-    'expanded',
-    '@INPUT@',
-    '@OUTPUT@'
-  ],
-)
-
-message(style_css.full_path())
-
-blueprints = custom_target('blueprints',
+blueprints = custom_target(
+  'blueprints',
   input: files(run_command('find', '.', '-name', '*.blp').stdout().strip().split('\n')),
   output: '.',
   command: [
     find_program('blueprint-compiler', required: true),
     'batch-compile',
-    '@OUTPUT@', '@CURRENT_SOURCE_DIR@', '@INPUT@'
+    '@OUTPUT@',
+    '@CURRENT_SOURCE_DIR@',
+    '@INPUT@',
   ],
   build_always_stale: true,
   build_by_default: true,
 )
 
-app_resources += gnome.compile_resources('sway_notification_center-resources',
+app_resources += gnome.compile_resources(
+  'sway_notification_center-resources',
   'sway_notification_center.gresource.xml',
-    dependencies: [ blueprints ],
-  c_name: 'sway_notification_center'
+  dependencies: [style_files, blueprints],
+  c_name: 'sway_notification_center',
 )

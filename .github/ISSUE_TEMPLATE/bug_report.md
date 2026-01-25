@@ -14,6 +14,8 @@ assignees: ''
 
 **Please also make sure that swaync is running with your primary GPU, and not PRIME**
 
+**If you're experiencing VK/vulkan error messages, please first try running with the environment variable `GSK_RENDERER=opengl swaync`**
+
 **Describe the bug**
 A clear and concise description of what the bug is.
 

@@ -37,7 +37,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
  - OS: [e.g. Fedora 42]
- - Version [e.g. 0.12.0]
+ - Version [e.g. 0.12.4]
 
 **Additional context**
 Add any other context about the problem here.

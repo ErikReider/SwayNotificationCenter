@@ -22,6 +22,15 @@ namespace SwayNotificationCenter.Widgets.Mpris {
         bool autohide;
         string[] blacklist;
         bool loop_carousel;
+        // New customization options
+        bool show_title;
+        bool show_subtitle;
+        bool show_background;
+        bool show_shuffle;
+        bool show_repeat;
+        bool show_favorite;
+        int button_size;
+        bool compact_mode;
     }
 
     public class Mpris : BaseWidget {
@@ -49,6 +58,15 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             show_album_art = AlbumArtState.ALWAYS,
             autohide = false,
             loop_carousel = false,
+            // defaults for new options
+            show_title = true,
+            show_subtitle = true,
+            show_background = true,
+            show_shuffle = true,
+            show_repeat = true,
+            show_favorite = true,
+            button_size = -1,
+            compact_mode = false,
         };
 
         public Mpris (string suffix) {
@@ -142,6 +160,65 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                                                       out loop_carousel_found);
                 if (loop_carousel_found) {
                     mpris_config.loop_carousel = loop_carousel;
+                }
+
+                // New options
+                bool show_title_found;
+                bool ?show_title = get_prop<bool> (config, "show-title", out show_title_found);
+                if (show_title_found && show_title != null) {
+                    mpris_config.show_title = show_title;
+                }
+
+                bool show_subtitle_found;
+                bool ?show_subtitle = get_prop<bool> (
+                    config, "show-subtitle", out show_subtitle_found
+                );
+                if (show_subtitle_found && show_subtitle != null) {
+                    mpris_config.show_subtitle = show_subtitle;
+                }
+
+                bool show_background_found;
+                bool ?show_background = get_prop<bool> (
+                    config, "show-background", out show_background_found
+                );
+                if (show_background_found && show_background != null) {
+                    mpris_config.show_background = show_background;
+                }
+
+                bool show_shuffle_found;
+                bool ?show_shuffle = get_prop<bool> (
+                    config, "show-shuffle", out show_shuffle_found
+                );
+                if (show_shuffle_found && show_shuffle != null) {
+                    mpris_config.show_shuffle = show_shuffle;
+                }
+
+                bool show_repeat_found;
+                bool ?show_repeat = get_prop<bool> (config, "show-repeat", out show_repeat_found);
+                if (show_repeat_found && show_repeat != null) {
+                    mpris_config.show_repeat = show_repeat;
+                }
+
+                bool show_favorite_found;
+                bool ?show_favorite = get_prop<bool> (
+                    config, "show-favorite", out show_favorite_found
+                );
+                if (show_favorite_found && show_favorite != null) {
+                    mpris_config.show_favorite = show_favorite;
+                }
+
+                bool button_size_found;
+                int ?button_size = get_prop<int> (config, "button-size", out button_size_found);
+                if (button_size_found && button_size != null) {
+                    mpris_config.button_size = button_size;
+                }
+
+                bool compact_mode_found;
+                bool ?compact_mode = get_prop<bool> (
+                    config, "compact-mode", out compact_mode_found
+                );
+                if (compact_mode_found && compact_mode != null) {
+                    mpris_config.compact_mode = compact_mode;
                 }
             }
 

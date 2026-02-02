@@ -37,28 +37,6 @@ namespace SwayNotificationCenter {
                 set_anchor ();
             }
 
-            this.map.connect (() => {
-                set_anchor ();
-
-                unowned Gdk.Surface surface = get_surface ();
-                if (!(surface is Gdk.Surface)) {
-                    warn_if_reached ();
-                    return;
-                }
-
-                ulong id = 0;
-                id = surface.enter_monitor.connect ((monitor) => {
-                    surface.disconnect (id);
-                    debug ("ControlCenter mapped on monitor: %s",
-                           Functions.monitor_to_string (monitor));
-                    app.show_blank_windows (monitor);
-                });
-            });
-            this.unmap.connect (() => {
-                debug ("ControlCenter un-mapped");
-                app.hide_blank_windows ();
-            });
-
             /*
              * Handling of bank window presses (pressing outside of Control Center)
              */
@@ -132,6 +110,32 @@ namespace SwayNotificationCenter {
                     set_anchor ();
                 }
             });
+        }
+
+        protected override void map () {
+            base.map ();
+            debug ("ControlCenter mapped, waiting for enter-monitor signal");
+            set_anchor ();
+
+            unowned Gdk.Surface surface = get_surface ();
+            if (!(surface is Gdk.Surface)) {
+                warn_if_reached ();
+                return;
+            }
+
+            ulong id = 0;
+            id = surface.enter_monitor.connect ((monitor) => {
+                surface.disconnect (id);
+                debug ("ControlCenter mapped on monitor: %s",
+                       Functions.monitor_to_string (monitor));
+                app.show_blank_windows (monitor);
+            });
+        }
+
+        protected override void unmap () {
+            base.unmap ();
+            debug ("ControlCenter un-mapped");
+            app.hide_blank_windows ();
         }
 
         private void key_released_event_cb (uint keyval, uint keycode, Gdk.ModifierType state) {

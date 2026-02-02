@@ -10,7 +10,7 @@ namespace SwayNotificationCenter {
         Gee.HashMap<uint32, unowned Notification> notification_ids
             = new Gee.HashMap<uint32, unowned Notification> ();
 
-        private static string ?monitor_name = null;
+        private string ?monitor_name = null;
 
         private const int MAX_HEIGHT = 600;
 
@@ -39,8 +39,8 @@ namespace SwayNotificationCenter {
                 string monitor_name = config.notification_window_preferred_output;
                 if (old == null
                     || old.notification_window_preferred_output != monitor_name
-                    || NotificationWindow.monitor_name != monitor_name) {
-                    NotificationWindow.monitor_name = null;
+                    || this.monitor_name != monitor_name) {
+                    this.monitor_name = null;
                     set_anchor ();
                 }
             });
@@ -138,8 +138,8 @@ namespace SwayNotificationCenter {
 
                 // Set the preferred monitor
                 string ?monitor_name = ConfigModel.instance.notification_window_preferred_output;
-                if (NotificationWindow.monitor_name != null) {
-                    monitor_name = NotificationWindow.monitor_name;
+                if (this.monitor_name != null) {
+                    monitor_name = this.monitor_name;
                 }
                 set_monitor (Functions.try_get_monitor (monitor_name));
             }
@@ -375,7 +375,7 @@ namespace SwayNotificationCenter {
         public void set_monitor (Gdk.Monitor ?monitor) {
             debug ("Setting monitor for Floating Notifications: %s",
                    Functions.monitor_to_string (monitor) ?? "Monitor Picked by Compositor");
-            NotificationWindow.monitor_name = monitor == null ? null : monitor.connector;
+            this.monitor_name = monitor == null ? null : monitor.connector;
             GtkLayerShell.set_monitor (this, monitor);
 
             set_input_region ();

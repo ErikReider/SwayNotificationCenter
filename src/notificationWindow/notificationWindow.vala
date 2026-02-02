@@ -29,34 +29,9 @@ namespace SwayNotificationCenter {
             }
             this.set_anchor ();
 
-            this.map.connect (() => {
-                set_anchor ();
-
-                unowned Gdk.Surface surface = get_surface ();
-                if (!(surface is Gdk.Surface)) {
-                    warn_if_reached ();
-                    return;
-                }
-                ulong id = 0;
-                id = surface.enter_monitor.connect ((monitor) => {
-                    surface.disconnect (id);
-                    debug ("NotificationWindow mapped on monitor: %s",
-                           Functions.monitor_to_string (monitor));
-                });
-            });
-            this.unmap.connect (() => {
-                debug ("NotificationWindow un-mapped");
-
-                // Destroy the wl_surface to get a new "enter-monitor" signal and
-                // fixes issues where keyboard shortcuts stop working after clearing
-                // all notifications.
-                ((Gtk.Widget) this).unrealize ();
-            });
-
             // TODO: Make option
             list.use_card_animation = true;
 
-            // set_resizable (false);
             default_width = ConfigModel.instance.notification_window_width;
 
             // Change output on config reload
@@ -69,6 +44,37 @@ namespace SwayNotificationCenter {
                     set_anchor ();
                 }
             });
+        }
+
+        protected override void map () {
+            base.map ();
+            debug ("NotificationWindow mapped, waiting for enter-monitor signal");
+            set_anchor ();
+
+            unowned Gdk.Surface surface = get_surface ();
+            if (!(surface is Gdk.Surface)) {
+                warn_if_reached ();
+                return;
+            }
+            ulong id = 0;
+            id = surface.enter_monitor.connect ((monitor) => {
+                surface.disconnect (id);
+                debug ("NotificationWindow mapped on monitor: %s",
+                       Functions.monitor_to_string (monitor));
+            });
+        }
+
+        protected override void unmap () {
+            base.unmap ();
+            debug ("NotificationWindow un-mapped");
+
+            // Make sure that all notifications are dismissed
+            noti_daemon.remove_all_floating_notifications (false, null);
+
+            // Destroy the wl_surface to get a new "enter-monitor" signal and
+            // fixes issues where keyboard shortcuts stop working after clearing
+            // all notifications.
+            ((Gtk.Widget) this).unrealize ();
         }
 
         protected override void size_allocate (int w, int h, int baseline) {
@@ -233,6 +239,14 @@ namespace SwayNotificationCenter {
             return notification;
         }
 
+        private inline void hide_if_empty () {
+            if (list.is_empty ()) {
+                set_visible (false);
+            } else {
+                set_input_region ();
+            }
+        }
+
         /**
          * Hides all notifications. Only invokes the NotificationClosed signal when transient.
          * The optional callback is used to remove select notifications where each
@@ -256,8 +270,11 @@ namespace SwayNotificationCenter {
             set_visible (false);
         }
 
-        private void remove_notification_internal (Notification notification, bool transition) {
-            return_if_fail (notification != null);
+        private bool remove_notification_internal (Notification notification, bool transition) {
+            if (notification == null) {
+                critical ("Trying to remove NULL Notification");
+                return false;
+            }
 
             NotifyParams param = notification.param;
             notification_ids.unset (param.applied_id);
@@ -276,13 +293,8 @@ namespace SwayNotificationCenter {
             }
             // Remove notification and its destruction timeout
             notification.remove_noti_timeout ();
-            list.remove.begin (notification, transition, (obj, res) => {
-                if (list.is_empty ()) {
-                    set_visible (false);
-                    return;
-                }
-                set_input_region ();
-            });
+            list.remove.begin (notification, transition, (obj, res) => hide_if_empty ());
+            return true;
         }
 
         public void add_notification (NotifyParams param) {
@@ -303,7 +315,7 @@ namespace SwayNotificationCenter {
                 }
             }
 
-            set_visible (true);
+            present ();
 
             list.append.begin (noti);
             notification_ids.set (param.applied_id, noti);
@@ -312,8 +324,9 @@ namespace SwayNotificationCenter {
         /** Removes the notification widget with ID. Doesn't dismiss */
         public void remove_notification (uint32 id) {
             unowned Notification ?notification = find_notification (id);
-            if (notification != null) {
-                remove_notification_internal (notification, true);
+            if (notification == null
+                || !remove_notification_internal (notification, true)) {
+                hide_if_empty ();
             }
         }
 

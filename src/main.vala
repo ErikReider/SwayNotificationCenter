@@ -146,6 +146,7 @@ namespace SwayNotificationCenter {
             notifications_widget = new Widgets.Notifications ();
             control_center = new ControlCenter ();
 
+            add_window (floating_notifications);
             add_window (control_center);
 
             noti_daemon.on_dnd_toggle.connect ((dnd) => {

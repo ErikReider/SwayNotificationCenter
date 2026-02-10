@@ -46,11 +46,6 @@ namespace SwayNotificationCenter {
             });
             this.unmap.connect (() => {
                 debug ("NotificationWindow un-mapped");
-
-                // Destroy the wl_surface to get a new "enter-monitor" signal and
-                // fixes issues where keyboard shortcuts stop working after clearing
-                // all notifications.
-                ((Gtk.Widget) this).unrealize ();
             });
 
             // TODO: Make option
@@ -301,6 +296,13 @@ namespace SwayNotificationCenter {
                     GtkLayerShell.set_keyboard_mode (
                         this, GtkLayerShell.KeyboardMode.ON_DEMAND);
                 }
+            }
+
+            if (!visible) {
+                // Destroy the wl_surface to get a new "enter-monitor" signal and
+                // fixes issues where keyboard shortcuts stop working after clearing
+                // all notifications.
+                ((Gtk.Widget) this).unrealize ();
             }
 
             set_visible (true);

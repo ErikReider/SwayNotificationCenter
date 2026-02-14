@@ -33,6 +33,21 @@ public class Underlay : Gtk.Widget {
         }
     }
 
+    public override void dispose () {
+        // Properly unparent children to release resources
+        if (_underlay_child != null) {
+            _underlay_child.unparent ();
+            _underlay_child = null;
+        }
+
+        if (_child != null) {
+            _child.unparent ();
+            _child = null;
+        }
+
+        base.dispose ();
+    }
+
     /*
      * Overrides
      */

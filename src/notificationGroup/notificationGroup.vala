@@ -207,6 +207,24 @@ namespace SwayNotificationCenter {
             });
         }
 
+        public override void dispose () {
+            // Stop and clean up animation to prevent reference cycles
+            if (remove_animation != null) {
+                remove_animation.skip ();
+                if (remove_animation_done_id > 0) {
+                    remove_animation.disconnect (remove_animation_done_id);
+                    remove_animation_done_id = 0;
+                }
+                remove_animation = null;
+            }
+
+            // Clear collections
+            urgent_notifications.clear ();
+            notification_ids.clear ();
+
+            base.dispose ();
+        }
+
         private void animation_value_changed (double progress) {
             queue_resize ();
         }

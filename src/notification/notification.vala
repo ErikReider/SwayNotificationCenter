@@ -105,6 +105,22 @@ namespace SwayNotificationCenter {
 
         private Notification () {}
 
+        public override void dispose () {
+            // Clear all image resources to release VRAM/GPU memory
+            img.clear ();
+            img_app_icon.clear ();
+            body_image.set_paintable (null);
+
+            // Remove any pending timeout
+            remove_noti_timeout ();
+
+            // Clear gesture/controller references
+            gesture = null;
+            motion_controller = null;
+
+            base.dispose ();
+        }
+
         /** Show a non-timed notification */
         public Notification.regular (NotifyParams param,
                                      NotificationType notification_type) {
@@ -309,7 +325,8 @@ namespace SwayNotificationCenter {
 
             this.body.set_lines (this.number_of_body_lines);
 
-            // Reset state
+            // Reset state - clear paintable to release GPU memory
+            body_image.set_paintable (null);
             body_image.hide ();
 
             // Removes all image tags and adds them to an array
@@ -344,8 +361,23 @@ namespace SwayNotificationCenter {
                         string img = Functions.uri_to_path (img_paths[0]);
                         File file = File.new_for_path (img);
                         if (img.length > 0 && file.query_exists ()) {
-                            Gdk.Texture texture = Gdk.Texture.from_file (file);
-                            body_image.set_paintable (texture);
+                            // Clear previous body image to release GPU memory
+                            body_image.set_paintable (null);
+                            // Load image scaled to display size to save GPU memory
+                            // Full-res images (e.g., 2560x1440 screenshots) waste VRAM
+                            try {
+                                Gdk.Pixbuf pixbuf = new Gdk.Pixbuf.from_file_at_scale (
+                                    img,
+                                    notification_body_image_width * get_scale_factor (),
+                                    notification_body_image_height * get_scale_factor (),
+                                    true);  // preserve aspect ratio
+                                Gdk.Texture texture = Gdk.Texture.for_pixbuf (pixbuf);
+                                body_image.set_paintable (texture);
+                            } catch (Error e) {
+                                // Fallback to full-size load if scaling fails
+                                Gdk.Texture texture = Gdk.Texture.from_file (file);
+                                body_image.set_paintable (texture);
+                            }
                             body_image.set_can_shrink (true);
                             body_image.set_content_fit (Gtk.ContentFit.SCALE_DOWN);
                             body_image.width_request = notification_body_image_width;
@@ -485,7 +517,8 @@ namespace SwayNotificationCenter {
         }
 
         private void set_style_urgency () {
-            // Reset state
+            // Reset state - clear paintable to release GPU memory
+            body_image.set_paintable (null);
             base_box.remove_css_class ("low");
             base_box.remove_css_class ("normal");
             base_box.remove_css_class ("critical");
@@ -505,7 +538,8 @@ namespace SwayNotificationCenter {
         }
 
         private void set_inline_reply () {
-            // Reset state
+            // Reset state - clear paintable to release GPU memory
+            body_image.set_paintable (null);
             inline_reply_box.hide ();
             // Only show inline replies in popup notifications if the compositor
             // supports ON_DEMAND layer shell keyboard interactivity

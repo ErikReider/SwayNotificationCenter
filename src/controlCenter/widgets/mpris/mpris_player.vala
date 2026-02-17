@@ -208,6 +208,8 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 }
                 title.set_text (name);
             }
+            // Honor show_title config
+            title.set_visible (mpris_config.show_title);
         }
 
         private void update_sub_title (HashTable<string, Variant> metadata) {
@@ -246,8 +248,9 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 }
             }
             sub_title.set_text (result);
-            // Hide if no album or artist
-            sub_title.set_visible (result.length > 0);
+            // Hide if no album or artist or config disables it
+            bool should_show = result.length > 0 && mpris_config.show_subtitle;
+            sub_title.set_visible (should_show);
         }
 
         private async void update_album_art (HashTable<string, Variant> metadata) {
@@ -329,6 +332,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
                     // Set background album art
                     background_picture.set_paintable (album_art_texture);
+                    background_picture.set_visible (mpris_config.show_background);
 
                     this.queue_draw ();
                     return;
@@ -349,6 +353,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 if (icon_info != null) {
                     album_art.set_from_gicon (icon);
                     background_picture.set_paintable (icon_info);
+                    background_picture.set_visible (mpris_config.show_background);
 
                     debug ("MPRIS album art: using .desktop icon");
                     return;
@@ -362,12 +367,19 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 icon_name, null, 128, get_scale_factor (),
                 Gtk.TextDirection.NONE, 0);
             background_picture.set_paintable (icon_info);
+            background_picture.set_visible (mpris_config.show_background);
 
             debug ("MPRIS album art: using default icon");
         }
 
         private void update_button_shuffle (HashTable<string, Variant> metadata) {
             if (!(button_shuffle is Gtk.Widget)) {
+                return;
+            }
+            // Respect user config: hide shuffle entirely if disabled
+            if (!mpris_config.show_shuffle) {
+                button_shuffle.set_visible (false);
+                button_shuffle.hide ();
                 return;
             }
 
@@ -432,6 +444,12 @@ namespace SwayNotificationCenter.Widgets.Mpris {
 
         private void update_button_repeat (HashTable<string, Variant> metadata) {
             if (!(button_repeat is Gtk.Widget)) {
+                return;
+            }
+            // Respect user config: hide repeat entirely if disabled
+            if (!mpris_config.show_repeat) {
+                button_repeat.set_visible (false);
+                button_repeat.hide ();
                 return;
             }
 

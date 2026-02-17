@@ -22,6 +22,9 @@ swaync - A simple notification daemon with a GTK gui for notifications and the c
 *--skip-system-css*
 	Skip trying to parse the packaged Stylesheet file. Useful for CSS debugging
 
+*--custom-system-css*
+	Pick a custom CSS file to use as the "system" CSS. Useful for CSS debugging
+
 *-c, --config* <Config file>
 	Use a custom config file
 

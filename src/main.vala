@@ -42,10 +42,12 @@ namespace SwayNotificationCenter {
 
         public signal void config_reload (ConfigModel ?old_config, ConfigModel new_config);
 
-        public Swaync () {
+        public Swaync (bool replace) {
             Object (
                 application_id : "org.erikreider.swaync",
                 flags: ApplicationFlags.DEFAULT_FLAGS
+                | ApplicationFlags.ALLOW_REPLACEMENT
+                | (replace ? ApplicationFlags.REPLACE : 0)
             );
 
             try {
@@ -230,6 +232,7 @@ namespace SwayNotificationCenter {
         }
 
         public static int main (string[] args) {
+            bool replace = false;
             if (args.length > 0) {
                 for (uint i = 1; i < args.length; i++) {
                     string arg = args[i];
@@ -247,6 +250,9 @@ namespace SwayNotificationCenter {
                         case "-c":
                         case "--config":
                             config_path = args[++i];
+                            break;
+                        case "--replace":
+                            replace = true;
                             break;
                         case "-v":
                         case "--version":
@@ -283,7 +289,7 @@ namespace SwayNotificationCenter {
             Functions.init ();
             self_settings = new Settings ("org.erikreider.swaync");
 
-            app = new Swaync ();
+            app = new Swaync (replace);
             return app.run ();
         }
 

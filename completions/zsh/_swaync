@@ -5,5 +5,6 @@ _arguments -s \
     '(-v --version)'{-v,--version}'[Prints version]' \
     '(-s --style)'{-s,--style}'[Use a custom Stylesheet file]:files:_files' \
     '(-c --config)'{-c,--config}'[Use a custom config file]:files:_files' \
+    '(   --replace)'--replace'[Replace the currently running instance of SwayNotificationCenter]' \
     '(   --skip-system-css)'--skip-system-css'[Skip trying to parse the packaged Stylesheet file. Useful for CSS debugging]' \
     '(   --custom-system-css)'--custom-system-css'[Pick a custom CSS file to use as the "system" CSS. Useful for CSS debugging]:files:_files' \

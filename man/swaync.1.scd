@@ -19,6 +19,9 @@ swaync - A simple notification daemon with a GTK gui for notifications and the c
 *-s, --style* <CSS file>
 	Use a custom Stylesheet file
 
+*--replace*
+	Replace the currently running instance of SwayNotificationCenter
+
 *--skip-system-css*
 	Skip trying to parse the packaged Stylesheet file. Useful for CSS debugging
 

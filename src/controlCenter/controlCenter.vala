@@ -376,10 +376,12 @@ namespace SwayNotificationCenter {
             if (this.visible == visibility) {
                 return;
             }
-            // Destroy the wl_surface to get a new "enter-monitor" signal and
-            // fixes issues where keyboard shortcuts stop working after clearing
-            // all notifications.
-            ((Gtk.Widget) this).unrealize ();
+
+            // NOTE: We removed the unrealize() call that was here.
+            // It was causing GPU memory leaks on repeated open/close cycles
+            // because textures had to be re-uploaded each time.
+            // If keyboard shortcuts stop working after clearing notifications,
+            // a different fix may be needed (e.g., reset keyboard mode via layer shell).
 
             this.set_visible (visibility);
 

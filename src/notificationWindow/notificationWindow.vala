@@ -42,9 +42,13 @@ namespace SwayNotificationCenter {
                     surface.disconnect (id);
                     debug ("NotificationWindow mapped on monitor: %s",
                            Functions.monitor_to_string (monitor));
+
+                    // Only set ON_DEMAND after the surface has been mapped
+                    set_keyboard_mode ();
                 });
             });
             this.unmap.connect (() => {
+                set_keyboard_mode ();
                 debug ("NotificationWindow un-mapped");
             });
 
@@ -83,6 +87,16 @@ namespace SwayNotificationCenter {
             };
             snapshot.append_color (color, Graphene.Rect.zero ());
             base.snapshot (snapshot);
+        }
+
+        private inline void set_keyboard_mode () {
+            if (app.use_layer_shell) {
+                if (app.has_layer_on_demand && get_mapped ()) {
+                    GtkLayerShell.set_keyboard_mode (this, GtkLayerShell.KeyboardMode.ON_DEMAND);
+                } else {
+                    GtkLayerShell.set_keyboard_mode (this, GtkLayerShell.KeyboardMode.NONE);
+                }
+            }
         }
 
         private void set_anchor () {
@@ -261,14 +275,8 @@ namespace SwayNotificationCenter {
 
             if (notification.has_inline_reply) {
                 inline_reply_notifications.remove (param.applied_id);
-                if (inline_reply_notifications.is_empty
-                    && app.use_layer_shell
-                    && GtkLayerShell.get_keyboard_mode (this)
-                    != GtkLayerShell.KeyboardMode.NONE) {
-                    GtkLayerShell.set_keyboard_mode (
-                        this, GtkLayerShell.KeyboardMode.NONE);
-                }
             }
+
             // Remove notification and its destruction timeout
             notification.remove_noti_timeout ();
             list.remove.begin (notification, transition, (obj, res) => {
@@ -286,18 +294,6 @@ namespace SwayNotificationCenter {
                                                ConfigModel.instance.timeout,
                                                ConfigModel.instance.timeout_low,
                                                ConfigModel.instance.timeout_critical);
-            if (noti.has_inline_reply) {
-                inline_reply_notifications.add (param.applied_id);
-
-                if (app.use_layer_shell &&
-                    GtkLayerShell.get_keyboard_mode (this)
-                    != GtkLayerShell.KeyboardMode.ON_DEMAND
-                    && app.has_layer_on_demand) {
-                    GtkLayerShell.set_keyboard_mode (
-                        this, GtkLayerShell.KeyboardMode.ON_DEMAND);
-                }
-            }
-
             if (!visible) {
                 // Destroy the wl_surface to get a new "enter-monitor" signal and
                 // fixes issues where keyboard shortcuts stop working after clearing

@@ -4,6 +4,7 @@
   --noti-border-color: rgba(255, 255, 255, 0.15);
   --noti-bg: 48, 48, 48;
   --noti-bg-alpha: 0.8;
+  --noti-bg-normal: rgba(var(--noti-bg), var(--noti-bg-alpha));
   --noti-bg-darker: rgb(38, 38, 38);
   --noti-bg-hover: rgb(56, 56, 56);
   --noti-bg-focus: rgba(68, 68, 68, 0.6);
@@ -33,6 +34,11 @@
 
   --hover-transition: var(--hover-tranistion);
   --group-collapse-transition: var(--group-collapse-tranistion);
+}
+
+@function gtk-alpha($color, $alpha) {
+  /* GTK's alpha() emulated */
+  @return unquote("alpha(#{$color}, #{$alpha})");
 }
 
 /* Fallback for older CSS themes */
@@ -85,7 +91,7 @@ notificationwindow, blankwindow {
       border: var(--border);
       padding: 0;
       transition: var(--hover-tranistion);
-      background: rgba(var(--noti-bg), var(--noti-bg-alpha));
+      background: var(--noti-bg-normal);
 
       &.low {
         /* Low Priority Notification */
@@ -205,7 +211,7 @@ notificationwindow, blankwindow {
 
             .inline-reply-button {
               margin-left: 4px;
-              background: rgba(var(--noti-bg), var(--noti-bg-alpha));
+              background: var(--noti-bg-normal);
               border: var(--border);
               border-radius: var(--border-radius);
               color: var(--text-color);
@@ -304,7 +310,7 @@ notificationwindow, blankwindow {
 
     .notification-row {
       .notification {
-        background-color: rgba(var(--noti-bg), 1);
+        background-color: gtk-alpha(var(--noti-bg-normal), 1);
       }
 
       &:not(:last-child) {

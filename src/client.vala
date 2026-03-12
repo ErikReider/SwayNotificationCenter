@@ -33,6 +33,8 @@ interface CcDaemon : Object {
 
     public abstract void latest_invoke_action (uint32 action_index) throws DBusError, IOError;
 
+    public abstract void latest_invoke_default_action () throws DBusError, IOError;
+
     public abstract bool set_cc_monitor (string monitor) throws DBusError, IOError;
     public abstract bool set_noti_window_monitor (string monitor) throws DBusError, IOError;
 
@@ -209,12 +211,13 @@ public int command_line (ref string[] args, bool skip_wait) {
                 break;
             case "--action":
             case "-a":
-                int action_index = 0;
                 if (args.length >= 2) {
                     used_args++;
-                    action_index = int.parse (args[1]);
+                    int action_index = int.parse (args[1]);
+                    cc_daemon.latest_invoke_action ((uint32) action_index);
+                } else {
+                    cc_daemon.latest_invoke_default_action ();
                 }
-                cc_daemon.latest_invoke_action ((uint32) action_index);
                 break;
             case "--get-inhibited":
             case "-I":

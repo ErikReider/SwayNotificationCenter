@@ -357,6 +357,17 @@ namespace SwayNotificationCenter {
             noti.click_alt_action (action);
         }
 
+        public void latest_notification_default_action () {
+            unowned AnimatedListItem ?item = list.get_first_item ();
+            if (item == null || !(item.child is Notification)) {
+                warn_if_reached ();
+                return;
+            }
+
+            Notification noti = (Notification) item.child;
+            noti.click_default_action ();
+        }
+
         public void set_monitor (Gdk.Monitor ?monitor) {
             debug ("Setting monitor for Floating Notifications: %s",
                    Functions.monitor_to_string (monitor) ?? "Monitor Picked by Compositor");

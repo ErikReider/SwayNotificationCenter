@@ -20,6 +20,7 @@ complete -c swaync-client      -l hide-latest --description "Hides latest notifi
 complete -c swaync-client      -l hide-all --description "Hides all notifications. Still shown in Control Center" -r
 complete -c swaync-client      -l close-latest --description "Closes latest notification" -r
 complete -c swaync-client -s C -l close-all --description "Closes all notifications" -r
+complete -c swaync-client      -l close --description "Closes notification with given ID" -r
 complete -c swaync-client -s sw -l skip-wait --description "Doesn't wait when swaync hasn't been started" -r
 complete -c swaync-client -s s -l subscribe --description "Subscribe to notification add and close events" -r
 complete -c swaync-client -s swb -l subscribe-waybar --description "Subscribe to notification add and close events with waybar support. Read README for example" -r

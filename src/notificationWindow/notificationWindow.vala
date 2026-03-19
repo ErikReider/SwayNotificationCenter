@@ -44,7 +44,7 @@ namespace SwayNotificationCenter {
                            Functions.monitor_to_string (monitor));
 
                     // Only set ON_DEMAND after the surface has been mapped
-                    set_keyboard_mode ();
+                    Idle.add_once (() => set_keyboard_mode ());
                 });
             });
             this.unmap.connect (() => {

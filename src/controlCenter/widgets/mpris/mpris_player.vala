@@ -98,8 +98,20 @@ namespace SwayNotificationCenter.Widgets.Mpris {
             album_art.set_visible (mpris_config.show_album_art == AlbumArtState.ALWAYS);
         }
 
+        public override void dispose () {
+            before_destroy ();
+            base.dispose ();
+        }
+
         public void before_destroy () {
             source.properties_changed.disconnect (properties_changed);
+
+            // Cancel any ongoing album art download
+            album_art_cancellable.cancel ();
+
+            // Clear album art textures to release VRAM/GPU memory
+            album_art.clear ();
+            background_picture.set_paintable (null);
         }
 
         private void properties_changed (string iface,
@@ -263,6 +275,10 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                 // Cancel previous download, reset the state and download again
                 album_art_cancellable.cancel ();
                 album_art_cancellable.reset ();
+
+                // Clear previous textures before loading new ones to release GPU memory
+                album_art.clear ();
+                background_picture.set_paintable (null);
 
                 Gdk.Texture ?album_art_texture = null;
                 try {

@@ -154,6 +154,12 @@ namespace SwayNotificationCenter {
             noti_daemon.invoke_latest_floating_action (action_index);
         }
 
+        /** Activates the default action of the latest floating notification */
+        public inline void latest_invoke_default_action ()
+        throws DBusError, IOError {
+            noti_daemon.invoke_latest_floating_default_action ();
+        }
+
         /**
          * Adds an inhibitor with the Application ID
          * (ex: "org.erikreider.swaysettings", "swayidle", etc...).

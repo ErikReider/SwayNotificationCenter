@@ -37,6 +37,9 @@ namespace SwayNotificationCenter.Widgets {
             case "slider":
                 widget = new Slider (suffix);
                 break;
+            case "calendar":
+                widget = new Calendar (suffix);
+                break;
 #if HAVE_PULSE_AUDIO
             case "volume":
                 widget = new Volume (suffix);

@@ -1,0 +1,34 @@
+:root {
+  --widget-calendar-font-size-day: 1.1rem;
+  --widget-calendar-font-size-date: 1.4rem;
+}
+
+.widget-calendar {
+  padding: 12px;
+  margin: 8px;
+
+  .calendar-container {
+    .day-label {
+      font-size: var(--widget-calendar-font-size-day);
+      font-weight: bold;
+      color: var(--text-color);
+      margin-bottom: 2px;
+    }
+
+    .date-label {
+      font-size: var(--widget-calendar-font-size-date);
+      color: var(--text-color);
+      opacity: 0.8;
+      margin-bottom: 8px;
+    }
+
+    calendar {
+      background: rgba(var(--noti-bg), var(--noti-bg-alpha));
+      border: var(--border);
+      border-radius: var(--border-radius);
+      padding: 8px;
+      color: var(--text-color);
+      font-size: 0.9rem;
+    }
+  }
+}

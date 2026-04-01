@@ -1,0 +1,28 @@
+// Calendar widget styling
+.widget-calendar {
+  padding: 12px;
+  margin: 8px;
+
+  .day-label {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--text-color);
+    margin-bottom: 2px;
+  }
+
+  .date-label {
+    font-size: 14px;
+    color: var(--text-color);
+    opacity: 0.8;
+    margin-bottom: 8px;
+  }
+
+  calendar {
+    background: rgba(var(--noti-bg), var(--noti-bg-alpha));
+    border: var(--border);
+    border-radius: var(--border-radius);
+    padding: 8px;
+    color: var(--text-color);
+    font-size: 14px;
+  }
+}

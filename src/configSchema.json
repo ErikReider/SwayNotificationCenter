@@ -423,6 +423,9 @@
         "^inhibitors(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
           "$comment": "References the widget structure from \"widgets\" below",
           "$ref": "#/widgets/inhibitors"
+        },
+        "^calendar(#[a-zA-Z0-9_-]{1,}){0,1}?$": {
+          "$ref": "#/widgets/calendar"
         }
       }
     }
@@ -788,6 +791,23 @@
           "type": "string",
           "description": "\"Clear All\" button text",
           "default": "Clear All"
+        }
+      }
+    },
+    "calendar": {
+      "type": "object",
+      "description": "Control Center Calendar Widget",
+      "additionalProperties": false,
+      "properties": {
+        "show-day-label": {
+          "type": "boolean",
+          "description": "Whether to show the day label (e.g., \"Monday\")",
+          "default": true
+        },
+        "show-date-label": {
+          "type": "boolean",
+          "description": "Whether to show the date label (e.g., \"January 1, 2024\")",
+          "default": true
         }
       }
     }

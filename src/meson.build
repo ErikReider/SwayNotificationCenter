@@ -50,6 +50,8 @@ widget_sources = [
   'controlCenter/widgets/backlight/backlightUtil.vala',
   # Widget: Inhibitors
   'controlCenter/widgets/inhibitors/inhibitors.vala',
+  # Widget: Calendar
+  'controlCenter/widgets/calendar/calendar.vala',
 ]
 
 app_sources = [

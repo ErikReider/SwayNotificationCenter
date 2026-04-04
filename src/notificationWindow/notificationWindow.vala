@@ -10,9 +10,12 @@ namespace SwayNotificationCenter {
         Gee.HashMap<uint32, unowned Notification> notification_ids
             = new Gee.HashMap<uint32, unowned Notification> ();
 
-        private static string ?monitor_name = null;
+        private string ?monitor_name = null;
 
         private const int MAX_HEIGHT = 600;
+
+        private bool is_mapped = false;
+        private bool is_mapped_on_monitor = false;
 
         public NotificationWindow () {
             Object (css_name: "notificationwindow");
@@ -29,33 +32,9 @@ namespace SwayNotificationCenter {
             }
             this.set_anchor ();
 
-            this.map.connect (() => {
-                set_anchor ();
-
-                unowned Gdk.Surface surface = get_surface ();
-                if (!(surface is Gdk.Surface)) {
-                    warn_if_reached ();
-                    return;
-                }
-                ulong id = 0;
-                id = surface.enter_monitor.connect ((monitor) => {
-                    surface.disconnect (id);
-                    debug ("NotificationWindow mapped on monitor: %s",
-                           Functions.monitor_to_string (monitor));
-
-                    // Only set ON_DEMAND after the surface has been mapped
-                    Idle.add_once (() => set_keyboard_mode ());
-                });
-            });
-            this.unmap.connect (() => {
-                set_keyboard_mode ();
-                debug ("NotificationWindow un-mapped");
-            });
-
             // TODO: Make option
             list.use_card_animation = true;
 
-            // set_resizable (false);
             default_width = ConfigModel.instance.notification_window_width;
 
             // Change output on config reload
@@ -63,11 +42,93 @@ namespace SwayNotificationCenter {
                 string monitor_name = config.notification_window_preferred_output;
                 if (old == null
                     || old.notification_window_preferred_output != monitor_name
-                    || NotificationWindow.monitor_name != monitor_name) {
-                    NotificationWindow.monitor_name = null;
+                    || this.monitor_name != monitor_name) {
+                    this.monitor_name = null;
                     set_anchor ();
                 }
             });
+        }
+
+        private inline string get_debug_map_string () {
+            unowned Gdk.Surface ?surface = get_surface ();
+            string[] strs = {
+                "  GTK-Mapped: %s".printf (get_mapped ().to_string ()),
+                "  Mapped: %s".printf (is_mapped.to_string ()),
+                "  Mapped_On_Monitor: %s".printf (is_mapped_on_monitor.to_string ()),
+                "  GTK-Visible: %s".printf (visible.to_string ()),
+                "  GTK-IsVisible: %s".printf (is_visible ().to_string ()),
+                "  GTK-Realized: %s".printf (get_realized ().to_string ()),
+                "  GTK-InDestruction: %s".printf (in_destruction ().to_string ()),
+                "  GTK-Default-W: %d".printf (default_width),
+                "  GTK-Default-H: %d".printf (default_height),
+                "  GTK-Request-W: %d".printf (width_request),
+                "  GTK-Request-H: %d".printf (height_request),
+                "  GTK-Width: %d".printf (get_width ()),
+                "  GTK-Height: %d".printf (get_height ()),
+                "  GTK-Alloc_Width: %d".printf (get_allocated_width ()),
+                "  GTK-Alloc_Height: %d".printf (get_allocated_height ()),
+                "  GTK-Surf_Mapped: %s".printf (
+                    surface != null ? surface.get_mapped ().to_string () : "null"),
+                "  GTK-Surf_IsDestroyed: %s".printf (
+                    surface != null ? surface.is_destroyed ().to_string () : "null"),
+                "  GTK-Surf_Width: %d".printf (surface != null ? surface.get_width () : -1),
+                "  GTK-Surf_Height: %d".printf (surface != null ? surface.get_height () : -1),
+            };
+            return string.joinv ("\n", strs);
+        }
+
+        protected override void map () {
+            base.map ();
+            debug ("NotificationWindow mapped, waiting for enter-monitor signal\n%s",
+                   get_debug_map_string ());
+            is_mapped = true;
+
+            set_anchor ();
+
+            unowned Gdk.Surface surface = get_surface ();
+            if (!(surface is Gdk.Surface)) {
+                warn_if_reached ();
+                return;
+            }
+            ulong surface_enter_id = 0;
+            uint timer_id = 0;
+
+            timer_id = Timeout.add_seconds_once (3, () => {
+                if (surface_enter_id != 0) {
+                    surface.disconnect (timer_id);
+                    timer_id = 0;
+                }
+                critical ("Not mapped in time!\n%s", get_debug_map_string ());
+            });
+            surface_enter_id = surface.enter_monitor.connect ((monitor) => {
+                surface.disconnect (surface_enter_id);
+                surface_enter_id = 0;
+
+                is_mapped_on_monitor = true;
+
+                if (timer_id != 0) {
+                    Source.remove (timer_id);
+                    timer_id = 0;
+                }
+                debug ("NotificationWindow mapped on monitor: %s\n%s",
+                       Functions.monitor_to_string (monitor),
+                       get_debug_map_string ());
+
+                // Only set ON_DEMAND after the surface has been mapped
+                Idle.add_once (() => set_keyboard_mode ());
+            });
+        }
+
+        protected override void unmap () {
+            base.unmap ();
+            is_mapped = false;
+            is_mapped_on_monitor = false;
+            debug ("NotificationWindow un-mapped\n%s", get_debug_map_string ());
+
+            set_keyboard_mode ();
+
+            // Make sure that all notifications are dismissed
+            noti_daemon.remove_all_floating_notifications (false, null);
         }
 
         protected override void size_allocate (int w, int h, int baseline) {
@@ -147,8 +208,8 @@ namespace SwayNotificationCenter {
 
                 // Set the preferred monitor
                 string ?monitor_name = ConfigModel.instance.notification_window_preferred_output;
-                if (NotificationWindow.monitor_name != null) {
-                    monitor_name = NotificationWindow.monitor_name;
+                if (this.monitor_name != null) {
+                    monitor_name = this.monitor_name;
                 }
                 set_monitor (Functions.try_get_monitor (monitor_name));
             }
@@ -248,6 +309,14 @@ namespace SwayNotificationCenter {
             return notification;
         }
 
+        private inline void hide_if_empty () {
+            if (list.is_empty ()) {
+                set_visible (false);
+            } else {
+                set_input_region ();
+            }
+        }
+
         /**
          * Hides all notifications. Only invokes the NotificationClosed signal when transient.
          * The optional callback is used to remove select notifications where each
@@ -271,8 +340,11 @@ namespace SwayNotificationCenter {
             set_visible (false);
         }
 
-        private void remove_notification_internal (Notification notification, bool transition) {
-            return_if_fail (notification != null);
+        private bool remove_notification_internal (Notification notification, bool transition) {
+            if (notification == null) {
+                critical ("Trying to remove NULL Notification");
+                return false;
+            }
 
             NotifyParams param = notification.param;
             notification_ids.unset (param.applied_id);
@@ -286,13 +358,8 @@ namespace SwayNotificationCenter {
 
             // Remove notification and its destruction timeout
             notification.remove_noti_timeout ();
-            list.remove.begin (notification, transition, (obj, res) => {
-                if (list.is_empty ()) {
-                    set_visible (false);
-                    return;
-                }
-                set_input_region ();
-            });
+            list.remove.begin (notification, transition, (obj, res) => hide_if_empty ());
+            return true;
         }
 
         public void add_notification (NotifyParams param) {
@@ -301,6 +368,7 @@ namespace SwayNotificationCenter {
                                                ConfigModel.instance.timeout,
                                                ConfigModel.instance.timeout_low,
                                                ConfigModel.instance.timeout_critical);
+            debug ("Add floating notification debug:\n%s", get_debug_map_string ());
             if (!visible) {
                 // Destroy the wl_surface to get a new "enter-monitor" signal and
                 // fixes issues where keyboard shortcuts stop working after clearing
@@ -316,7 +384,7 @@ namespace SwayNotificationCenter {
                 }
             }
 
-            set_visible (true);
+            present ();
 
             list.append.begin (noti);
             notification_ids.set (param.applied_id, noti);
@@ -325,8 +393,9 @@ namespace SwayNotificationCenter {
         /** Removes the notification widget with ID. Doesn't dismiss */
         public void remove_notification (uint32 id) {
             unowned Notification ?notification = find_notification (id);
-            if (notification != null) {
-                remove_notification_internal (notification, true);
+            if (notification == null
+                || !remove_notification_internal (notification, true)) {
+                hide_if_empty ();
             }
         }
 
@@ -375,7 +444,7 @@ namespace SwayNotificationCenter {
         public void set_monitor (Gdk.Monitor ?monitor) {
             debug ("Setting monitor for Floating Notifications: %s",
                    Functions.monitor_to_string (monitor) ?? "Monitor Picked by Compositor");
-            NotificationWindow.monitor_name = monitor == null ? null : monitor.connector;
+            this.monitor_name = monitor == null ? null : monitor.connector;
             GtkLayerShell.set_monitor (this, monitor);
 
             set_input_region ();

@@ -14,6 +14,9 @@ namespace SwayNotificationCenter {
 
         private const int MAX_HEIGHT = 600;
 
+        private bool is_mapped = false;
+        private bool is_mapped_on_monitor = false;
+
         public NotificationWindow () {
             Object (css_name: "notificationwindow");
             if (app.use_layer_shell) {
@@ -46,9 +49,40 @@ namespace SwayNotificationCenter {
             });
         }
 
+        private inline string get_debug_map_string () {
+            unowned Gdk.Surface ?surface = get_surface ();
+            string[] strs = {
+                "  GTK-Mapped: %s".printf (get_mapped ().to_string ()),
+                "  Mapped: %s".printf (is_mapped.to_string ()),
+                "  Mapped_On_Monitor: %s".printf (is_mapped_on_monitor.to_string ()),
+                "  GTK-Visible: %s".printf (visible.to_string ()),
+                "  GTK-IsVisible: %s".printf (is_visible ().to_string ()),
+                "  GTK-Realized: %s".printf (get_realized ().to_string ()),
+                "  GTK-InDestruction: %s".printf (in_destruction ().to_string ()),
+                "  GTK-Default-W: %d".printf (default_width),
+                "  GTK-Default-H: %d".printf (default_height),
+                "  GTK-Request-W: %d".printf (width_request),
+                "  GTK-Request-H: %d".printf (height_request),
+                "  GTK-Width: %d".printf (get_width ()),
+                "  GTK-Height: %d".printf (get_height ()),
+                "  GTK-Alloc_Width: %d".printf (get_allocated_width ()),
+                "  GTK-Alloc_Height: %d".printf (get_allocated_height ()),
+                "  GTK-Surf_Mapped: %s".printf (
+                    surface != null ? surface.get_mapped ().to_string () : "null"),
+                "  GTK-Surf_IsDestroyed: %s".printf (
+                    surface != null ? surface.is_destroyed ().to_string () : "null"),
+                "  GTK-Surf_Width: %d".printf (surface != null ? surface.get_width () : -1),
+                "  GTK-Surf_Height: %d".printf (surface != null ? surface.get_height () : -1),
+            };
+            return string.joinv ("\n", strs);
+        }
+
         protected override void map () {
             base.map ();
-            debug ("NotificationWindow mapped, waiting for enter-monitor signal");
+            debug ("NotificationWindow mapped, waiting for enter-monitor signal\n%s",
+                   get_debug_map_string ());
+            is_mapped = true;
+
             set_anchor ();
 
             unowned Gdk.Surface surface = get_surface ();
@@ -56,11 +90,29 @@ namespace SwayNotificationCenter {
                 warn_if_reached ();
                 return;
             }
-            ulong id = 0;
-            id = surface.enter_monitor.connect ((monitor) => {
-                surface.disconnect (id);
-                debug ("NotificationWindow mapped on monitor: %s",
-                       Functions.monitor_to_string (monitor));
+            ulong surface_enter_id = 0;
+            uint timer_id = 0;
+
+            timer_id = Timeout.add_seconds_once (3, () => {
+                if (surface_enter_id != 0) {
+                    surface.disconnect (timer_id);
+                    timer_id = 0;
+                }
+                critical ("Not mapped in time!\n%s", get_debug_map_string ());
+            });
+            surface_enter_id = surface.enter_monitor.connect ((monitor) => {
+                surface.disconnect (surface_enter_id);
+                surface_enter_id = 0;
+
+                is_mapped_on_monitor = true;
+
+                if (timer_id != 0) {
+                    Source.remove (timer_id);
+                    timer_id = 0;
+                }
+                debug ("NotificationWindow mapped on monitor: %s\n%s",
+                       Functions.monitor_to_string (monitor),
+                       get_debug_map_string ());
 
                 // Only set ON_DEMAND after the surface has been mapped
                 Idle.add_once (() => set_keyboard_mode ());
@@ -69,7 +121,9 @@ namespace SwayNotificationCenter {
 
         protected override void unmap () {
             base.unmap ();
-            debug ("NotificationWindow un-mapped");
+            is_mapped = false;
+            is_mapped_on_monitor = false;
+            debug ("NotificationWindow un-mapped\n%s", get_debug_map_string ());
 
             set_keyboard_mode ();
 
@@ -314,6 +368,7 @@ namespace SwayNotificationCenter {
                                                ConfigModel.instance.timeout,
                                                ConfigModel.instance.timeout_low,
                                                ConfigModel.instance.timeout_critical);
+            debug ("Add floating notification debug:\n%s", get_debug_map_string ());
             if (!visible) {
                 // Destroy the wl_surface to get a new "enter-monitor" signal and
                 // fixes issues where keyboard shortcuts stop working after clearing

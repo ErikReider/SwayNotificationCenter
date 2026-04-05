@@ -44,7 +44,7 @@ namespace SwayNotificationCenter {
                            Functions.monitor_to_string (monitor));
 
                     // Only set ON_DEMAND after the surface has been mapped
-                    set_keyboard_mode ();
+                    Idle.add_once (() => set_keyboard_mode ());
                 });
             });
             this.unmap.connect (() => {
@@ -89,9 +89,15 @@ namespace SwayNotificationCenter {
             base.snapshot (snapshot);
         }
 
+        /**
+         * Compositors handle the layer shell ON_DEMAND mode differently, so
+         * only set the mode while mapped to reduce the chance of the users
+         * input focus being stolen by an incoming notification.
+         */
         private inline void set_keyboard_mode () {
             if (app.use_layer_shell) {
-                if (app.has_layer_on_demand && get_mapped ()) {
+                if (app.has_layer_on_demand && get_mapped ()
+                    && !inline_reply_notifications.is_empty) {
                     GtkLayerShell.set_keyboard_mode (this, GtkLayerShell.KeyboardMode.ON_DEMAND);
                 } else {
                     GtkLayerShell.set_keyboard_mode (this, GtkLayerShell.KeyboardMode.NONE);
@@ -275,6 +281,7 @@ namespace SwayNotificationCenter {
 
             if (notification.has_inline_reply) {
                 inline_reply_notifications.remove (param.applied_id);
+                set_keyboard_mode ();
             }
 
             // Remove notification and its destruction timeout
@@ -299,6 +306,14 @@ namespace SwayNotificationCenter {
                 // fixes issues where keyboard shortcuts stop working after clearing
                 // all notifications.
                 ((Gtk.Widget) this).unrealize ();
+            }
+
+            if (noti.has_inline_reply) {
+                inline_reply_notifications.add (param.applied_id);
+                // Update the keyboard mode when already mapped
+                if (get_mapped ()) {
+                    set_keyboard_mode ();
+                }
             }
 
             set_visible (true);

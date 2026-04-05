@@ -48,6 +48,7 @@ _swaync-client() {
         --hide-all
         --close-latest
         --close-all
+        --close
         --skip-wait
         --subscribe
         --subscribe-waybar

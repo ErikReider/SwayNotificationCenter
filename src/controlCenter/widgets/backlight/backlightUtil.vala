@@ -66,17 +66,24 @@ namespace SwayNotificationCenter.Widgets {
         }
 
         private void connect_monitor () {
-            if (monitor != null) {
-                // connect monitor to monitor changes
-                monitor.changed.connect ((src, dest, event) => {
-                    get_brightness ();
-                });
+            if (monitor == null) {
+                try {
+                    monitor = fd.monitor (FileMonitorFlags.NONE, null);
+                } catch (Error e) {
+                    critical ("Error %s\n", e.message);
+                    return;
+                }
             }
+            // connect monitor to monitor changes
+            monitor.changed.connect ((src, dest, event) => {
+                get_brightness ();
+            });
         }
 
         public void close () {
             if (monitor != null) {
                 monitor.cancel ();
+                monitor = null;
             }
         }
 

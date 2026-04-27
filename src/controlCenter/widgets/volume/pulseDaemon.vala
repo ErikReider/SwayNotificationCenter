@@ -60,7 +60,7 @@ namespace SwayNotificationCenter.Widgets {
         private void get_context () {
             var ctx = new Context (mainloop.get_api (), null);
             ctx.set_state_callback ((ctx) => {
-                debug ("Pulse Status: %s\n", ctx.get_state ().to_string ());
+                debug ("Pulse Status: %s", ctx.get_state ().to_string ());
                 switch (ctx.get_state ()) {
                     case Context.State.CONNECTING :
                     case Context.State.AUTHORIZING :
@@ -83,20 +83,20 @@ namespace SwayNotificationCenter.Widgets {
                             quitting = false;
                             break;
                         }
-                        stderr.printf (
-                            "PulseAudio connection lost. Will retry connection.\n");
+                        warning (
+                            "PulseAudio connection lost. Will retry connection.");
                         get_context ();
                         break;
                     default:
                         running = false;
-                        stderr.printf ("Connection failure: %s\n",
+                        warning ("Connection failure: %s",
                                        PulseAudio.strerror (ctx.errno ()));
                         break;
                 }
             });
             if (ctx.connect (
                     null, Context.Flags.NOFAIL, null) < 0) {
-                stdout.printf ("pa_context_connect() failed: %s\n",
+                stdout.printf ("pa_context_connect() failed: %s",
                                PulseAudio.strerror (ctx.errno ()));
             }
             this.context = ctx;
@@ -589,7 +589,7 @@ namespace SwayNotificationCenter.Widgets {
                 if (success == 1) {
                     set_bluetooth_card_profile.callback ();
                 } else {
-                    stderr.printf ("setting the card %s profile to %s failed\n",
+                    warning ("setting the card %s profile to %s failed",
                                    device.card_name, profile.name);
                 }
             });
@@ -606,7 +606,7 @@ namespace SwayNotificationCenter.Widgets {
                 if (success == 1) {
                     set_card_profile_by_index.callback ();
                 } else {
-                    stderr.printf ("setting the card %s profile to %s failed\n",
+                    warning ("setting the card %s profile to %s failed",
                                    device.card_name, profile_name);
                 }
             });
@@ -620,7 +620,7 @@ namespace SwayNotificationCenter.Widgets {
                 if (success == 1) {
                     set_sink_port_by_name.callback ();
                 } else {
-                    stderr.printf ("setting sink port to %s failed\n",
+                    warning ("setting sink port to %s failed",
                                    device.port_name);
                 }
             });
@@ -632,7 +632,7 @@ namespace SwayNotificationCenter.Widgets {
                 if (success == 1) {
                     set_default_sink.callback ();
                 } else {
-                    stderr.printf ("setting default sink to %s failed\n",
+                    warning ("setting default sink to %s failed",
                                    device.device_name);
                 }
             });

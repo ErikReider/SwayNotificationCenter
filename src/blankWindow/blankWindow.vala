@@ -30,7 +30,7 @@ namespace SwayNotificationCenter {
                     try {
                         swaync_daemon.set_visibility (false);
                     } catch (Error e) {
-                        stderr.printf ("ControlCenter BlankWindow Click Error: %s\n",
+                        warning ("ControlCenter BlankWindow Click Error: %s",
                                        e.message);
                     }
                 }
@@ -60,10 +60,10 @@ namespace SwayNotificationCenter {
             });
 
             if (!GtkLayerShell.is_supported ()) {
-                stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
-                stderr.printf ("Swaync only works on Wayland!\n");
-                stderr.printf ("If running waylans session, try running:\n");
-                stderr.printf ("\tGDK_BACKEND=wayland swaync\n");
+                critical ("GTKLAYERSHELL IS NOT SUPPORTED!");
+                critical ("Swaync only works on Wayland!");
+                critical ("If running Wayland session, try running:");
+                critical ("\tGDK_BACKEND=wayland swaync");
                 Process.exit (1);
             }
             GtkLayerShell.init_for_window (this);

@@ -52,7 +52,7 @@ namespace SwayNotificationCenter {
                     Gdk.Texture texture = Gdk.Texture.for_pixbuf (pixbuf);
                     img.set_from_paintable (texture);
                 } catch (Error e) {
-                    stderr.printf (e.message + "\n");
+                    warning ("%s", e.message);
                 }
             }
 
@@ -158,8 +158,8 @@ namespace SwayNotificationCenter {
                 }
             }
             if (path == "") {
-                stderr.printf (
-                    "COULD NOT FIND CSS FILE! REINSTALL THE PACKAGE!\n");
+                critical (
+                    "COULD NOT FIND CSS FILE! REINSTALL THE PACKAGE!");
                 Process.exit (1);
             }
             return path;
@@ -200,8 +200,8 @@ namespace SwayNotificationCenter {
                 }
             }
             if (path == "") {
-                stderr.printf (
-                    "COULD NOT FIND CONFIG FILE! REINSTALL THE PACKAGE!\n");
+                critical (
+                    "COULD NOT FIND CONFIG FILE! REINSTALL THE PACKAGE!");
                 Process.exit (1);
             }
             return path;

@@ -1062,8 +1062,7 @@ namespace SwayNotificationCenter {
             var tmp_table = new OrderedHashTable<T> ();
 
             if (node.get_node_type () != Json.NodeType.OBJECT) {
-                stderr.printf ("Node %s is not a json object!...\n",
-                               property_name);
+                warning ("Node %s is not a json object!", property_name);
                 return tmp_table;
             }
 
@@ -1222,8 +1221,7 @@ namespace SwayNotificationCenter {
             GenericArray<T> tmp_array = new GenericArray<T> ();
 
             if (node.get_node_type () != Json.NodeType.ARRAY) {
-                stderr.printf ("Node %s is not a json array!...\n",
-                               property_name);
+                warning ("Node %s is not a json array!", property_name);
                 return tmp_array;
             }
 
@@ -1397,7 +1395,7 @@ namespace SwayNotificationCenter {
                     FileCreateFlags.REPLACE_DESTINATION,
                     null);
             } catch (Error e) {
-                stderr.printf (e.message + "\n");
+                warning ("%s", e.message);
                 return false;
             }
         }

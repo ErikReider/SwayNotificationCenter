@@ -568,12 +568,12 @@ namespace SwayNotificationCenter {
         }
 
         /**
-         * Wether or not the windows should be opened as layer-shell surfaces
+         * Whether or not the windows should be opened as layer-shell surfaces
          */
         public bool layer_shell { get; set; default = true; }
 
         /**
-         * Wether or not the windows should cover the whole screen when
+         * Whether or not the windows should cover the whole screen when
          * layer-shell is used.
          */
         public bool layer_shell_cover_screen { get; set; default = true; }

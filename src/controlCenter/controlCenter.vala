@@ -12,6 +12,13 @@ namespace SwayNotificationCenter {
 
         private Gtk.EventControllerKey key_controller;
 
+        private Ext.BackgroundEffect.Surface *bg_effect = null;
+        private int last_blur_x = -1;
+        private int last_blur_y = -1;
+        private int last_blur_w = -1;
+        private int last_blur_h = -1;
+        private int last_blur_radius = -1;
+
         /** Unsorted list of copies of all notifications */
         private List<unowned Widgets.BaseWidget> widgets;
         private const string[] DEFAULT_WIDGETS = { "title", "dnd", "notifications" };
@@ -52,11 +59,14 @@ namespace SwayNotificationCenter {
                     debug ("ControlCenter mapped on monitor: %s",
                            Functions.monitor_to_string (monitor));
                     app.show_blank_windows (monitor);
+
+                    update_blur_effect ();
                 });
             });
             this.unmap.connect (() => {
                 debug ("ControlCenter un-mapped");
                 app.hide_blank_windows ();
+                destroy_blur_effect ();
             });
 
             /*
@@ -131,7 +141,12 @@ namespace SwayNotificationCenter {
                     this.monitor_name = null;
                     set_anchor ();
                 }
+                update_blur_effect ();
             });
+        }
+
+        ~ControlCenter () {
+            destroy_blur_effect ();
         }
 
         private void key_released_event_cb (uint keyval, uint keycode, Gdk.ModifierType state) {
@@ -376,6 +391,8 @@ namespace SwayNotificationCenter {
             if (this.visible == visibility) {
                 return;
             }
+            destroy_blur_effect ();
+
             // Destroy the wl_surface to get a new "enter-monitor" signal and
             // fixes issues where keyboard shortcuts stop working after clearing
             // all notifications.
@@ -405,6 +422,91 @@ namespace SwayNotificationCenter {
                    Functions.monitor_to_string (monitor) ?? "Monitor Picked by Compositor");
             this.monitor_name = monitor == null ? null : monitor.connector;
             GtkLayerShell.set_monitor (this, monitor);
+        }
+
+        protected override void size_allocate (int w, int h, int baseline) {
+            base.size_allocate (w, h, baseline);
+            update_blur_effect ();
+        }
+
+        public void update_blur_effect () {
+            if (!ConfigModel.instance.background_blur
+                || !app.background_effect.blur_available) {
+                destroy_blur_effect ();
+                return;
+            }
+
+            unowned Gdk.Surface ?gdk_surface = get_surface ();
+            if (gdk_surface == null) {
+                return;
+            }
+            unowned Wl.Surface wlsurface = Functions.get_wl_surface (gdk_surface);
+            if (wlsurface == null) {
+                return;
+            }
+
+            if (bg_effect == null) {
+                bg_effect = app.background_effect.create_effect (wlsurface);
+                if (bg_effect == null) {
+                    return;
+                }
+            }
+
+            Graphene.Rect win_bounds;
+            if (!window.compute_bounds (this, out win_bounds)) {
+                return;
+            }
+
+            double surface_x, surface_y;
+            ((Gtk.Native) this).get_surface_transform (out surface_x, out surface_y);
+
+            int x = (int) win_bounds.get_x () + (int) surface_x;
+            int y = (int) win_bounds.get_y () + (int) surface_y;
+            int width = (int) win_bounds.get_width ();
+            int height = (int) win_bounds.get_height ();
+            if (width < 2 || height < 2) {
+                return;
+            }
+
+            int radius = BackgroundEffectHelper.get_widget_border_radius (window);
+
+            if (x == last_blur_x && y == last_blur_y
+                && width == last_blur_w && height == last_blur_h
+                && radius == last_blur_radius) {
+                return;
+            }
+            last_blur_x = x;
+            last_blur_y = y;
+            last_blur_w = width;
+            last_blur_h = height;
+            last_blur_radius = radius;
+
+            app.background_effect.set_blur_region_rounded (bg_effect, x, y,
+                                                           width, height, radius);
+            unowned Gdk.Surface ?s = get_surface ();
+            if (s != null) {
+                s.queue_render ();
+            }
+        }
+
+        private void destroy_blur_effect () {
+            if (bg_effect != null) {
+                app.background_effect.destroy_effect (bg_effect);
+                bg_effect = null;
+                queue_blur_commit ();
+            }
+            invalidate_blur_cache ();
+        }
+
+        private void queue_blur_commit () {
+            unowned Gdk.Surface ?surface = get_surface ();
+            if (surface != null) {
+                surface.queue_render ();
+            }
+        }
+
+        private inline void invalidate_blur_cache () {
+            last_blur_w = -1;
         }
     }
 }

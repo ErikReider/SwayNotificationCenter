@@ -305,7 +305,7 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                                                                     album_art_cancellable);
 
                         // Use PixbufLoader instead of from_stream_async to allow format auto-detection
-                        / Previously, it would use icon if the URL did not have the extension
+                        // Previously, it would use icon if the URL did not have the extension
                         Gdk.PixbufLoader loader = new Gdk.PixbufLoader ();
                         uint8[] buffer = new uint8[4096];
                         ssize_t bytes_read;

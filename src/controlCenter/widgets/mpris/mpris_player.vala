@@ -299,30 +299,29 @@ namespace SwayNotificationCenter.Widgets.Mpris {
                             album_art_texture = Gdk.Texture.for_pixbuf (pixbuf);
                         }
                     } else {
-                            // Load as a regular file/URL
-                            File file = File.new_for_uri (art_data);
-                            InputStream stream = yield file.read_async (Priority.DEFAULT,
-                                                                        album_art_cancellable);
+                        // Load as a regular file/URL
+                        File file = File.new_for_uri (art_data);
+                        InputStream stream = yield file.read_async (Priority.DEFAULT,
+                                                                    album_art_cancellable);
 
-                            // Use PixbufLoader instead of from_stream_async to allow format auto-detection
-                            // Previously, it would just fallback to the application icon if the URL did not specify the URL
-                            Gdk.PixbufLoader loader = new Gdk.PixbufLoader ();
-                            uint8[] buffer = new uint8[4096];
-                            ssize_t bytes_read;
-                            while ((bytes_read = yield stream.read_async (buffer, Priority.DEFAULT,
-                                                                        album_art_cancellable)) > 0) {
-                                loader.write (buffer[0:bytes_read]);
-                            }
-                            loader.close ();
-                            
-                            unowned Gdk.Pixbuf ?pixbuf = loader.get_pixbuf ();
-                            if (pixbuf != null) {
-                                album_art_texture = Gdk.Texture.for_pixbuf (pixbuf);
-                            }
-                    }
+                        // Use PixbufLoader instead of from_stream_async to allow format auto-detection
+                        / Previously, it would use icon if the URL did not have the extension
+                        Gdk.PixbufLoader loader = new Gdk.PixbufLoader ();
+                        uint8[] buffer = new uint8[4096];
+                        ssize_t bytes_read;
+                        while ((bytes_read = yield stream.read_async (buffer, Priority.DEFAULT,
+                                                                      album_art_cancellable)) > 0) {
+                            loader.write (buffer[0:bytes_read]);
+                        }
+                        loader.close ();
+
+                        unowned Gdk.Pixbuf ?pixbuf = loader.get_pixbuf ();
+                        if (pixbuf != null) {
+                            album_art_texture = Gdk.Texture.for_pixbuf (pixbuf);
+                        }
                 } catch (Error e) {
                     critical ("MPRIS (%s) album art error: %s. Using fallback...",
-                              source.media_player.identity, e.message);
+                             source.media_player.identity, e.message);
                 }
                 if (album_art_texture != null) {
                     // Set album art

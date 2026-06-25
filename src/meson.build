@@ -16,6 +16,7 @@ version = 'swaync @0@'.format(version)
 const_config_data = configuration_data()
 const_config_data.set_quoted('VERSION', version)
 const_config_data.set_quoted('VERSION_NUM', meson.project_version())
+const_config_data.set_quoted('CONFIG_PATH', join_paths(get_option('prefix'), config_path))
 constants = configure_file(
   input : 'constants.vala.in',
   output : 'constants.vala',

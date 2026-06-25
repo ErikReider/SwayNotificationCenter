@@ -26,7 +26,7 @@ namespace SwayNotificationCenter {
                                             get_visibility (),
                                             inhibited);
             } catch (Error e) {
-                stderr.printf (e.message + "\n");
+                warning ("%s", e.message);
             }
         }
 
@@ -152,6 +152,12 @@ namespace SwayNotificationCenter {
         public inline void latest_invoke_action (uint32 action_index)
         throws DBusError, IOError {
             noti_daemon.invoke_latest_floating_action (action_index);
+        }
+
+        /** Activates the default action of the latest floating notification */
+        public inline void latest_invoke_default_action ()
+        throws DBusError, IOError {
+            noti_daemon.invoke_latest_floating_default_action ();
         }
 
         /**

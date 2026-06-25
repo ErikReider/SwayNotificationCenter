@@ -1,7 +1,7 @@
 namespace SwayNotificationCenter {
     public enum NotificationGroupState {
         EMPTY = 0,
-        SINLGE = 1,
+        SINGLE = 1,
         MANY = 2;
     }
 
@@ -222,7 +222,10 @@ namespace SwayNotificationCenter {
 
             if (get_mapped () && transition) {
                 remove_animation_done_id = remove_animation.done.connect ((e) => {
-                    play_remove_animation.callback ();
+                    Idle.add (() => {
+                        play_remove_animation.callback ();
+                        return Source.REMOVE;
+                    });
                 });
                 remove_animation.value_from
                     = remove_animation.state == Adw.AnimationState.PLAYING
@@ -256,7 +259,7 @@ namespace SwayNotificationCenter {
 
         private void update_state () {
             state = group.n_children >
-                NotificationGroupState.SINLGE ? NotificationGroupState.MANY :
+                NotificationGroupState.SINGLE ? NotificationGroupState.MANY :
                 (NotificationGroupState) group.n_children;
 
             group.set_sensitive (!dismissed &&
@@ -355,7 +358,7 @@ namespace SwayNotificationCenter {
             // otherwise, animate the whole group (collapsed single-notification)
             if (state == NotificationGroupState.MANY) {
                 yield notification.remove_notification (!dismissed_by_swipe);
-            } else if (state == NotificationGroupState.SINLGE) {
+            } else if (state == NotificationGroupState.SINGLE) {
                 dismissed = true;
                 if (!yield play_remove_animation (!notification.dismissed_by_swipe)) {
                     debug ("Trying to play group removal animation twice. Ignoring");
@@ -368,7 +371,7 @@ namespace SwayNotificationCenter {
             group.remove (notification);
 
             update_state ();
-            if (state == NotificationGroupState.SINLGE) {
+            if (state == NotificationGroupState.SINGLE) {
                 set_expanded (false);
                 on_expand_change (false);
             }
@@ -383,7 +386,7 @@ namespace SwayNotificationCenter {
 
             // Skip animation if the notification was dismissed by swipe
             bool dismissed_by_swipe = this.dismissed_by_swipe;
-            if (state == NotificationGroupState.SINLGE) {
+            if (state == NotificationGroupState.SINGLE) {
                 unowned Notification ?noti = (Notification ?) group.get_first_widget ();
                 if (noti != null) {
                     dismissed_by_swipe |= noti.dismissed_by_swipe;

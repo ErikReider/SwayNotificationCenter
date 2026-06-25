@@ -534,12 +534,12 @@ namespace SwayNotificationCenter {
         }
 
         /**
-         * Wether or not the windows should be opened as layer-shell surfaces
+         * Whether or not the windows should be opened as layer-shell surfaces
          */
         public bool layer_shell { get; set; default = true; }
 
         /**
-         * Wether or not the windows should cover the whole screen when
+         * Whether or not the windows should cover the whole screen when
          * layer-shell is used.
          */
         public bool layer_shell_cover_screen { get; set; default = true; }
@@ -1028,8 +1028,7 @@ namespace SwayNotificationCenter {
             var tmp_table = new OrderedHashTable<T> ();
 
             if (node.get_node_type () != Json.NodeType.OBJECT) {
-                stderr.printf ("Node %s is not a json object!...\n",
-                               property_name);
+                warning ("Node %s is not a json object!", property_name);
                 return tmp_table;
             }
 
@@ -1188,8 +1187,7 @@ namespace SwayNotificationCenter {
             GenericArray<T> tmp_array = new GenericArray<T> ();
 
             if (node.get_node_type () != Json.NodeType.ARRAY) {
-                stderr.printf ("Node %s is not a json array!...\n",
-                               property_name);
+                warning ("Node %s is not a json array!", property_name);
                 return tmp_array;
             }
 
@@ -1363,7 +1361,7 @@ namespace SwayNotificationCenter {
                     FileCreateFlags.REPLACE_DESTINATION,
                     null);
             } catch (Error e) {
-                stderr.printf (e.message + "\n");
+                warning ("%s", e.message);
                 return false;
             }
         }

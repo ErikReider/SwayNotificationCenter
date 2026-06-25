@@ -143,7 +143,7 @@ namespace SwayNotificationCenter {
                     img_tag_regex = new Regex (
                         "<img[^>]* src=((\"([^\"]*)\")|(\'([^\']*)\'))[^>]*>");
                 } catch (Error e) {
-                    stderr.printf ("Invalid regex: %s", e.message);
+                    warning ("Invalid regex: %s", e.message);
                 }
             }
 
@@ -362,7 +362,7 @@ namespace SwayNotificationCenter {
                         }
                     }
                 } catch (Error e) {
-                    stderr.printf (e.message);
+                    warning ("%s", e.message);
                 }
             }
 
@@ -397,8 +397,8 @@ namespace SwayNotificationCenter {
                     this.body.set_attributes (attr);
                 }
             } catch (Error e) {
-                stderr.printf ("Could not parse Pango markup %s: %s\n",
-                               text, e.message);
+                warning ("Could not parse Pango markup %s: %s",
+                         text, e.message);
                 // Sets the original text
                 this.body.set_text (text);
             }

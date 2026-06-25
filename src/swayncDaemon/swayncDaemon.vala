@@ -26,7 +26,7 @@ namespace SwayNotificationCenter {
                                             get_visibility (),
                                             inhibited);
             } catch (Error e) {
-                stderr.printf (e.message + "\n");
+                warning ("%s", e.message);
             }
         }
 

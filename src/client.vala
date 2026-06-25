@@ -246,7 +246,7 @@ public int command_line (ref string[] args, bool skip_wait) {
             case "--inhibitor-add":
             case "-Ia":
                 if (args.length < 2) {
-                    stderr.printf ("Application ID needed!");
+                    printerr ("Application ID needed!");
                     Process.exit (1);
                 }
                 used_args++;
@@ -254,12 +254,12 @@ public int command_line (ref string[] args, bool skip_wait) {
                     print ("Added inhibitor: \"%s\"", args[1]);
                     break;
                 }
-                stderr.printf ("Inhibitor: \"%s\" already added!...", args[1]);
+                printerr ("Inhibitor: \"%s\" already added!...", args[1]);
                 break;
             case "--inhibitor-remove":
             case "-Ir":
                 if (args.length < 2) {
-                    stderr.printf ("Application ID needed!");
+                    printerr ("Application ID needed!");
                     Process.exit (1);
                 }
                 used_args++;
@@ -267,7 +267,7 @@ public int command_line (ref string[] args, bool skip_wait) {
                     print ("Removed inhibitor: \"%s\"", args[1]);
                     break;
                 }
-                stderr.printf ("Inhibitor: \"%s\" does not exist!...", args[1]);
+                printerr ("Inhibitor: \"%s\" does not exist!...", args[1]);
                 break;
             case "inhibitors-clear":
             case "-Ic":
@@ -308,7 +308,7 @@ public int command_line (ref string[] args, bool skip_wait) {
                 break;
             case "--change-cc-monitor":
                 if (args.length < 2) {
-                    stderr.printf ("Monitor connector name needed!");
+                    printerr ("Monitor connector name needed!");
                     Process.exit (1);
                 }
                 used_args++;
@@ -316,11 +316,11 @@ public int command_line (ref string[] args, bool skip_wait) {
                     print ("Changed monitor to: \"%s\"", args[1]);
                     break;
                 }
-                stderr.printf ("Could not find monitor: \"%s\"!", args[1]);
+                printerr ("Could not find monitor: \"%s\"!", args[1]);
                 break;
             case "--change-noti-monitor":
                 if (args.length < 2) {
-                    stderr.printf ("Monitor connector name needed!");
+                    printerr ("Monitor connector name needed!");
                     Process.exit (1);
                 }
                 used_args++;
@@ -328,7 +328,7 @@ public int command_line (ref string[] args, bool skip_wait) {
                     print ("Changed monitor to: \"%s\"", args[1]);
                     break;
                 }
-                stderr.printf ("Could not find monitor: \"%s\"!", args[1]);
+                printerr ("Could not find monitor: \"%s\"!", args[1]);
                 break;
             default:
                 printerr ("Unknown command: \"%s\"\n", args[0]);
@@ -336,7 +336,7 @@ public int command_line (ref string[] args, bool skip_wait) {
                 break;
         }
     } catch (Error e) {
-        stderr.printf (e.message + "\n");
+        printerr (e.message + "\n");
         if (skip_wait) {
             Process.exit (1);
         }
@@ -348,7 +348,7 @@ public int command_line (ref string[] args, bool skip_wait) {
 }
 
 void print_connection_error () {
-    stderr.printf (
+    printerr (
         "Could not connect to CC service. Will wait for connection...\n");
 }
 
@@ -378,7 +378,7 @@ int try_connect (owned string[] args) {
         }
         // Should only be reached if the args only contains --skip-wait or -sw
         if (one_arg) {
-            stderr.printf ("Skipping wait, but with no action.");
+            printerr ("Skipping wait, but with no action.");
         }
         return 0;
     } catch (Error e) {

@@ -44,7 +44,7 @@ namespace SwayNotificationCenter.Widgets {
                 }
                 GLib.SignalHandler.unblock (this, this.handler_id);
             } catch (RegexError e) {
-                stderr.printf ("RegexError: %s\n", e.message);
+                warning ("RegexError: %s", e.message);
             }
         }
     }

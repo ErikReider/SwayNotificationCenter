@@ -812,6 +812,28 @@ namespace SwayNotificationCenter {
             });
         }
 
+        public bool get_blur_bounds (Gtk.Widget relative_to,
+                                     out int x, out int y,
+                                     out int w, out int h) {
+            x = 0;
+            y = 0;
+            w = 0;
+            h = 0;
+            Graphene.Rect bounds;
+            if (!base_box.compute_bounds (relative_to, out bounds)) {
+                return false;
+            }
+            x = (int) bounds.get_x ();
+            y = (int) bounds.get_y ();
+            w = (int) bounds.get_width ();
+            h = (int) bounds.get_height ();
+            return w > 0 && h > 0;
+        }
+
+        public int get_blur_radius () {
+            return BackgroundEffectHelper.get_widget_border_radius (base_box);
+        }
+
         public void remove_noti_timeout () {
             if (timeout_id > 0) {
                 Source.remove (timeout_id);

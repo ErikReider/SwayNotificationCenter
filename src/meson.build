@@ -74,7 +74,9 @@ app_sources = [
   widget_sources,
   'blankWindow/blankWindow.vala',
   'functions.vala',
+  'background_effect.vala',
   'xdg_activation.vala',
+
   constants,
 ]
 

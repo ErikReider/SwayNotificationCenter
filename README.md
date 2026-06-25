@@ -301,6 +301,31 @@ The main config file is located in `/etc/xdg/swaync/config.json`. Copy it over
 to your `.config/swaync/` folder to customize without needing root access.
 See `swaync(5)` man page for more information
 
+### Background Blur
+
+SwayNotificationCenter can blur the background behind the control center and
+notification popups using the `ext-background-effect-v1` Wayland protocol.
+This requires compositor support (e.g. niri, KDE Plasma 6.3+).
+
+To enable it, set `"background-blur": true` in your `config.json` and make sure
+the CSS backgrounds have some transparency so the blur is visible. For example:
+
+```css
+.control-center {
+  background: rgba(30, 30, 30, 0.5);
+}
+.floating-notifications .notification {
+  background: rgba(28, 28, 30, 0.45);
+}
+```
+
+The blur region shape derives its `border-radius` automatically by reading the
+`--border-radius` CSS variable. If your custom style overrides the border radius
+via a variable (e.g. `--border-radius: 14px`), the blur corners will match. If
+you set `border-radius` directly on a class without an accompanying
+`--border-radius` variable, the blur region will be rectangular (no rounding).
+No separate configuration is needed for corner rounding.
+
 To reload the config, you'll need to run `swaync-client --reload-config`
 
 The main CSS style file is located in `/etc/xdg/swaync/style.css`. Copy it over

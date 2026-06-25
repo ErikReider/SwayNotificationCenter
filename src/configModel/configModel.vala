@@ -553,6 +553,9 @@ namespace SwayNotificationCenter {
         /** Unsets the GTK_THEME env variable when true */
         public bool ignore_gtk_theme { get; set; default = true; }
 
+        /** Whether to use ext-background-effect-v1 for compositor blur */
+        public bool background_blur { get; set; default = false; }
+
         /** The notifications and controlcenters horizontal alignment */
         public PositionX positionX { // vala-lint=naming-convention
             get; set; default = PositionX.RIGHT;

@@ -31,7 +31,7 @@ namespace SwayNotificationCenter {
                         swaync_daemon.set_visibility (false);
                     } catch (Error e) {
                         warning ("ControlCenter BlankWindow Click Error: %s",
-                                       e.message);
+                                 e.message);
                     }
                 }
 

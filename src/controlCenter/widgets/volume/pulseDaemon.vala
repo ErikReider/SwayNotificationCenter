@@ -90,7 +90,7 @@ namespace SwayNotificationCenter.Widgets {
                     default:
                         running = false;
                         warning ("Connection failure: %s",
-                                       PulseAudio.strerror (ctx.errno ()));
+                                 PulseAudio.strerror (ctx.errno ()));
                         break;
                 }
             });
@@ -590,7 +590,7 @@ namespace SwayNotificationCenter.Widgets {
                     set_bluetooth_card_profile.callback ();
                 } else {
                     warning ("setting the card %s profile to %s failed",
-                                   device.card_name, profile.name);
+                             device.card_name, profile.name);
                 }
             });
             yield;
@@ -607,7 +607,7 @@ namespace SwayNotificationCenter.Widgets {
                     set_card_profile_by_index.callback ();
                 } else {
                     warning ("setting the card %s profile to %s failed",
-                                   device.card_name, profile_name);
+                             device.card_name, profile_name);
                 }
             });
             yield;
@@ -621,7 +621,7 @@ namespace SwayNotificationCenter.Widgets {
                     set_sink_port_by_name.callback ();
                 } else {
                     warning ("setting sink port to %s failed",
-                                   device.port_name);
+                             device.port_name);
                 }
             });
             yield;
@@ -633,7 +633,7 @@ namespace SwayNotificationCenter.Widgets {
                     set_default_sink.callback ();
                 } else {
                     warning ("setting default sink to %s failed",
-                                   device.device_name);
+                             device.device_name);
                 }
             });
             yield;

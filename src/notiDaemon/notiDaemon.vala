@@ -367,7 +367,7 @@ namespace SwayNotificationCenter {
                                                    -1);
                         } catch (Error e) {
                             critical ("Notifying script-fail error: %s",
-                                       e.message);
+                                      e.message);
                         }
                     }
                 });

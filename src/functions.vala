@@ -280,7 +280,7 @@ namespace SwayNotificationCenter {
         public delegate bool FilterFunc (char character);
 
         public static string filter_string (string body, FilterFunc func) {
-            var result = new StringBuilder ();
+            var result = new StringBuilder.sized (body.length);
             foreach (char char in (char[]) body.data) {
                 if (!func (char)) {
                     continue;

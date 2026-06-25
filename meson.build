@@ -1,4 +1,4 @@
-project('sway-notificaton-center', ['c', 'vala'],
+project('sway-notification-center', ['c', 'vala'],
   version: '0.12.6',
   meson_version: '>= 0.60.0',
   default_options: [ 'warning_level=2' ],

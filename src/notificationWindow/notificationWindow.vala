@@ -18,10 +18,10 @@ namespace SwayNotificationCenter {
             Object (css_name: "notificationwindow");
             if (app.use_layer_shell) {
                 if (!GtkLayerShell.is_supported ()) {
-                    stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
-                    stderr.printf ("Swaync only works on Wayland!\n");
-                    stderr.printf ("If running waylans session, try running:\n");
-                    stderr.printf ("\tGDK_BACKEND=wayland swaync\n");
+                    critical ("GTKLAYERSHELL IS NOT SUPPORTED!");
+                    critical ("Swaync only works on Wayland!");
+                    critical ("If running waylans session, try running:");
+                    critical ("\tGDK_BACKEND=wayland swaync");
                     Process.exit (1);
                 }
                 GtkLayerShell.init_for_window (this);
@@ -370,6 +370,17 @@ namespace SwayNotificationCenter {
 
             Notification noti = (Notification) item.child;
             noti.click_alt_action (action);
+        }
+
+        public void latest_notification_default_action () {
+            unowned AnimatedListItem ?item = list.get_first_item ();
+            if (item == null || !(item.child is Notification)) {
+                warn_if_reached ();
+                return;
+            }
+
+            Notification noti = (Notification) item.child;
+            noti.click_default_action ();
         }
 
         public void set_monitor (Gdk.Monitor ?monitor) {

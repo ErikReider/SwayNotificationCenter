@@ -113,100 +113,66 @@ namespace SwayNotificationCenter {
 
         private const RegexMatchFlags REGEX_MATCH_FLAGS = RegexMatchFlags.NOTEMPTY;
 
+        private Regex ?_app_name_regex = null;
+        private Regex ?_desktop_entry_regex = null;
+        private Regex ?_summary_regex = null;
+        private Regex ?_body_regex = null;
+        private Regex ?_urgency_regex = null;
+        private Regex ?_category_regex = null;
+        private Regex ?_sound_name_regex = null;
+        private Regex ?_sound_file_regex = null;
+
+        private bool check_match (string ?pattern, ref Regex ?cached_regex,
+                                  string ?target,
+                                  RegexCompileFlags flags = REGEX_COMPILE_OPTIONS) {
+            if (pattern == null) {
+                return true;
+            }
+
+            if (target == null) {
+                return false;
+            }
+
+            if (cached_regex == null) {
+                try {
+                    cached_regex = new Regex (pattern, flags);
+                } catch (RegexError e) {
+                    stderr.printf ("Failed to compile regex '%s': %s\n", pattern, e.message);
+                    return false;
+                }
+            }
+
+            return cached_regex.match (target, REGEX_MATCH_FLAGS);
+        }
+
         public virtual bool matches_notification (NotifyParams param) {
-            if (app_name != null) {
-                if (param.app_name == null) {
-                    return false;
-                }
-                bool result = Regex.match_simple (
-                    app_name, param.app_name,
-                    REGEX_COMPILE_OPTIONS,
-                    REGEX_MATCH_FLAGS);
-                if (!result) {
-                    return false;
-                }
+            if (!check_match (app_name, ref _app_name_regex, param.app_name)) {
+                return false;
             }
-            if (desktop_entry != null) {
-                if (param.desktop_entry == null) {
-                    return false;
-                }
-                bool result = Regex.match_simple (
-                    desktop_entry, param.desktop_entry,
-                    REGEX_COMPILE_OPTIONS,
-                    REGEX_MATCH_FLAGS);
-                if (!result) {
-                    return false;
-                }
+            if (!check_match (desktop_entry, ref _desktop_entry_regex,
+                              param.desktop_entry)) {
+                return false;
             }
-            if (summary != null) {
-                if (param.summary == null) {
-                    return false;
-                }
-                bool result = Regex.match_simple (
-                    summary, param.summary,
-                    REGEX_COMPILE_OPTIONS,
-                    REGEX_MATCH_FLAGS);
-                if (!result) {
-                    return false;
-                }
+            if (!check_match (summary, ref _summary_regex, param.summary)) {
+                return false;
             }
-            if (body != null) {
-                if (param.body == null) {
-                    return false;
-                }
-                bool result = Regex.match_simple (
-                    body, param.body,
-                    0,
-                    REGEX_MATCH_FLAGS);
-                if (!result) {
-                    return false;
-                }
+            if (!check_match (body, ref _body_regex, param.body, 0)) {
+                return false; // Note: body uses flags = 0
             }
-            if (urgency != null) {
-                bool result = Regex.match_simple (
-                    urgency, param.urgency.to_string (),
-                    REGEX_COMPILE_OPTIONS,
-                    REGEX_MATCH_FLAGS);
-                if (!result) {
-                    return false;
-                }
+            if (!check_match (urgency, ref _urgency_regex,
+                              param.urgency.to_string ())) {
+                return false;
             }
-            if (category != null) {
-                if (param.category == null) {
-                    return false;
-                }
-                bool result = Regex.match_simple (
-                    category, param.category,
-                    REGEX_COMPILE_OPTIONS,
-                    REGEX_MATCH_FLAGS);
-                if (!result) {
-                    return false;
-                }
+            if (!check_match (category, ref _category_regex, param.category)) {
+                return false;
             }
-            if (sound_file != null) {
-                if (param.sound_file == null) {
-                    return false;
-                }
-                bool result = Regex.match_simple (
-                    sound_file, param.sound_file,
-                    REGEX_COMPILE_OPTIONS,
-                    REGEX_MATCH_FLAGS);
-                if (!result) {
-                    return false;
-                }
+            if (!check_match (sound_file, ref _sound_file_regex, param.sound_file)) {
+                return false;
             }
-            if (sound_name != null) {
-                if (param.sound_name == null) {
-                    return false;
-                }
-                bool result = Regex.match_simple (
-                    sound_name, param.sound_name,
-                    REGEX_COMPILE_OPTIONS,
-                    REGEX_MATCH_FLAGS);
-                if (!result) {
-                    return false;
-                }
+            if (!check_match (sound_name, ref _sound_name_regex, param.sound_name)) {
+                return false;
             }
+
             return true;
         }
 
@@ -568,12 +534,12 @@ namespace SwayNotificationCenter {
         }
 
         /**
-         * Wether or not the windows should be opened as layer-shell surfaces
+         * Whether or not the windows should be opened as layer-shell surfaces
          */
         public bool layer_shell { get; set; default = true; }
 
         /**
-         * Wether or not the windows should cover the whole screen when
+         * Whether or not the windows should cover the whole screen when
          * layer-shell is used.
          */
         public bool layer_shell_cover_screen { get; set; default = true; }
@@ -1062,8 +1028,7 @@ namespace SwayNotificationCenter {
             var tmp_table = new OrderedHashTable<T> ();
 
             if (node.get_node_type () != Json.NodeType.OBJECT) {
-                stderr.printf ("Node %s is not a json object!...\n",
-                               property_name);
+                warning ("Node %s is not a json object!", property_name);
                 return tmp_table;
             }
 
@@ -1222,8 +1187,7 @@ namespace SwayNotificationCenter {
             GenericArray<T> tmp_array = new GenericArray<T> ();
 
             if (node.get_node_type () != Json.NodeType.ARRAY) {
-                stderr.printf ("Node %s is not a json array!...\n",
-                               property_name);
+                warning ("Node %s is not a json array!", property_name);
                 return tmp_array;
             }
 
@@ -1397,7 +1361,7 @@ namespace SwayNotificationCenter {
                     FileCreateFlags.REPLACE_DESTINATION,
                     null);
             } catch (Error e) {
-                stderr.printf (e.message + "\n");
+                warning ("%s", e.message);
                 return false;
             }
         }

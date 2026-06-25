@@ -369,7 +369,7 @@ action is taken on the notification
 More information can be found in the `swaync(5)` man page
 
 Notification information can be printed into a terminal by running
-`G_MESSAGES_DEBUG=all swaync` (when a notification appears).
+`G_MESSAGES_DEBUG=swaync swaync` (when a notification appears).
 
 Config properties:
 
@@ -484,7 +484,7 @@ Alternatively, the number of notifications can be shown by adding `{0}` anywhere
 
 ## Debugging Environment Variables
 
-- `G_MESSAGES_DEBUG=all`: Displays all of the debug messages.
+- `G_MESSAGES_DEBUG=swaync`: Displays all swaync of the debug messages.
 - `GTK_DEBUG=interactive`: Opens the GTK Inspector.
 - `G_ENABLE_DIAGNOSTIC=1`: If set to a non-zero value, this environment variable
   enables diagnostic messages, like deprecation messages for GObject properties

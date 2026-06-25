@@ -306,7 +306,7 @@
             },
             "id-matcher": {
               "type": "string",
-              "description": "Matches the action identifier. Can be found by reading the output of swaync when run with the `G_MESSAGES_DEBUG=all` environment variable."
+              "description": "Matches the action identifier. Can be found by reading the output of swaync when run with the `G_MESSAGES_DEBUG=swaync` environment variable."
             },
             "text-matcher": {
               "type": "string",

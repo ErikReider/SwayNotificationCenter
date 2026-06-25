@@ -227,7 +227,7 @@ config file to be able to detect config errors
 			optional: true (needs at least one *matcher*) ++
 			description: Matches the actions identifier. Can be found by ++
 				reading the output of swaync when run with the ++
-				*G_MESSAGES_DEBUG=all* environment variable.++
+				*G_MESSAGES_DEBUG=swaync* environment variable.++
 		*text-matcher*++
 			type: string ++
 			optional: true (needs at least one *matcher*) ++

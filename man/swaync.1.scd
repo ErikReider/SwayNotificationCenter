@@ -76,7 +76,7 @@ Scripting rules and logic:
 . If a notification doesn't include one of the properties, that property will be skipped
 
 Notification information can be printed into a terminal by running
-*G_MESSAGES_DEBUG=all swaync* (when a notification appears).
+*G_MESSAGES_DEBUG=swaync swaync* (when a notification appears).
 
 Config properties:
 

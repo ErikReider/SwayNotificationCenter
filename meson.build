@@ -6,6 +6,7 @@ project('sway-notification-center', ['c', 'vala'],
 
 add_project_arguments(['-w'], language: 'c')
 add_project_arguments(['-Wno-error=int-conversion'], language: 'c')
+add_project_arguments(['-DG_LOG_DOMAIN="swaync"'], language: 'c')
 add_project_arguments(['--enable-gobject-tracing'], language: 'vala')
 add_project_arguments(['--enable-checking'], language: 'vala')
 

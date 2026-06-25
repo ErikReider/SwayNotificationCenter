@@ -35,6 +35,8 @@ interface CcDaemon : Object {
 
     public abstract void latest_invoke_action (uint32 action_index) throws DBusError, IOError;
 
+    public abstract void latest_invoke_default_action () throws DBusError, IOError;
+
     public abstract bool set_cc_monitor (string monitor) throws DBusError, IOError;
     public abstract bool set_noti_window_monitor (string monitor) throws DBusError, IOError;
 
@@ -81,7 +83,9 @@ private void print_help (string[] args) {
     print ("  -C, \t --close-all \t\t\t Closes all notifications\n");
     print ("      \t --close [ID] \t\t\t Closes notification with given ID\n");
     print ("  -a, \t --action [ACTION_INDEX]\t " +
-           "Invokes the action [ACTION_INDEX] of the latest notification\n");
+           "Invokes the action [ACTION_INDEX] (or 0) of the latest notification\n");
+    print ("  -ad,\t --action-default \t\t " +
+           "Invokes the default action of the latest notification\n");
     print ("  -sw, \t --skip-wait \t\t\t Doesn't wait when swaync hasn't been started\n");
     print ("  -s, \t --subscribe \t\t\t Subscribe to notification add and close events\n");
     print ("  -swb,  --subscribe-waybar \t\t Subscribe to notification add and close events "
@@ -226,6 +230,10 @@ public int command_line (ref string[] args, bool skip_wait) {
                     action_index = int.parse (args[1]);
                 }
                 cc_daemon.latest_invoke_action ((uint32) action_index);
+                break;
+            case "--action-default":
+            case "-ad":
+                cc_daemon.latest_invoke_default_action ();
                 break;
             case "--get-inhibited":
             case "-I":

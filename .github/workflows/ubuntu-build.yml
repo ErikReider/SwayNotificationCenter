@@ -27,7 +27,7 @@ jobs:
           apt install -y $PACKAGES
 
       - name: Check out sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Meson configure
         run: meson build

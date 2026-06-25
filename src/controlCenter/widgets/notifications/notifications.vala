@@ -298,7 +298,7 @@ namespace SwayNotificationCenter.Widgets {
                 case "Return" :
                     if (group != null) {
                         var noti = group.get_latest_notification ();
-                        if (group.state == NotificationGroupState.SINLGE && noti != null) {
+                        if (group.state == NotificationGroupState.SINGLE && noti != null) {
                             noti.click_default_action ();
                             break;
                         }
@@ -309,7 +309,7 @@ namespace SwayNotificationCenter.Widgets {
                 case "BackSpace" :
                     if (group != null && n_groups > 0) {
                         unowned Notification ?noti = group.get_latest_notification ();
-                        if (group.state == NotificationGroupState.SINLGE && noti != null) {
+                        if (group.state == NotificationGroupState.SINGLE && noti != null) {
                             noti.request_dismiss_notification (ClosedReasons.DISMISSED, false);
                             break;
                         }

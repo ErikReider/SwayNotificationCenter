@@ -18,10 +18,10 @@ namespace SwayNotificationCenter {
             Object (css_name: "notificationwindow");
             if (app.use_layer_shell) {
                 if (!GtkLayerShell.is_supported ()) {
-                    stderr.printf ("GTKLAYERSHELL IS NOT SUPPORTED!\n");
-                    stderr.printf ("Swaync only works on Wayland!\n");
-                    stderr.printf ("If running waylans session, try running:\n");
-                    stderr.printf ("\tGDK_BACKEND=wayland swaync\n");
+                    critical ("GTKLAYERSHELL IS NOT SUPPORTED!");
+                    critical ("Swaync only works on Wayland!");
+                    critical ("If running waylans session, try running:");
+                    critical ("\tGDK_BACKEND=wayland swaync");
                     Process.exit (1);
                 }
                 GtkLayerShell.init_for_window (this);
@@ -42,9 +42,13 @@ namespace SwayNotificationCenter {
                     surface.disconnect (id);
                     debug ("NotificationWindow mapped on monitor: %s",
                            Functions.monitor_to_string (monitor));
+
+                    // Only set ON_DEMAND after the surface has been mapped
+                    Idle.add_once (() => set_keyboard_mode ());
                 });
             });
             this.unmap.connect (() => {
+                set_keyboard_mode ();
                 debug ("NotificationWindow un-mapped");
             });
 
@@ -83,6 +87,22 @@ namespace SwayNotificationCenter {
             };
             snapshot.append_color (color, Graphene.Rect.zero ());
             base.snapshot (snapshot);
+        }
+
+        /**
+         * Compositors handle the layer shell ON_DEMAND mode differently, so
+         * only set the mode while mapped to reduce the chance of the users
+         * input focus being stolen by an incoming notification.
+         */
+        private inline void set_keyboard_mode () {
+            if (app.use_layer_shell) {
+                if (app.has_layer_on_demand && get_mapped ()
+                    && !inline_reply_notifications.is_empty) {
+                    GtkLayerShell.set_keyboard_mode (this, GtkLayerShell.KeyboardMode.ON_DEMAND);
+                } else {
+                    GtkLayerShell.set_keyboard_mode (this, GtkLayerShell.KeyboardMode.NONE);
+                }
+            }
         }
 
         private void set_anchor () {
@@ -261,14 +281,9 @@ namespace SwayNotificationCenter {
 
             if (notification.has_inline_reply) {
                 inline_reply_notifications.remove (param.applied_id);
-                if (inline_reply_notifications.is_empty
-                    && app.use_layer_shell
-                    && GtkLayerShell.get_keyboard_mode (this)
-                    != GtkLayerShell.KeyboardMode.NONE) {
-                    GtkLayerShell.set_keyboard_mode (
-                        this, GtkLayerShell.KeyboardMode.NONE);
-                }
+                set_keyboard_mode ();
             }
+
             // Remove notification and its destruction timeout
             notification.remove_noti_timeout ();
             list.remove.begin (notification, transition, (obj, res) => {
@@ -286,23 +301,19 @@ namespace SwayNotificationCenter {
                                                ConfigModel.instance.timeout,
                                                ConfigModel.instance.timeout_low,
                                                ConfigModel.instance.timeout_critical);
-            if (noti.has_inline_reply) {
-                inline_reply_notifications.add (param.applied_id);
-
-                if (app.use_layer_shell &&
-                    GtkLayerShell.get_keyboard_mode (this)
-                    != GtkLayerShell.KeyboardMode.ON_DEMAND
-                    && app.has_layer_on_demand) {
-                    GtkLayerShell.set_keyboard_mode (
-                        this, GtkLayerShell.KeyboardMode.ON_DEMAND);
-                }
-            }
-
             if (!visible) {
                 // Destroy the wl_surface to get a new "enter-monitor" signal and
                 // fixes issues where keyboard shortcuts stop working after clearing
                 // all notifications.
                 ((Gtk.Widget) this).unrealize ();
+            }
+
+            if (noti.has_inline_reply) {
+                inline_reply_notifications.add (param.applied_id);
+                // Update the keyboard mode when already mapped
+                if (get_mapped ()) {
+                    set_keyboard_mode ();
+                }
             }
 
             set_visible (true);
@@ -359,6 +370,17 @@ namespace SwayNotificationCenter {
 
             Notification noti = (Notification) item.child;
             noti.click_alt_action (action);
+        }
+
+        public void latest_notification_default_action () {
+            unowned AnimatedListItem ?item = list.get_first_item ();
+            if (item == null || !(item.child is Notification)) {
+                warn_if_reached ();
+                return;
+            }
+
+            Notification noti = (Notification) item.child;
+            noti.click_default_action ();
         }
 
         public void set_monitor (Gdk.Monitor ?monitor) {

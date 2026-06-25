@@ -146,19 +146,23 @@ namespace SwayNotificationCenter {
             build_noti ();
         }
 
-        construct {
+        static construct {
             try {
-                code_regex = new Regex ("(?<= |^)(\\d{3}(-| )\\d{3}|\\d{4,8})(?= |$|\\.|,)",
-                                        RegexCompileFlags.MULTILINE);
+                code_regex = new Regex (
+                    "(?<= |^)(\\d{3}(-| )\\d{3}|\\d{4,8})(?= |$|\\.|,)",
+                    RegexCompileFlags.MULTILINE);
                 string joined_tags = string.joinv ("|", TAGS);
                 tag_regex = new Regex ("&lt;(/?(?:%s))&gt;".printf (joined_tags));
                 string unescaped = string.joinv ("|", UNESCAPE_CHARS);
                 tag_unescape_regex = new Regex ("&amp;(?=%s)".printf (unescaped));
-                img_tag_regex = new Regex ("<img[^>]* src=((\"([^\"]*)\")|(\'([^\']*)\'))[^>]*>");
+                img_tag_regex = new Regex (
+                    "<img[^>]* src=((\"([^\"]*)\")|(\'([^\']*)\'))[^>]*>");
             } catch (Error e) {
-                stderr.printf ("Invalid regex: %s", e.message);
+                warning ("Invalid regex: %s", e.message);
             }
+        }
 
+        construct {
             bind_property ("dismissed",
                            this, "sensitive",
                            BindingFlags.SYNC_CREATE | BindingFlags.INVERT_BOOLEAN,
@@ -390,7 +394,7 @@ namespace SwayNotificationCenter {
                         }
                     }
                 } catch (Error e) {
-                    stderr.printf (e.message);
+                    warning ("%s", e.message);
                 }
             }
 
@@ -425,8 +429,8 @@ namespace SwayNotificationCenter {
                     this.body.set_attributes (attr);
                 }
             } catch (Error e) {
-                stderr.printf ("Could not parse Pango markup %s: %s\n",
-                               text, e.message);
+                warning ("Could not parse Pango markup %s: %s",
+                         text, e.message);
                 // Sets the original text
                 this.body.set_text (text);
             }

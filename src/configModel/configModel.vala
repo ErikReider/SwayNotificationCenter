@@ -347,24 +347,24 @@ namespace SwayNotificationCenter {
             switch (this) {
                 default :
                 return "enabled";
-                case MUTED:
+                case MUTED :
                     return "muted";
-                case IGNORED:
+                case IGNORED :
                     return "ignored";
-                case TRANSIENT:
+                case TRANSIENT :
                     return "transient";
             }
         }
 
         public static NotificationStatusEnum from_value (string value) {
             switch (value) {
-                default:
-                    return ENABLED;
-                case "muted":
+                default :
+                return ENABLED;
+                case "muted" :
                     return MUTED;
-                case "ignored":
+                case "ignored" :
                     return IGNORED;
-                case "transient":
+                case "transient" :
                     return TRANSIENT;
             }
         }
@@ -382,9 +382,9 @@ namespace SwayNotificationCenter {
 
         public string to_string () {
             switch (this) {
-                case LOW:
+                case LOW :
                     return "Low";
-                case NORMAL:
+                case NORMAL :
                     return "Normal";
                 case CRITICAL:
                     return "Critical";

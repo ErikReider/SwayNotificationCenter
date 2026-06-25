@@ -17,6 +17,8 @@ interface CcDaemon : Object {
 
     public abstract void close_all_notifications () throws DBusError, IOError;
 
+    public abstract void close_notification (uint32 id) throws DBusError, IOError;
+
     public abstract uint notification_count () throws DBusError, IOError;
 
     public abstract bool get_dnd () throws DBusError, IOError;
@@ -77,6 +79,7 @@ private void print_help (string[] args) {
     print ("      \t --hide-all \t\t\t Hides all notifications. Still shown in Control Center\n");
     print ("      \t --close-latest \t\t Closes latest notification\n");
     print ("  -C, \t --close-all \t\t\t Closes all notifications\n");
+    print ("      \t --close [ID] \t\t\t Closes notification with given ID\n");
     print ("  -a, \t --action [ACTION_INDEX]\t " +
            "Invokes the action [ACTION_INDEX] of the latest notification\n");
     print ("  -sw, \t --skip-wait \t\t\t Doesn't wait when swaync hasn't been started\n");
@@ -176,6 +179,14 @@ public int command_line (ref string[] args, bool skip_wait) {
             case "--close-all":
             case "-C":
                 cc_daemon.close_all_notifications ();
+                break;
+            case "--close":
+                if (args.length < 2) {
+                    stderr.printf ("Notification ID needed!");
+                    Process.exit (1);
+                }
+                used_args++;
+                cc_daemon.close_notification ((uint32) int.parse (args[1]));
                 break;
             case "--toggle-panel":
             case "-t":

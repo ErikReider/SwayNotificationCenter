@@ -222,7 +222,10 @@ namespace SwayNotificationCenter {
 
             if (get_mapped () && transition) {
                 remove_animation_done_id = remove_animation.done.connect ((e) => {
-                    play_remove_animation.callback ();
+                    Idle.add (() => {
+                        play_remove_animation.callback ();
+                        return Source.REMOVE;
+                    });
                 });
                 remove_animation.value_from
                     = remove_animation.state == Adw.AnimationState.PLAYING

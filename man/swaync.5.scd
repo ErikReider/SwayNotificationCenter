@@ -341,6 +341,8 @@ config file to be able to detect config errors
 #END pulse-audio
 		*backlight*++
 			optional: true ++
+		*calendar*++
+			optional: true ++
 		*inhibitors*++
 			optional: true ++
 	description: ++
@@ -738,6 +740,51 @@ config file to be able to detect config errors
 					default: 0 ++
 					description: Lowest possible value for brightness ++
 			description: Slider to control screen brightness ++
+		*calendar*++
+			type: object ++
+			css classes: ++
+				widget-calendar ++
+				calendar-container ++
+				day-label ++
+				date-label ++
+			properties: ++
+				show-day-label: ++
+					type: bool ++
+					optional: true ++
+					default: true ++
+					description: Whether to show the day of the week label ++
+				show-date-label: ++
+					type: bool ++
+					optional: true ++
+					default: true ++
+					description: Whether to show the date label ++
+				show-heading: ++
+					type: bool ++
+					optional: true ++
+					default: true ++
+					description: Whether to show the month/year heading in the calendar grid ++
+				show-day-names: ++
+					type: bool ++
+					optional: true ++
+					default: true ++
+					description: Whether to show the day of week abbreviations in the calendar grid ++
+				show-week-numbers: ++
+					type: bool ++
+					optional: true ++
+					default: false ++
+					description: Whether to show ISO week numbers in the calendar grid ++
+				day-format: ++
+					type: string ++
+					optional: true ++
+					default: "%A" ++
+					description: strftime format for the day label (e.g. "Monday") ++
+				date-format: ++
+					type: string ++
+					optional: true ++
+					default: "%B %-d, %Y" ++
+					description: strftime format for the date label (e.g. "January 1, 2024") ++
+			description: A calendar widget displaying the day, date, and a GTK4 calendar grid. ++
+				Today's date is automatically marked. Clicking a day updates the labels. ++
 		*inhibitors*++
 			type: object ++
 			css class: widget-inhibitors ++

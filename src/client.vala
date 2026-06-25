@@ -17,6 +17,8 @@ interface CcDaemon : Object {
 
     public abstract void close_all_notifications () throws DBusError, IOError;
 
+    public abstract void close_notification (uint32 id) throws DBusError, IOError;
+
     public abstract uint notification_count () throws DBusError, IOError;
 
     public abstract bool get_dnd () throws DBusError, IOError;
@@ -32,6 +34,8 @@ interface CcDaemon : Object {
     public abstract void set_visibility (bool value) throws DBusError, IOError;
 
     public abstract void latest_invoke_action (uint32 action_index) throws DBusError, IOError;
+
+    public abstract void latest_invoke_default_action () throws DBusError, IOError;
 
     public abstract bool set_cc_monitor (string monitor) throws DBusError, IOError;
     public abstract bool set_noti_window_monitor (string monitor) throws DBusError, IOError;
@@ -77,8 +81,11 @@ private void print_help (string[] args) {
     print ("      \t --hide-all \t\t\t Hides all notifications. Still shown in Control Center\n");
     print ("      \t --close-latest \t\t Closes latest notification\n");
     print ("  -C, \t --close-all \t\t\t Closes all notifications\n");
+    print ("      \t --close [ID] \t\t\t Closes notification with given ID\n");
     print ("  -a, \t --action [ACTION_INDEX]\t " +
-           "Invokes the action [ACTION_INDEX] of the latest notification\n");
+           "Invokes the action [ACTION_INDEX] (or 0) of the latest notification\n");
+    print ("  -ad,\t --action-default \t\t " +
+           "Invokes the default action of the latest notification\n");
     print ("  -sw, \t --skip-wait \t\t\t Doesn't wait when swaync hasn't been started\n");
     print ("  -s, \t --subscribe \t\t\t Subscribe to notification add and close events\n");
     print ("  -swb,  --subscribe-waybar \t\t Subscribe to notification add and close events "
@@ -177,6 +184,14 @@ public int command_line (ref string[] args, bool skip_wait) {
             case "-C":
                 cc_daemon.close_all_notifications ();
                 break;
+            case "--close":
+                if (args.length < 2) {
+                    stderr.printf ("Notification ID needed!");
+                    Process.exit (1);
+                }
+                used_args++;
+                cc_daemon.close_notification ((uint32) int.parse (args[1]));
+                break;
             case "--toggle-panel":
             case "-t":
                 cc_daemon.toggle_visibility ();
@@ -216,6 +231,10 @@ public int command_line (ref string[] args, bool skip_wait) {
                 }
                 cc_daemon.latest_invoke_action ((uint32) action_index);
                 break;
+            case "--action-default":
+            case "-ad":
+                cc_daemon.latest_invoke_default_action ();
+                break;
             case "--get-inhibited":
             case "-I":
                 print (cc_daemon.is_inhibited ().to_string ());
@@ -227,7 +246,7 @@ public int command_line (ref string[] args, bool skip_wait) {
             case "--inhibitor-add":
             case "-Ia":
                 if (args.length < 2) {
-                    stderr.printf ("Application ID needed!");
+                    printerr ("Application ID needed!");
                     Process.exit (1);
                 }
                 used_args++;
@@ -235,12 +254,12 @@ public int command_line (ref string[] args, bool skip_wait) {
                     print ("Added inhibitor: \"%s\"", args[1]);
                     break;
                 }
-                stderr.printf ("Inhibitor: \"%s\" already added!...", args[1]);
+                printerr ("Inhibitor: \"%s\" already added!...", args[1]);
                 break;
             case "--inhibitor-remove":
             case "-Ir":
                 if (args.length < 2) {
-                    stderr.printf ("Application ID needed!");
+                    printerr ("Application ID needed!");
                     Process.exit (1);
                 }
                 used_args++;
@@ -248,7 +267,7 @@ public int command_line (ref string[] args, bool skip_wait) {
                     print ("Removed inhibitor: \"%s\"", args[1]);
                     break;
                 }
-                stderr.printf ("Inhibitor: \"%s\" does not exist!...", args[1]);
+                printerr ("Inhibitor: \"%s\" does not exist!...", args[1]);
                 break;
             case "inhibitors-clear":
             case "-Ic":
@@ -289,7 +308,7 @@ public int command_line (ref string[] args, bool skip_wait) {
                 break;
             case "--change-cc-monitor":
                 if (args.length < 2) {
-                    stderr.printf ("Monitor connector name needed!");
+                    printerr ("Monitor connector name needed!");
                     Process.exit (1);
                 }
                 used_args++;
@@ -297,11 +316,11 @@ public int command_line (ref string[] args, bool skip_wait) {
                     print ("Changed monitor to: \"%s\"", args[1]);
                     break;
                 }
-                stderr.printf ("Could not find monitor: \"%s\"!", args[1]);
+                printerr ("Could not find monitor: \"%s\"!", args[1]);
                 break;
             case "--change-noti-monitor":
                 if (args.length < 2) {
-                    stderr.printf ("Monitor connector name needed!");
+                    printerr ("Monitor connector name needed!");
                     Process.exit (1);
                 }
                 used_args++;
@@ -309,7 +328,7 @@ public int command_line (ref string[] args, bool skip_wait) {
                     print ("Changed monitor to: \"%s\"", args[1]);
                     break;
                 }
-                stderr.printf ("Could not find monitor: \"%s\"!", args[1]);
+                printerr ("Could not find monitor: \"%s\"!", args[1]);
                 break;
             default:
                 printerr ("Unknown command: \"%s\"\n", args[0]);
@@ -317,7 +336,7 @@ public int command_line (ref string[] args, bool skip_wait) {
                 break;
         }
     } catch (Error e) {
-        stderr.printf (e.message + "\n");
+        printerr (e.message + "\n");
         if (skip_wait) {
             Process.exit (1);
         }
@@ -329,7 +348,7 @@ public int command_line (ref string[] args, bool skip_wait) {
 }
 
 void print_connection_error () {
-    stderr.printf (
+    printerr (
         "Could not connect to CC service. Will wait for connection...\n");
 }
 
@@ -359,7 +378,7 @@ int try_connect (owned string[] args) {
         }
         // Should only be reached if the args only contains --skip-wait or -sw
         if (one_arg) {
-            stderr.printf ("Skipping wait, but with no action.");
+            printerr ("Skipping wait, but with no action.");
         }
         return 0;
     } catch (Error e) {

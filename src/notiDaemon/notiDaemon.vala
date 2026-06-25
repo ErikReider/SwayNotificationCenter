@@ -122,6 +122,11 @@ namespace SwayNotificationCenter {
             floating_notifications.latest_notification_action (action_index);
         }
 
+        /** Activates the default action of the latest notification */
+        internal void invoke_latest_floating_default_action () {
+            floating_notifications.latest_notification_default_action ();
+        }
+
         /*
          * D-Bus Specification
          * https://specifications.freedesktop.org/notification-spec/latest/ar01s09.html

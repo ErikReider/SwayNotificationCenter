@@ -17,7 +17,7 @@ jobs:
   vala-linting:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
     - uses: elementary/actions/vala-lint@master
       with:
         dir: src/
@@ -35,7 +35,7 @@ jobs:
             uncrustify
 
       - name: Check out sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           path: swaync
@@ -55,7 +55,7 @@ jobs:
             rpmlint rpkg
 
       - name: Check out sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           path: swaync

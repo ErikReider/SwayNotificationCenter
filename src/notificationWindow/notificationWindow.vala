@@ -12,6 +12,10 @@ namespace SwayNotificationCenter {
 
         private static string ?monitor_name = null;
 
+        private Ext.BackgroundEffect.Surface *bg_effect = null;
+        private int[] last_blur_cards = {};
+        private int last_blur_radius = -1;
+
         private const int MAX_HEIGHT = 600;
 
         public NotificationWindow () {
@@ -43,12 +47,15 @@ namespace SwayNotificationCenter {
                     debug ("NotificationWindow mapped on monitor: %s",
                            Functions.monitor_to_string (monitor));
 
+                    update_blur_effect ();
+
                     // Only set ON_DEMAND after the surface has been mapped
                     Idle.add_once (() => set_keyboard_mode ());
                 });
             });
             this.unmap.connect (() => {
                 set_keyboard_mode ();
+                destroy_blur_effect ();
                 debug ("NotificationWindow un-mapped");
             });
 
@@ -67,14 +74,18 @@ namespace SwayNotificationCenter {
                     NotificationWindow.monitor_name = null;
                     set_anchor ();
                 }
+                update_blur_effect ();
             });
+        }
+
+        ~NotificationWindow () {
+            destroy_blur_effect ();
         }
 
         protected override void size_allocate (int w, int h, int baseline) {
             base.size_allocate (w, h, baseline);
-
-            // Set the input region to only be the size of the ScrolledWindow
             set_input_region ();
+            update_blur_effect ();
         }
 
         protected override void snapshot (Gtk.Snapshot snapshot) {
@@ -105,6 +116,134 @@ namespace SwayNotificationCenter {
             }
         }
 
+        public void update_blur_effect () {
+            if (!ConfigModel.instance.background_blur
+                || !app.background_effect.blur_available) {
+                destroy_blur_effect ();
+                return;
+            }
+
+            unowned Gdk.Surface ?gdk_surface = get_surface ();
+            if (gdk_surface == null) {
+                return;
+            }
+            unowned Wl.Surface wlsurface = Functions.get_wl_surface (gdk_surface);
+            if (wlsurface == null) {
+                return;
+            }
+
+            if (bg_effect == null) {
+                bg_effect = app.background_effect.create_effect (wlsurface);
+                if (bg_effect == null) {
+                    return;
+                }
+            }
+
+            double surface_x, surface_y;
+            ((Gtk.Native) this).get_surface_transform (out surface_x, out surface_y);
+            int offset_x = (int) surface_x;
+            int offset_y = (int) surface_y;
+
+            int visible_count = 0;
+            foreach (unowned AnimatedListItem item in list.visible_children) {
+                if (item != null && !item.destroying && item.child != null) {
+                    visible_count++;
+                }
+            }
+
+            if (visible_count == 0) {
+                app.background_effect.set_blur_region (bg_effect, null);
+                last_blur_cards = {};
+                last_blur_radius = -1;
+                queue_blur_commit ();
+                return;
+            }
+
+            int[] cards = new int[visible_count * 4];
+            int card_idx = 0;
+            int radius = 0;
+            bool got_radius = false;
+
+            foreach (unowned AnimatedListItem item in list.visible_children) {
+                if (item == null || item.destroying) {
+                    continue;
+                }
+                unowned Notification noti = (Notification) item.child;
+                if (noti == null) {
+                    continue;
+                }
+
+                if (!got_radius) {
+                    radius = noti.get_blur_radius ();
+                    got_radius = true;
+                }
+
+                int bx, by, bw, bh;
+                if (!noti.get_blur_bounds (this, out bx, out by, out bw, out bh)) {
+                    continue;
+                }
+                int idx = card_idx * 4;
+                cards[idx] = bx + offset_x;
+                cards[idx + 1] = by + offset_y;
+                cards[idx + 2] = bw;
+                cards[idx + 3] = bh;
+                card_idx++;
+            }
+
+            if (card_idx == 0) {
+                app.background_effect.set_blur_region (bg_effect, null);
+                last_blur_cards = {};
+                last_blur_radius = -1;
+                queue_blur_commit ();
+                return;
+            }
+
+            if (card_idx * 4 < cards.length) {
+                cards.resize (card_idx * 4);
+            }
+
+            if (cards_equal (cards, last_blur_cards) && radius == last_blur_radius) {
+                return;
+            }
+            last_blur_cards = cards;
+            last_blur_radius = radius;
+
+            app.background_effect.set_blur_region_multi_rounded (bg_effect, cards, radius);
+            unowned Gdk.Surface ?s = get_surface ();
+            if (s != null) {
+                s.queue_render ();
+            }
+        }
+
+        private static bool cards_equal (int[] a, int[] b) {
+            if (a.length != b.length) {
+                return false;
+            }
+            for (int i = 0; i < a.length; i++) {
+                if (a[i] != b[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private void destroy_blur_effect () {
+            if (bg_effect != null) {
+                app.background_effect.destroy_effect (bg_effect);
+                bg_effect = null;
+                queue_blur_commit ();
+            }
+            last_blur_cards = {};
+            last_blur_radius = -1;
+        }
+
+        private void queue_blur_commit () {
+            unowned Gdk.Surface ?surface = get_surface ();
+            if (surface != null) {
+                surface.queue_render ();
+            }
+        }
+
         private void set_anchor () {
             debug ("NotificationWindow set_anchor");
             if (app.use_layer_shell) {
@@ -113,19 +252,19 @@ namespace SwayNotificationCenter {
                 GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.BOTTOM, true);
                 GtkLayerShell.set_anchor (this, GtkLayerShell.Edge.TOP, true);
                 switch (ConfigModel.instance.positionX) {
-                    case PositionX.LEFT:
+                    case PositionX.LEFT :
                         GtkLayerShell.set_anchor (
                             this, GtkLayerShell.Edge.RIGHT, false);
                         GtkLayerShell.set_anchor (
                             this, GtkLayerShell.Edge.LEFT, true);
                         break;
-                    case PositionX.CENTER:
+                    case PositionX.CENTER :
                         GtkLayerShell.set_anchor (
                             this, GtkLayerShell.Edge.RIGHT, false);
                         GtkLayerShell.set_anchor (
                             this, GtkLayerShell.Edge.LEFT, false);
                         break;
-                    default:
+                        default :
                         GtkLayerShell.set_anchor (
                             this, GtkLayerShell.Edge.LEFT, false);
                         GtkLayerShell.set_anchor (
@@ -292,6 +431,7 @@ namespace SwayNotificationCenter {
                     return;
                 }
                 set_input_region ();
+                Idle.add_once (() => update_blur_effect ());
             });
         }
 
@@ -302,6 +442,7 @@ namespace SwayNotificationCenter {
                                                ConfigModel.instance.timeout_low,
                                                ConfigModel.instance.timeout_critical);
             if (!visible) {
+                destroy_blur_effect ();
                 // Destroy the wl_surface to get a new "enter-monitor" signal and
                 // fixes issues where keyboard shortcuts stop working after clearing
                 // all notifications.
@@ -320,6 +461,7 @@ namespace SwayNotificationCenter {
 
             list.append.begin (noti);
             notification_ids.set (param.applied_id, noti);
+            Idle.add_once (() => update_blur_effect ());
         }
 
         /** Removes the notification widget with ID. Doesn't dismiss */

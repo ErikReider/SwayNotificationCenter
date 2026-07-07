@@ -13,6 +13,11 @@
       "description": "Unsets the GTK_THEME environment variable, fixing a lot of issues with GTK themes ruining the users custom CSS themes.",
       "default": true
     },
+    "background-blur": {
+      "type": "boolean",
+      "description": "Whether to use the ext-background-effect-v1 Wayland protocol for compositor-level background blur. Requires compositor support (e.g. niri). Set CSS background alpha < 1 on .control-center and .floating-notifications .notification for the blur to be visible.",
+      "default": false
+    },
     "positionX": {
       "type": "string",
       "description": "Horizontal position of control center and notification window",

@@ -40,6 +40,8 @@ namespace SwayNotificationCenter {
 
         public XdgActivationHelper xdg_activation;
 
+        public BackgroundEffectHelper background_effect;
+
         public signal void config_reload (ConfigModel ?old_config, ConfigModel new_config);
 
         public Swaync (bool replace) {
@@ -143,6 +145,8 @@ namespace SwayNotificationCenter {
             yield;
 
             xdg_activation = new XdgActivationHelper ();
+
+            background_effect = new BackgroundEffectHelper ();
 
             floating_notifications = new NotificationWindow ();
             notifications_widget = new Widgets.Notifications ();

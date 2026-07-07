@@ -57,6 +57,10 @@ namespace SwayNotificationCenter {
         /** Reloads the CSS file */
         public bool reload_css () throws Error {
             bool result = Functions.load_css (style_path);
+            if (result) {
+                control_center.update_blur_effect ();
+                floating_notifications.update_blur_effect ();
+            }
             return result;
         }
 

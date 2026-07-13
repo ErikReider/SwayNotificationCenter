@@ -282,14 +282,14 @@ namespace SwayNotificationCenter {
         public delegate bool FilterFunc (char character);
 
         public static string filter_string (string body, FilterFunc func) {
-            string result = "";
+            var result = new StringBuilder.sized (body.length);
             foreach (char char in (char[]) body.data) {
                 if (!func (char)) {
                     continue;
                 }
-                result += char.to_string ();
+                result.append_c (char);
             }
-            return result;
+            return result.str;
         }
 
         public static async bool execute_command (string cmd, string[] env_additions = {},

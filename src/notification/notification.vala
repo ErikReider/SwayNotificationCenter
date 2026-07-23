@@ -91,6 +91,13 @@ namespace SwayNotificationCenter {
         private static Regex tag_regex;
         private static Regex tag_unescape_regex;
         private static Regex img_tag_regex;
+        private static Regex link_open_tag_regex;
+        private static Regex link_close_tag_regex;
+        private static Regex plain_url_regex;
+        private static Regex plain_domain_regex;
+        private const MarkupParser MARKUP_PARSER = {
+            validate_markup_start, null, null, null, null
+        };
         private const string[] TAGS = { "b", "u", "i" };
         private const string[] UNESCAPE_CHARS = {
             "lt;", "#60;", "#x3C;", "#x3c;", // <
@@ -141,6 +148,25 @@ namespace SwayNotificationCenter {
                 tag_unescape_regex = new Regex ("&amp;(?=%s)".printf (unescaped));
                 img_tag_regex = new Regex (
                     "<img[^>]* src=((\"([^\"]*)\")|(\'([^\']*)\'))[^>]*>");
+                link_open_tag_regex = new Regex (
+                    "<a(?:\\s+(?:href|title|class)\\s*=\\s*" +
+                    "(?:\"[^\"]*\"|'[^']*'))+\\s*>");
+                link_close_tag_regex = new Regex ("</a\\s*>");
+                plain_url_regex = new Regex (
+                    "<a\\b[^>]*>.*?</a\\s*>(*SKIP)(*F)|" +
+                    "<[^>]+>(*SKIP)(*F)|" +
+                    "(https?://[^\\s<>\"']*[^\\s<>\"'.,!?;:])",
+                    RegexCompileFlags.DOTALL);
+                plain_domain_regex = new Regex (
+                    "<a\\b[^>]*>.*?</a\\s*>(*SKIP)(*F)|" +
+                    "<[^>]+>(*SKIP)(*F)|" +
+                    "(?<![@\\w./:-])" +
+                    "((?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}" +
+                    "[A-Za-z0-9])?\\.)+" +
+                    "[A-Za-z]{2,63}(?![A-Za-z0-9_-])" +
+                    "(?!\\.[A-Za-z0-9-])(?::\\d{1,5})?" +
+                    "(?:[/?#][^\\s<>\"']*[^\\s<>\"'.,!?;:]|/)?)",
+                    RegexCompileFlags.DOTALL);
             } catch (Error e) {
                 warning ("Invalid regex: %s", e.message);
             }
@@ -174,7 +200,9 @@ namespace SwayNotificationCenter {
                     switch (gesture.get_current_button ()) {
                         default:
                         case Gdk.BUTTON_PRIMARY:
-                            click_default_action ();
+                            if (body.get_current_uri () == null) {
+                                click_default_action ();
+                            }
                             break;
                         case Gdk.BUTTON_MIDDLE:
                         case Gdk.BUTTON_SECONDARY:
@@ -255,6 +283,54 @@ namespace SwayNotificationCenter {
                 // Dismiss notification without activating Action
                 action_clicked (null);
             });
+
+            body.activate_link.connect ((_uri) => {
+                // Prevent the enclosing notification from invoking its
+                // default action.
+                default_action_down = false;
+                default_action_in = false;
+                return false;
+            });
+        }
+
+        private static void validate_markup_start (MarkupParseContext context,
+                                                   string element_name,
+                                                   string[] attribute_names,
+                                                   string[] _attribute_values) throws MarkupError {
+            if (element_name != "a") {
+                return;
+            }
+
+            bool has_href = false;
+            for (int i = 0; attribute_names[i] != null; i++) {
+                switch (attribute_names[i]) {
+                    case "href" :
+                        has_href = true;
+                        break;
+                    case "title":
+                    case "class":
+                        break;
+                    default:
+                        throw new MarkupError.UNKNOWN_ATTRIBUTE (
+                                  "Unknown attribute '%s' on element 'a'"
+                                   .printf (attribute_names[i]));
+                }
+            }
+            if (!has_href) {
+                throw new MarkupError.MISSING_ATTRIBUTE (
+                          "Element 'a' requires attribute 'href'");
+            }
+
+            int link_depth = 0;
+            foreach (unowned string element in context.get_element_stack ()) {
+                if (element == "a") {
+                    link_depth++;
+                }
+            }
+            if (link_depth > 1) {
+                throw new MarkupError.INVALID_CONTENT (
+                          "Element 'a' cannot be nested");
+            }
         }
 
         private void build_noti () {
@@ -278,7 +354,7 @@ namespace SwayNotificationCenter {
 
             // Changes the swipe direction depending on the notifications X position
             switch (ConfigModel.instance.positionX) {
-                case PositionX.LEFT :
+                case PositionX.LEFT:
                     dismissible_widget.set_gesture_direction (SwipeDirection.SWIPE_LEFT);
                     break;
                 default:
@@ -370,32 +446,52 @@ namespace SwayNotificationCenter {
             try {
                 Pango.AttrList ?attr = null;
                 string ?buf = null;
+                string markup = text;
                 try {
-                    // Try parsing without any hacks
-                    Pango.parse_markup (text, -1, 0, out attr, out buf, null);
+                    var markup_context = new MarkupParseContext (
+                        MARKUP_PARSER,
+                        MarkupParseFlags.PREFIX_ERROR_POSITION,
+                        null,
+                        null);
+                    markup_context.parse ("<markup>", -1);
+                    markup_context.parse (text, text.length);
+                    markup_context.parse ("</markup>", -1);
+                    markup_context.end_parse ();
+
+                    // Pango does not understand GTK's link tags. Replace them
+                    // only while validating, then let Gtk.Label render them.
+                    string pango_markup = link_open_tag_regex.replace_literal (
+                        text, text.length, 0, "<span>");
+                    pango_markup = link_close_tag_regex.replace_literal (
+                        pango_markup, pango_markup.length, 0, "</span>");
+                    Pango.parse_markup (
+                        pango_markup, -1, 0, out attr, out buf, null);
+                    markup = plain_url_regex.replace (
+                        text, text.length, 0, "<a href=\"\\1\">\\1</a>");
+                    markup = plain_domain_regex.replace (
+                        markup, markup.length, 0,
+                        "<a href=\"https://\\1\">\\1</a>");
                 } catch (Error e) {
                     // Default to hack if the initial markup couldn't be parsed
 
                     // Escapes all characters
-                    string escaped = Markup.escape_text (text);
+                    markup = Markup.escape_text (text);
                     // Replace all valid tags brackets with <,</,> so that the
                     // markup parser only parses valid tags
                     // Ex: &lt;b&gt;BOLD&lt;/b&gt; -> <b>BOLD</b>
-                    escaped = tag_regex.replace (escaped, escaped.length, 0, "<\\1>");
+                    markup = tag_regex.replace (markup, markup.length, 0, "<\\1>");
 
                     // Unescape a few characters that may have been double escaped
                     // Sending "<" in Discord would result in "&amp;lt;" without this
                     // &amp;lt; -> &lt;
-                    escaped = tag_unescape_regex.replace_literal (escaped, escaped.length, 0, "&");
+                    markup = tag_unescape_regex.replace_literal (
+                        markup, markup.length, 0, "&");
 
                     // Turns it back to markup, defaults to original if not valid
-                    Pango.parse_markup (escaped, -1, 0, out attr, out buf, null);
+                    Pango.parse_markup (markup, -1, 0, out attr, out buf, null);
                 }
 
-                this.body.set_text (buf);
-                if (attr != null) {
-                    this.body.set_attributes (attr);
-                }
+                this.body.set_markup (markup);
             } catch (Error e) {
                 warning ("Could not parse Pango markup %s: %s",
                          text, e.message);

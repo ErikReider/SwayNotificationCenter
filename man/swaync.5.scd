@@ -40,6 +40,13 @@ config file to be able to detect config errors
 	description: Wether or not the windows should be opened as layer-shell ++
 		surfaces. Note: Requires swaync restart to apply
 
+*layer-shell-cover-screen* ++
+	type: bool ++
+	default: true ++
+	description: Whether or not the windows should cover the whole screen when ++
+		layer-shell is used. May exceed the height of the monitor if the value is too large. ++
+		Fixes animations in compositors like Mango, Hyprland.
+
 *cssPriority* ++
 	type: string ++
 	default: application ++

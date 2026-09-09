@@ -101,6 +101,13 @@ template $SwayNotificationCenterNotification: Adw.Bin {
                       ]
                     }
 
+                    // Optional (notification-copy-button), shown from Vala.
+                    // Placed before the time label so the label's right
+                    // margin keeps clearing the overlaid close button.
+                    $SwayNotificationCenterNotificationCopyButton copy_button {
+                      visible: false;
+                    }
+
                     Label time {
                       justify: left;
                       ellipsize: none;

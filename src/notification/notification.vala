@@ -32,6 +32,12 @@ namespace SwayNotificationCenter {
         unowned NotificationCloseButton close_button;
 
         [GtkChild]
+        unowned NotificationCopyButton copy_button;
+        /** How long the copy confirmation stays visible before dismissal */
+        private const uint COPY_CONFIRM_HOLD_MS = 350;
+        private bool copy_pending = false;
+
+        [GtkChild]
         unowned Gtk.Label summary;
         [GtkChild]
         unowned Gtk.Label time;
@@ -221,6 +227,13 @@ namespace SwayNotificationCenter {
             close_button.clicked.connect (() => {
                 request_dismiss_notification (ClosedReasons.DISMISSED, false);
             });
+
+            if (ConfigModel.instance.notification_copy_button) {
+                copy_button.visible = true;
+                // Center the timestamp on the button's axis
+                time.valign = Gtk.Align.CENTER;
+                copy_button.clicked.connect (copy_notification_text);
+            }
 
             motion_controller = new Gtk.EventControllerMotion ();
             base_widget.add_controller (motion_controller);
@@ -429,6 +442,33 @@ namespace SwayNotificationCenter {
 
         public void click_default_action () {
             action_clicked (param.default_action);
+        }
+
+        /**
+         * Copies "Summary: Body" to the clipboard, shows the confirmation on
+         * the copy button for COPY_CONFIRM_HOLD_MS, then dismisses the
+         * notification. Dismissing immediately would hide the confirmation
+         * behind the fade-out.
+         */
+        private void copy_notification_text () {
+            if (copy_pending || dismissed) {
+                return;
+            }
+            copy_pending = true;
+
+            string summary_text = param.summary ?? param.app_name ?? "";
+            string body_text = this.body.get_text ();
+            string text = body_text.length > 0
+                ? "%s: %s".printf (summary_text, body_text)
+                : summary_text;
+
+            this.get_clipboard ().set_text (text);
+            copy_button.show_confirm ();
+
+            Timeout.add_once (COPY_CONFIRM_HOLD_MS, () => {
+                copy_pending = false;
+                request_dismiss_notification (ClosedReasons.DISMISSED, false);
+            });
         }
 
         public void click_alt_action (uint index) {

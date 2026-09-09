@@ -66,6 +66,27 @@ notificationwindow, blankwindow {
   }
 }
 
+.copy-button {
+  /* The optional notification Copy Button (notification-copy-button) */
+  background: var(--noti-close-bg);
+  color: var(--text-color);
+  text-shadow: none;
+  padding: 0;
+  border-radius: 100%;
+  margin: 0 $margin / 2;
+  box-shadow: none;
+  border: none;
+  min-width: 24px;
+  min-height: 24px;
+
+  &:hover {
+    box-shadow: none;
+    background: var(--noti-close-bg-hover);
+    transition: var(--hover-tranistion);
+    border: none;
+  }
+}
+
 .notification-row {
   background: none;
   outline: none;

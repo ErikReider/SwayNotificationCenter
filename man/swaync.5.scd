@@ -100,6 +100,13 @@ config file to be able to detect config errors
 	default: true ++
 	description: If each notification should display a 'COPY \"1234\"' action
 
+*notification-copy-button* ++
+	type: bool ++
+	default: false ++
+	description: If each notification should display a button, next to the ++
+		timestamp, that copies its summary and body to the clipboard and ++
+		dismisses it.
+
 *timeout* ++
 	type: integer ++
 	default: 10 ++

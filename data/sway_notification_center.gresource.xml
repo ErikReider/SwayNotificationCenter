@@ -3,6 +3,8 @@
   <gresource prefix="/org/erikreider/swaync">
     <file preprocess="xml-stripblanks">icons/scalable/actions/swaync-collapse-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/swaync-close-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/swaync-copy-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/swaync-copy-confirm-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/swaync-up-small-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/swaync-down-small-symbolic.svg</file>
 

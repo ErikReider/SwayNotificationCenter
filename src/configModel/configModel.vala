@@ -802,6 +802,12 @@ namespace SwayNotificationCenter {
         public bool notification_inline_replies { get; set; default = false; }
 
         /**
+         * If each notification should display a button that copies its
+         * summary and body to the clipboard and dismisses it.
+         */
+        public bool notification_copy_button { get; set; default = false; }
+
+        /**
          * Notification icon size, in pixels.
          */
         [Version (deprecated = true, replacement = "CSS root variable")]

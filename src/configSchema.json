@@ -100,6 +100,11 @@
       "description": "If notifications should display a text field to reply if the sender requests it. NOTE: Replying in popup notifications is only available if the compositor supports GTK Layer-Shell ON_DEMAND keyboard interactivity.",
       "default": false
     },
+    "notification-copy-button": {
+      "type": "boolean",
+      "description": "If each notification should display a button, next to the timestamp, that copies its summary and body to the clipboard and dismisses it.",
+      "default": false
+    },
     "notification-icon-size": {
       "type": "integer",
       "deprecated": true,

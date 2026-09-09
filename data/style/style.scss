@@ -242,6 +242,27 @@ notificationwindow, blankwindow {
           color: var(--text-color);
         }
       }
+
+      .notification-timeout-bar {
+        /* The optional countdown bar (notification-timeout-bar) */
+        min-height: 3px;
+        margin: 0 $margin $margin / 2 $margin;
+        background: transparent;
+
+        trough {
+          min-height: 3px;
+          border-radius: 2px;
+          background: var(--noti-close-bg);
+        }
+
+        progress {
+          min-height: 3px;
+          border-radius: 2px;
+          background: var(--text-color);
+          /* Redrawn every 100 ms from Vala; a CSS transition would lag */
+          transition: none;
+        }
+      }
     }
   }
 }

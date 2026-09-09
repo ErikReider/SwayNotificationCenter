@@ -173,6 +173,17 @@ template $SwayNotificationCenterNotification: Adw.Bin {
               "notification-alt-actions",
             ]
           }
+
+          // Optional countdown bar (notification-timeout-bar), shown by
+          // add_notification_timeout() for timed notifications only
+          ProgressBar timeout_bar {
+            orientation: horizontal;
+            visible: false;
+
+            styles [
+              "notification-timeout-bar",
+            ]
+          }
         }
 
         [overlay]

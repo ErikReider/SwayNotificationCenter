@@ -26,6 +26,12 @@ namespace SwayNotificationCenter {
         unowned Gtk.ProgressBar progress_bar;
 
         [GtkChild]
+        unowned Gtk.ProgressBar timeout_bar;
+        /** Redraw source for timeout_bar, 0 when not running */
+        private uint timeout_bar_tick_id = 0;
+        private const uint TIMEOUT_BAR_TICK_MS = 100;
+
+        [GtkChild]
         unowned IterBox base_box;
 
         [GtkChild]
@@ -848,6 +854,16 @@ namespace SwayNotificationCenter {
             timeout_id = Timeout.add_once ((uint) (remaining_us / 1000), () => {
                 request_dismiss_notification (ClosedReasons.EXPIRED, false);
             });
+
+            if (ConfigModel.instance.notification_timeout_bar) {
+                // The bar reads the same timeline, so it continues from the
+                // fraction it was paused at
+                timeout_bar.visible = true;
+                update_timeout_bar ();
+                if (timeout_bar_tick_id == 0) {
+                    timeout_bar_tick_id = Timeout.add (TIMEOUT_BAR_TICK_MS, update_timeout_bar);
+                }
+            }
         }
 
         public void remove_noti_timeout () {
@@ -855,6 +871,21 @@ namespace SwayNotificationCenter {
                 Source.remove (timeout_id);
                 timeout_id = 0;
             }
+            // Stops the redraw only; a paused bar stays where it is
+            if (timeout_bar_tick_id > 0) {
+                Source.remove (timeout_bar_tick_id);
+                timeout_bar_tick_id = 0;
+            }
+        }
+
+        private bool update_timeout_bar () {
+            if (timeout_total_ms == 0) {
+                return Source.CONTINUE;
+            }
+            int64 elapsed_us = GLib.get_monotonic_time () - timeout_start_us;
+            double fraction = 1.0 - (elapsed_us / 1000.0) / (double) timeout_total_ms;
+            timeout_bar.set_fraction (fraction.clamp (0.0, 1.0));
+            return Source.CONTINUE;
         }
 
         /**

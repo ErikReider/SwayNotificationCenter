@@ -100,6 +100,14 @@ config file to be able to detect config errors
 	default: true ++
 	description: If each notification should display a 'COPY \"1234\"' action
 
+*notification-timeout-bar* ++
+	type: bool ++
+	default: false ++
+	description: If popup notifications should display a thin bar showing ++
+		the time left before they are dismissed. The bar pauses while the ++
+		notification is hovered and is never shown for notifications ++
+		without a timeout or in the control center.
+
 *timeout* ++
 	type: integer ++
 	default: 10 ++

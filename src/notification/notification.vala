@@ -65,6 +65,17 @@ namespace SwayNotificationCenter {
         }
 
         private uint timeout_id = 0;
+        /**
+         * The countdown is a single timeline per notification: remaining time
+         * is always (timeout_total_ms - elapsed since timeout_start_us).
+         * Hovering records timeout_paused_at_us and stops the timer without
+         * touching the timeline; un-hovering shifts timeout_start_us forward
+         * by the paused duration and re-arms for the true remainder.
+         */
+        private int64 timeout_start_us = 0;
+        private uint timeout_total_ms = 0;
+        /** Monotonic time of the hover pause, 0 when not paused */
+        private int64 timeout_paused_at_us = 0;
 
         public bool is_timed { get; construct; default = false; }
 
@@ -226,10 +237,13 @@ namespace SwayNotificationCenter {
             base_widget.add_controller (motion_controller);
             motion_controller.enter.connect ((event) => {
                 close_button.set_reveal (true);
+                // Pause the countdown; the timeline itself is untouched
+                timeout_paused_at_us = GLib.get_monotonic_time ();
                 remove_noti_timeout ();
             });
             motion_controller.leave.connect ((controller) => {
                 close_button.set_reveal (false);
+                // Resumes with the remaining time, see add_notification_timeout
                 add_notification_timeout ();
             });
 
@@ -302,9 +316,8 @@ namespace SwayNotificationCenter {
                 revealer.set_reveal_child (true);
             });
 
-            remove_noti_timeout ();
             if (is_timed) {
-                add_notification_timeout ();
+                restart_notification_timeout ();
             }
         }
 
@@ -789,29 +802,50 @@ namespace SwayNotificationCenter {
             // Removes the previous timeout
             remove_noti_timeout ();
 
-            uint timeout;
-            switch (param.urgency) {
-                case UrgencyLevels.LOW :
-                    timeout = timeout_low_delay * 1000;
-                    break;
-                case UrgencyLevels.NORMAL:
-                default:
-                    timeout = timeout_delay * 1000;
-                    break;
-                case UrgencyLevels.CRITICAL:
-                    // Critical notifications should not automatically expire.
-                    // Ignores the notifications expire_timeout.
-                    if (timeout_critical_delay == 0) {
-                        return;
-                    }
-                    timeout = timeout_critical_delay * 1000;
-                    break;
+            int64 now = GLib.get_monotonic_time ();
+            // Only an existing timeline can be resumed
+            bool resuming = timeout_paused_at_us > 0 && timeout_total_ms > 0;
+
+            if (resuming) {
+                // Shift the start forward by the paused duration so the
+                // elapsed time, and therefore the remaining time, stay
+                // exactly what they were when the pointer entered
+                timeout_start_us += now - timeout_paused_at_us;
+                timeout_paused_at_us = 0;
+            } else {
+                uint timeout;
+                switch (param.urgency) {
+                    case UrgencyLevels.LOW :
+                        timeout = timeout_low_delay * 1000;
+                        break;
+                    case UrgencyLevels.NORMAL:
+                    default:
+                        timeout = timeout_delay * 1000;
+                        break;
+                    case UrgencyLevels.CRITICAL:
+                        // Critical notifications should not automatically expire.
+                        // Ignores the notifications expire_timeout.
+                        if (timeout_critical_delay == 0) {
+                            return;
+                        }
+                        timeout = timeout_critical_delay * 1000;
+                        break;
+                }
+                uint ms = param.expire_timeout > 0 ? param.expire_timeout : timeout;
+                if (ms <= 0) {
+                    return;
+                }
+                timeout_total_ms = ms;
+                timeout_start_us = now;
             }
-            uint ms = param.expire_timeout > 0 ? param.expire_timeout : timeout;
-            if (ms <= 0) {
+
+            int64 elapsed_us = now - timeout_start_us;
+            int64 remaining_us = ((int64) timeout_total_ms) * 1000 - elapsed_us;
+            if (remaining_us <= 0) {
+                request_dismiss_notification (ClosedReasons.EXPIRED, false);
                 return;
             }
-            timeout_id = Timeout.add_once (ms, () => {
+            timeout_id = Timeout.add_once ((uint) (remaining_us / 1000), () => {
                 request_dismiss_notification (ClosedReasons.EXPIRED, false);
             });
         }
@@ -820,6 +854,23 @@ namespace SwayNotificationCenter {
             if (timeout_id > 0) {
                 Source.remove (timeout_id);
                 timeout_id = 0;
+            }
+        }
+
+        /**
+         * (Re)starts the countdown from the full duration. If the pointer is
+         * already over the notification (a replaced notification, or one that
+         * appeared under the pointer), the countdown starts paused and only
+         * runs once the pointer leaves.
+         */
+        private void restart_notification_timeout () {
+            remove_noti_timeout ();
+            timeout_paused_at_us = 0;
+            timeout_total_ms = 0;
+            add_notification_timeout ();
+            if (timeout_id > 0 && motion_controller.contains_pointer) {
+                timeout_paused_at_us = GLib.get_monotonic_time ();
+                remove_noti_timeout ();
             }
         }
     }

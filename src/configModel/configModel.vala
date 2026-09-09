@@ -802,6 +802,13 @@ namespace SwayNotificationCenter {
         public bool notification_inline_replies { get; set; default = false; }
 
         /**
+         * If popup notifications should display a thin bar showing the time
+         * left before they are dismissed. Pauses while hovered. Never shown
+         * for notifications without a timeout or in the control center.
+         */
+        public bool notification_timeout_bar { get; set; default = false; }
+
+        /**
          * Notification icon size, in pixels.
          */
         [Version (deprecated = true, replacement = "CSS root variable")]

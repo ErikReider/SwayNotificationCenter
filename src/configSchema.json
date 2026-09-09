@@ -100,6 +100,11 @@
       "description": "If notifications should display a text field to reply if the sender requests it. NOTE: Replying in popup notifications is only available if the compositor supports GTK Layer-Shell ON_DEMAND keyboard interactivity.",
       "default": false
     },
+    "notification-timeout-bar": {
+      "type": "boolean",
+      "description": "If popup notifications should display a thin bar showing the time left before they are dismissed. The bar pauses while the notification is hovered and is never shown for notifications without a timeout or in the control center.",
+      "default": false
+    },
     "notification-icon-size": {
       "type": "integer",
       "deprecated": true,

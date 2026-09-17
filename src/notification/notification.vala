@@ -65,6 +65,7 @@ namespace SwayNotificationCenter {
         }
 
         private uint timeout_id = 0;
+        private uint reveal_idle_id = 0;
 
         public bool is_timed { get; construct; default = false; }
 
@@ -298,7 +299,11 @@ namespace SwayNotificationCenter {
             set_actions ();
             set_style_urgency ();
 
-            Idle.add_once (() => {
+            if (reveal_idle_id > 0) {
+                Source.remove (reveal_idle_id);
+            }
+            reveal_idle_id = Idle.add_once (() => {
+                reveal_idle_id = 0;
                 revealer.set_reveal_child (true);
             });
 
@@ -680,6 +685,16 @@ namespace SwayNotificationCenter {
                     yield;
                 }
             }
+        }
+
+        public override void dispose () {
+            if (reveal_idle_id > 0) {
+                Source.remove (reveal_idle_id);
+                reveal_idle_id = 0;
+            }
+            remove_noti_timeout ();
+
+            base.dispose ();
         }
 
         public void replace_notification (NotifyParams new_params) {

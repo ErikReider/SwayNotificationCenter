@@ -43,6 +43,7 @@ namespace SwayNotificationCenter.Widgets {
 
             dnd_button.set_can_focus (false);
             dnd_button.valign = Gtk.Align.CENTER;
+            dnd_button.set_cursor_from_name ("pointer");
             // Backwards compatible towards older CSS stylesheets
             dnd_button.add_css_class ("control-center-dnd");
             append (dnd_button);

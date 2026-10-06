@@ -601,6 +601,19 @@ config file to be able to detect config errors
 									variable "SWAYNC_TOGGLE_STATE" is set. See example usage in the ++
 									default config.json ++
 								enum: ["normal", "toggle"] ++
+							update-command: ++
+								type: string ++
+								default: "" ++
+								description: "Command to be executed on visibility change of ++
+									cc to update the active state of the toggle button (should ++
+									echo true or false)" ++
+							label-command: ++
+								type: string ++
+								default: "" ++
+								description: "Command whose output replaces the button label ++
+									(empty output or a failing command keeps the current ++
+									label). Executed on startup, on visibility change of cc, ++
+									and after a normal button's command" ++
 							active: ++
 								type: bool ++
 								default: false ++

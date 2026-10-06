@@ -12,6 +12,8 @@ namespace SwayNotificationCenter.Widgets {
         // 7 is the default Gtk.FlowBox.max_children_per_line
         int buttons_per_row = 7;
         List<ToggleButton> toggle_buttons;
+        HashTable<Gtk.Button, string> label_commands =
+            new HashTable<Gtk.Button, string> (direct_hash, direct_equal);
 
         public ButtonsGrid (string suffix) {
             base (suffix);
@@ -44,14 +46,47 @@ namespace SwayNotificationCenter.Widgets {
                                                             act.update_command, act.active);
                         container.insert (tb, -1);
                         toggle_buttons.append (tb);
+                        if (act.label_command != "") {
+                            label_commands.insert (tb, act.label_command);
+                        }
                         break;
                     default:
                         Gtk.Button b = new Gtk.Button.with_label (act.label);
-                        b.clicked.connect (() => execute_command.begin (act.command));
+                        string label_command = act.label_command;
+                        b.clicked.connect (() => on_click.begin (b, act.command, label_command));
                         container.insert (b, -1);
+                        if (label_command != "") {
+                            label_commands.insert (b, label_command);
+                        }
                         break;
                 }
             }
+
+            update_labels ();
+        }
+
+        private async void on_click (Gtk.Button button, string command, string label_command) {
+            yield execute_command (command);
+
+            if (label_command != "") {
+                yield update_label (button, label_command);
+            }
+        }
+
+        private async void update_label (Gtk.Button button, string label_command) {
+            string msg = "";
+            bool success = yield Functions.execute_command (label_command, {}, out msg);
+
+            string label = msg.strip ();
+            if (success && label != "") {
+                button.set_label (label);
+            }
+        }
+
+        private void update_labels () {
+            label_commands.foreach ((button, label_command) => {
+                update_label.begin (button, label_command);
+            });
         }
 
         public override void on_cc_visibility_change (bool value) {
@@ -59,6 +94,7 @@ namespace SwayNotificationCenter.Widgets {
                 foreach (var tb in toggle_buttons) {
                     tb.on_update.begin ();
                 }
+                update_labels ();
             }
         }
     }

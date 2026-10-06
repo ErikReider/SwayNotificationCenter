@@ -27,6 +27,7 @@ namespace SwayNotificationCenter.Widgets {
         string ?command;
         BaseWidget.ButtonType ?type;
         string ?update_command;
+        string ?label_command;
         bool ?active;
     }
 

@@ -568,6 +568,11 @@
                 "description": "Command to be executed on visibility change of cc to update the active state of the toggle button (should echo true or false)",
                 "default": ""
               },
+              "label-command": {
+                "type": "string",
+                "description": "Command whose output replaces the button label (empty output or a failing command keeps the current label). Executed on startup, on visibility change of cc, and after a normal button's command",
+                "default": ""
+              },
               "active": {
                 "type": "boolean",
                 "description": "Whether the toggle button is active as default or not",

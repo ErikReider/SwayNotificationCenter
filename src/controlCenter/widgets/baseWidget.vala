@@ -116,6 +116,9 @@ namespace SwayNotificationCenter.Widgets {
                 string update_command =
                     actions.get_object_element (i).get_string_member_with_default ("update-command",
                                                                                    "");
+                string label_command =
+                    actions.get_object_element (i).get_string_member_with_default ("label-command",
+                                                                                   "");
                 bool active =
                     actions.get_object_element (i).get_boolean_member_with_default ("active",
                                                                                     false);
@@ -124,6 +127,7 @@ namespace SwayNotificationCenter.Widgets {
                     command = command,
                     type = type,
                     update_command = update_command,
+                    label_command = label_command,
                     active = active
                 };
             }

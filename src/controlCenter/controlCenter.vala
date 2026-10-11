@@ -226,6 +226,16 @@ namespace SwayNotificationCenter {
                 unowned Widgets.BaseWidget cloned_widget = widgets.last ().data;
                 box.append (cloned_widget);
             }
+
+            // Widgets rebuilt while the control center is open never receive
+            // the visibility event that starts their backend clients (volume
+            // and backlight sliders) and re-runs toggle update-commands, so
+            // fire it here to keep a reload-in-place consistent.
+            if (this.visible) {
+                foreach (var widget in widgets) {
+                    widget.on_cc_visibility_change (true);
+                }
+            }
         }
 
         /** Resets the UI positions */

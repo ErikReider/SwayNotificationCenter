@@ -439,7 +439,7 @@ namespace SwayNotificationCenter.Widgets {
             device.device_description = info.description;
             device.device_index = info.index;
 
-            bool is_default = device.device_name == this.default_source_name;
+            bool is_default = device.device_name == this.default_sink_name;
             device.is_default = is_default;
 
             device.is_muted = info.mute == 1;

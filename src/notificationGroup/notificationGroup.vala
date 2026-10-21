@@ -252,9 +252,15 @@ namespace SwayNotificationCenter {
                 return;
             }
 
-            snapshot.push_opacity (animation_target.progress);
+            // Skip the opacity node at rest, see DismissibleWidget.snapshot
+            bool fade = animation_target.progress < 1.0;
+            if (fade) {
+                snapshot.push_opacity (animation_target.progress);
+            }
             base.snapshot (snapshot);
-            snapshot.pop ();
+            if (fade) {
+                snapshot.pop ();
+            }
         }
 
         private void update_state () {

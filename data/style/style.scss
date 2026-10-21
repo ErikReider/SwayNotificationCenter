@@ -333,6 +333,8 @@ notificationwindow, blankwindow {
   background: var(--cc-bg);
   color: var(--text-color);
   border-radius: var(--border-radius);
+  /* Uncomment to enable compositor background blur (see the README) */
+  /* backdrop-filter: blur(10px); */
 
   .control-center-list-placeholder {
     /* The placeholder when there are no notifications */
@@ -368,6 +370,8 @@ notificationwindow, blankwindow {
 
   .notification {
     box-shadow: none;
+    /* Uncomment to enable compositor background blur (see the README) */
+    /* backdrop-filter: blur(10px); */
   }
 }
 

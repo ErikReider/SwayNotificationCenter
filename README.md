@@ -312,6 +312,34 @@ and customize them instead. To use the SCSS files, compile with `sassc`.
 **Tip**: running swaync with `GTK_DEBUG=interactive swaync` will open a inspector
 window that'll allow you to see all of the CSS classes + other information.
 
+### Background blur
+
+swaync can have the compositor blur the area behind the control center and the
+floating notifications. It is off by default; enable it from your `style.css`:
+
+```css
+.control-center {
+  backdrop-filter: blur(10px);
+}
+
+.floating-notifications .notification {
+  backdrop-filter: blur(10px);
+}
+```
+
+Then reload the CSS with `swaync-client -rs`.
+
+- `blur()` must be at least `10px` to take effect. The compositor decides the
+  actual blur strength.
+- The background must be translucent for the blur to be visible.
+- Requires GTK >= 4.24 and a compositor that supports the
+  `ext-background-effect-v1` Wayland protocol for layer-shell surfaces. Support
+  varies, so check your compositor's documentation.
+- Setting `opacity` below 1 on a parent of the blurred widget disables the blur
+  for that widget.
+- Blur is not shown while a notification is animating (swipe to dismiss, fade
+  in/out).
+
 ## Toggle Buttons
 
 To add toggle buttons to your control center you can set the "type" of any action to "toggle".

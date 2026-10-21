@@ -863,6 +863,25 @@ config file to be able to detect config errors
 	}
 }
 ```
+
+# Background blur
+
+The compositor can blur the area behind the control center and the floating
+notifications. This is configured in the CSS file, not the config file.
+
+*backdrop-filter* ++
+	type: css property ++
+	default: none ++
+	values: blur(Npx) ++
+	description: Set on *.control-center* and/or ++
+		*.floating-notifications .notification* to enable blur. N must be at ++
+		least 10, the compositor decides the actual strength. The background ++
+		also needs to be ++
+		translucent for the blur to be visible. Requires GTK >= 4.24 and a ++
+		compositor that supports the *ext-background-effect-v1* protocol. ++
+		Note: Setting *opacity* below 1 on a parent of the blurred widget ++
+		disables the blur, and blur is not shown while a notification is ++
+		animating.
 #START scripting
 
 # Scripts

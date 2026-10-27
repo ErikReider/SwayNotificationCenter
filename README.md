@@ -246,6 +246,24 @@ meson devenv -C build -w .
 # Now you can start nvim, vscode, etc in the development environment
 ```
 
+### Monitor hotplug integration tests
+
+These tests run the built daemon in a headless Sway session with a private
+Wayland display, D-Bus, configuration directory and in-memory GSettings. They do
+not connect to your desktop notification service or change physical outputs.
+In addition to the build dependencies, install `sway`, Python with PyGObject,
+`dbus-daemon` and `gdbus`.
+Run these tests as an unprivileged user.
+
+```sh
+meson configure build -Dintegration-tests=true
+meson test -C build --suite integration --print-errorlogs
+```
+
+The tests cover a preferred output appearing while a popup is visible, repeated
+disconnect/reconnect cycles, connector and full-identity matching, the open
+notification center and compositor-selected output fallback.
+
 ## Sway Usage
 
 ```ini

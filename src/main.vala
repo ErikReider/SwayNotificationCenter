@@ -175,19 +175,37 @@ namespace SwayNotificationCenter {
             bool visible = control_center.get_visibility ();
 
             for (uint i = 0; i < removed; i++) {
-                unowned BlankWindow win = blank_windows.index (position + i);
+                unowned BlankWindow win = blank_windows.index (position);
+                win.monitor.notify.disconnect (monitor_identity_changed);
                 win.close ();
-                blank_windows.remove_index (position + i);
+                blank_windows.remove_index (position);
             }
 
             for (uint i = 0; i < added; i++) {
                 Gdk.Monitor monitor = (Gdk.Monitor) monitors.get_item (position + i);
+                monitor.notify.connect (monitor_identity_changed);
                 BlankWindow win = new BlankWindow (monitor);
                 win.set_visible (visible);
                 blank_windows.insert_val (position + i, win);
             }
 
-            // Set preferred output
+            set_preferred_monitors ();
+        }
+
+        private void monitor_identity_changed (Object monitor, ParamSpec property) {
+            // GTK adds the monitor before Wayland supplies its connector and identity.
+            // Retry when fields used by try_get_monitor become available.
+            switch (property.name) {
+                case "connector" :
+                case "manufacturer":
+                case "model":
+                case "description":
+                    set_preferred_monitors ();
+                    break;
+            }
+        }
+
+        private void set_preferred_monitors () {
             try {
                 swaync_daemon.set_cc_monitor (
                     ConfigModel.instance.control_center_preferred_output);
@@ -241,7 +259,7 @@ namespace SwayNotificationCenter {
                         case "--style" :
                             style_path = args[++i];
                             break;
-                        case "--skip-system-css" :
+                        case "--skip-system-css":
                             skip_packaged_css = true;
                             break;
                         case "--custom-system-css":

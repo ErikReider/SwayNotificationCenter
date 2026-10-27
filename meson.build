@@ -30,6 +30,10 @@ subdir('protocols')
 subdir('data')
 subdir('src')
 
+if get_option('integration-tests')
+  subdir('tests')
+endif
+
 meson.add_devenv(dev_env)
 
 conf_data = configuration_data()

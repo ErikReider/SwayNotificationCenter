@@ -129,7 +129,9 @@ namespace SwayNotificationCenter {
          */
         public bool transient { get; private set; }
         /** The urgency level. */
-        public UrgencyLevels urgency { get; private set; }
+        public UrgencyLevels urgency {
+            get; private set; default = UrgencyLevels.NORMAL;
+        }
         /** Replaces the old notification with the same value of:
          * - x-canonical-private-synchronous
          * - synchronous
